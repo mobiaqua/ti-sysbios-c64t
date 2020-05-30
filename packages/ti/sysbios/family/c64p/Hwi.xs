@@ -45,11 +45,7 @@ var instanceName = [];
 function getAsmFiles(targetName)
 {
     switch(targetName) {
-        case "ti.targets.C64P":
-        case "ti.targets.C64P_big_endian":
-        case "ti.targets.C674":
         case "ti.targets.elf.C64P":
-        case "ti.targets.elf.C64P_big_endian":
         case "ti.targets.elf.C674":
         case "ti.targets.elf.C66":
         case "ti.targets.elf.C66_big_endian":
@@ -188,7 +184,8 @@ function module$use()
     }
 
     /* place .vecs section into platform's codeMemory */
-    if (Program.sectMap[".vecs"] === undefined) {
+    if (!Program.platformName.match(/ti\.platforms\.c6x/) &&
+        (Program.sectMap[".vecs"] === undefined)) {
         Program.sectMap[".vecs"] = new Program.SectionSpec();
         Program.sectMap[".vecs"].loadSegment = Program.platform.codeMemory;
     }

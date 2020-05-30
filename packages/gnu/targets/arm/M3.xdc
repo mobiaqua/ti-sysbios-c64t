@@ -1,5 +1,5 @@
 /* 
- *  Copyright (c) 2008-2015 Texas Instruments and others.
+ *  Copyright (c) 2008-2017 Texas Instruments and others.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -48,7 +48,7 @@ metaonly module M3 inherits IM {
 
     override config ITarget2.Options lnkOpts = {
         prefix: "-mthumb -march=armv7-m -nostartfiles -Wl,-static -Wl,--gc-sections",
-        suffix: "-Wl,--start-group -lgcc -lc -lm -Wl,--end-group -Wl,-Map=$(XDCCFGDIR)/$@.map"
+        suffix: "-Wl,--start-group -lgcc -lc -lm -Wl,--end-group --specs=nano.specs -Wl,-Map=$(XDCCFGDIR)/$@.map"
     };
 }
 /*

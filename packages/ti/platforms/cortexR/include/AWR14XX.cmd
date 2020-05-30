@@ -26,10 +26,10 @@ MEMORY{
 SECTIONS{
     .intvecs : {} > VECTORS
 
-    .text    : {} > PROG_RAM ALIGN(8)
-    .const   : {} > PROG_RAM ALIGN(8)
-    .cinit   : {} > PROG_RAM ALIGN(8)
-    .pinit   : {} > PROG_RAM ALIGN(8)
+    .text    : {} > PROG_RAM ALIGN(16)
+    .const   : {} > PROG_RAM ALIGN(16)
+    .cinit   : {} > PROG_RAM ALIGN(16)
+    .pinit   : {} > PROG_RAM ALIGN(16)
 
     .bss     : {} > DATA_RAM
     .data    : {} > DATA_RAM

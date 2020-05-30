@@ -179,7 +179,8 @@ function instance$meta$init(name)
             this.CPU.clockRate = 300;
         }
 
-        if (this.deviceName.match(/^RM57D8/)) {
+        if (this.deviceName.match(/^RM57D8/) ||
+            this.deviceName.match(/^RM57L8/)) {
             this.CPU.catalogName = "ti.catalog.arm.cortexr5";
             this.CPU.deviceName = "CortexR";
             this.CPU.clockRate = 300;

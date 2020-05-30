@@ -39,6 +39,7 @@ var Cache = null;
 var device = null;
 var MPU = null;
 var Settings = null;
+var Startup = null;
 
 /*
  * ======== getAsmFiles ========
@@ -49,6 +50,7 @@ function getAsmFiles(targetName)
 {
     switch(targetName) {
         case "ti.targets.arm.elf.R4F":
+        case "ti.targets.arm.elf.R4Ft":
         case "ti.targets.arm.elf.R5F":
             return (["MPU_asm.sv7R"]);
             break;
@@ -159,11 +161,7 @@ function module$use()
     BIOS = xdc.module('ti.sysbios.BIOS');
     Build = xdc.useModule('ti.sysbios.Build');
     Cache = xdc.useModule('ti.sysbios.hal.Cache');
-
-    if (Cache.CacheProxy.delegate$.$name.match(/ti\.sysbios\.hal\.CacheNull/)) {
-        Startup = xdc.useModule('xdc.runtime.Startup');
-        Startup.firstFxns.$add(MPU.startup);
-    }
+    Startup = xdc.useModule('xdc.runtime.Startup');
 
     if (device == null) {
         /*
@@ -227,6 +225,10 @@ function module$static$init(mod, params)
             MPU.regionEntry[i].sizeAndEnable;
         mod.regionEntry[i].regionAttrs =
             MPU.regionEntry[i].regionAttrs;
+    }
+
+    if (Cache.CacheProxy.delegate$.$name.match(/ti\.sysbios\.hal\.CacheNull/)) {
+        Startup.firstFxns.$add(MPU.startup);
     }
 }
 

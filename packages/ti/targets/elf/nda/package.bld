@@ -1,0 +1,11 @@
+/*
+ *  Copyright 2017 by Texas Instruments Incorporated.
+ *
+ */
+
+Pkg.otherSrcs = ['linkcmd.xdt', 'std.h'];
+Pkg.otherFiles = Pkg.otherSrcs;
+/*
+
+ */
+

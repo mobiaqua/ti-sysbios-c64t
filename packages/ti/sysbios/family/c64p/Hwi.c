@@ -234,13 +234,13 @@ Int Hwi_postInit(Hwi_Object *hwi, Error_Block *eb)
 {
 #ifndef ti_sysbios_hal_Hwi_DISABLE_ALL_HOOKS
     Int i;
+    Error_Block localEB;
     Error_Block *leb;
 
     if (eb != Error_IGNORE) {
         leb = eb;
     }
     else {
-        Error_Block localEB;
         Error_init(&localEB);
         leb = &localEB;
     }
@@ -621,7 +621,7 @@ Void Hwi_setupSC()
     /* Register secure contexts */
     rv = SK_registerSCWP(&Hwi_module->scw, 1);
 
-    if (rv < 0) {
+    if (rv != (Int)&Hwi_module->scw) {
         Error_raise(NULL, Hwi_E_registerSCFailed, 0, 0);
     }
 

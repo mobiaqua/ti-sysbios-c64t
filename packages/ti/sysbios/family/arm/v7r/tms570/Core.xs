@@ -50,6 +50,7 @@ function getAsmFiles(targetName)
 {
     switch(targetName) {
         case "ti.targets.arm.elf.R4F":
+        case "ti.targets.arm.elf.R4Ft":
         case "ti.targets.arm.elf.R5F":
             return (["Core_asm.sv7R"]);
             break;

@@ -62,14 +62,8 @@ Void BIOS_linkedWithIncorrectBootLibrary(Void)
  */
 BIOS_ThreadType BIOS_getThreadType(Void)
 {
-    UInt key;
-    BIOS_ThreadType threadType;
-
     if (BIOS_smpEnabled == TRUE) {
-        key = Core_hwiDisable();
-        threadType = BIOS_module->smpThreadType[Core_getId()];
-        Core_hwiRestore(key);
-        return (threadType);
+        return (BIOS_module->smpThreadType[Core_getId()]);
     }
     else {
         return (BIOS_module->threadType);

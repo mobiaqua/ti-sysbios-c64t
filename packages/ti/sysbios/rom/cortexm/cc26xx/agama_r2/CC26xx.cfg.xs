@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Texas Instruments Incorporated
+ * Copyright (c) 2016-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,14 +43,22 @@ if (BIOS.$written("swiEnabled") && BIOS.swiEnabled == false) {
 BIOS.swiEnabled = true;
 
 if (BIOS.$written("logsEnabled") && BIOS.logsEnabled == true) {
-    CC26xx.$logWarning("BIOS.logsEnabled must be set to false for ROM applications.", BIOS, "logsEnabled");
+    var $logsEnabledWarningIssued = true;
+    CC26xx.$logWarning("\nLogs are disabled in all ROM APIs." +
+            "\nOnly APIs not in the ROM will have their Logs enabled.", BIOS, "logsEnabled");
 }
-BIOS.logsEnabled = false;
+else {
+    BIOS.logsEnabled = false;
+}
 
 if (BIOS.$written("assertsEnabled") && BIOS.assertsEnabled == true) {
-    CC26xx.$logWarning("BIOS.assertsEnabled must be set to false for ROM applications.", BIOS, "assertsEnabled");
+    var $assertsEnabledWarningIssued = true;
+    CC26xx.$logWarning("\nAsserts are disabled in all ROM APIs." +
+            "\nOnly APIs not in the ROM will have their Asserts enabled.", BIOS, "assertsEnabled");
 }
-BIOS.assertsEnabled = false;
+else {
+    BIOS.assertsEnabled = false;
+}
 
 if (BIOS.$written("includeXdcRuntime") && BIOS.includeXdcRuntime == false) {
     CC26xx.$logWarning("BIOS.includeXdcRuntimeEnabled must be set to true for ROM applications.", BIOS, "includeXdcRuntime");

@@ -77,6 +77,13 @@ function compile(goal) {
         A53F.targetPkgPath = this.$package.packageBase;
     }
 
+//    var ccOpts = A15F.ccOpts.prefix + " " + A15F.cc.opts + " " +
+//                 A15F.ccOpts.suffix;
+
+//    if (!ccOpts.match(/--specs=nano\.specs/)) {
+//        goal.opts.copts += " --specs=nano.specs ";
+//    }
+
 //    goal.opts.copts += " -I" + A53F.targetPkgPath +
 //        "/libs/install-native/$(GCCTARG)/include ";
 

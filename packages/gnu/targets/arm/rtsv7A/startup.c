@@ -1,5 +1,5 @@
 /* 
- *  Copyright (c) 2013 Texas Instruments and others.
+ *  Copyright (c) 2013-2017 Texas Instruments and others.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -12,7 +12,6 @@
 /*
  *  ======== startup.c ========
  *  C runtime initialization.
- *
  */
 #include <sys/types.h>
 #include <xdc/runtime/Startup.h>
@@ -23,6 +22,7 @@ extern unsigned int __bss_start__, __bss_end__;
 extern unsigned int __data_load__, __data_start__, __data_end__;
 extern void (*__init_array_start []) (void);
 extern void (*__init_array_end []) (void);
+extern int main();
 extern void _exit(int code);
 extern void xdc_runtime_System_exit__E(int code);
 volatile unsigned gnu_targets_arm_rtsv7A_exit = 0;
@@ -94,7 +94,15 @@ void gnu_targets_arm_rtsv7A_startupC(void)
 void _fini(void) {
 }
 
-
+/*
+ *  ======== __sync_synchronize ========
+ */
+void __sync_synchronize()
+{
+    __asm__ __volatile__ (
+        "dmb ish"
+    );
+}
 /*
 
  */

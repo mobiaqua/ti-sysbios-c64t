@@ -217,6 +217,7 @@ define ASSEMBLE
 endef
 %var LIB = "sysbios.a" + TARGET.suffix;
 %var CFG_OBJ = "rom_sysbios_config.obj";
+%var IAR_CFG_OBJ = "iar_rom_sysbios_config.obj";
 %var ROM_EXEC = "rtos_rom.x" + TARGET.suffix;
 %var SYMBOL_MAP_FILE = "symbolMapFile.mak";
 
@@ -343,6 +344,15 @@ mangled_BIOS_rom.obj: `ROMPPS.join(" ")`
 	@echo cp `CFG_OBJ`
 	@-$(call RM, "`RomModule.libDir``CFG_OBJ`")
 	@$(CP) `CFG_OBJ` "`RomModule.libDir``CFG_OBJ`"
+	@$(CC_LIB) --wchar_t=32 $(BIOS_DEFS) $(XOPTS) $(INCS) --output_file=`IAR_CFG_OBJ` \
+%for (var i = 0; i < LIBCFGPPS.length-1; i++) {
+	`LIBCFGPPS[i]` \
+%}
+	`LIBCFGPPS[i]`
+	@echo Create the IAR SYS/BIOS configuration library that contains the generated configuration APIs not included in the ROM.
+	@echo cp `IAR_CFG_OBJ`
+	@-$(call RM, "`RomModule.libDir``IAR_CFG_OBJ`")
+	@$(CP) `IAR_CFG_OBJ` "`RomModule.libDir``IAR_CFG_OBJ`"
 
 %var BIOS_lib_obj = LIBPPS[0].substring(0, LIBPPS[0].lastIndexOf('.')) + ".obj";
 `BIOS_lib_obj`: `CFG_OBJ`

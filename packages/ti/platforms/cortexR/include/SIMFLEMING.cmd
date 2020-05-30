@@ -1,7 +1,7 @@
 /*----------------------------------------------------------------------------*/
 /* SIMFLEMING.cmd                                                             */
 /*                                                                            */
-/* (c) Texas Instruments 2016, All rights reserved.                           */
+/* (c) Texas Instruments 2016-2017, All rights reserved.                      */
 /*                                                                            */
 
 /* USER CODE BEGIN (0) */
@@ -16,7 +16,7 @@
 /*----------------------------------------------------------------------------*/
 /* Memory Map                                                                 */
 MEMORY{
-    VECTORS    (X)   : origin=0x00000000 length=0x00000020
+    VECTORS    (X)   : origin=0x00000000 length=0x00000040
     ATCM       (RWX) : origin=0x00550000 length=0x8000
     BTCM       (RWX) : origin=0x00560000 length=0x8000
     RAM0       (RW)  : origin=0x41C00000 length=0x00080000

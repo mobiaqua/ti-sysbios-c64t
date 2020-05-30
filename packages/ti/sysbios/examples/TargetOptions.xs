@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, Texas Instruments Incorporated
+ * Copyright (c) 2015-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -100,7 +100,8 @@ var targetOptions = {
                         deviceId: "~.*(Cortex A|TM4C|TM4E|LM3|F28M3|LM4|" +
                             "RM4|TMS570LS|ARM7|ARM11|Generic|EVMDMRX45X" +
                             "|CC13|CC25|CM25|CC26|CC32|TMS470M|DM350|DM357|" +
-                            "DM368|P401R|RM57D8|AM57|TDA2|TDA3).*",
+                            "DM368|P401R|RM57D8|AM57|TDA2|TDA3|AWR14|AWR16|" +
+                            "IWR14|IWR16).*",
                     }
                 }
             },
@@ -116,12 +117,55 @@ var targetOptions = {
                     }
                 }
             },
+            "R4F": {
+                cfgPrefix: "default/",
+                target: "ti.targets.arm.elf.R4F",
+                compilerBuildOptions: "",
+                linkerBuildOptions: "",
+                devices: {
+                    "AWR14XX": {
+                        deviceId: ".*(AWR14).*",
+                        platform: "ti.platforms.cortexR:AWR14XX",
+                        linkerCommandFile: "ti/platforms/cortexR/include/" +
+                            "AWR14XX.cmd",
+                        productGroup: "Sitara",
+                    },
+                    "AWR16XX": {
+                        deviceId: ".*(AWR16).*",
+                        platform: "ti.platforms.cortexR:AWR16XX",
+                        linkerCommandFile: "ti/platforms/cortexR/include/" +
+                            "AWR16XX.cmd",
+                        productGroup: "Sitara",
+                    },
+                    "IWR14XX": {
+                        deviceId: ".*(IWR14).*",
+                        platform: "ti.platforms.cortexR:IWR14XX",
+                        linkerCommandFile: "ti/platforms/cortexR/include/" +
+                            "IWR14XX.cmd",
+                        productGroup: "Sitara",
+                    },
+                    "IWR16XX": {
+                        deviceId: ".*(IWR16).*",
+                        platform: "ti.platforms.cortexR:IWR16XX",
+                        linkerCommandFile: "ti/platforms/cortexR/include/" +
+                            "IWR16XX.cmd",
+                        productGroup: "Sitara",
+                    }
+                }
+            },
             "R5F": {
                 cfgPrefix: "default/",
                 target: "ti.targets.arm.elf.R5F",
                 compilerBuildOptions: "",
                 linkerBuildOptions: "",
                 devices: {
+                    "RM57L8XX": {
+                        deviceId: ".*(RM57L8).*",
+                        platform: "ti.platforms.cortexR:$DeviceId$",
+                        linkerCommandFile: "ti/platforms/cortexR/include/" +
+                            "$DeviceId$.cmd",
+                        productGroup: "Sitara",
+                    },
                     "RM57D8XX": {
                         cfgPrefix: "rm57d8xx/",
                         deviceId: ".*(RM57D8).*",
@@ -322,7 +366,19 @@ var targetOptions = {
                         deviceId: "~.*(TMS320C670|TMS320C671|TMS320C672|" +
                                   "DSK6713|GenericC62xxDevice|" +
                                   "GenericC64xxDevice|GenericC67xxDevice|" +
-                                  "GenericC67xPlusDevice|C641).*",
+                                  "GenericC67xPlusDevice|C641|AWR16|IWR16).*",
+                    },
+                    "AWR16XX": {
+                        deviceId: ".*(AWR16).*",
+                        platform: "ti.platforms.c6x:AWR16XX",
+                        linkerCommandFile: "ti/platforms/c6x/include/" +
+                            "AWR16XX.cmd",
+                    },
+                    "IWR16XX": {
+                        deviceId: ".*(IWR16).*",
+                        platform: "ti.platforms.c6x:IWR16XX",
+                        linkerCommandFile: "ti/platforms/c6x/include/" +
+                            "IWR16XX.cmd",
                     }
                 }
             }
@@ -376,10 +432,13 @@ var targetOptions = {
                 cfgPrefix: "default/",
                 target: "gnu.targets.arm.A8F",
                 linkerCommandFile: "",
-                compilerBuildOptions: "-mfloat-abi=hard",
+                compilerBuildOptions: "-mfloat-abi=hard"
+                + " -I${xdc_find:gnu/targets/arm/libs/install-native/"
+                + "arm-none-eabi/include/newlib-nano:${ProjName}}",
                 linkerBuildOptions: "-nostartfiles -static --gc-sections -lgcc"
                 + " -lc -lm -lnosys -L${xdc_find:gnu/targets/"
-                + "arm/libs/install-native/arm-none-eabi/lib/fpu:${ProjName}}",
+                + "arm/libs/install-native/arm-none-eabi/lib/hard:${ProjName}}"
+                + " --specs=nano.specs",
                 productGroup: "Sitara",
                 devices: {
                     "GENERIC": {
@@ -388,8 +447,9 @@ var targetOptions = {
                         cfgPrefix: "cortexa_semihost/",
                         linkerBuildOptions: "-nostartfiles -static"
                         + " --gc-sections -lgcc -lc -lm -lrdimon"
-                        + " -L${xdc_find:gnu/targets/arm/libs/"
-                        + "install-native/arm-none-eabi/lib/fpu:${ProjName}}"
+                        + " -L${xdc_find:gnu/targets/arm/libs/i"
+                        + "install-native/arm-none-eabi/lib/hard:${ProjName}}"
+                        + " --specs=nano.specs"
                     }
                 }
             },
@@ -398,10 +458,13 @@ var targetOptions = {
                 cfgPrefix: "default/",
                 target: "gnu.targets.arm.A9F",
                 linkerCommandFile: "",
-                compilerBuildOptions: "-mfloat-abi=hard",
+                compilerBuildOptions: "-mfloat-abi=hard"
+                + " -I${xdc_find:gnu/targets/arm/libs/install-native/"
+                + "arm-none-eabi/include/newlib-nano:${ProjName}}",
                 linkerBuildOptions: "-nostartfiles -static --gc-sections -lgcc"
                 + " -lc -lm -lnosys -L${xdc_find:gnu/targets/arm/"
-                + "libs/install-native/arm-none-eabi/lib/fpu:${ProjName}}",
+                + "libs/install-native/arm-none-eabi/lib/hard:${ProjName}}"
+                + " --specs=nano.specs",
                 productGroup: "Sitara",
                 devices: {
                     "GENERIC": {
@@ -411,7 +474,8 @@ var targetOptions = {
                         linkerBuildOptions: "-nostartfiles -static"
                         + " --gc-sections -lgcc -lc -lm -lrdimon"
                         + " -L${xdc_find:gnu/targets/arm/libs/"
-                        + "install-native/arm-none-eabi/lib/fpu:${ProjName}}"
+                        + "install-native/arm-none-eabi/lib/hard:${ProjName}}"
+                        + " --specs=nano.specs"
                     }
                 }
             },
@@ -420,10 +484,13 @@ var targetOptions = {
                 cfgPrefix: "default/",
                 target: "gnu.targets.arm.A15F",
                 linkerCommandFile: "",
-                compilerBuildOptions: "-mfloat-abi=hard",
+                compilerBuildOptions: "-mfloat-abi=hard"
+                + " -I${xdc_find:gnu/targets/arm/libs/install-native/"
+                + "arm-none-eabi/include/newlib-nano:${ProjName}}",
                 linkerBuildOptions: "-nostartfiles -static --gc-sections -lgcc"
                 + " -lc -lm -lnosys -L${xdc_find:gnu/targets/arm/"
-                + "libs/install-native/arm-none-eabi/lib/fpu:${ProjName}}",
+                + "libs/install-native/arm-none-eabi/lib/hard:${ProjName}}"
+                + " --specs=nano.specs",
                 productGroup: "Sitara",
                 devices: {
                     "GENERIC": {
@@ -433,22 +500,26 @@ var targetOptions = {
                         linkerBuildOptions: "-nostartfiles -static"
                         + " --gc-sections -lgcc -lc -lm -lrdimon"
                         + " -L${xdc_find:gnu/targets/arm/libs/"
-                        + "install-native/arm-none-eabi/lib/fpu:${ProjName}}"
+                        + "install-native/arm-none-eabi/lib/hard:${ProjName}}"
+                        + " --specs=nano.specs"
                     }
                 }
             },
             "M3": {
+                deviceVariant: "CortexM3",
                 cfgPrefix: "cortexm/",
                 target: "gnu.targets.arm.M3",
                 compilerBuildOptions:
                     " -mcpu=cortex-m3 -march=armv7-m -mthumb" +
                     " -mfloat-abi=soft -ffunction-sections -fdata-sections" +
-                    " -g -gstrict-dwarf -Wall",
+                    " -g -gstrict-dwarf -Wall -I${xdc_find:gnu/targets/arm/" +
+                    "libs/install-native/arm-none-eabi/include/newlib-nano:" +
+                    "${ProjName}}",
                 linkerBuildOptions:
                     " -march=armv7-m -mthumb -nostartfiles -static" +
                     " -Wl,--gc-sections -L${xdc_find:gnu/targets/arm/libs" +
-                    "/install-native/arm-none-eabi/lib/armv7-m:${ProjName}}" +
-                    " -lgcc -lc -lm -lnosys",
+                    "/install-native/arm-none-eabi/lib/thumb/v7-m:${ProjName}}" +
+                    " -lgcc -lc -lm -lnosys --specs=nano.specs",
                 productGroup: "",
                 devices: {
                     "SEMIHOST": {
@@ -460,8 +531,9 @@ var targetOptions = {
                         linkerBuildOptions:
                             " -mthumb -march=armv7-m -nostartfiles -static" +
                             " -Wl,--gc-sections -L${xdc_find:gnu/targets/arm" +
-                            "/libs/install-native/arm-none-eabi/lib" +
-                            "/armv7-m:${ProjName}} -lgcc -lc -lm -lrdimon",
+                            "/libs/install-native/arm-none-eabi/lib/thumb" +
+                            "/v7-m:${ProjName}} -lgcc -lc -lm -lrdimon" +
+                            " --specs=nano.specs"
                     },
                     /* exclude CC26XX because it needs driverlib ...
                     "CC26XX": {
@@ -486,17 +558,20 @@ var targetOptions = {
                 }
             },
             "M4": {
+                deviceVariant: "CortexM4",
                 cfgPrefix: "cortexm/",
                 target: "gnu.targets.arm.M4",
                 compilerBuildOptions:
                     " -mcpu=cortex-m4 -march=armv7e-m -mthumb" +
                     " -mfloat-abi=soft -ffunction-sections -fdata-sections" +
-                    " -g -gstrict-dwarf -Wall",
+                    " -g -gstrict-dwarf -Wall -I${xdc_find:gnu/targets/arm/" +
+                    "libs/install-native/arm-none-eabi/include/newlib-nano:" +
+                    "${ProjName}}",
                 linkerBuildOptions:
                     " -march=armv7e-m -mthumb -nostartfiles -static" +
                     " -Wl,--gc-sections -L${xdc_find:gnu/targets/arm/libs" +
-                    "/install-native/arm-none-eabi/lib/armv7e-m:${ProjName}}" +
-                    " -lgcc -lc -lm -lnosys",
+                    "/install-native/arm-none-eabi/lib/thumb/v7e-m:${ProjName}}" +
+                    " -lgcc -lc -lm -lnosys --specs=nano.specs",
                 devices: {
                     "CC32XX": {
                         deviceId: ".*CC32.*",
@@ -514,8 +589,9 @@ var targetOptions = {
                         linkerBuildOptions:
                             " -mthumb -march=armv7e-m -nostartfiles -static" +
                             " -Wl,--gc-sections -L${xdc_find:gnu/targets/arm" +
-                            "/libs/install-native/arm-none-eabi/lib/" +
-                            "armv7e-m:${ProjName}} -lgcc -lc -lm -lrdimon",
+                            "/libs/install-native/arm-none-eabi/lib/thumb/" +
+                            "v7e-m:${ProjName}} -lgcc -lc -lm -lrdimon" +
+                            " --specs=nano.specs",
                         productGroup: "SimpleLink"
                     }
                 }
@@ -526,13 +602,16 @@ var targetOptions = {
                 compilerBuildOptions:
                     " -mcpu=cortex-m4 -march=armv7e-m -mthumb" +
                     " -mfloat-abi=hard -mfpu=fpv4-sp-d16 -ffunction-sections" +
-                    " -fdata-sections -g -gstrict-dwarf -Wall",
+                    " -fdata-sections -g -gstrict-dwarf -Wall" +
+                    " -I${xdc_find:gnu/targets/arm/libs/install-native/" +
+                    "arm-none-eabi/include/newlib-nano:${ProjName}}",
                 linkerBuildOptions:
                     " -march=armv7e-m -mthumb -mfloat-abi=hard" +
                     " -mfpu=fpv4-sp-d16 -nostartfiles -static" +
                     " -Wl,--gc-sections -L${xdc_find:gnu/targets/arm/libs" +
-                    "/install-native/arm-none-eabi/lib/armv7e-m/" +
-                    "fpu:${ProjName}} -lgcc -lc -lm -lnosys",
+                    "/install-native/arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/" +
+                    "hard:${ProjName}} -lgcc -lc -lm -lnosys" +
+                    " --specs=nano.specs",
                 productGroup: "TivaC",
                 devices: {
                     "TIVA": {
@@ -551,8 +630,9 @@ var targetOptions = {
                             " -march=armv7e-m -mthumb -mfloat-abi=hard" +
                             " -mfpu=fpv4-sp-d16 -nostartfiles -static" +
                             " -Wl,--gc-sections -L${xdc_find:gnu/targets/arm" +
-                            "/libs/install-native/arm-none-eabi/lib/armv7e-m" +
-                            "/fpu:${ProjName}} -lgcc -lc -lm -lrdimon",
+                            "/libs/install-native/arm-none-eabi/lib/thumb" +
+                            "/v7e-m/fpv4-sp/hard:${ProjName}} -lgcc -lc -lm" +
+                            " -lrdimon --specs=nano.specs",
                     }
                 }
             },
@@ -564,13 +644,16 @@ var targetOptions = {
                 compilerBuildOptions:
                     " -mcpu=cortex-m4 -march=armv7e-m -mthumb" +
                     " -mfloat-abi=hard -mfpu=fpv4-sp-d16 -ffunction-sections" +
-                    " -fdata-sections -g -gstrict-dwarf -Wall",
+                    " -fdata-sections -g -gstrict-dwarf -Wall" +
+                    " -I${xdc_find:gnu/targets/arm/libs/install-native/" +
+                    "arm-none-eabi/include/newlib-nano:${ProjName}}",
                 linkerBuildOptions:
                     " -march=armv7e-m -mthumb -mfloat-abi=hard" +
                     " -mfpu=fpv4-sp-d16 -nostartfiles -static" +
                     " -Wl,--gc-sections -L${xdc_find:gnu/targets/arm/libs" +
-                    "/install-native/arm-none-eabi/lib/armv7e-m/" +
-                    "fpu:${ProjName}} -lgcc -lc -lm -lnosys",
+                    "/install-native/arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/" +
+                    "hard:${ProjName}} -lgcc -lc -lm -lnosys" +
+                    " --specs=nano.specs",
                 productGroup: "MSP430",
                 devices: {
                     "MSP432": {
@@ -589,8 +672,9 @@ var targetOptions = {
                             " -march=armv7e-m -mthumb -mfloat-abi=hard" +
                             " -mfpu=fpv4-sp-d16 -nostartfiles -static" +
                             " -Wl,--gc-sections -L${xdc_find:gnu/targets/arm" +
-                            "/libs/install-native/arm-none-eabi/lib/armv7e-m" +
-                            "/fpu:${ProjName}} -lgcc -lc -lm -lrdimon",
+                            "/libs/install-native/arm-none-eabi/lib/thumb" +
+                            "/v7e-m/fpv4-sp/hard:${ProjName}}" +
+                            " -lgcc -lc -lm -lrdimon --specs=nano.specs"
                     }
                 }
             }
