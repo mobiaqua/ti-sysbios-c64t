@@ -1,0 +1,16 @@
+/*
+ *  Copyright 2015 by Texas Instruments Incorporated.
+ *
+ */
+
+Pkg.attrs.relScript = "./local.rel";
+
+Pkg.otherSrcs = ['ccs_exec.xdt', 'linkcmd.xdt', 'linkUtils.xs', 'std.h',
+    'ccs_package.xdt', 'ccs_start.bat', 'ccs_start.pl'
+];
+
+Pkg.otherFiles = Pkg.otherSrcs;
+/*
+
+ */
+
