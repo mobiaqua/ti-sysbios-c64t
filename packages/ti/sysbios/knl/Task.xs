@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018, Texas Instruments Incorporated
+ * Copyright (c) 2015-2019, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -117,7 +117,7 @@ function module$use()
     Task.SupportProxy = xdc.module(Settings.getDefaultTaskSupportDelegate());
 
     /* only useModule(Memory) if needed */
-    var Defaults = xdc.useModule('xdc.runtime.Defaults');
+    var Defaults = xdc.module('xdc.runtime.Defaults');
     if (Defaults.common$.memoryPolicy ==
         xdc.module("xdc.runtime.Types").STATIC_POLICY) {
         Memory = xdc.module('xdc.runtime.Memory');
@@ -126,8 +126,14 @@ function module$use()
         Memory = xdc.useModule('xdc.runtime.Memory');
     }
 
-    xdc.useModule('xdc.runtime.Log');
-    xdc.useModule('xdc.runtime.Assert');
+    if (!(BIOS.libType == BIOS.LibType_Custom && BIOS.logsEnabled == false)) {
+        xdc.useModule('xdc.runtime.Log');
+    }
+    if (!(BIOS.libType == BIOS.LibType_Custom
+        && BIOS.assertsEnabled == false)) {
+        xdc.useModule('xdc.runtime.Assert');
+    }
+
     xdc.useModule("ti.sysbios.knl.Idle");
     xdc.useModule("ti.sysbios.knl.Intrinsics");
     xdc.useModule("ti.sysbios.knl.Task_SupportProxy");
@@ -659,6 +665,9 @@ function viewInitBasic(view, obj)
     var Task = xdc.useModule('ti.sysbios.knl.Task');
     var BIOS = xdc.useModule('ti.sysbios.BIOS');
     var BIOSCfg = Program.getModuleConfig(BIOS.$name);
+    var taskModView = Program.scanModuleView('ti.sysbios.knl.Task', 'Module');
+    var Core = null;
+    var CoreCfg = null;
 
     var coreId = obj.curCoreId;
 
@@ -677,8 +686,8 @@ function viewInitBasic(view, obj)
     view.priority = obj.priority;
 
     if (BIOSCfg.smpEnabled == true) {
-        var Core = xdc.useModule('ti.sysbios.hal.Core');
-        var CoreCfg = Program.getModuleConfig(Core.$name);
+        Core = xdc.useModule('ti.sysbios.hal.Core');
+        CoreCfg = Program.getModuleConfig(Core.$name);
 
         if (obj.curCoreId == CoreCfg.numCores) {
             view.curCoreId = "X";
@@ -717,49 +726,82 @@ function viewInitBasic(view, obj)
         return;
     }
 
+    /* determine actual mode */
+
+    /* Fetch the mode the task says it's in */
+    var mode = obj.mode;
+
+    /*
+     * Speculatively set mode to INACTIVE
+     * if priority is -1. The task's 'mode' value
+     * will be whatever mode the task was in
+     * when its priority was set to -1
+     */
     if (obj.priority == -1) {
-        view.mode = "Inactive";
+        mode = Task.Mode_INACTIVE;
     }
-    else {
-        var biosModView = Program.scanModuleView('ti.sysbios.BIOS', 'Module');
-        switch (obj.mode) {
-            case Task.Mode_RUNNING:
-                if (biosModView.currentThreadType[coreId] == "Task") {
-                    view.mode = "Running";
-                }
-                else {
-                    view.mode = "Preempted";
-                }
-                break;
-            case Task.Mode_READY:
-                if (BIOSCfg.smpEnabled == true) {
-                    view.mode = "Ready";
-                }
-                else {
-                    if ((Number(rawView.modState.curTask) == Number(obj.$addr))) {
-                        if (biosModView.currentThreadType[coreId] == "Task") {
-                            view.mode = "Running";
-                        }
-                        else {
-                            view.mode = "Preempted";
-                        }
+
+    /*
+     * In SMP, if a task is the currently running task
+     * but in a transient state such as executing within
+     * Task_exit(), or after Task_setPri() has been called
+     * from a Hwi/Swi and the affected task is the running
+     * task on the other core, the task 'mode' may not
+     * accurately reflect its current state.
+     *
+     * Always return RUNNING if the task is the currently
+     * running task on its respective core.
+     */
+    if (BIOSCfg.smpEnabled == true) {
+        if (obj.curCoreId != CoreCfg.numCores) {
+            if (Number(taskModView.currentTask[obj.curCoreId]) == Number(obj.$addr)) {
+                mode = Task.Mode_RUNNING;
+            }
+        }
+    }
+
+    var biosModView = Program.scanModuleView('ti.sysbios.BIOS', 'Module');
+
+    switch (mode) {
+        case Task.Mode_RUNNING:
+            if (biosModView.currentThreadType[coreId] == "Task") {
+                view.mode = "Running";
+            }
+            else {
+                view.mode = "Preempted";
+            }
+            break;
+        case Task.Mode_READY:
+            if (BIOSCfg.smpEnabled == true) {
+                view.mode = "Ready";
+            }
+            else {
+                if ((Number(rawView.modState.curTask) == Number(obj.$addr))) {
+                    if (biosModView.currentThreadType[coreId] == "Task") {
+                        view.mode = "Running";
                     }
                     else {
-                        view.mode = "Ready";
+                        view.mode = "Preempted";
                     }
                 }
-                break;
-            case Task.Mode_BLOCKED:
-                view.mode = "Blocked";
-                break;
-            case Task.Mode_TERMINATED:
-                view.mode = "Terminated";
-                break;
-            default:
-                view.mode = "Invalid mode";
-                Program.displayError(view, "mode", "Invalid mode: " +
-                                     obj.mode);
-        }
+                else {
+                    view.mode = "Ready";
+                }
+            }
+            break;
+        case Task.Mode_BLOCKED:
+            view.mode = "Blocked";
+            break;
+        case Task.Mode_TERMINATED:
+            view.mode = "Terminated";
+            break;
+        case Task.Mode_INACTIVE:
+            view.mode = "Inactive";
+            break;
+        default:
+            view.mode = "Invalid mode";
+            Program.displayError(view, "mode", "Invalid mode: " +
+                                 obj.mode);
     }
 
     view.stackSize = obj.stackSize;
@@ -1419,9 +1461,8 @@ function viewGetReadyQs(priorityNodes, readyQs, coreId, numPris, affinity)
                     var taskView = Program.scanHandleView('ti.sysbios.knl.Task', elem.next, 'Basic');
                 }
                 catch (e) {
-                    taskElemView.$status["Address"] = "Bad Task object address: " +
-                                                Number(elem.next).toString(16) +
-                                                ": " + e.toString();
+                    taskElemView.$status["Address"] = "Bad Task object address: "
+                        + Number(elem.next).toString(16) + ": " + e.toString();
                     break;
                 }
 
@@ -1498,8 +1539,8 @@ function viewGetReadyQs(priorityNodes, readyQs, coreId, numPris, affinity)
 
                 /*
                  * Add the address to a map so we can check for loops.
-                 * The value 'true' is just a placeholder to make sure the address
-                 * is in the map.
+                 * The value 'true' is just a placeholder to make sure the
+                 * address is in the map.
                  */
                 addrs[elem.$addr] = true;
             }
@@ -1559,7 +1600,7 @@ function viewInitCallStack()
             var nullArray = new Array();
             obj["0x" + Number(taskView.$addr).toString(16) +
             ",  Uninitialized Task object"] = nullArray;
-            return (obj);
+            continue;
         }
 
         /* determine Task state */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, Texas Instruments Incorporated
+ * Copyright (c) 2017-2019, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,27 +41,24 @@ var Exception = null;
 
 if (xdc.om.$name == "cfg") {
     var deviceTable = {
-        "SIMFLEMING": {
+        "AM65.*": {
             vimBaseAddress              : 0x40F80000,
             resetVectorAddress          : 0x00000000,
             numInterrupts               : 512
         },
-        "J7ES_MCU": {
+        "J7.*_MCU": {
             vimBaseAddress              : 0x40F80000,
             resetVectorAddress          : 0x00000000,
             numInterrupts               : 512
         },
-        "J7ES_MAIN": {
+        "J7.*_MAIN": {
             vimBaseAddress              : 0x0FF80000,
             resetVectorAddress          : 0x00000000,
             numInterrupts               : 512
         },
     }
 
-    deviceTable["SIMMAXWELL"] = deviceTable["SIMFLEMING"];
-    deviceTable["AM65.*"]     = deviceTable["SIMMAXWELL"];
-    deviceTable["J7ES"]       = deviceTable["SIMMAXWELL"];
-    deviceTable["J7.*"]       = deviceTable["SIMMAXWELL"];
+    deviceTable["J7.*"]       = deviceTable["J7.*_MCU"];
 }
 
 /*
@@ -73,6 +70,7 @@ function getAsmFiles(targetName)
 {
     switch(targetName) {
         case "ti.targets.arm.elf.R5F":
+        case "ti.targets.arm.elf.R5Ft":
             return (["Hwi_asm.sv7R", "Hwi_asm_switch.sv7R"]);
 
         default:
@@ -476,10 +474,10 @@ function viewVimFetch(that)
     var Hwi = xdc.useModule('ti.sysbios.family.arm.v7r.keystone3.Hwi');
     var modCfg = Program.getModuleConfig('ti.sysbios.family.arm.v7r.keystone3.Hwi');
     try {
-        if (that.VIMREGS === undefined) {
-            that.VIMREGS = Program.fetchStruct(
-                                                Hwi.VIM$fetchDesc,
-                                                modCfg.vimBaseAddress,
+        if (that.VIMGROUPREGS === undefined) {
+            that.VIMGROUPREGS = Program.fetchStruct(
+                                                Hwi.VIM_GROUP$fetchDesc,
+                                                modCfg.vimBaseAddress + 0x400,
                                                 false
                                            );
         }
@@ -528,8 +526,8 @@ function viewInitBasic(view, obj)
     viewVimFetch(this);
     var regIdx = obj.intNum >>> 5;
     var regOffset = obj.intNum & 0x1F;
-    var enabled = this.VIMREGS.GROUP[regIdx].ENABLEDSET & (1 << regOffset);
-    var pending = this.VIMREGS.GROUP[regIdx].RAWSTATUSSET & (1 << regOffset);
+    var enabled = this.VIMGROUPREGS.GROUP[regIdx].ENABLEDSET & (1 << regOffset);
+    var pending = this.VIMGROUPREGS.GROUP[regIdx].RAWSTATUSSET & (1 << regOffset);
 
     if (enabled) {
         view.status = "enabled";

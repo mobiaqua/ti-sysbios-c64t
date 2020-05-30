@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018, Texas Instruments Incorporated
+ * Copyright (c) 2015-2019, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,10 +52,6 @@ function getAsmFiles(targetName)
             return (["Hwi_asm.s62", "Hwi_asm_switch.s62", "Hwi_disp_always.s64P"]);
             break;
 
-        case "ti.targets.elf.C64T":
-            return (["Hwi_asm.s64T", "Hwi_asm_switch.s64T", "Hwi_disp_always.s64T"]);
-            break;
-
         default:
             return (null);
 	    break;
@@ -70,14 +66,6 @@ function getAsmFiles(targetName)
 function getCFiles(targetName)
 {
     return (["Hwi.c", "Hwi_startup.c"]);
-}
-
-if (xdc.om.$name == "cfg") {
-    var deviceTable = {
-        "J7ES": {
-            INTRMUX1Address : 0x08020104
-        },
-    }
 }
 
 /*
@@ -135,13 +123,11 @@ function module$use()
 {
     xdc.useModule('xdc.runtime.Log');
 
-    if (Program.build.target.isa != "64T") {
-        if (Program.build.target.isa == "66") {
-            xdc.useModule("ti.sysbios.family.c66.Cache");
-        }
-        else {
-            xdc.useModule("ti.sysbios.family.c64p.Cache");
-        }
+    if (Program.build.target.isa == "66") {
+        xdc.useModule("ti.sysbios.family.c66.Cache");
+    }
+    else {
+        xdc.useModule("ti.sysbios.family.c64p.Cache");
     }
 
     var BIOS = xdc.useModule("ti.sysbios.BIOS");
@@ -205,26 +191,6 @@ function module$use()
     if (Hwi.resetVectorAddress !== undefined) {
         Program.sectMap[".resetVector"] = new Program.SectionSpec();
         Program.sectMap[".resetVector"].loadAddress = Hwi.resetVectorAddress;
-    }
-
-    var deviceName;
-    var found = false;
-    for (deviceName in deviceTable) {
-        if (deviceName == Program.cpu.deviceName) {
-            /* exact match */
-            found = true;
-            break;
-        }
-        else if (Program.cpu.deviceName.match(deviceName)) {
-            /* wildcard match */
-            found = true;
-            break;
-        }
-    }
-
-    if (found) {
-        /* override default value */
-        Hwi.INTRMUX1Address = deviceTable[deviceName].INTRMUX1Address;
     }
 }
 

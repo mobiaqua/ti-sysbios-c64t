@@ -34,6 +34,7 @@
  */
 
 #include <xdc/std.h>
+#include <xdc/runtime/Assert.h>
 #include <xdc/runtime/Error.h>
 #include <xdc/runtime/Memory.h>
 #include <xdc/runtime/Startup.h>
@@ -84,6 +85,11 @@ extern __FAR__ char _stack[0x10001];
 #define SWI_RESTORE Hwi_swiRestoreHwi
 #endif
 
+/*
+ * ECSP stores an 8 KB context for each interrupt, up to a maximum of 8
+ * nesting levels (1 per priority level).
+ */
+#define HWI_ECSP_SIZE (0x10000)
 
 /*
  *  ======== Hwi_Module_startup ========
@@ -118,13 +124,13 @@ Int Hwi_Module_startup(Int phase)
     Hwi_module->isrStack = Hwi_getIsrStackAddress() - 16;
     __ECSP_S = (UInt64)_stack;
     __ECSP_SS = (UInt64)_stack;
-    __TCSP = (UInt64)(_stack + 0x10000);
+    __TCSP = (UInt64)(_stack + HWI_ECSP_SIZE);
 
     /* signal that we're executing on the ISR stack */
     Hwi_module->taskSP = (Char *)-1;
 
     /* initialize event mapping */
-    for (i = 4; i < Hwi_NUM_INTERRUPTS; i++) {
+    for (i = 0; i < Hwi_NUM_INTERRUPTS; i++) {
         if (Hwi_module->intEvents[i] != -1) {
             Hwi_eventMap(i, Hwi_module->intEvents[i]);
         }
@@ -172,6 +178,7 @@ Int Hwi_Instance_init(Hwi_Object *hwi, Int intNum,
     }
 
     Hwi_module->dispatchTable[intNum] = hwi;
+
 // There is no vector table on C7x.  Instead, all interrupts vector to
 // ESTP + 0x800, where a dispatcher needs to look at AHPEE for interrupt
 // number in service and call the configured ISR.
@@ -179,7 +186,6 @@ Int Hwi_Instance_init(Hwi_Object *hwi, Int intNum,
 
     Hwi_reconfig(hwi, fxn, params);
     hwi->intNum = intNum;
-    Hwi_setPriority(hwi->intNum, hwi->priority);
 
 #ifndef ti_sysbios_hal_Hwi_DISABLE_ALL_HOOKS
     if (Hwi_hooks.length > 0) {
@@ -215,6 +221,12 @@ Int Hwi_Instance_init(Hwi_Object *hwi, Int intNum,
 Int Hwi_postInit (Hwi_Object *hwi, Error_Block *eb)
 {
     Int i;
+
+    if (hwi->priority < 1 || hwi->priority > 7) {
+        Error_raise(eb, Hwi_E_invalidPriority, hwi->priority, 0);
+
+        return (-1);
+    }
 
 #ifndef ti_sysbios_hal_Hwi_DISABLE_ALL_HOOKS
     for (i = 0; i < Hwi_hooks.length; i++) {
@@ -388,6 +400,8 @@ ULong Hwi_restoreIER(ULong mask)
  */
 Void Hwi_setPriority(UInt intNum, UInt priority)
 {
+    Assert_isTrue(priority >= 1U && priority <= 7U, Hwi_A_invalidPriority);
+
     __set_indexed(__EPRI, intNum, priority << 5);
 }
 
@@ -587,8 +601,8 @@ Bool Hwi_getStackInfo(Hwi_StackInfo *stkInfo, Bool computeStackDepth)
     Bool stackOverflow;
 
     /* Copy the stack base address and size */
-    stkInfo->hwiStackSize = (SizeT)_symval(&__TI_STACK_SIZE);
-    stkInfo->hwiStackBase = (Ptr)_stack;
+    stkInfo->hwiStackSize = (SizeT)_symval(&__TI_STACK_SIZE) - HWI_ECSP_SIZE;
+    stkInfo->hwiStackBase = _stack + HWI_ECSP_SIZE;
 
     isrSP = stkInfo->hwiStackBase;
 
