@@ -317,23 +317,23 @@ static inline CT__ti_sysbios_xdcruntime_CacheSupport_Module__id ti_sysbios_xdcru
 
 /* Module_hasMask */
 static inline xdc_Bool ti_sysbios_xdcruntime_CacheSupport_Module_hasMask(void);
-static inline xdc_Bool ti_sysbios_xdcruntime_CacheSupport_Module_hasMask(void) 
+static inline xdc_Bool ti_sysbios_xdcruntime_CacheSupport_Module_hasMask(void)
 {
-    return (xdc_Bool)(ti_sysbios_xdcruntime_CacheSupport_Module__diagsMask__C != NULL);
+    return (xdc_Bool)(ti_sysbios_xdcruntime_CacheSupport_Module__diagsMask__C != (CT__ti_sysbios_xdcruntime_CacheSupport_Module__diagsMask)NULL);
 }
 
 /* Module_getMask */
 static inline xdc_Bits16 ti_sysbios_xdcruntime_CacheSupport_Module_getMask(void);
-static inline xdc_Bits16 ti_sysbios_xdcruntime_CacheSupport_Module_getMask( void ) 
+static inline xdc_Bits16 ti_sysbios_xdcruntime_CacheSupport_Module_getMask(void)
 {
-    return ti_sysbios_xdcruntime_CacheSupport_Module__diagsMask__C != NULL ? *ti_sysbios_xdcruntime_CacheSupport_Module__diagsMask__C : (xdc_Bits16)0;
+    return (ti_sysbios_xdcruntime_CacheSupport_Module__diagsMask__C != (CT__ti_sysbios_xdcruntime_CacheSupport_Module__diagsMask)NULL) ? *ti_sysbios_xdcruntime_CacheSupport_Module__diagsMask__C : (xdc_Bits16)0;
 }
 
 /* Module_setMask */
 static inline xdc_Void ti_sysbios_xdcruntime_CacheSupport_Module_setMask(xdc_Bits16 mask);
 static inline xdc_Void ti_sysbios_xdcruntime_CacheSupport_Module_setMask(xdc_Bits16 mask)
 {
-    if (ti_sysbios_xdcruntime_CacheSupport_Module__diagsMask__C != NULL) {
+    if (ti_sysbios_xdcruntime_CacheSupport_Module__diagsMask__C != (CT__ti_sysbios_xdcruntime_CacheSupport_Module__diagsMask)NULL) {
         *ti_sysbios_xdcruntime_CacheSupport_Module__diagsMask__C = mask;
     }
 }

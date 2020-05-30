@@ -59,6 +59,7 @@ var family = {
     "gnu.targets.arm.M3" :                      "arm",
     "gnu.targets.arm.M4" :                      "arm",
     "gnu.targets.arm.M4F" :                     "arm",
+    "gnu.targets.arm.M33F" :                    "arm",
     "gnu.targets.arm.A8F" :                     "arm",
     "gnu.targets.arm.A9F" :                     "arm",
     "gnu.targets.arm.A15F" :                    "arm",
@@ -66,6 +67,7 @@ var family = {
     "iar.targets.arm.M3" :                      "arm",
     "iar.targets.arm.M4" :                      "arm",
     "iar.targets.arm.M4F" :                     "arm",
+    "iar.targets.arm.M33" :                     "arm",
     "ti.targets.arp32.elf.ARP32" :              "arp32",
     "ti.targets.arp32.elf.ARP32_far" :          "arp32",
 };
@@ -124,6 +126,7 @@ function module$meta$init()
     this.timerDelegate = getDefaultTimerDelegate();
     this.clockTimerDelegate = getDefaultClockTimerDelegate();
     this.secondsDelegate = getDefaultSecondsDelegate();
+    this.syscallDelegate = getDefaultSysCallDelegate();
 }
 
 /*
@@ -236,6 +239,14 @@ function getDefaultSecondsDelegate()
 }
 
 /*
+ *  ======== getDefaultSysCallDelegate ========
+ */
+function getDefaultSysCallDelegate()
+{
+    return (familySettings.getDefaultSysCallDelegate());
+}
+
+/*
  *  ======== getDefaultBootModule ========
  */
 function getDefaultBootModule()
@@ -275,6 +286,18 @@ function unsupportedTargetCheck(mod)
     if (Program.build.target.$name == "ti.targets.arm.elf.A8F") {
         mod.$logError(Program.build.target.$name + " is no longer supported. " +
             "Please use ti.targets.arm.elf.A8Fnv instead.", mod);
+        throw Error();
+    }
+    else if ((Program.build.target.name == "C64T") ||
+             (Program.build.target.$name == "ti.targets.C64P") ||
+             (Program.build.target.name == "C64P_big_endian")) {
+        mod.$logError(Program.build.target.$name + " is no longer supported. " +
+            "Please use SYS/BIOS 6.42.03 or older.", mod);
+        throw Error();
+    }
+    else if (Program.build.target.$name == "ti.targets.C674") {
+        mod.$logError(Program.build.target.$name + " is no longer supported. " +
+            "Please use ti.targets.elf.C674 instead.", mod);
         throw Error();
     }
     else if (Program.build.target.$name ==

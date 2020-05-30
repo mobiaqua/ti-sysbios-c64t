@@ -1,5 +1,5 @@
 /*
- *  Copyright 2017 by Texas Instruments Incorporated.
+ *  Copyright 2018 by Texas Instruments Incorporated.
  *
  */
 
@@ -153,6 +153,16 @@
      /* Defined to 1 if Cortex-R5 is targeted (the -mv7R5 option is used); */
 #    define xdc_target_name__ R5F
 
+#  endif
+
+/*
+ *  ======== LLVM ========
+ *  Arm devices
+ */
+#elif defined(__clang__)
+#  if defined(__ARM_ARCH_8M_MAIN__)
+#    define xdc_target_name__ M33F
+#    define xdc_target_types__ ti/targets/arm/elf/llvm/std.h
 #  endif
 
 /*

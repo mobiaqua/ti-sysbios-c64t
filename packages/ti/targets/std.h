@@ -1,5 +1,5 @@
 /* 
- *  Copyright (c) 2008-2016 Texas Instruments Incorporated
+ *  Copyright (c) 2008-2017 Texas Instruments Incorporated
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -93,10 +93,18 @@
     #define xdc__BITS16__
     #define xdc__BITS32__
     #define xdc__BITS64__
-//    #define xdc__INT40__
+/*    #define xdc__INT40__ */
     #define xdc__INT64__
 
     #define __FAR__
+
+#elif defined(__ARM_ARCH_8M_MAIN__)
+    #define xdc__LONGLONG__
+    #define xdc__BITS8__
+    #define xdc__BITS16__
+    #define xdc__BITS32__
+    #define xdc__BITS64__
+    #define xdc__INT64__
 
 #else
     #error <ti/targets/std.h> is not supported for this target
