@@ -162,7 +162,7 @@
 #elif defined(__clang__)
 #  if defined(__ARM_ARCH_8M_MAIN__)
 #    define xdc_target_name__ M33F
-#    define xdc_target_types__ ti/targets/arm/elf/llvm/std.h
+#    define xdc_target_types__ ti/targets/arm/clang/std.h
 #  endif
 
 /*

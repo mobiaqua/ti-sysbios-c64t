@@ -4,9 +4,9 @@
  */
 
 /*****************************************************************************/
-/* BOOT.C   v4.4.2 - Initialize the MSP430 C runtime environment             */
+/* BOOT_CORTEX_M.C   v1.0.0 - Initialize the ARM C runtime environment       */
 /*                                                                           */
-/* Copyright (c) 2003-2014 Texas Instruments Incorporated                    */
+/* Copyright (c) 2017-2018 Texas Instruments Incorporated                    */
 /* http://www.ti.com/                                                        */
 /*                                                                           */
 /*  Redistribution and  use in source  and binary forms, with  or without    */
@@ -39,14 +39,9 @@
 /*  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.     */
 /*                                                                           */
 /*****************************************************************************/
-#include "boot.h"
+#include <stdint.h>
 
-#include <xdc/runtime/Startup.h>
-extern int xdc_runtime_Startup__RESETFXN__C;
-extern void xdc_runtime_System_exit__E(int status);
-
-/* this function is defined by link.xdt */
-extern void ti_targets_msp430_rts430_noexit__I(int status);
+#include <xdc/runtime/System.h>
 
 #ifdef __TI_RTS_BUILD
 /*---------------------------------------------------------------------------*/
@@ -58,56 +53,85 @@ extern void ti_targets_msp430_rts430_noexit__I(int status);
 __asm("__TI_default_c_int00 .set 1");
 #endif
 
-#pragma CLINK(__TI_cleanup_ptr)
-void              (*__TI_cleanup_ptr)(void) = NULL;
-#pragma CLINK(__TI_dtors_ptr)
-void _DATA_ACCESS (*__TI_dtors_ptr)(int)    = NULL;
+/*----------------------------------------------------------------------------*/
+/* Define the user mode stack. The size will be determined by the linker.     */
+/*----------------------------------------------------------------------------*/
+__attribute__((section(".stack")))
+int __stack;
 
-/*---------------------------------------------------------------------------*/
-/* Allocate the memory for the system stack.  This section will be sized     */
-/* by the linker.                                                            */
-/*---------------------------------------------------------------------------*/
-#pragma DATA_SECTION (_stack, ".stack");
-#if defined(__LARGE_DATA_MODEL__)
-long _stack;
-#else
-int _stack;
-#endif
+/*----------------------------------------------------------------------------*/
+/* Linker defined symbol that will point to the end of the user mode stack.   */
+/* The linker will enforce 8-byte alignment.                                  */
+/*----------------------------------------------------------------------------*/
+extern int __STACK_END;
 
-__asm("\t.global _c_int00");
-__asm("\t.global _reset_vector");
-__asm("\t.sect   \".reset\"");
-__asm("\t.align  2");
-__asm("_reset_vector:\n\t.field _c_int00, 16");
+/*----------------------------------------------------------------------------*/
+/* Function declarations.                                                     */
+/*----------------------------------------------------------------------------*/
+__attribute__((weak)) extern void __mpu_init(void);
+extern int _system_pre_init(void);
+extern void __TI_auto_init(void);
+extern void _args_main(void);
+extern void exit(int);
+extern int main();
 
-/*****************************************************************************/
-/* C_INT00() - C ENVIRONMENT ENTRY POINT                                     */
-/*****************************************************************************/
-#pragma CLINK(_c_int00)
-CSTART_DECL _c_int00()
+/*----------------------------------------------------------------------------*/
+/* Default boot routine for Cortex-M                                          */
+/*----------------------------------------------------------------------------*/
+static __inline __attribute__((always_inline))
+void _c_int00_template(int NEEDS_ARGS, int NEEDS_INIT)
 {
-   STACK_INIT();
+   // Initialize the stack pointer
+   char* stack_ptr = (char*)&__STACK_END;
+   __asm volatile ("MSR msp, %0" : : "r" (stack_ptr) : );
 
-   /*------------------------------------------------------------------------*/
-   /* Call hook configured into Startup_resetFxn                             */
-   /*------------------------------------------------------------------------*/
-   if (&xdc_runtime_Startup__RESETFXN__C == (int*)1) {
-      xdc_runtime_Startup_reset__I();
+   // Initialize the FPU if building for floating point
+   #ifdef __ARM_FP
+   volatile uint32_t* cpacr = (volatile uint32_t*)0xE000ED88;
+   *cpacr |= (0xf0 << 16);
+   #endif
+
+   __mpu_init();
+   if (_system_pre_init())
+   {
+      if (NEEDS_INIT)
+         __TI_auto_init();
    }
 
-   /*------------------------------------------------------------------------*/
-   /* Allow for any application-specific low level initialization prior to   */
-   /* initializing the C/C++ environment (global variable initialization,    */
-   /* constructers).  If _system_pre_init() returns 0, then bypass C/C++     */
-   /* initialization.  NOTE: BYPASSING THE CALL TO THE C/C++ INITIALIZATION  */
-   /* ROUTINE MAY RESULT IN PROGRAM FAILURE.                                 */
-   /*------------------------------------------------------------------------*/
-   if(_system_pre_init() != 0)  _auto_init();
+   if (NEEDS_ARGS) {
+      _args_main();
+      System_exit(0);
+   }
+   else {
+      System_exit(main());
+   }
+}
 
-   /*------------------------------------------------------------------------*/
-   /* Handle any argc/argv arguments if supported by an MSP430 loader.       */
-   /*------------------------------------------------------------------------*/
-   xdc_runtime_System_exit__E(_args_main());
+/******************************************************************************/
+/* Specializations                                                            */
+/******************************************************************************/
+__attribute__((section(".text:_c_int00"), used))
+void _c_int00(void)
+{
+   _c_int00_template(1, 1);
+}
+
+__attribute__((section(".text:_c_int00_noargs"), used))
+void _c_int00_noargs(void)
+{
+   _c_int00_template(0, 1);
+}
+
+__attribute__((section(".text:_c_int00_noinit"), used))
+void _c_int00_noinit(void)
+{
+   _c_int00_template(1, 0);
+}
+
+__attribute__((section(".text:_c_int00_noinit_noargs"), used))
+void _c_int00_noinit_noargs(void)
+{
+   _c_int00_template(0, 0);
 }
 /*
 

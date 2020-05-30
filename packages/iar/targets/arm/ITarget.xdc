@@ -103,6 +103,7 @@ metaonly interface ITarget inherits xdc.bld.ITarget3 {
         [".cc",   {suf: ".cc",  typ: "cpp"}],
         [".s",    {suf: ".s",   typ: "asm"}],
         [".sv7M", {suf: ".sv7M",typ: "asm"}],
+        [".sv8M", {suf: ".sv8M",typ: "asm"}],
     ];
 
     /*!

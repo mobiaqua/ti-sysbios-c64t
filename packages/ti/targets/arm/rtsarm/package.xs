@@ -33,8 +33,8 @@ function getLibs(prog)
 {
     var libs;
 
-    if (Program.build.target.$name.match(/llvm/)) {
-        libs = "";
+    if (Program.build.target.$name.match(/clang/)) {
+        libs = "lib/startup.a" + prog.build.target.suffix;
     }
     else {
         libs = "lib/boot.a" + prog.build.target.suffix

@@ -3,11 +3,10 @@
  *
  */
 
-#if __TI_COMPILER_VERSION__ >= 4004000
 /*****************************************************************************/
-/* AUTO_INIT_WDT()   v4.4.2 - Perform initialization of C variables.         */
+/* BOOT_HOOKS.H          - Perform initialization of C variables.            */
 /*                                                                           */
-/* Copyright (c) 2014-2014 Texas Instruments Incorporated                    */
+/* Copyright (c) 2015 Texas Instruments Incorporated                         */
 /* http://www.ti.com/                                                        */
 /*                                                                           */
 /*  Redistribution and  use in source  and binary forms, with  or without    */
@@ -40,41 +39,21 @@
 /*  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.     */
 /*                                                                           */
 /*****************************************************************************/
-#include "autoinit.h"
-#include <inttypes.h>
-#include <string.h>
+#ifndef _TI_BOOT_HOOKS_H
+#define _TI_BOOT_HOOKS_H
 
-#include <xdc/runtime/Startup.h>
-extern int xdc_runtime_Startup__EXECFXN__C;
+extern int  _system_pre_init(void);
 
-#define WDTPW                (0x5A00)
-#define WDTCNTCL             (0x0008)
-#define WDTHOLD              (0x0080)
-#define RESTORE_WDT(setting) (WDTPW | (0x00FF & (setting)) | WDTCNTCL)
-#define HOLD_WDT             (WDTPW | WDTHOLD)
+#if __ARM_ARCH
+/*****************************************************************************/
+/* ARM supports converting calls to weak references into nops. Leverage      */
+/* that support to avoid calling an empty function. We can't do this for     */
+/* _system_pre_init() because it must return a value                         */
+/*****************************************************************************/
+__attribute__((weak))
+#endif
+extern void _system_post_cinit(void);
 
-
-extern volatile uint16_t WDTCTL;
-
-void AUTO_INIT_HOLD_WDT(void)
-{
-    run_binit();
-
-    uint16_t initial_WDT = WDTCTL;
-
-    run_cinit();
-
-    WDTCTL = RESTORE_WDT(initial_WDT);
-
-    /*------------------------------------------------------------------------*/
-    /* Process XDC Startup                                                    */
-    /*------------------------------------------------------------------------*/
-    if (&xdc_runtime_Startup__EXECFXN__C == (int*)1) {
-       xdc_runtime_Startup_exec__E();
-    }
-
-    run_pinit();
-}
 #endif
 /*
 
