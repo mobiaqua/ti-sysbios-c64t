@@ -1,5 +1,5 @@
 /*
- *  Copyright 2016 by Texas Instruments Incorporated.
+ *  Copyright 2017 by Texas Instruments Incorporated.
  *
  */
 
@@ -54,10 +54,10 @@
    * xdc_target_types__ on the compile line.
    */
 #  ifndef xdc_target_name__
-#    warn can't determine an appropriate setting for xdc_target_name__
+#    warning "can't determine an appropriate setting for xdc_target_name__"
 #  endif
 #  ifndef xdc_target_types__
-#    warn can't determine an appropriate setting for xdc_target_types__
+#    warning "can't determine an appropriate setting for xdc_target_types__"
 #  endif
 #endif
 /*

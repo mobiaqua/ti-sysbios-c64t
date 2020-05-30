@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,10 +43,6 @@ function getSects()
     switch(ROM.romName) {
         case ROM.CC2650:
             romModName = "CC26xx";
-            break;
-
-        case ROM.CC2650_FLASH:
-            romModName = "CC26xx_flash";
             break;
     }
 

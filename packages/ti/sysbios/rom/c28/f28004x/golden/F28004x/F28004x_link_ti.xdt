@@ -70,8 +70,6 @@
 -u _ti_sysbios_rom_ROM_ti_sysbios_family_c28_Hwi_startup__E
 -u _ti_sysbios_rom_ROM_ti_sysbios_family_c28_Timer_setPeriodMicroSecs__E
 -u _ti_sysbios_rom_ROM_ti_sysbios_hal_Timer_TimerProxy_Module__startupDone__S
--u _ti_sysbios_rom_ROM_ti_sysbios_hal_Timer_TimerProxy_Object__create__S
--u _ti_sysbios_rom_ROM_ti_sysbios_hal_Timer_TimerProxy_Object__delete__S
 -u _ti_sysbios_rom_ROM_ti_sysbios_hal_Timer_TimerProxy_create
 -u _ti_sysbios_rom_ROM_ti_sysbios_hal_Timer_TimerProxy_delete
 -u _ti_sysbios_rom_ROM_ti_sysbios_hal_Timer_TimerProxy_getCount__E
@@ -93,7 +91,6 @@
 -u _ti_sysbios_rom_ROM_ti_sysbios_hal_Timer_TimerProxy_stop__E
 -u _ti_sysbios_rom_ROM_ti_sysbios_hal_Timer_TimerProxy_trigger__E
 -u _ti_sysbios_rom_ROM_ti_sysbios_knl_Clock_TimerProxy_Module__startupDone__S
--u _ti_sysbios_rom_ROM_ti_sysbios_knl_Clock_TimerProxy_Object__delete__S
 -u _ti_sysbios_rom_ROM_ti_sysbios_knl_Clock_TimerProxy_getCurrentTick__E
 -u _ti_sysbios_rom_ROM_ti_sysbios_knl_Clock_TimerProxy_getMaxTicks__E
 -u _ti_sysbios_rom_ROM_ti_sysbios_knl_Clock_TimerProxy_getNumTimers__E
@@ -531,8 +528,8 @@ SECTIONS
         *(.econst:ti_sysbios_rom_ROM_ti_sysbios_family_c28_Hwi_startup__E)
         *(.econst:ti_sysbios_rom_ROM_ti_sysbios_family_c28_Timer_setPeriodMicroSecs__E)
         *(.econst:ti_sysbios_rom_ROM_ti_sysbios_hal_Timer_TimerProxy_Module__startupDone__S)
-        *(.econst:ti_sysbios_rom_ROM_ti_sysbios_hal_Timer_TimerProxy_Object__create__S)
-        *(.econst:ti_sysbios_rom_ROM_ti_sysbios_hal_Timer_TimerProxy_Object__delete__S)
+        *(.econst:ti_sysbios_rom_ROM_null14)
+        *(.econst:ti_sysbios_rom_ROM_null15)
         *(.econst:ti_sysbios_rom_ROM_ti_sysbios_hal_Timer_TimerProxy_create)
         *(.econst:ti_sysbios_rom_ROM_ti_sysbios_hal_Timer_TimerProxy_delete)
         *(.econst:ti_sysbios_rom_ROM_ti_sysbios_hal_Timer_TimerProxy_getCount__E)
@@ -554,7 +551,7 @@ SECTIONS
         *(.econst:ti_sysbios_rom_ROM_ti_sysbios_hal_Timer_TimerProxy_stop__E)
         *(.econst:ti_sysbios_rom_ROM_ti_sysbios_hal_Timer_TimerProxy_trigger__E)
         *(.econst:ti_sysbios_rom_ROM_ti_sysbios_knl_Clock_TimerProxy_Module__startupDone__S)
-        *(.econst:ti_sysbios_rom_ROM_ti_sysbios_knl_Clock_TimerProxy_Object__delete__S)
+        *(.econst:ti_sysbios_rom_ROM_null30)
         *(.econst:ti_sysbios_rom_ROM_ti_sysbios_knl_Clock_TimerProxy_getCurrentTick__E)
         *(.econst:ti_sysbios_rom_ROM_ti_sysbios_knl_Clock_TimerProxy_getMaxTicks__E)
         *(.econst:ti_sysbios_rom_ROM_ti_sysbios_knl_Clock_TimerProxy_getNumTimers__E)

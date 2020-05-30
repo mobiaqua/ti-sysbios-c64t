@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,8 +38,8 @@
 #include <ti/sysbios/hal/Seconds.h>
 #include <ti/sysbios/knl/Clock.h>
 
-#include <ti/sysbios/posix/_time.h>
-#include <ti/sysbios/posix/_pthread_error.h>
+#include "time.h"
+#include "errno.h"
 
 /*
  *  ======== clock_gettime ========
@@ -74,7 +74,8 @@ int clock_gettime(clockid_t clockId, struct timespec *ts)
 int clock_settime(clockid_t clock_id, const struct timespec *ts)
 {
     if (clock_id == CLOCK_MONOTONIC) {
-        return (EINVAL);
+        /* EINVAL */
+        return (-1);
     }
 
     Seconds_set(ts->tv_sec);

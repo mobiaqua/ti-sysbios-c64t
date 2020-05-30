@@ -84,15 +84,24 @@ function getExeContext(prog)
  *  ======== Platform.getExecCmd ========
  *  This Platform's implementation xdc.platform.IPlatform.getExecCmd.
  */
-function getExecCmd(prog)
+function getExecCmd(prog, packagePath)
 {
     var os = environment["xdc.hostOS"];
     var updateComment = "@$(ECHO) Check for updates to this package at:\n" +
     "@$(ECHO) https://www-a.ti.com/downloads/sds_support/targetcontent/rtsc/index.html";
 
-    return("@$(ECHO) " + this.$package.$name + " platform package cannot " +
-           "execute " + prog.name + " on " + os + "\n" + updateComment +
-           "\n\t:");
+    if (os == "Linux" && this.ccsSim != undefined) {
+        command = this.ccsSim + "scripting/bin/dss.sh " + packagePath + os
+            + "/main.js -q -c "
+            + this.ccsSim + "common/targetdb/configurations/C6678sim.ccxml "
+            + prog.name;
+        return (command);
+    }
+    else {
+        return("@$(ECHO) " + this.$package.$name + " platform package cannot "
+            + "execute " + prog.name + " on " + os + "\n" + updateComment
+            + "\n\t:");
+    }
 }
 
 /*

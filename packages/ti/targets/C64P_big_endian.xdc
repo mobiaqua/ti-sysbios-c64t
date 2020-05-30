@@ -12,12 +12,12 @@
 
 /*
  *  ======== C64P_big_endian.xdc ========
- *
  */
 
 /*!
+ *  @_nodoc
  *  ======== C64P_big_endian ========
- *  TI C64P big endian 
+ *  TI C64P big endian
  */
 metaonly module C64P_big_endian inherits ti.targets.ITarget {
     override readonly config string name                 = "C64P_big_endian";

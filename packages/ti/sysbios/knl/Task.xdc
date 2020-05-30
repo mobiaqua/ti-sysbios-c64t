@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, Texas Instruments Incorporated
+ * Copyright (c) 2015-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -444,7 +444,7 @@ module Task
         Ptr     env;            /*! Global environment struct. */
         Mode    mode;           /*! Task's current mode. */
         Ptr     sp;             /*! Task's current stack pointer. */
-        SizeT   used;           /*! max # of words used on stack. */
+        SizeT   used;           /*! Maximum number of bytes used on stack. */
     };
 
     /*!

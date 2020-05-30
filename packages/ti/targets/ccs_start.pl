@@ -1,5 +1,5 @@
 #
-#  Copyright 2016 by Texas Instruments Incorporated.
+#  Copyright 2017 by Texas Instruments Incorporated.
 #  
 #
 
@@ -33,7 +33,7 @@ if ($proj) {
     }
 }
 #
-#  @(#) ti.targets; 1, 0, 3,0; 10-21-2016 18:16:53; /db/ztree/library/trees/xdctargets/xdctargets-l07/src/ xlibrary
+#  @(#) ti.targets; 1, 0, 3,0; 2-10-2017 09:06:41; /db/ztree/library/trees/xdctargets/xdctargets-m11/src/ xlibrary
 
 #
 

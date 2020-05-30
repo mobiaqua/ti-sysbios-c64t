@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Texas Instruments Incorporated
+ * Copyright (c) 2016-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,8 +75,8 @@ struct sched_param {
  *  block.
  */
 
-#define sched_get_priority_min() 1
-#define sched_get_priority_max() (ti_sysbios_knl_Task_numPriorities - 1)
+#define sched_get_priority_min(x) 1
+#define sched_get_priority_max(x) (ti_sysbios_knl_Task_numPriorities - 1)
 
 extern int sched_yield(void);
 

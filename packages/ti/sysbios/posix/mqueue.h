@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Texas Instruments Incorporated
+ * Copyright (c) 2016-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <ti/sysbios/posix/types.h>
+#include "sys/types.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -76,15 +76,14 @@ typedef unsigned mode_t;  /* TODO: sys/stat.h? */
  */
 extern int mq_close(mqd_t mqdes);
 extern int mq_getattr(mqd_t mqdes, struct mq_attr *mqstat);
-extern int mq_notify(mqd_t mqdes, const struct sigevent *notification);
 extern mqd_t mq_open(const char *name, int oflags, ...);
-extern long mq_receive(mqd_t mqdes, char *msg_ptr, size_t msg_len,
+extern ssize_t mq_receive(mqd_t mqdes, char *msg_ptr, size_t msg_len,
         unsigned int *msg_prio);
 extern int mq_send(mqd_t mqdes, const char *msg_ptr, size_t msg_len,
         unsigned int msg_prio);
 extern int mq_setattr(mqd_t mqdes, const struct mq_attr *mqstat,
         struct mq_attr *omqstat);
-extern long mq_timedreceive(mqd_t mqdes, char *msg_ptr, size_t msg_len,
+extern ssize_t mq_timedreceive(mqd_t mqdes, char *msg_ptr, size_t msg_len,
         unsigned int *msg_prio, const struct timespec *abstime);
 extern int mq_timedsend(mqd_t mqdes, const char *msg_ptr, size_t msg_len,
         unsigned int msg_prio, const struct timespec *abstime);

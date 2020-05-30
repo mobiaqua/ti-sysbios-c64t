@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, Texas Instruments Incorporated
+ * Copyright (c) 2015-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -307,6 +307,29 @@ function viewGetHandle(pi)
         for (var i in halHwiRawView.instStates) {
             if (Number(halHwiRawView.instStates[i].pi) == Number(pi)) {
                 return (halHwiRawView.instStates[i].$addr);
+            }
+        }
+
+    }
+    catch (e) {
+        return (null);
+    }
+
+    return (null);
+}
+
+/*!
+ *  ======== viewGetLabel ========
+ */
+function viewGetLabel(pi)
+{
+    var Program = xdc.useModule('xdc.rov.Program');
+
+    try {
+        var halHwiRawView = Program.scanRawView('ti.sysbios.hal.Hwi');
+        for (var i in halHwiRawView.instStates) {
+            if (Number(halHwiRawView.instStates[i].pi) == Number(pi)) {
+                return (halHwiRawView.instStates[i].$label);
             }
         }
 

@@ -95,6 +95,9 @@ typedef volatile struct TimerRegs {
         UInt gtcrWhole;
     } u_gtcr;
     UInt wdtcr;
+    UInt pad[2];
+    UInt rello;
+    UInt relhi;
     UInt caplo;
     UInt caphi;
     UInt intctlstat;

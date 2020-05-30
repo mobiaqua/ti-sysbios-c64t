@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, Texas Instruments Incorporated
+ * Copyright (c) 2015-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -329,6 +329,14 @@ module Hwi inherits ti.sysbios.interfaces.IHwi
      */
     config Error.Id E_badIntNum = {
         msg: "E_badIntNum, intnum: %d is out of range"
+    };
+
+    /*!
+     *  Error raised if an attempt is made to create a Hwi
+     *  with a priority of 0
+     */
+    config Error.Id E_invalidPriority = {
+        msg: "E_invalidPriority, priority: %d is either invalid or not supported"
     };
 
     /*!

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, Texas Instruments Incorporated
+ * Copyright (c) 2015-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,9 +44,9 @@ extern "C" {
 #include <ti/sysbios/knl/Queue.h>
 #include <ti/sysbios/knl/Task.h>
 #include <ti/sysbios/knl/Semaphore.h>
-#include <ti/sysbios/posix/pthread.h>
 
-#include <ti/sysbios/posix/Settings.h>
+#include "pthread.h"
+#include "Settings.h"
 
 #ifndef ti_sysbios_posix_Settings_supportsMutexPriority__D
 #define ti_sysbios_posix_Settings_supportsMutexPriority__D 1

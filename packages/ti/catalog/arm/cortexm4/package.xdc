@@ -46,5 +46,6 @@ package ti.catalog.arm.cortexm4 [1,0,0] {
     module TDA3XX;
     module CC32xx;
     module MSP432;
+    module CC13xx;
     module CC26xx;
 }

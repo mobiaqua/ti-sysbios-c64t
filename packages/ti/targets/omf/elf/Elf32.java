@@ -19,7 +19,15 @@ import java.util.regex.Matcher;
  */
 public class Elf32 implements xdc.rta.IOFReader, xdc.rov.ISymbolTable
 {
-    static final Pattern C_IDENT = Pattern.compile("[a-zA-Z_][a-zA-Z0-9_]*");
+    /*
+     *  ======== C_IDENT ========
+     *  Regular expression for C-identifies optionally followed by
+     *  TI's  program-level optimization mangling hack; i.e., the addition
+     *  of "$<file number>" to each static symbol in a file participating in
+     *  program-level optimization.
+     */
+    static final Pattern C_IDENT =
+        Pattern.compile("[a-zA-Z_][a-zA-Z0-9_]*(\\$[0-9]+)?");
     static Matcher cIdent = C_IDENT.matcher("");
     
     static final int ET_NONE = 0;         /* No machine */
@@ -653,23 +661,42 @@ public class Elf32 implements xdc.rta.IOFReader, xdc.rov.ISymbolTable
     /*
      *  ======== getISA ========
      */
-    public int getISA() {
+    public int getISA()
+    {
         // TODO Auto-generated method stub
         return 0;
     }
 
     /*
      *  ======== lookupDataSymbol ========
+     *  Return either a data or absolute symbol name
+     *
+     *  We lookup absolute symbols to enable finding symbols delivered in ROM.
      */
-    public String[] lookupDataSymbol(long val) {
-        return (dataSymsByVal.get(val));
+    public String[] lookupDataSymbol(long val)
+    {
+        String [] result = dataSymsByVal.get(val);
+        if (result == null || result.length == 0) {
+            /* to support ROM, look for a matching absolute */
+            result = absSymsByVal.get(val);
+        }
+        return (result);
     }
 
     /*
      *  ======== lookupFuncName ========
+     *  Return either a program or absolute symbol name
+     *
+     *  We lookup absolute symbols to enable finding symbols delivered in ROM.
      */
-    public String[] lookupFuncName(long val) {
-        return (progSymsByVal.get(val));
+    public String[] lookupFuncName(long val)
+    {
+        String [] result = progSymsByVal.get(val);
+        if (result == null || result.length == 0) {
+            /* to support ROM, look for a matching absolute */
+            result = absSymsByVal.get(val);
+        }
+        return (result);
     }
 
     /*
@@ -787,6 +814,7 @@ public class Elf32 implements xdc.rta.IOFReader, xdc.rov.ISymbolTable
         symsByName = new HashMap<String, Long>();
         dataSymsByVal = new HashMap<Long, String[]>();
         progSymsByVal = new HashMap<Long, String[]>();
+        absSymsByVal = new HashMap<Long, String[]>();
         
         /* Retrieve the section containing the symbol table entries. */
         // TODO - Are these sections always identified as ".symtab" and  
@@ -845,6 +873,12 @@ public class Elf32 implements xdc.rta.IOFReader, xdc.rov.ISymbolTable
             /* Parse the next entry. */
             entry.read(symTabBuffer);
 
+            //            System.out.println("    " + readStringFromBuffer(symStrTabBuffer, entry.st_name, 1)
+            //                + ", st_shndx: 0x" + Integer.toHexString((int)entry.st_shndx)
+            //                + ", st_info: 0x" + Integer.toHexString((int)entry.st_info)
+            //                + ", st_size: 0x" + Integer.toHexString((int)entry.st_size)
+            //                + ", st_other: 0x" + Integer.toHexString((int)entry.st_other));
+
             /* If this is a data or program symbol ... */
             if (entry.isAbsolute() || entry.isLocalAbsolute()
                 || entry.isData() || entry.isLocalData()
@@ -890,6 +924,9 @@ public class Elf32 implements xdc.rta.IOFReader, xdc.rov.ISymbolTable
                 else if (entry.isCode() || entry.isLocalCode()) {
                     symsByVal = progSymsByVal;
                 }
+                else if (entry.isAbsolute() || entry.isLocalAbsolute()) {
+                    symsByVal = absSymsByVal;
+                }
                 else {
                     continue;
                 }
@@ -914,7 +951,7 @@ public class Elf32 implements xdc.rta.IOFReader, xdc.rov.ISymbolTable
                     System.arraycopy(syms, 0, newSyms, 0, syms.length);
                     
                     /* Add the new symbol to the end. */
-                    newSyms[newSyms.length - 1] = entry.name;
+                    newSyms[newSyms.length - 1] = demangle(entry.name);
                 }
                 /* 
                  * Otherwise, if this is the first symbol at 
@@ -923,7 +960,7 @@ public class Elf32 implements xdc.rta.IOFReader, xdc.rov.ISymbolTable
                 else {
                     newSyms = new String[1];
                     
-                    newSyms[0] = entry.name;
+                    newSyms[0] = demangle(entry.name);
                 }
                 
                 /* Add the symbols to the map. */
@@ -1124,6 +1161,24 @@ public class Elf32 implements xdc.rta.IOFReader, xdc.rov.ISymbolTable
     }
 
     /*
+     *  ======== demangle ========
+     *  TI mangles static identifies when build with whole program
+     *  optimization (by adding "$<file number>" to static symbols).  To hide
+     *  this hack, we must remove the suffix when clients aare looking up the
+     *  name corresponding to an address.
+     */
+    private String demangle(String name)
+    {
+        if (name != null) {
+            int k = name.indexOf('$');
+            if (k != -1) {
+                name = name.substring(0, k);
+            }
+        }
+        return (name);
+    }
+
+    /*
      *  ======== readStringFromBuffer ========
      *  Reads the string from 'buffer' starting at 'offset'.
      *
@@ -1245,6 +1300,7 @@ public class Elf32 implements xdc.rta.IOFReader, xdc.rov.ISymbolTable
     private HashMap<String, Long> symsByName;
     private HashMap<Long, String[]> dataSymsByVal;
     private HashMap<Long, String[]> progSymsByVal;
+    private HashMap<Long, String[]> absSymsByVal;
     
     private RandomAccessFile file;
     private String curFileName = null;

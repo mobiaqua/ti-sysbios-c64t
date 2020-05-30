@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -153,8 +153,7 @@ Void Boot_configureDCO(Void)
     do {
        REG(UCSCTL7) &= ~(XT2OFFG + XT1LFOFFG + XT1HFOFFG + DCOFFG);
        REG(SFRIFG1) &= ~OFIFG;
-    } while (REG(SFRIFG1) &OFIFG);
-
+    } while (REG(UCSCTL7) & (XT2OFFG + XT1LFOFFG + XT1HFOFFG + DCOFFG));
 }
 
 /*

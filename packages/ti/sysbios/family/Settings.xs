@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, Texas Instruments Incorporated
+ * Copyright (c) 2015-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,13 +47,13 @@ var family = {
     "ti.targets.elf.C674" :                     "c64p",
     "ti.targets.elf.C67P" :                     "c67p",
     "ti.targets.elf.C64T" :                     "c64p",
+    "ti.targets.elf.C28_float" :                "c28",
     "ti.targets.msp430.elf.MSP430X" :           "msp430",
     "iar.targets.msp430.MSP430" :               "msp430",
     "iar.targets.msp430.MSP430X_small" :        "msp430",
     "iar.targets.msp430.MSP430X_large" :        "msp430",
     "ti.targets.arm.elf.Arm9" :                 "arm",
     "ti.targets.arm.elf.A8Fnv" :                "arm",
-    "ti.targets.arm.elf.M0" :                   "arm",
     "ti.targets.arm.elf.M3" :                   "arm",
     "ti.targets.arm.elf.M4" :                   "arm",
     "ti.targets.arm.elf.M4F" :                  "arm",

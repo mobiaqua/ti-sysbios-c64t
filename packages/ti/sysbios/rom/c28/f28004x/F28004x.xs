@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, Texas Instruments Incorporated
+ * Copyright (c) 2015-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -118,11 +118,6 @@ function module$use()
         case ROM.F28004x:
             F28004x.REVISION = 1915367466;
             F28004x.REVISION_WORD_ADDRESS = 0x003f910a;
-            break;
-
-        case ROM.F28004x_P2:
-            F28004x.REVISION = 1114795641;
-            F28004x.REVISION_WORD_ADDRESS = 0x003f9110;
             break;
     }
 

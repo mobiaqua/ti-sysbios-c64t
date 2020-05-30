@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -186,7 +186,6 @@ Void Swi_runLoop()
     }
     while (maxQ > curQ);
 }
-
 
 /*
  *  ======== Swi_schedule ========
@@ -520,7 +519,7 @@ Int Swi_Instance_init(Swi_Object *swi, Swi_FuncPtr fxn,
      * floor of 2 here is to differentiate Swi_postInit errors
      * from Instance_init errors
      */
-    if (Error_check(eb)) {
+    if (status != 0) {
         return (2 + status);
     }
 
@@ -540,14 +539,24 @@ Int Swi_postInit (Swi_Object *swi, Error_Block *eb)
 {
 #ifndef ti_sysbios_knl_Swi_DISABLE_ALL_HOOKS
     Int i;
+    Error_Block *leb;
+
+    if (eb != Error_IGNORE) {
+        leb = eb;
+    }
+    else {
+        Error_Block localEB;
+        Error_init(&localEB);
+        leb = &localEB;
+    }
 
     for (i = 0; i < Swi_hooks.length; i++) {
         swi->hookEnv[i] = (Ptr)0;
         if (Swi_hooks.elem[i].createFxn != NULL) {
-            Swi_hooks.elem[i].createFxn(swi, eb);
+            Swi_hooks.elem[i].createFxn(swi, leb);
 
-            if (Error_check(eb)) {
-                return (i);
+            if (Error_check(leb)) {
+                return (i + 1);
             }
         }
     }

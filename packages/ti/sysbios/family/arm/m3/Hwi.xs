@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, Texas Instruments Incorporated
+ * Copyright (c) 2015-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -248,10 +248,21 @@ function module$meta$init()
 
     var deviceName = deviceSupportCheck();
 
+    /*
+     * Most tiva derivative GNU linker cmd files require definitions for
+     *  _intvecs_base_address and _vtable_base_address.
+     * "isTiva = true" informs Hwi.xdt and Hwi_link.xdt to generate the required
+     * linker cmd content for these devices.
+     */
     if (Program.platformName.match(/ti\.platforms\.tiva/) ||
         Program.platformName.match(/ti\.platforms\.cc26xx/) ||
         Program.platformName.match(/ti\.platforms\.msp432/) ||
-        Program.platformName.match(/ti\.platforms\.simplelink/)) {
+        Program.platformName.match(/ti\.platforms\.simplelink/) ||
+        Program.cpu.deviceName.match(/CC26/) ||
+        Program.cpu.deviceName.match(/CC13/) ||
+        Program.cpu.deviceName.match(/CC25/) ||
+        Program.cpu.deviceName.match(/CC32/) ||
+        Program.cpu.deviceName.match(/TM4/)) {
         Hwi.isTiva = true;
     }
     else {
@@ -1006,7 +1017,12 @@ function viewFillBasicInfo(view, obj)
 
     view.subPriority = (pri & subPriMasks[hwiModCfg.priGroup]) >> shift;
     view.halHwiHandle =  halHwi.viewGetHandle(obj.$addr);
-    view.label = Program.getShortName(obj.$label);
+    if (view.halHwiHandle != null) {
+        view.label = Program.getShortName(halHwi.viewGetLabel(obj.$addr));
+    }
+    else {
+        view.label = Program.getShortName(obj.$label);
+    }
     view.intNum = Math.abs(obj.intNum);
 
     if (obj.intNum >= 0) {
@@ -1032,11 +1048,46 @@ function viewFillBasicInfo(view, obj)
 }
 
 /*
+ *  ======== viewCheckForNullObject ========
+ *  Returns true if the object is all zeros.
+ */
+function viewCheckForNullObject(mod, obj)
+{
+    var Program = xdc.useModule('xdc.rov.Program');
+    var objSize = mod.Instance_State.$sizeof();
+
+    /* skip uninitialized objects */
+    try {
+        var objArray = Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UInt8',
+                                    isScalar: true},
+                                    Number(obj.$addr),
+                                    objSize,
+                                    true);
+    }
+    catch(e) {
+        print(e.toString());
+    }
+
+    for (var i = 0; i < objSize; i++) {
+        if (objArray[i] != 0) return (false);
+    }
+
+    return (true);
+}
+
+/*
  *  ======== viewInitBasic ========
  *  Initialize the 'Basic' Task instance view.
  */
 function viewInitBasic(view, obj)
 {
+    var Hwi = xdc.useModule('ti.sysbios.family.arm.m3.Hwi');
+    
+    if (viewCheckForNullObject(Hwi, obj)) {
+        view.halHwiHandle = "Uninitialized Hwi object";
+        return;
+    }
+
     /* Add constructed Hwis to ROV object list */
     viewScanDispatchTable(this, 'Basic');
 
@@ -1057,6 +1108,11 @@ function viewInitDetailed(view, obj)
 
     /* Add constructed Hwis to ROV object list */
     viewScanDispatchTable(this, 'Detailed');
+
+    if (viewCheckForNullObject(Hwi, obj)) {
+        view.halHwiHandle = "Uninitialized Hwi object";
+        return;
+    }
 
     /* Detailed view builds off basic view. */
     viewFillBasicInfo(view, obj);

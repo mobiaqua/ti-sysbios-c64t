@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, Texas Instruments Incorporated
+ * Copyright (c) 2015-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,7 +63,7 @@ if (xdc.om.$name == "cfg") {
             errataInitEsm       : false,
             resetVIM            : false,
         },
-        "AR14XX": {
+        "AWR14XX": {
             lockstepDevice      : true,
             vimBaseAddress      : 0xFFFFFDEC,
             vimRamAddress       : 0xFFF82000,
@@ -77,7 +77,9 @@ if (xdc.om.$name == "cfg") {
     deviceTable["RM57D8.*"] = deviceTable["RM57D8xx"];
     deviceTable["RM57L8.*"] = deviceTable["RM57L8xx"];
     deviceTable["RM48L.*"] = deviceTable["RM57L8xx"];
-    deviceTable["AR16XX"] = deviceTable["AR14XX"];
+    deviceTable["AWR16XX"] = deviceTable["AWR14XX"];
+    deviceTable["IWR14XX"] = deviceTable["AWR14XX"];
+    deviceTable["IWR16XX"] = deviceTable["AWR14XX"];
 }
 
 /*
@@ -647,7 +649,12 @@ function viewInitBasic(view, obj)
     viewScanDispatchTable(this, 'Basic');
 
     view.halHwiHandle =  halHwi.viewGetHandle(obj.$addr);
-    view.label = Program.getShortName(obj.$label);
+    if (view.halHwiHandle != null) {
+        view.label = Program.getShortName(halHwi.viewGetLabel(obj.$addr));
+    }
+    else {
+        view.label = Program.getShortName(obj.$label);
+    }
     view.intNum = obj.intNum;
 
     if (obj.type == Hwi.Type_FIQ) {

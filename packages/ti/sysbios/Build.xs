@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, Texas Instruments Incorporated
+ * Copyright (c) 2015-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,7 +75,6 @@ var ccOptsList = {
     "ti.targets.arm.elf.Arm9"                   : customArmOpts,
     "ti.targets.arm.elf.A8F"                    : customArmOpts,
     "ti.targets.arm.elf.A8Fnv"                  : customArmOpts,
-    "ti.targets.arm.elf.M0"                     : customArmOpts,
     "ti.targets.arm.elf.M3"                     : customArmOpts,
     "ti.targets.arm.elf.M4"                     : customArmOpts,
     "ti.targets.arm.elf.M4F"                    : customArmOpts,
@@ -290,7 +289,6 @@ var biosPackages = [
     "ti.sysbios.family.arm.lm4",
     "ti.sysbios.family.arm.lm4.rtc",
     "ti.sysbios.family.arm.lm3",
-    "ti.sysbios.family.arm.v6m",
     "ti.sysbios.family.arm.m3",
     "ti.sysbios.family.arm.msp432",
     "ti.sysbios.family.arm.msp432.init",
@@ -464,6 +462,8 @@ function getDefs()
     }
 
     if ((BIOS.buildingAppLib == true) && (Build.buildROM == false)) {
+        defs += " -Dti_sysbios_Build_useIndirectReferences=FALSE";
+
         defs += " -Dti_sysbios_knl_Swi_numPriorities__D=" + Swi.numPriorities;
         defs += " -Dti_sysbios_knl_Task_deleteTerminatedTasks__D=" + (Task.deleteTerminatedTasks ? "TRUE" : "FALSE");
         defs += " -Dti_sysbios_knl_Task_numPriorities__D=" + Task.numPriorities;
@@ -1070,6 +1070,9 @@ function buildLibs(objList, relList, filter, xdcArgs, incs)
         for (var j = 0; j < profiles.length; j++) {
             var ccopts = "";
             var asmopts = "";
+
+            ccopts += " -Dti_sysbios_Build_useIndirectReferences=FALSE"
+            asmopts += " -Dti_sysbios_Build_useIndirectReferences=FALSE"
 
             if (profiles[j] == "smp") {
                 var libPath = "lib/smpbios/debug/";

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016, Texas Instruments Incorporated
+ * Copyright (c) 2013-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -88,7 +88,7 @@ if (xdc.om.$name == "cfg") {
             emifCBase:   0x0,
             emifCLength: 0x0,
         },
-        "AR16XX": {
+        "AWR16XX": {
             emifACfg: $addr(0x0),
             emifABase:   0x0,
             emifALength: 0x0,
@@ -138,6 +138,8 @@ if (xdc.om.$name == "cfg") {
     deviceTable["TMS320DM8148"]   = deviceTable["TMS320TI816X"];
     deviceTable["TMS320DM8168"]   = deviceTable["TMS320TI816X"];
     deviceTable["TMS320C6A8149"]  = deviceTable["TMS320TI816X"];
+
+    deviceTable["IWR16XX"]        = deviceTable["AWR16XX"];
 }
 
 /*

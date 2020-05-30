@@ -225,7 +225,12 @@ function instance$meta$init(name)
             else {
                 this.CPU.clockRate = this.clockRate = 48;
             }
-            this.CPU.catalogName = "ti.catalog.arm.cortexm3";
+            if (prog.build.target.$name.match("M3")) {
+                this.CPU.catalogName = "ti.catalog.arm.cortexm3";
+            }
+            else {
+                this.CPU.catalogName = "ti.catalog.arm.cortexm4";
+            }
             this.CPU.deviceName = "CC13xx";
             xdc.loadPackage(this.CPU.catalogName);
         }

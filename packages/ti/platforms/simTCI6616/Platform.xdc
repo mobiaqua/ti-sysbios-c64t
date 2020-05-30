@@ -91,4 +91,11 @@ instance:
      */
     config String l2Mode = "0k";
 
+    /*
+     *  ======== ccsSim ========
+     *  @_nodoc
+     *  Location of simulator files.
+     */
+    config String ccsSim;
+
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Texas Instruments Incorporated
+ * Copyright (c) 2016-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,9 +48,9 @@
 #include <ti/sysbios/knl/Task.h>
 #include <ti/sysbios/knl/Mailbox.h>
 
-#include <ti/sysbios/posix/pthread.h>
-#include <ti/sysbios/posix/mqueue.h>
-#include <ti/sysbios/posix/_pthread_error.h>
+#include "pthread.h"
+#include "mqueue.h"
+#include "errno.h"
 
 /*
  *  ======== MQueueObj ========
@@ -108,6 +108,8 @@ int mq_getattr(mqd_t mqdes, struct mq_attr *mqstat)
     UInt        key;
 
     key = Task_disable();
+    msgQueue->attrs.mq_curmsgs = Mailbox_getNumPendingMsgs(msgQueue->mailbox);
+
     *mqstat = msgQueue->attrs;
     mqstat->mq_flags = mqd->flags;
     Task_restore(key);
@@ -128,7 +130,7 @@ mqd_t mq_open(const char *name, int oflags, ...)
     MQueueDesc       *mqd = (MQueueDesc *)(-1);
     Error_Block       eb;
     UInt              key;
-
+    Bool              failedStatus = FALSE;
 
     va_start(va, oflags);
 
@@ -139,40 +141,42 @@ mqd_t mq_open(const char *name, int oflags, ...)
 
     va_end(va);
 
+    if (name == NULL) {
+        return ((mqd_t)(-1));
+    }
+
     Error_init(&eb);
 
+    key = Task_disable();
     msgQueue = findInList(name);
+    Task_restore(key);
 
     if ((msgQueue != NULL) && (oflags & O_CREAT) && (oflags & O_EXCL)) {
         /* Error: Message queue has alreadey been opened and O_EXCL is set */
-        goto done;
+        return ((mqd_t)(-1));
     }
 
-    if ((msgQueue == NULL) && !(oflags & O_CREAT)) {
-        /* Error: Message has not been opened and O_CREAT is not set */
-        goto done;
+    if ((msgQueue == NULL) && (!(oflags & O_CREAT) ||
+                (attrs == NULL) || (attrs->mq_maxmsg <= 0))) {
+        /*
+         *  Error: Message has not been opened and O_CREAT is not set or
+         *  attrs are bad.
+         */
+        return ((mqd_t)(-1));
     }
 
-    mqd = msgQueueDesc =
-        (MQueueDesc *)Memory_alloc(Task_Object_heap(), sizeof(MQueueDesc),
-        0, &eb);
+    msgQueueDesc = (MQueueDesc *)Memory_alloc(Task_Object_heap(),
+            sizeof(MQueueDesc), 0, &eb);
     if (msgQueueDesc == NULL) {
-        mqd = (MQueueDesc *)(-1);
-        goto done;
+        return ((mqd_t)(-1));
     }
 
     if (msgQueue == NULL) {
-        if ((attrs == NULL) || (attrs->mq_maxmsg <= 0) ||
-                (attrs->mq_msgsize <= 0)) {
-            mqd = (MQueueDesc *)(-1);
-            goto done;
-        }
-
         /* Allocate the MQueueObj */
         msgQueue = (MQueueObj *)Memory_alloc(Task_Object_heap(),
                 sizeof(MQueueObj), 0, &eb);
         if (msgQueue == NULL) {
-            mqd = (MQueueDesc *)(-1);
+            failedStatus = TRUE;
             goto done;
         }
 
@@ -183,17 +187,17 @@ mqd_t mq_open(const char *name, int oflags, ...)
                 strlen(name) + 1, 0, &eb);
 
         if (msgQueue->name == NULL) {
-            mqd = (MQueueDesc *)(-1);
+            failedStatus = TRUE;
             goto done;
         }
 
         strcpy(msgQueue->name, name);
 
         msgQueue->mailbox = Mailbox_create(attrs->mq_msgsize,
-                attrs->mq_maxmsg, NULL, NULL);
+                attrs->mq_maxmsg, NULL, &eb);
 
         if (msgQueue->mailbox == NULL) {
-            mqd = (MQueueDesc *)(-1);
+            failedStatus = TRUE;
             goto done;
         }
 
@@ -218,18 +222,16 @@ mqd_t mq_open(const char *name, int oflags, ...)
 
     Task_restore(key);
 
-    mqd = msgQueueDesc;
-    mqd->msgQueue = msgQueue;
+    msgQueueDesc->msgQueue = msgQueue;
 
-    if (oflags & O_NONBLOCK) {
-        mqd->flags = O_NONBLOCK;
-    }
-    else {
-        mqd->flags = 0;
-    }
+    msgQueueDesc->flags = (oflags & O_NONBLOCK) ? O_NONBLOCK : 0;
 
 done:
-    if (mqd == (MQueueDesc *)(-1)) {
+    if (failedStatus) {
+        /*
+         *  We only get here if we attempted to allocate msgQueue (i.e., it
+         *  was not already in the list), so we're ok to free it.
+         */
         if (msgQueue != NULL) {
             if (msgQueue->name != NULL) {
                 Memory_free(Task_Object_heap(), msgQueue->name,
@@ -242,6 +244,9 @@ done:
             Memory_free(Task_Object_heap(), msgQueueDesc, sizeof(MQueueDesc));
         }
     }
+    else {
+        mqd = msgQueueDesc;
+    }
 
     (void)mode;
 
@@ -250,16 +255,22 @@ done:
 
 /*
  *  ======== mq_receive ========
- *  On success, returns the number of bytes in the message.  On failure,
- *  returns -1 and sets errno to the appropriate error.
  */
-long mq_receive(mqd_t mqdes, char *msg_ptr, size_t msg_len,
+ssize_t mq_receive(mqd_t mqdes, char *msg_ptr, size_t msg_len,
         unsigned int *msg_prio)
 {
     MQueueDesc *mqd = (MQueueDesc *)mqdes;
     MQueueObj  *msgQueue = mqd->msgQueue;
     UInt32      timeout;
     int         retVal = -1;
+
+    /*
+     *  If msg_len is less than the message size attribute of the message
+     *  queue, return an error.
+     */
+    if (msg_len < (msgQueue->attrs).mq_msgsize) {
+        return (-1);
+    }
 
     if (mqd->flags & O_NONBLOCK) {
         timeout = BIOS_NO_WAIT;
@@ -342,7 +353,7 @@ int mq_setattr(mqd_t mqdes, const struct mq_attr *mqstat,
 /*
  *  ======== mq_timedreceive ========
  */
-long mq_timedreceive(mqd_t mqdes, char *msg_ptr, size_t msg_len,
+ssize_t mq_timedreceive(mqd_t mqdes, char *msg_ptr, size_t msg_len,
         unsigned int *msg_prio, const struct timespec *abstime)
 {
     MQueueDesc         *mqd = (MQueueDesc *)mqdes;
@@ -352,6 +363,14 @@ long mq_timedreceive(mqd_t mqdes, char *msg_ptr, size_t msg_len,
     long                usecs = 0;
     time_t              secs = 0;
     int                 retVal = -1;
+
+    /*
+     *  If msg_len is less than the message size attribute of the message
+     *  queue, return an error.
+     */
+    if (msg_len < (msgQueue->attrs).mq_msgsize) {
+        return (-1);
+    }
 
     if (mqd->flags & O_NONBLOCK) {
         timeout = BIOS_NO_WAIT;

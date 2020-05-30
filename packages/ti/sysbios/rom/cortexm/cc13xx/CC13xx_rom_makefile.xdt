@@ -1,6 +1,6 @@
 %%{
 /*
- * Copyright (c) 2015-2016, Texas Instruments Incorporated
+ * Copyright (c) 2015-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -403,7 +403,7 @@ mangled_BIOS_rom.obj: `ROMPPS.join(" ")`
 	@echo Create `TestName`_link_iar.xdt file
 	@$(XDC_ROOT)/../xs -c `RomModule.libDir`../createLinkCmdFile.xs  sysbios_rom_text sysbios_rom_const sysbios_rom_data `TestName`_link_iar.xdt `xdc.module("xdc.cfg.Program").cpu.deviceName.toUpperCase()`.icf /db/vendors/iar/arm/6.70.1/Linux
 	@$(CP) `TestName`_link_iar.xdt "`RomModule.libDir`"
-	@$(CP) `xdc.module("xdc.cfg.Program").cpu.deviceName.toUpperCase()`.icf "`RomModule.libDir`"
+	@$(CP) TIRTOS_ROM.icf "`RomModule.libDir`"
 
 romInternFuncs.txt: `ROM_EXEC`
 

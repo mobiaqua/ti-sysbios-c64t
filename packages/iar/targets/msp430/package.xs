@@ -1,5 +1,5 @@
 /* 
- *  Copyright (c) 2012-2016 Texas Instruments and others.
+ *  Copyright (c) 2012-2017 Texas Instruments and others.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -14,6 +14,9 @@ var cap = xdc.loadCapsule("ITarget.xs");
 function init()
 {
     cap._init(this);
+
+    /* Remove target checks */
+    environment["xdc.cfg.check.exclude"] = ".*";
 
     var ma = this.$modules;
     var iarTargets = xdc.loadPackage('iar.targets.msp430');

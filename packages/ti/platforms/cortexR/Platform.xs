@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Texas Instruments Incorporated
+ * Copyright (c) 2016-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -191,8 +191,10 @@ function instance$meta$init(name)
             this.CPU.clockRate = 300;
         }
 
-        if (this.deviceName.match(/^AR16/) ||
-            this.deviceName.match(/^AR14/)) {
+        if (this.deviceName.match(/^AWR14/) ||
+            this.deviceName.match(/^AWR16/) ||
+            this.deviceName.match(/^IWR14/) ||
+            this.deviceName.match(/^IWR16/)) {
             this.CPU.catalogName = "ti.catalog.arm.cortexr4";
             this.CPU.deviceName = "CortexR";
             this.CPU.clockRate = 200;
