@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -81,6 +81,7 @@ Int HeapBuf_Module_startup( Int phase )
  *  1. Parameters non-null, non-zero
  *  2. Buffer aligned on requested alignment
  *  3. bufSize is large enough
+ *  4. blockSize large enough to contain two data pointers
  *
  *  HeapBuf will not adjust the buffer to satisfy the alignment request,
  *  the buffer must be aligned manually.
@@ -96,7 +97,7 @@ Int HeapBuf_Instance_init(HeapBuf_Object *obj, const HeapBuf_Params *params,
     /* Assert that buf is not null and parameters are non-zero */
     Assert_isTrue((params->buf != NULL), HeapBuf_A_nullBuf);
     Assert_isTrue((params->numBlocks != 0), HeapBuf_A_zeroBlocks);
-    Assert_isTrue((params->blockSize != 0), HeapBuf_A_zeroBlockSize);
+    Assert_isTrue((params->blockSize >= (2 * sizeof(Ptr))), HeapBuf_A_invalidBlockSize);
     Assert_isTrue((params->bufSize != 0), HeapBuf_A_zeroBufSize);
 
     /* Use the min alignment, unless an alignment has been requested. */

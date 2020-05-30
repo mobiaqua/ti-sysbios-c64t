@@ -1,5 +1,5 @@
 /* 
- *  Copyright (c) 2008 Texas Instruments and others.
+ *  Copyright (c) 2008-2015 Texas Instruments Incorporated
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -54,8 +54,8 @@ metaonly module C64T inherits ti.targets.ITarget {
     };
 
     override readonly config ITarget2.Command lnk = {
-        cmd: "lnk6x",
-        opts: "--abi=coffabi"
+        cmd: "cl6x",
+        opts: "--abi=coffabi -z"
     };
 
     /*!
@@ -111,7 +111,7 @@ metaonly module C64T inherits ti.targets.ITarget {
     final override readonly config Bool splitMap[string] =
         ti.targets.C64P.splitMap;
 
-    override readonly config xdc.bld.ITarget.StdTypes stdTypes = 
+    override readonly config xdc.bld.ITarget.StdTypes stdTypes =
         ti.targets.C64P.stdTypes;
 
     override readonly config Int bitsPerChar =

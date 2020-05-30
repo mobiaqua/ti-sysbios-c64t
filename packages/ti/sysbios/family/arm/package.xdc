@@ -46,7 +46,7 @@ requires ti.sysbios.interfaces;
 package ti.sysbios.family.arm [2,0,0,0] {
     module HwiCommon;
     module IntrinsicsSupport;
-    module Mpu;
+    module MPU;
     module Settings;
     module TaskSupport;
 }

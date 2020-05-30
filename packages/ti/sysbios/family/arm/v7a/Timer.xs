@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
 var Timer = null;
 var Pmu = null;
 var BIOS = null;
-
+var Hwi = null;
 /*
  *  ======== module$meta$init ========
  */
@@ -65,9 +65,6 @@ function module$meta$init()
 function instance$meta$init(id, tickfxn)
 {
     Pmu = xdc.module("ti.sysbios.family.arm.v7a.Pmu");
-
-    /* Need to set PMU interruptFunc early to force Hwi creation */
-    Pmu.interruptFunc = Timer.oneShotStub;//'&ti_sysbios_family_arm_v7a_Timer_oneShotStub__E';
 }
 
 /*
@@ -76,7 +73,8 @@ function instance$meta$init(id, tickfxn)
 function module$use()
 {
     BIOS = xdc.useModule('ti.sysbios.BIOS');
-    Pmu = xdc.useModule("ti.sysbios.family.arm.v7a.Pmu");
+    Pmu = xdc.useModule('ti.sysbios.family.arm.v7a.Pmu');
+    Hwi = xdc.useModule('ti.sysbios.hal.Hwi');
 }
 
 /*
@@ -108,7 +106,6 @@ function instance$static$init(obj, id, tickFxn, params)
 
     /* set flag because static instances need to be started */
     Timer.startupNeeded = true;
-
     obj.staticInst = true;
 
     if ((id >= Timer.NUM_TIMER_DEVICES)) {
@@ -127,8 +124,9 @@ function instance$static$init(obj, id, tickFxn, params)
     }
     else {
         /*
-         * If a timer has not been assigned because either the requested timer was
-         * unavailable or 'any timer' was requested and none were available...
+         * If a timer has not been assigned because either the requested timer
+         * was unavailable or 'any timer' was requested
+         * and none were available...
          */
         Timer.$logFatal("Timer device unavailable.", this);
     }
@@ -140,14 +138,28 @@ function instance$static$init(obj, id, tickFxn, params)
     obj.tickFxn       = tickFxn;
     obj.period        = params.period;
 
-    if ((params.runMode == Timer.RunMode_CONTINUOUS) ||
-        (params.runMode == Timer.RunMode_DYNAMIC)) {
-        Pmu.$object.interruptFunc = Timer.periodicStub; //Meta('&ti_sysbios_family_arm_v7a_Timer_periodicStub__E');
+    /* Frequency above 4 GHz not supported */
+    obj.extFreq.lo    = params.extFreq.lo;
+    obj.extFreq.hi    = 0;
+
+    if (obj.tickFxn != null) {
+        if (!params.hwiParams) {
+            params.hwiParams = new Hwi.Params();
+        }
+        var hwiPrms = params.hwiParams;
+        hwiPrms.arg = this;
+        /* Periodic/Dynamic functionality has not been tested */
+        if ((params.runMode == Timer.RunMode_CONTINUOUS) ||
+            (params.runMode == Timer.RunMode_DYNAMIC)) {
+            obj.hwi = Hwi.create(Pmu.intNum, Timer.periodicStub, hwiPrms);
+        }
+        else {
+            obj.hwi = Hwi.create(Pmu.intNum, Timer.oneShotStub, hwiPrms);
+        }
     }
     else {
-        Pmu.$object.interruptFunc = Timer.oneShotStub;//Meta('&ti_sysbios_family_arm_v7a_Timer_oneShotStub__E');
+        obj.hwi = null;
     }
-
     modObj.handle = this;
 }
 
@@ -191,9 +203,7 @@ function viewInitBasic(view, obj)
     view.periodType     = getEnumString(obj.periodType);
     view.tickFxn        = Program.lookupFuncName(Number(obj.tickFxn));
     view.arg            = obj.arg;
-
-    view.extFreq        =
-        Number(obj.extFreq.lo + (obj.extFreq.hi << 32)).toString(10);
+    view.timerFreq      = Number(obj.extFreq.lo).toString(10);
 }
 
 /*

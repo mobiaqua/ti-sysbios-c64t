@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, Texas Instruments Incorporated
+ * Copyright (c) 2012-2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,7 +65,7 @@ static inline UInt ti_sysbios_family_arm_ducati_Core_hwiDisable()
     __asm__ __volatile__ (
             "mrs %0, basepri\n\t"
             "msr basepri, %1"
-            : "=r" (key)
+            : "=&r" (key)
             : "r" (ti_sysbios_family_arm_m3_Hwi_disablePriority)
             );
     return key;

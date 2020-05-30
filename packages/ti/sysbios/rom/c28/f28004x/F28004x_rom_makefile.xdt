@@ -131,7 +131,7 @@ vpath %.c `XDCROOT`
 
 CCOPTS    = `BIOS.getCCOpts(TARGET.name)`
 
-LNKOPTS   = -c
+LNKOPTS   = -z -c
 
 XDC_ROOT  = `XDCROOT`
 
@@ -163,7 +163,6 @@ AR = `CGEN`/bin/`TARGET.ar.cmd` `TARGET.ar.opts`
 LNK = `CGEN`/bin/`TARGET.lnk.cmd` $(LNKOPTS)
 NM = `CGEN`/bin/nm2000
 HEX = `CGEN`/bin/hex2000
-OBJDUMP = objdump
 
 %/*
 % * In order to prevent the linker from aliasing some of the generated proxy/delegate

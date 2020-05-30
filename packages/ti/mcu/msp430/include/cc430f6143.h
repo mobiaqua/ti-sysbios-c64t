@@ -1,15 +1,3 @@
-/*
- *  Copyright (c) 2015 by Texas Instruments and others.
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
- *
- *  Contributors:
- *      Texas Instruments - initial implementation
- *
- * */
-
 /* ============================================================================ */
 /* Copyright (c) 2014, Texas Instruments Incorporated                           */
 /*  All rights reserved.                                                        */
@@ -1088,16 +1076,16 @@ SFR_8BIT(RF1ATXFIFO_H);                       /* Direct transmit FIFO access reg
 /* status registers */
 #define PARTNUM                0x30           /*  PARTNUM    - Chip ID */
 #define VERSION                0x31           /*  VERSION    - Chip ID */
-#define FREQEST                0x32           /*  FREQEST    ï¿½ Frequency Offset Estimate from demodulator 
-#define LQI                    0x33           /*  LQI        ï¿½ Demodulator estimate for Link Quality 
-#define RSSI                   0x34           /*  RSSI       ï¿½ Received signal strength indication 
-#define MARCSTATE              0x35           /*  MARCSTATE  ï¿½ Main Radio Control State Machine state 
-#define WORTIME1               0x36           /*  WORTIME1   ï¿½ High byte of WOR time 
-#define WORTIME0               0x37           /*  WORTIME0   ï¿½ Low byte of WOR time 
-#define PKTSTATUS              0x38           /*  PKTSTATUS  ï¿½ Current GDOx status and packet status 
-#define VCO_VC_DAC             0x39           /*  VCO_VC_DAC ï¿½ Current setting from PLL calibration module 
-#define TXBYTES                0x3A           /*  TXBYTES    ï¿½ Underflow and number of bytes 
-#define RXBYTES                0x3B           /*  RXBYTES    ï¿½ Overflow and number of bytes 
+#define FREQEST                0x32           /*  FREQEST    – Frequency Offset Estimate from demodulator */
+#define LQI                    0x33           /*  LQI        – Demodulator estimate for Link Quality */
+#define RSSI                   0x34           /*  RSSI       – Received signal strength indication */
+#define MARCSTATE              0x35           /*  MARCSTATE  – Main Radio Control State Machine state */
+#define WORTIME1               0x36           /*  WORTIME1   – High byte of WOR time */
+#define WORTIME0               0x37           /*  WORTIME0   – Low byte of WOR time */
+#define PKTSTATUS              0x38           /*  PKTSTATUS  – Current GDOx status and packet status */
+#define VCO_VC_DAC             0x39           /*  VCO_VC_DAC – Current setting from PLL calibration module */
+#define TXBYTES                0x3A           /*  TXBYTES    – Underflow and number of bytes */
+#define RXBYTES                0x3B           /*  RXBYTES    – Overflow and number of bytes */
 
 /* burst write registers */
 #define PATABLE                0x3E           /*  PATABLE - PA control settings table */
@@ -4741,7 +4729,3 @@ SFR_8BIT(WDTCTL_H);                           /* Watchdog Timer Control */
 #endif /* extern "C" */
 
 #endif /* #ifndef __CC430F6143 */
-
-/*
- */
-

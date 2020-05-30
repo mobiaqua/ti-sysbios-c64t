@@ -86,7 +86,6 @@ function module$use()
         }
         else if (Program.cpu.deviceName.match(/^CC26/) ||
                  Program.cpu.deviceName.match(/^CC13/)) {
-            xdc.useModule('ti.sysbios.family.arm.cc26xx.Power');
             Timer.enableFunc =
                 '&ti_sysbios_family_arm_lm4_Timer_enableCC26xx';
         }
@@ -102,7 +101,6 @@ function module$use()
         }
         else if (Program.cpu.deviceName.match(/^CC26/) ||
                  Program.cpu.deviceName.match(/^CC13/)) {
-            xdc.useModule('ti.sysbios.family.arm.cc26xx.Power');
             Timer.disableFunc =
                 '&ti_sysbios_family_arm_lm4_Timer_disableCC26xx';
         }

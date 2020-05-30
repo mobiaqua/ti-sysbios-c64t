@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, Texas Instruments Incorporated
+ * Copyright (c) 2013-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -683,6 +683,16 @@ Bool Hwi_getStackInfo(Hwi_StackInfo *stkInfo, Bool computeStackDepth)
     }
 
     return stackOverflow;
+}
+
+/*
+ *  ======== Hwi_getCoreStackInfo ========
+ *  Used to get Hwi stack usage info.
+ */
+Bool Hwi_getCoreStackInfo(Hwi_StackInfo *stkInfo, Bool computeStackDepth,
+    UInt coreId)
+{
+    return (Hwi_getStackInfo(stkInfo, computeStackDepth));
 }
 
 /*

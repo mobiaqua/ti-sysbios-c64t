@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Texas Instruments Incorporated
+ * Copyright (c) 2014-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,8 +54,15 @@
 #endif
 
 #ifdef ti_sysbios_family_arm_cc26xx_Boot_driverlibVersion
-#include <ti/sysbios/family/arm/cc26xx/Power.h>
-#include <ti/sysbios/family/arm/cc26xx/PowerCC2650.h>
+
+#ifdef DEVICE_FAMILY
+#define DEVICE_FAMILY_PREFIX(x) <ti/devices/DEVICE_FAMILY/x>
+#else
+#define DEVICE_FAMILY_PREFIX(x) <x>
+#endif
+
+#include DEVICE_FAMILY_PREFIX(driverlib/prcm.h)
+
 #endif
 
 #include "package/internal/Timer.xdc.h"
@@ -570,7 +577,8 @@ Void Timer_start(Timer_Object *obj)
 
     /* Timer_RunMode_CONTINUOUS */
     if (obj->runMode == Timer_RunMode_CONTINUOUS) {
-        Timer_write(obj->altclk, &timer->GPTMTAILR, obj->period);
+        /* sub 1 from period to compensate for extra count during reload */
+        Timer_write(obj->altclk, &timer->GPTMTAILR, obj->period - 1);
         Timer_write(obj->altclk, &timer->GPTMTAMR, amr | 0x2); /* periodic */
     }
 
@@ -1063,41 +1071,74 @@ Void Timer_masterEnable(Void)
 #ifdef ti_sysbios_family_arm_cc26xx_Boot_driverlibVersion
 /*
  *  ======== Timer_enableCC26xx ========
+ *  Note: This function implementation is intended only for test cases where
+ *  the Power manager module (in ti/drivers/power) is not being used.  This
+ *  function will directly enable a GPT so that it can be programmed,
+ *  without giving any considerations to power management of the PERIPH domain
+ *  and the GPT clocks.
  */
+#define INVALID_TIMER_ID ~0
+#if defined(__IAR_SYSTEMS_ICC__)
+__weak Void Timer_enableCC26xx(Int id)
+#elif defined(__GNUC__) && !defined(__ti__)
+Void __attribute__((weak)) Timer_enableCC26xx(Int id)
+#else
+#pragma WEAK (Timer_enableCC26xx)
 Void Timer_enableCC26xx(Int id)
+#endif
 {
-    UInt key;
+    UInt gpt = INVALID_TIMER_ID;
 
-    key = Hwi_disable();
-
+    /* map timer ID to the appropriate driverlib ID */
     switch (id) {
-        case 0: Power_setDependency(PERIPH_GPT0);
+        case 0: gpt = PRCM_PERIPH_TIMER0;
                 break;
 
-        case 1: Power_setDependency(PERIPH_GPT1);
+        case 1: gpt = PRCM_PERIPH_TIMER1;
                 break;
 
-        case 2: Power_setDependency(PERIPH_GPT2);
+        case 2: gpt = PRCM_PERIPH_TIMER2;
                 break;
 
-        case 3: Power_setDependency(PERIPH_GPT3);
+        case 3: gpt = PRCM_PERIPH_TIMER3;
                 break;
 
         default:
                 break;
     }
 
-    /* declare the disallow standby constraint while GP timer is in use */
-    Power_setConstraint(Power_SB_DISALLOW);
+    /* if a valid GPT timer ID, enable the GPT ... */
+    if (gpt != INVALID_TIMER_ID) {
 
-    Hwi_restore(key);
+        /* if it is not already on, turn on the PERIPH domain */
+        if (PRCMPowerDomainStatus(PRCM_DOMAIN_PERIPH) !=
+            PRCM_DOMAIN_POWER_ON) {
+            PRCMPowerDomainOn(PRCM_DOMAIN_PERIPH);
+            while (PRCMPowerDomainStatus(PRCM_DOMAIN_PERIPH) !=
+                PRCM_DOMAIN_POWER_ON) {};
+        }
+
+        /* now enable the GPT clocks */
+        PRCMPeripheralRunEnable(gpt);
+        PRCMPeripheralSleepEnable(gpt);
+        PRCMPeripheralDeepSleepEnable(gpt);
+        PRCMLoadSet();
+        while(!PRCMLoadGet()){};
+    }
 }
 #endif
 
 /*
  *  ======== Timer_enableCC3200 ========
  */
+#if defined(__IAR_SYSTEMS_ICC__)
+__weak Void Timer_enableCC3200(Int id)
+#elif defined(__GNUC__) && !defined(__ti__)
+Void __attribute__((weak)) Timer_enableCC3200(Int id)
+#else
+#pragma WEAK (Timer_enableCC3200)
 Void Timer_enableCC3200(Int id)
+#endif
 {
     UInt key;
 
@@ -1180,40 +1221,29 @@ Void Timer_enableTiva(Int id)
 /*
  *  ======== Timer_disableCC26xx ========
  */
+#if defined(__IAR_SYSTEMS_ICC__)
+__weak Void Timer_disableCC26xx(Int id)
+#elif defined(__GNUC__) && !defined(__ti__)
+Void __attribute__((weak)) Timer_disableCC26xx(Int id)
+#else
+#pragma WEAK (Timer_disableCC26xx)
 Void Timer_disableCC26xx(Int id)
+#endif
 {
-    UInt key;
-
-    key = Hwi_disable();
-
-    switch (id) {
-       case 0: Power_releaseDependency(PERIPH_GPT0);
-                break;
-
-        case 1: Power_releaseDependency(PERIPH_GPT1);
-                break;
-
-        case 2: Power_releaseDependency(PERIPH_GPT2);
-                break;
-
-        case 3: Power_releaseDependency(PERIPH_GPT3);
-                break;
-
-        default:
-                break;
-    }
-
-    /* release the disallow standby constraint when the GP timer is disabled */
-    Power_releaseConstraint(Power_SB_DISALLOW);
-
-    Hwi_restore(key);
 }
 #endif
 
 /*
  *  ======== Timer_disableCC3200 ========
  */
+#if defined(__IAR_SYSTEMS_ICC__)
+__weak Void Timer_disableCC3200(Int id)
+#elif defined(__GNUC__) && !defined(__ti__)
+Void __attribute__((weak)) Timer_disableCC3200(Int id)
+#else
+#pragma WEAK (Timer_disableCC3200)
 Void Timer_disableCC3200(Int id)
+#endif
 {
     UInt key;
 

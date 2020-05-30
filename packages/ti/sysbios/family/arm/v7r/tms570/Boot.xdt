@@ -36,8 +36,7 @@
  *  ======== Boot.xdt ========
  */
 %%}
-% /* Don't generate Boot funcs if this is a romimage */
-% if (!Program.$$isrom && (Program.build.rtsName !== null)) {
+% if (Program.build.rtsName !== null) {
 %     var Boot = xdc.module("ti.sysbios.family.arm.v7r.tms570.Boot");
 extern ti_sysbios_family_arm_v7r_tms570_Boot_configurePllDivs(xdc_UInt,
     xdc_UInt, xdc_UInt, xdc_UInt, xdc_UInt, xdc_UInt, xdc_UInt, xdc_Bool);

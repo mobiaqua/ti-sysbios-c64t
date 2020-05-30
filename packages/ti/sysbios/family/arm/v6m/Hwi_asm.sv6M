@@ -1,5 +1,5 @@
 ;
-;  Copyright (c) 2013, Texas Instruments Incorporated
+;  Copyright (c) 2015, Texas Instruments Incorporated
 ;  All rights reserved.
 ;
 ;  Redistribution and use in source and binary forms, with or without
@@ -50,44 +50,6 @@
         .global ti_sysbios_family_arm_ducati_Core_unlock__E
 
 ti_sysbios_family_arm_v6m_Hwi_Module__state__V .tag ti_sysbios_family_arm_v6m_Hwi_Module_State
-
-        .global ti_sysbios_family_arm_v6m_Hwi_disableFxn__E
-        .global ti_sysbios_family_arm_v6m_Hwi_enableFxn__E
-        .global ti_sysbios_family_arm_v6m_Hwi_restoreFxn__E
-
-;
-; Hwi_enable/disable/restore
-;
-
-        .sect ".text:ti_sysbios_family_arm_v6m_Hwi_disableFxn__E"
-        .clink
-        .thumbfunc _ti_sysbios_family_arm_v6m_Hwi_disableFxn__E
-ti_sysbios_family_arm_v6m_Hwi_disableFxn__E:
-        .asmfunc
-        mrs     r0, primask
-        cpsid   i
-        bx      lr
-        .endasmfunc
-
-        .sect ".text:ti_sysbios_family_arm_v6m_Hwi_enableFxn__E"
-        .clink
-        .thumbfunc _ti_sysbios_family_arm_v6m_Hwi_enableFxn__E
-ti_sysbios_family_arm_v6m_Hwi_enableFxn__E:
-        .asmfunc
-        mrs     r0, primask
-        cpsie   i
-        bx      lr
-        .endasmfunc
-
-        .sect ".text:ti_sysbios_family_arm_v6m_Hwi_restoreFxn__E"
-        .clink
-        .thumbfunc _ti_sysbios_family_arm_v6m_Hwi_restoreFxn__E
-ti_sysbios_family_arm_v6m_Hwi_restoreFxn__E:
-        .asmfunc
-        msr     primask, r0
-        bx      lr
-        .endasmfunc
-
 
 ;
 ; Here on all dispatched interrupts

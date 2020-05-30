@@ -50,23 +50,24 @@ import xdc.runtime.Error;
  *  is placed at 0x20000.
  *
  *  @a(Bootup sequence)
- *  When each Cortex-R5 core comes out of reset, it runs a routine that
- *  determines the source of reset and depending on the source either
- *  continues executing the bootup sequence or calls a reset callback
- *  function corresponding to the detected reset source.
+ *  When each Cortex-R core comes out of reset, it initializes the
+ *  stack pointer and calls the reset callback function
+ *  (see {@link #resetFunc}) and then continues executing the
+ *  bootup sequence.
  *
- *  In case the reset source is a PowerOn/Debug/External reset signal,
- *  the normal bootup sequence is continued (i.e. data section init
- *  and execution of various kernel module startup functions before
- *  calling main() function).
+ *  On a lockstep device, the bootup sequence involves calling
+ *  _c_int00() while on dual-core devices, the bootup sequence
+ *  involves setting up IPC between the 2 Cortex-R cores to
+ *  synchronize their startup.
  *
- *  For other reset sources, the callback functions corresponding to
- *  the reset source are called. Here's an example showing how to register
- *  a software reset callback function:
+ *  The reset callback function is called very early in the
+ *  bootup sequence and can be used to detect the reset source and
+ *  take the appropriate action. Here's an example showing how to
+ *  register a reset callback function:
  *
  *  @p(code)
  *  var Core = xdc.useModule('ti.sysbios.family.arm.v7r.tms570.Core');
- *  Core.swResetFunc = '&myfunc';
+ *  Core.resetFunc = '&myfunc';
  *  @p
  */
 
@@ -77,25 +78,6 @@ module Core inherits ti.sysbios.interfaces.ICore
 {
     /*! Reset function type definition. */
     typedef Void (*ResetFuncPtr)(void);
-
-    /*!
-     *  @_nodoc
-     *  Reset sources
-     */
-    enum ResetSource
-    {
-        ResetSource_POWERON       =   0x8000U,
-        ResetSource_OSC_FAILURE   =   0x4000U,
-        ResetSource_WATCHDOG      =   0x2000U,
-        ResetSource_WATCHDOG2     =   0x1000U,
-        ResetSource_DEBUG         =   0x0800U,
-        ResetSource_INTERCONNECT  =   0x0080U,
-        ResetSource_CPU1          =   0x0040U,
-        ResetSource_CPU0          =   0x0020U,
-        ResetSource_SW            =   0x0010U,
-        ResetSource_EXT           =   0x0008U,
-        ResetSource_NO_RESET      =   0x0000U
-    };
 
     /*!
      *  Error raised if Core.id does not match the contents
@@ -115,46 +97,10 @@ module Core inherits ti.sysbios.interfaces.ICore
     config UInt id = 0;
 
     /*!
-     *  ======== cpu0ResetFunc ========
-     *  CPU0 reset function pointer
+     *  ======== resetFunc ========
+     *  Reset Function Pointer
      */
-    metaonly config ResetFuncPtr cpu0ResetFunc = null;
-
-    /*!
-     *  ======== cpu1ResetFunc ========
-     *  CPU1 reset function pointer
-     */
-    metaonly config ResetFuncPtr cpu1ResetFunc = null;
-
-    /*!
-     *  ======== interconnectResetFunc ========
-     *  Interconnect reset function pointer
-     */
-    metaonly config ResetFuncPtr interconnectResetFunc = null;
-
-    /*!
-     *  ======== oscFailureResetFunc ========
-     *  Oscillator failure reset function pointer
-     */
-    metaonly config ResetFuncPtr oscFailureResetFunc = null;
-
-    /*!
-     *  ======== swResetFunc ========
-     *  Software reset function pointer
-     */
-    metaonly config ResetFuncPtr swResetFunc = null;
-
-    /*!
-     *  ======== watchdogResetFunc ========
-     *  Watchdog reset function pointer
-     */
-    metaonly config ResetFuncPtr watchdogResetFunc = null;
-
-    /*!
-     *  ======== watchdog2ResetFunc ========
-     *  Watchdog2 reset function pointer
-     */
-    metaonly config ResetFuncPtr watchdog2ResetFunc = null;
+    metaonly config ResetFuncPtr resetFunc = null;
 
     @Macro
     override UInt hwiDisable();
@@ -168,15 +114,18 @@ module Core inherits ti.sysbios.interfaces.ICore
 internal:
 
     /*
-     *  ======== syncStartup ========
-     *  Sync Core0 and Core1 during startup.
+     *  ======== overrideHwiResetFunc ========
+     *  This flag is set if this module installs its own resetFunc
+     *  as Hwi.resetFunc and is used by various sections of code to
+     *  determine whether or not to generate certain functions.
      */
-    Void syncStartup();
+    metaonly config Bool overrideHwiResetFunc = false;
 
     /*
-     *  ======== getResetSource ========
+     *  ======== startCore1 ========
+     *  Signal Core1. Called by Core0.
      */
-    ResetSource getResetSource();
+    Void startCore1();
 
     /*
      *  ======== resetC ========

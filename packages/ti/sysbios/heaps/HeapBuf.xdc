@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -242,13 +242,15 @@ module HeapBuf inherits xdc.runtime.IHeap {
      *  specified when creating the heap.
      */
     config xdc.runtime.Assert.Id A_invalidRequestedAlign =
-        {msg: "align parameter 1) must be 0 or a power of 2 and 2) not greater than the heaps alignment"};/*!
+        {msg: "align parameter 1) must be 0 or a power of 2 and 2) not greater than the heaps alignment"};
 
-     *  ======== A_zeroBlockSize ========
-     *  Assert raised when the blockSize parameter is 0
+    /*!
+     *  ======== A_invalidBlockSize ========
+     *  Assert raised when the blockSize parameter is not large enough to
+     *  hold two pointers.
      */
-    config xdc.runtime.Assert.Id A_zeroBlockSize =
-        {msg: "blockSize cannot be zero"};
+    config xdc.runtime.Assert.Id A_invalidBlockSize =
+        {msg: "blockSize must be large enough to hold atleast two pointers"};
 
     /*!
      *  ======== A_zeroBlocks ========

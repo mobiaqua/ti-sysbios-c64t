@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -73,15 +73,6 @@ function module$use()
     xdc.useModule('xdc.runtime.Log');
     xdc.useModule('xdc.runtime.Assert');
 
-    if ((Clock.TimerProxy === undefined) || Clock.TimerProxy == null) {
-        var Settings = xdc.module("ti.sysbios.family.Settings");
-        TimerProxy = Settings.getDefaultClockTimerDelegate();
-        if (TimerProxy == null) {
-            TimerProxy = "ti.sysbios.hal.TimerNull";
-        }
-        Clock.TimerProxy = xdc.module(TimerProxy);
-    }
-
     if (BIOS.swiEnabled) {
         Swi = xdc.useModule('ti.sysbios.knl.Swi');
         if (Clock.swiPriority === undefined) {
@@ -112,16 +103,6 @@ function module$use()
         Clock.tickSource = Clock.TickSource_NULL;
     }
 
-    /* if user has not defined the TickMode ... */
-    if (Clock.tickMode == undefined) {
-        if (Clock.TimerProxy.defaultDynamic == true) {
-            Clock.tickMode = Clock.TickMode_DYNAMIC;
-        }
-        else {
-            Clock.tickMode = Clock.TickMode_PERIODIC;
-        }
-    }
-
     /* if app hasn't declared Clock_stop() behavior, choose a default */
     if (!Clock.$written("stopCheckNext")) {
 
@@ -133,33 +114,6 @@ function module$use()
         else {
             Clock.stopCheckNext = false;
         }
-    }
-
-    /*
-     * if Clock.stopCheckNext is true, and BIOS.clockEnabled, and tick mode
-     * is TickMode_DYNAMIC ... create the trigger clock object
-     */
-    if (BIOS.clockEnabled && (Clock.tickMode == Clock.TickMode_DYNAMIC) &&
-        (Clock.stopCheckNext == true)) {
-        var clockParams = new Clock.Params();
-        clockParams.period = 0;
-        clockParams.startFlag = false;
-        Clock.triggerClock = Clock.create(Clock.triggerFunc, 1, clockParams);
-    }
-    else {
-        Clock.stopCheckNext = false;
-        Clock.triggerClock = null;
-    }
-
-    /* add -D to compile line with definition for Clock.stopCheckNext */
-    Build.ccArgs.$add("-Dti_sysbios_knl_Clock_stopCheckNext__D=" +
-        (Clock.stopCheckNext ? "TRUE" : "FALSE"));
-
-    /* Make sure that the delegate module gets 'used' */    
-    if (BIOS.clockEnabled && Clock.tickSource == Clock.TickSource_TIMER) {
-        xdc.useModule(Clock.TimerProxy.$name);
-	/* Inform xgconf regarding timer delegate's 'supportsDynamic' value */
-	Clock.timerSupportsDynamic = Clock.TimerProxy.supportsDynamic;
     }
 }
 
@@ -275,16 +229,12 @@ function instance$static$init(obj, func, timeout, params)
 function module$validate()
 {
     /* check constraints for using TickMode_DYNAMIC */
-    if (Clock.tickMode == Clock.TickMode_DYNAMIC) {
+    if ((Clock.tickMode == Clock.TickMode_DYNAMIC) &&
+        (Clock.tickSource == Clock.TickSource_TIMER)) {
 
         /* verify that the bound Timer supports RunMode_DYNAMIC */
         if (Clock.TimerProxy.supportsDynamic == false) {
-            Clock.$logError("Clock tick suppression (TickMode_DYNAMIC) not supported on this device", Clock, "tickMode");
-        }
-
-        /* ensure TickSource_USER is NOT specified */
-        if (Clock.tickSource == Clock.TickSource_USER) {
-            Clock.$logError("Clock tick suppression requires the tick source to be TickSource_TIMER", Clock, "tickSource");
+            Clock.$logError("The selected Clock.TimerProxy does not support TickMode_DYNAMIC", Clock, "tickMode");
         }
     }
 
@@ -317,6 +267,7 @@ function viewInitBasic(view, obj)
 {
     var Program = xdc.useModule('xdc.rov.Program');
     var Model = xdc.useModule("xdc.rov.Model");
+    var modCfg = Program.getModuleConfig('ti.sysbios.knl.Clock');
 
     view.label = obj.$label;
     view.timeout = obj.timeout;
@@ -335,7 +286,27 @@ function viewInitBasic(view, obj)
 
         var modRaw = Program.scanRawView("ti.sysbios.knl.Clock");
 
-        var remain = obj.currTimeout - modRaw.modState.ticks;
+        /*
+         * If operating in dynamic mode and skipping ticks, try to query the
+         * timer to compute the current Clock tick count.
+         */
+        var compTicks = false;
+        if (modRaw.modState.numTickSkip > 1) {
+            var timer = xdc.module(modCfg.TimerProxy.$name);
+            try {
+                var ticks = timer.viewGetCurrentClockTick();
+                compTicks = true;
+            }
+            catch (e) {
+            }
+        }
+
+        if (compTicks) {
+            var remain = obj.currTimeout - ticks;
+        }
+        else {
+            var remain = obj.currTimeout - modRaw.modState.ticks;
+        }
 
         /*
          * Check if 'currTimeout' has wrapped.
@@ -348,10 +319,14 @@ function viewInitBasic(view, obj)
             remain += Math.pow(2, 32);
         }
 
-        /* if skipping ticks indicate stale data */
-        if (modRaw.modState.numTickSkip > 1) {
+        /*
+         * If Timer didn't compute/report tick count, but skipping ticks,
+         * indicate 'stale data'.
+         */
+        if ((!compTicks) && (modRaw.modState.numTickSkip > 1)) {
             view.tRemaining = String(remain) + " (stale data)";
         }
+        /* else, just show remaining ticks */
         else {
             view.tRemaining = String(remain);
         }
@@ -369,10 +344,25 @@ function viewInitModule(view, mod)
     var modRaw = Program.scanRawView("ti.sysbios.knl.Clock");
     var modCfg = Program.getModuleConfig('ti.sysbios.knl.Clock');
 
-    /* if skipping ticks indicate stale data */
+    /*
+     * If operating in dynamic mode and skipping ticks, query the timer
+     * to compute the current Clock tick count.  If the timer doesn't support
+     * computing Clock ticks (i.e., it doesn't implement
+     * viewGetCurrentClockTick()), just report the most recent tick count, and
+     * note 'stale data' (because  ROV's reported count is likely stale, since
+     * it indicates the last serviced timer interrupt).
+     */
     if (modRaw.modState.numTickSkip > 1) {
-        view.ticks = String(mod.ticks) + " (stale data)";
+        var timer = xdc.module(modCfg.TimerProxy.$name);
+        try {
+            var ticks = timer.viewGetCurrentClockTick();
+            view.ticks = String(ticks);
+        }
+        catch (e) {
+            view.ticks = String(mod.ticks) + " (stale data)";
+        }
     }
+    /* else, just show the tick counter */
     else {
         view.ticks = String(mod.ticks);
     }

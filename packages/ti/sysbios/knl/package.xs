@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2014-2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,4 +46,71 @@ function getLibs(prog)
 
     /* use shared getLibs() */
     return (Build.getLibs(this));
+}
+
+/*
+ *  ======== close ========
+ */
+function close()
+{
+    /* Only process during "cfg" phase */
+    if (xdc.om.$name != "cfg") {
+        return;
+    }
+
+    var Build = xdc.module("ti.sysbios.Build");
+    var BIOS = xdc.module('ti.sysbios.BIOS');
+    var Clock = xdc.module('ti.sysbios.knl.Clock');
+
+    /* Set the Clock TimerProxy if not yet set */
+    if ((Clock.TimerProxy === undefined) || (Clock.TimerProxy == null)) {
+        if (Clock.tickSource == Clock.TickSource_TIMER) {
+            var Settings = xdc.module("ti.sysbios.family.Settings");
+            var TimerProxy = Settings.getDefaultClockTimerDelegate();
+            if (TimerProxy == null) {
+                TimerProxy = "ti.sysbios.hal.TimerNull";
+            }
+        }
+        else {
+            /*
+             *  For TickSource_USER and TickSource_NULL, set the Clock
+             *  TimerProxy to hal TimerNull.
+             */
+            TimerProxy = "ti.sysbios.hal.TimerNull";
+        }
+        Clock.TimerProxy = xdc.module(TimerProxy);
+        Clock.timerSupportsDynamic = Clock.TimerProxy.supportsDynamic;
+    }
+
+    if (Clock.$used) {
+        xdc.useModule(Clock.TimerProxy.delegate$.$name);
+    }
+
+    Clock.timerSupportsDynamic = Clock.TimerProxy.supportsDynamic;
+
+    /* if user has not defined the TickMode ... */
+    if (Clock.tickMode == undefined) {
+        if (Clock.TimerProxy.defaultDynamic == true) {
+            Clock.tickMode = Clock.TickMode_DYNAMIC;
+        }
+        else {
+            Clock.tickMode = Clock.TickMode_PERIODIC;
+        }
+    }
+
+    if (BIOS.clockEnabled && (Clock.tickMode == Clock.TickMode_DYNAMIC) &&
+            (Clock.stopCheckNext == true)) {
+        var clockParams = new Clock.Params();
+        clockParams.period = 0;
+        clockParams.startFlag = false;
+        Clock.triggerClock = Clock.create(Clock.triggerFunc, 1, clockParams);
+    }
+    else {
+        Clock.stopCheckNext = false;
+        Clock.triggerClock = null;
+    }
+
+    /* add -D to compile line with definition for Clock.stopCheckNext */
+    Build.ccArgs.$add("-Dti_sysbios_knl_Clock_stopCheckNext__D=" +
+            (Clock.stopCheckNext ? "TRUE" : "FALSE"));
 }

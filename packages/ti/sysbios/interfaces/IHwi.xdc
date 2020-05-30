@@ -284,9 +284,11 @@ interface IHwi {
      *  interrupt dispatcher performance when it is known that Swis
      *  will not be posted from any of their Hwi threads.
      *
+     *  @a(Warning)
      *  Setting this parameter to false will disable the logic in
      *  the interrupt dispatcher that invokes the Swi scheduler
      *  prior to returning from an interrupt.
+     *  With this setting, Swis MUST NOT be posted from Hwi functions!
      */
     config Bool dispatcherSwiSupport;
 

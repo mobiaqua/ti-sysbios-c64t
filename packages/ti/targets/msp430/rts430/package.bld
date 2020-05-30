@@ -1,5 +1,5 @@
 /*
- *  Copyright 2015 by Texas Instruments Incorporated.
+ *  Copyright 2016 by Texas Instruments Incorporated.
  *
  */
 
@@ -34,7 +34,7 @@ Pkg.otherFiles.$add("link.xdt");
 Pkg.generatedFiles = ["lib/"];
 
 var attrs = {
-    profile: Pkg.attrs.profile == "debug" ? "debug" : "whole_program",
+    profile: Pkg.attrs.profile == "debug" ? "debug" : "release",
     /* add debug without sacrificing optimizations; this allows stack trace
      * displays in the debugger
      */

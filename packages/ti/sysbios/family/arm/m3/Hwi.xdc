@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -101,7 +101,9 @@ import ti.sysbios.interfaces.IHwi;
  *  The NVIC interrupt controller is designed for priority based
  *  interrupts.
  *
- *  No support is provided for anything but {@link #MaskingOption_LOWER}.
+ *  In this Hwi module, the {@link #maskSetting} instance configuration
+ *  parameter is ignored.
+ *  Effectively, only the {@link #MaskingOption_LOWER} is supported.
  *
  *  @a(Interrupt Priorities)
  *
@@ -992,9 +994,18 @@ module Hwi inherits ti.sysbios.interfaces.IHwi
     metaonly Bool inUseMeta(UInt intNum);
 
     /*!
-     *  @_nodoc
      *  ======== plug ========
      *  Plug a non dispatched interrupt vector with an ISR address.
+     *
+     *  Used internally by Hwi_create() and Hwi_construct().
+     *
+     *  This API is provided for external use primarily to allow users
+     *  to plug the NMI vector (interrupt #2) at runtime.
+     *
+     *  @a(Note)
+     *  Interrupt vectors plugged using Hwi_plug() are NOT managed by
+     *  the Hwi interrupt dispatcher. Consequently, it is not safe to
+     *  call SYS/BIOS APIs from within these ISRs.
      *
      *  @param(intNum)  interrupt number
      *  @param(fxn)     pointer to ISR function
@@ -1311,12 +1322,12 @@ internal:   /* not for client use */
     Void dispatch();
 
     /*
-     *  ======== cc26xxRomInitNVIC ========
+     *  ======== romInitNVIC ========
      *  Fix for SDOCM00114681: broken Hwi_initNVIC() function.
-     *  Installed rather than Hwi.initNVIC for CC26xx ROM build
+     *  Installed rather than Hwi.initNVIC for ROM app build
      *  when Hwi.resetVectorAddress is not 0x00000000.
      */
-    Void cc26xxRomInitNVIC();
+    Void romInitNVIC();
 
     /*
      * "Top Half" of Interrupt Dispatcher
@@ -1367,7 +1378,7 @@ internal:   /* not for client use */
         Ptr             excStack[];         // Exception thread stack
         Ptr             isrStack;           // Points to isrStack address
         Ptr             isrStackBase;       // = __TI_STACK_BASE
-        SizeT           isrStackSize;       // = Program.stack
+        Ptr             isrStackSize;       // = Program.stack
         Ptr             vectorTableBase;    // Points to base of vector table
         UInt            swiTaskKeys;        // dispatcher Swi and Task key storage
         Ptr             dispatchTable;      // Ptr to dispatchTable or sparseInterruptTable

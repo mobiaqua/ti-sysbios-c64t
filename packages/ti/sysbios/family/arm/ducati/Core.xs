@@ -54,34 +54,33 @@ function getAsmFiles(targetName)
         case "ti.targets.arm.elf.M3":
         case "ti.targets.arm.elf.M4":
         case "ti.targets.arm.elf.M4F":
-	    if (BIOS.smpEnabled == true) {
-		return (["Core_smp_asm.sv7M"]);
-	    }
-	    else {
-		return (["Core_asm.sv7M"]);
-	    }
+            if (BIOS.smpEnabled == true) {
+                return (["Core_smp_asm.sv7M"]);
+            }
+            else {
+                return (["Core_asm.sv7M"]);
+            }
             break;
 
         case "gnu.targets.arm.M3":
         case "gnu.targets.arm.M4":
         case "gnu.targets.arm.M4F":
-	    if (BIOS.smpEnabled == true) {
-		return (null);
-	    }
-	    else {
-		return (["Core_asm_gnu.sv7M"]);
-	    }
+            if (BIOS.smpEnabled == true) {
+                return (["Core_smp_asm_gnu.sv7M"]);
+            }
+            else {
+                return (["Core_asm_gnu.sv7M"]);
+            }
             break;
 
         case "iar.targets.arm.M3":
         case "iar.targets.arm.M4":
         case "iar.targets.arm.M4F":
-	    return (null);
+            return (null);
             break;
 
-	default:
-	    return (null);
-	    break;
+        default:
+            return (null);
     }
 }
 
@@ -187,17 +186,26 @@ function module$use()
                 /* place Power moduleboot code at 0 */
                 Program.sectMap[".ducatiPowerBoot"] = new Program.SectionSpec();
                 Program.sectMap[".ducatiPowerBoot"].loadAddress = 0;
+                if (Program.build.target.$name.match(/gnu/)) {
+                    Program.sectMap[".ducatiPowerBoot"].runAddress = 0;
+                }
             }
             else {
                 /* place common boot code at 0 */
                 Program.sectMap[".ducatiBoot"] = new Program.SectionSpec();
                 Program.sectMap[".ducatiBoot"].loadAddress = 0;
+                if (Program.build.target.$name.match(/gnu/)) {
+                    Program.sectMap[".ducatiBoot"].runAddress = 0;
+                }
             }
         }
         else {
             /* place common boot code at 0 */
             Program.sectMap[".ducatiBoot"] = new Program.SectionSpec();
             Program.sectMap[".ducatiBoot"].loadAddress = 0;
+            if (Program.build.target.$name.match(/gnu/)) {
+                Program.sectMap[".ducatiBoot"].runAddress = 0;
+            }
         }
     }
 

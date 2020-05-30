@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,18 +31,19 @@
  */
 /*
  *  ======== package.bld ========
- *
  */
 
 var BiosBuild = xdc.loadCapsule("ti/sysbios/Build.xs");
 
 var objList = [
     "Core.c",
+    "Core_smp.c",
     "Core_asm",
-    "CTM_asm",
+    "Core_smp_asm",
     "GateDualCore.c",
     "GateSmp.c",
     "Timer.c",
+    "Timer_smp.c",
     "TimerSupport.c",
     "TimestampProvider.c",
     "Wugen.c",
@@ -64,11 +65,13 @@ BiosBuild.buildLibs(objList, undefined, trgFilter, ["profile=smp"]);
 
 var objList = [
     "Core.c",
+    "Core_smp.c",
     "Core_asm_gnu",
-    "CTM_asm_gnu",
+    "Core_smp_asm_gnu",
     "GateDualCore.c",
     "GateSmp.c",
     "Timer.c",
+    "Timer_smp.c",
     "TimerSupport.c",
     "TimestampProvider.c",
     "Wugen.c",
@@ -92,11 +95,9 @@ Pkg.otherFiles = [
     "package.bld",
     "Core__prologue.h",
     "Core__epilogue.h",
-    "Core_smp.c",
-    "Core_smp_asm.sv7M",
     "Core_link.xdt",
+    "CTM_link.xdt",
     "linkcmd.xdt",
-    "Timer_smp.c",
     "smp_bios_core0.gel",
     "ducati_m3_rom_table.gel",  
     "tisim_init_ducati_1.gel",  
@@ -106,4 +107,3 @@ Pkg.otherFiles = [
 /* include source files in the release package */
 Pkg.attrs.exportSrc = true;
 Pkg.attrs.exportCfg = true;
-

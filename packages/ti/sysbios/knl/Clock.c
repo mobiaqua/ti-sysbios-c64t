@@ -58,6 +58,10 @@
 #define CLOCK_TICK_MODE Clock_tickMode
 #endif
 
+#ifndef ti_sysbios_knl_Clock_stopCheckNext__D
+#define ti_sysbios_knl_Clock_stopCheckNext__D FALSE
+#endif
+
 /* MODULE LEVEL FUNCTIONS */
 
 /*
@@ -122,6 +126,14 @@ UInt32 Clock_getTicks()
 }
 
 /*
+ *  ======== Clock_setTicks  ========
+ */
+Void Clock_setTicks(UInt32 ticks)
+{
+    Clock_module->ticks = ticks;
+}
+
+/*
  *  ======== Clock_ticksUntilInterrupt  ========
  */
 UInt32 Clock_getTicksUntilInterrupt()
@@ -156,6 +168,14 @@ UInt32 Clock_getTicksUntilInterrupt()
     }
 
     return (ticks);
+}
+
+/*
+ *  ======== Clock_getTicksUntilTimeout  ========
+ */
+UInt32 Clock_getTicksUntilTimeout()
+{
+    return (Clock_walkQueuePeriodic());
 }
 
 /*
@@ -217,6 +237,45 @@ Void Clock_tickStart()
             Clock_TimerProxy_start(Clock_module->timer);
         }
     }
+}
+
+/*
+ *  ======== Clock_walkQueuePeriodic ========
+ *  Walk the Clock Queue for TickMode_PERIODIC to determine the number of
+ *  ticks until the next active timeout
+ */
+UInt32 Clock_walkQueuePeriodic()
+{
+    UInt32 distance = ~0;
+    Queue_Handle clockQ;
+    Queue_Elem  *elem;
+    Clock_Object *obj;
+    UInt32 thisTick;
+    UInt32 delta;
+
+    clockQ = Clock_Module_State_clockQ();
+    elem = Queue_head(clockQ);
+    thisTick = Clock_module->ticks;
+
+    /* traverse clock queue */
+    while (elem != (Queue_Elem *)(clockQ)) {
+
+        obj = (Clock_Object *)elem;
+        elem = Queue_next(elem);
+
+        /* if  the object is active ... */
+        if (obj->active == TRUE) {
+
+            delta = obj->currTimeout - thisTick;
+
+            /* if this is the soonest tick update distance to soonest */
+            if (delta < distance) {
+                distance = delta;
+            }
+        }
+    }
+
+    return (distance);
 }
 
 /*
@@ -617,7 +676,7 @@ Void Clock_start(Clock_Object *obj)
 Void Clock_stop(Clock_Object *obj)
 {
     obj->active = FALSE;
-#if ti_sysbios_knl_Clock_stopCheckNext__D
+#if ti_sysbios_knl_Clock_stopCheckNext__D==TRUE
     if (obj->currTimeout == Clock_module->nextScheduledTick) {
         Clock_start(Clock_triggerClock);
     }

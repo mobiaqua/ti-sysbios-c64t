@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright (C) 2012 - 2015 Texas Instruments Incorporated - http://www.ti.com/
+* Copyright (C) 2012 - 2016 Texas Instruments Incorporated - http://www.ti.com/
 *
 * Redistribution and use in source and binary forms, with or without
 * modification, are permitted provided that the following conditions
@@ -36,9 +36,6 @@
 *
 *****************************************************************************/
 
---retain=interruptVectors
---retain=flashMailbox
-
 MEMORY
 {
     MAIN       (RX) : origin = 0x00000000, length = 0x00040000
@@ -64,15 +61,16 @@ MEMORY
 
 SECTIONS
 {
-    .intvecs:   > 0x00000000
     .text   :   > MAIN
+#ifdef __TI_COMPILER_VERSION__
+#if __TI_COMPILER_VERSION__ >= 15009000
+    .TI.ramfunc : {} load=MAIN, run=SRAM_CODE, table(BINIT)
+#endif
+#endif
     .const  :   > MAIN
     .cinit  :   > MAIN
     .pinit  :   > MAIN
 
-    .flashMailbox : > 0x00200000
-
-    .vtable :   > 0x20000000
     .data   :   > SRAM_DATA
     .bss    :   > SRAM_DATA
     .sysmem :   > SRAM_DATA
@@ -81,4 +79,3 @@ SECTIONS
 
 /* Symbolic definition of the WDTCTL register for RTS */
 WDTCTL_SYM = 0x4000480C;
-

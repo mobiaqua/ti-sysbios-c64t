@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,18 @@
 #include <ti/sysbios/interfaces/IHwi.h>
 
 #include "package/internal/Hwi.xdc.h"
+
+#define REG32(A)            (*(volatile UInt32 *) (A))
+
+#define ESM_BASE_ADDRESS    0xFFFFF500
+#define ESMSR1              (ESM_BASE_ADDRESS + 0x18)
+#define ESMSR2              (ESM_BASE_ADDRESS + 0x1C)
+#define ESMSR3              (ESM_BASE_ADDRESS + 0x20)
+#define ESMSSR2             (ESM_BASE_ADDRESS + 0x3C)
+#define ESMSR4              (ESM_BASE_ADDRESS + 0x58)
+
+#define RCM_BASE_ADDRESS    0xFFFFFF00
+#define SOFTRST2            (RCM_BASE_ADDRESS + 0x08)
 
 extern Void ti_sysbios_family_xxx_Hwi_switchAndRunFunc(Void (*func)());
 extern Void ti_sysbios_family_xxx_Hwi_switchAndRunDispatchC(
@@ -101,10 +113,8 @@ Int Hwi_Module_startup (Int startupPhase)
     }
 #endif
 
-    /* set up FIQ stack pointer & switch to SYSTEM mode */
+    /* set up FIQ stack pointer */
     Hwi_init();
-
-    Hwi_initIntController();
 
     /*
      * Initialize the pointer to the isrStack.
@@ -117,7 +127,39 @@ Int Hwi_Module_startup (Int startupPhase)
                                         /* on the ISR stack */
 
     /* Initialize VIM RAM phantom vector */
-    Hwi_module->vimRam[0] = (UInt32)(&Hwi_nonPluggedHwiHandler);
+    Hwi_module->vimRam[0] = (UInt32)(Hwi_phantomFunc);
+
+    /* Initialize remaining VIM RAM */
+    for (i = 0; i < Hwi_NUM_INTERRUPTS; i++) {
+        /*
+         *  IntNum 127 does not have a corresponding VIM RAM entry. It
+         *  should be skipped.
+         */
+        if (i != 127) {
+            hwi = Hwi_module->dispatchTable[i];
+            if (hwi !=  NULL) {
+                if (hwi->type == Hwi_Type_IRQ) {
+                    Hwi_plug(hwi->intNum, (Hwi_PlugFuncPtr)(hwi->intNum));
+                }
+                else {
+                    Hwi_plug(hwi->intNum, (Hwi_PlugFuncPtr)(hwi->fxn));
+                }
+            }
+            else {
+                Hwi_plug(i, (Hwi_PlugFuncPtr)(~0));
+            }
+        }
+    }
+
+    /*
+     * Hwi_initIntController() will reset VIM. Ensure it is run after
+     * VIM RAM has been initialized.
+     */
+    Hwi_initIntController();
+
+    if (Hwi_errataInitEsm) {
+        Hwi_initEsm();
+    }
 
     for (i = 0; i < Hwi_NUM_INTERRUPTS; i++) {
         /*
@@ -128,9 +170,6 @@ Int Hwi_Module_startup (Int startupPhase)
             hwi = Hwi_module->dispatchTable[i];
             if (hwi !=  NULL) {
                 Hwi_postInit(hwi, NULL);
-            }
-            else {
-                Hwi_plug(i, (Hwi_PlugFuncPtr)(&Hwi_nonPluggedHwiHandler));
             }
         }
     }
@@ -161,6 +200,18 @@ Int Hwi_Instance_init(Hwi_Object *hwi, Int intNum,
 
     hwi->intNum = intNum;
 
+    switch (params->maskSetting) {
+        case Hwi_MaskingOption_LOWER:
+        case Hwi_MaskingOption_ALL:
+        case Hwi_MaskingOption_SELF:
+            break;
+        case Hwi_MaskingOption_NONE:
+        case Hwi_MaskingOption_BITMASK:
+        default:
+            Error_raise(eb, Hwi_E_unsupportedMaskingOption, 0, 0);
+            break;
+    }
+
     Hwi_reconfig(hwi, fxn, params);
 
 #ifndef ti_sysbios_hal_Hwi_DISABLE_ALL_HOOKS
@@ -176,6 +227,13 @@ Int Hwi_Instance_init(Hwi_Object *hwi, Int intNum,
 #endif
 
     hwi->irp = 0;
+
+    if (hwi->type == Hwi_Type_IRQ) {
+        Hwi_plug(hwi->intNum, (Hwi_PlugFuncPtr)(hwi->intNum));
+    }
+    else {
+        Hwi_plug(hwi->intNum, (Hwi_PlugFuncPtr)(hwi->fxn));
+    }
 
     status = Hwi_postInit(hwi, eb);
 
@@ -248,18 +306,6 @@ Int Hwi_postInit (Hwi_Object *hwi, Error_Block *eb)
 
     Hwi_setType(hwi->intNum, hwi->type);
 
-    if (hwi->type == Hwi_Type_IRQ) {
-        if (!(hwi->useDispatcher)) {
-            Hwi_plug(hwi->intNum, (Hwi_PlugFuncPtr)(hwi->fxn));
-        }
-        else {
-            Hwi_plug(hwi->intNum, Hwi_dispatchIRQ);
-        }
-    }
-    else {
-        Hwi_plug(hwi->intNum, (Hwi_PlugFuncPtr)(hwi->fxn));
-    }
-
     return (0);
 }
 
@@ -282,7 +328,7 @@ Void Hwi_Instance_finalize(Hwi_Object *hwi, Int status)
 
     Hwi_disableInterrupt(intNum);
     Hwi_module->dispatchTable[intNum] = NULL;
-    Hwi_plug(intNum, (Hwi_PlugFuncPtr)(&Hwi_nonPluggedHwiHandler));
+    Hwi_plug(intNum, (Hwi_PlugFuncPtr)(~0));
 
     if (hwi->type == Hwi_Type_FIQ) {
         key = Hwi_disable();
@@ -316,11 +362,32 @@ Void Hwi_Instance_finalize(Hwi_Object *hwi, Int status)
 }
 
 /*
+ *  ======== Hwi_initEsm ========
+ */
+Void Hwi_initEsm()
+{
+    REG32(ESMSR1)  = 0xFFFFFFFF;
+    REG32(ESMSR2)  = 0xFFFFFFFF;
+    REG32(ESMSR3)  = 0xFFFFFFFF;
+    REG32(ESMSSR2) = 0xFFFFFFFF;
+    REG32(ESMSR4)  = 0xFFFFFFFF;
+}
+
+/*
  *  ======== Hwi_initIntController ========
  */
 Void Hwi_initIntController()
 {
     UInt i, numRegs;
+    UInt32 regVal;
+
+    if (Hwi_resetVIM) {
+        regVal = REG32(SOFTRST2);
+        regVal |= 0xAD000000;       /* Assert VIM only reset */
+        REG32(SOFTRST2) = regVal;
+        regVal &= ~(0xFF000000);
+        REG32(SOFTRST2) = regVal;
+    }
 
     /*
      * The interrupt controller has no RESET feature and
@@ -370,7 +437,10 @@ Void Hwi_initIntController()
  */
 Void Hwi_startup()
 {
-    /* Enable FIQs. Once enabled, FIQs cannot be disabled again. */
+    /*
+     * Enable FIQs. Once enabled, the HW ignores all calls to disable the FIQs.
+     * Therefore, FIQs cannot be disabled again.
+     */
     _enable_FIQ();
 
     /* Enable IRQs */
@@ -533,10 +603,12 @@ Bool Hwi_getStackInfo(Hwi_StackInfo *stkInfo, Bool computeStackDepth)
  */
 Void Hwi_setType(UInt intNum, Hwi_Type type)
 {
-    UInt index, mask;
+    UInt index, key, mask;
 
     index = intNum / 32;
     mask = 1 << (intNum & 0x1f);
+
+    key = Hwi_disable();
 
     if (type == Hwi_Type_FIQ) {
         Hwi_vim.FIRQPR[index] |= mask;
@@ -544,6 +616,8 @@ Void Hwi_setType(UInt intNum, Hwi_Type type)
     else {
         Hwi_vim.FIRQPR[index] &= ~mask;
     }
+
+    Hwi_restore(key);
 }
 
 /*
@@ -565,7 +639,6 @@ Void Hwi_reconfig(Hwi_Object *hwi, Hwi_FuncPtr fxn, const Hwi_Params *params)
     hwi->fxn = fxn;
     hwi->arg = params->arg;
     hwi->type = params->type;
-    hwi->useDispatcher = params->useDispatcher;
 
     index = intNum >> 5;
     offset = intNum & 0x1f;
@@ -602,9 +675,9 @@ Void Hwi_reconfig(Hwi_Object *hwi, Hwi_FuncPtr fxn, const Hwi_Params *params)
                 }
             }
             break;
-        default:
         case Hwi_MaskingOption_NONE:
         case Hwi_MaskingOption_BITMASK:
+        default:
             Error_raise(0, Hwi_E_unsupportedMaskingOption, 0, 0);
             break;
     }
@@ -690,6 +763,15 @@ Void Hwi_mapChannel(UInt channelId, UInt intRequestId)
 }
 
 /*
+ *  ======== Hwi_phantomIntHandler ========
+ *  Default phantom interrupt handler.
+ */
+interrupt Void Hwi_phantomIntHandler()
+{
+    Error_raise(0, Hwi_E_phantomInterrupt, 0, 0);
+}
+
+/*
  *  ======== Hwi_dispatchIRQC ========
  *  Configurable IRQ interrupt dispatcher.
  */
@@ -703,17 +785,16 @@ Void Hwi_dispatchIRQC(Hwi_Irp irp)
     UInt oldReqEnaMask[4];
     BIOS_ThreadType prevThreadType;
 
-    /* save irp for ROV call stack view */
-    Hwi_module->irp = irp;
-    //TODO cant we store irp directly in the Hwi object and get rid of irp field from Hwi module state ???
+    intNum = Hwi_vim.IRQVECREG;
 
-    intNum = Hwi_vim.IRQINDEX;
-
-    if (intNum != 0) {
-        intNum = intNum - 1;
-    }
-    else {
+    if (intNum >= Hwi_NUM_INTERRUPTS) {
         Hwi_module->spuriousInts++;
+        if (intNum == ~0) {
+            Hwi_nonPluggedHwiHandler(0);
+        }
+        else if (intNum == (UInt32)(Hwi_phantomFunc)) {
+            Hwi_phantomFunc();
+        }
         return;
     }
 
@@ -722,7 +803,7 @@ Void Hwi_dispatchIRQC(Hwi_Irp irp)
 
     hwi = Hwi_module->dispatchTable[intNum];
 
-    hwi->irp = Hwi_module->irp;
+    hwi->irp = irp;
 
     if (Hwi_dispatcherSwiSupport) {
         swiKey = SWI_DISABLE();
@@ -750,9 +831,10 @@ Void Hwi_dispatchIRQC(Hwi_Irp irp)
             Hwi_vim.REQENACLR[i] =
                 hwi->disableMask[i] & Hwi_module->zeroLatencyFIQMask[i];
             /*
-             *  Perform a dummy read of REQENACLR register to ensure register
-             *  write is complete. This is an alternative to using "dmb" which
-             *  is more expensive.
+             *  Ordering is preserved for all accesses to the same interface.
+             *  Therefore, perform a dummy read of REQENACLR register to ensure
+             *  register write is complete. This is an alternative to using
+             *  "dmb" which is more expensive.
              */
             dummy = Hwi_vim.REQENACLR[i];
         }

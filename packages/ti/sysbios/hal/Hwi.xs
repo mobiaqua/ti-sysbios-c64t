@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -177,11 +177,28 @@ function module$use()
      * Warn IAR users that Program.stack is ignored
      */
     if (Program.build.target.$name.match(/iar/)) {
-        if (Program.$written("stack") == true) {
+        if (Program.$written("stack") == true && (Program.stack != 0)) {
             Program.$logWarning("For IAR targets, Program.stack is ignored. " +
                     "The C and Hwi stack sizes are determined by the size " +
                     "of the CSTACK section definition within the linker " +
                     "command file.", Program, "stack");
+        }
+    }
+    else {
+        var Settings = xdc.module("ti.sysbios.family.Settings");
+        var TaskSupportDelegate = xdc.module(Settings.getDefaultTaskSupportDelegate());
+        var align = TaskSupportDelegate.stackAlignment;
+        var stackSizeBefore = Program.stack;
+        var stackSizeAfter = Program.stack;
+        if (align != 0) {
+            stackSizeAfter &= (-align);
+        }
+        if (stackSizeBefore != stackSizeAfter) {
+            Hwi.$logWarning("Program.stack (" + stackSizeBefore +
+                ") was adjusted to " + stackSizeAfter +
+                " to guarantee proper stack alignment.",
+                Program, "stack");
+            Program.stack = stackSizeAfter;
         }
     }
 }
@@ -197,8 +214,12 @@ function module$static$init(mod, params)
             /* initialize the C stack; do it early to catch early oveflows */
             Startup.firstFxns.$add("&ti_sysbios_hal_Hwi_initStack");
         }
+        else if (Hwi.checkStackFlag == true) {
+            /* only initialize the top of the stack */
+            Startup.firstFxns.$add("&ti_sysbios_hal_Hwi_initStackMin");
+        }
 
-        if ((Hwi.checkStackFlag == true) && (Hwi.initStackFlag == true)) {
+        if (Hwi.checkStackFlag == true) {
             if (BIOS.smpEnabled) {
                 for (var i = 0; i < Core.numCores; i++) {
                     Idle.addCoreFunc("&ti_sysbios_hal_Hwi_checkStack", i);
@@ -236,6 +257,30 @@ function addHookSet(hookSet)
 
     Hwi.HwiProxy.delegate$.addHookSet(hookSet);
     Hwi.numHooks++;
+}
+
+/*
+ *  ======== module$validate ========
+ */
+function module$validate()
+{
+    var Settings = xdc.module("ti.sysbios.family.Settings");
+    var HwiDelegate = xdc.module(Settings.getDefaultHwiDelegate());
+    if ((BIOS.swiEnabled == true) 
+         && (HwiDelegate.dispatcherSwiSupport == false)) {
+        if (BIOS.clockEnabled == true) {
+            HwiDelegate.$logError("Hwi.dispatchSwiSupport must be enabled when "
+               + "BIOS.clockEnabled is true and "
+               + "BIOS.swiEnabled is true.",
+               HwiDelegate, "dispatcherSwiSupport");
+        }
+        else {
+            HwiDelegate.$logWarning("When BIOS.swiEnabled is true and "
+               + "Hwi.dispatcherSwiSupport is false, Swis MUST NOT be "
+               + "posted from Hwi funcstions!",
+               HwiDelegate, "dispatcherSwiSupport");
+        }
+    }
 }
 
 /*!

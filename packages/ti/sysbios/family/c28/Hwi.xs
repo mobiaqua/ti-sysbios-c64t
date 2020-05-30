@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -76,6 +76,7 @@ function module$meta$init()
     Hwi.common$.fxntab = false;
 
     if ((Program.cpu.deviceName.match(/F2807/)) ||
+        (Program.cpu.deviceName.match(/F28004/)) ||
         (Program.cpu.deviceName.match(/F2837/))) {
         Hwi.NUM_INTERRUPTS_PIE = 192;
         Hwi.NUM_INTERRUPTS_ALL = Hwi.NUM_INTERRUPTS + Hwi.NUM_INTERRUPTS_PIE;

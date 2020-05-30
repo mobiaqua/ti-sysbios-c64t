@@ -33,4 +33,7 @@
 %%}
 %/* turn off entry point change warning */
 --diag_suppress=10063
+% var Core = xdc.module("ti.sysbios.family.arm.v7r.tms570.Core");
+% if (Core.overrideHwiResetFunc == true) {
 --entry_point=ti_sysbios_family_arm_v7r_tms570_Core_reset
+% }

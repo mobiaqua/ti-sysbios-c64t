@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,6 +36,8 @@
 package ti.sysbios.family.c66;
 
 import xdc.rov.ViewInfo;
+
+import xdc.runtime.Error;
 
 /*!
  *  ======== Cache ========
@@ -96,6 +98,9 @@ import xdc.rov.ViewInfo;
  *  </table>
  *  @p
  */
+
+
+@ModuleStartup      /* generate a call to Cache_Module_startup at startup */
 
 module Cache inherits ti.sysbios.interfaces.ICache
 {
@@ -274,6 +279,20 @@ module Cache inherits ti.sysbios.interfaces.ICache
      */
     metaonly config UInt32 MAR224_255;
 
+    /*!
+     *  Error raised when invalid L1 cache size defined
+     */
+    config Error.Id E_invalidL1CacheSize = {
+        msg: "E_invalidL1CacheSize: Invalid L1 cache size %d"
+    };
+
+    /*!
+     *  Error raised when invalid L2 cache size defined
+     */
+    config Error.Id E_invalidL2CacheSize = {
+        msg: "E_invalidL2CacheSize: Invalid L2 cache size %d"
+    };
+
     /*! @_nodoc
      *
      *  This parameter is used to break up large blocks into multiple
@@ -283,6 +302,16 @@ module Cache inherits ti.sysbios.interfaces.ICache
      *  cache operations are not done atomically.
      */
     config UInt32 atomicBlockSize = 1024;
+
+    /*!
+     *  ======== registerRTSSynch ========
+     *  Boolean flag controlling registration of data synchronization
+     *  functions that are called by the RTS when accessing shared RTS
+     *  data objects.  The compiler option "--multithread" needs to be
+     *  applied in order for this feature to be functional (otherwise,
+     *  empty stubs are used in RTS).
+     */
+    config Bool registerRTSSynch = false;
 
     /*!
      *  ======== getMarMeta ========
@@ -301,6 +330,9 @@ module Cache inherits ti.sysbios.interfaces.ICache
      *  The 'pc' ("Permit Caching") field is enabled for all memory regions
      *  in the device platform.  Only set the fields of the Mar structure
      *  which need to be modified.  Any field not set retains its reset value.
+     *
+     *  All MAR registers that corresponds within the specified base address
+     *  and base address + size are set to the specified value.
      *
      *  @a(Note)
      *  The 'wte' (Bit 1) and 'pcx' (Bit 2) MAR bits are reserved on
@@ -371,6 +403,9 @@ module Cache inherits ti.sysbios.interfaces.ICache
      *  Set MAR register(s) that corresponds to the specified address range.
      *
      *  All cached entries in L1 and L2 are written back and invalidated.
+     *
+     *  All MAR registers that corresponds within the specified base address
+     *  and base address + size are set to the specified value.
      *
      *  @a(Note)
      *  The 'wte' (Bit 1) and 'pcx' (Bit 2) MAR bits are reserved on
@@ -448,6 +483,27 @@ module Cache inherits ti.sysbios.interfaces.ICache
 internal:
 
     /*!
+     *  ======== RTSSynchInv ========
+     *  @_nodoc
+     *  Called by RTS for shared data synch invalidate
+     */
+    Void RTSSynchInv(Ptr blockPtr, SizeT byteCnt);
+
+    /*!
+     *  ======== RTSSynchWb ========
+     *  @_nodoc
+     *  Called by RTS for shared data synch writeback
+     */
+    Void RTSSynchWb(Ptr blockPtr, SizeT byteCnt);
+
+    /*!
+     *  ======== RTSSynchWbInv ========
+     *  @_nodoc
+     *  Called by RTS for shared data synch writeback/invalidate
+     */
+    Void RTSSynchWbInv(Ptr blockPtr, SizeT byteCnt);
+
+    /*!
      *  ======== invPrefetchBuffer ========
      *  Invalidate the prefetch buffer
      */
@@ -464,6 +520,21 @@ internal:
      */
     Void block(Ptr blockPtr, SizeT byteCnt, Bool wait,
                volatile UInt32 *barReg);
+
+    /*
+     *  ======== getL1DInitSize ========
+     */
+    Void getL1DInitSize(Size *size);
+
+    /*
+     *  ======== getL1PInitSize ========
+     */
+    Void getL1PInitSize(Size *size);
+
+    /*
+     *  ======== getL2InitSize ========
+     */
+    Void getL2InitSize(Size *size);
 
     /* cache configuration registers */
     const UInt32 L2CFG  = 0x01840000;

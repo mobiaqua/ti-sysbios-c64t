@@ -1,13 +1,13 @@
 /* 
- *  Copyright (c) 2010 Texas Instruments and others.
+ *  Copyright (c) 2010-2015 Texas Instruments Incorporated
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *  Contributors:
  *      Texas Instruments - initial implementation
- * 
+ *
  * */
 
 import ti.targets.ITarget;
@@ -17,9 +17,9 @@ import ti.targets.ITarget;
  *  ELF MSP430X small code, small data model, little endian
  */
 metaonly module MSP430X_small inherits ITarget {
-    override readonly config string name    = "MSP430X_small"; 
+    override readonly config string name    = "MSP430X_small";
     override readonly config string suffix  = "e430XS";
-    override readonly config string isa     = "430X";    
+    override readonly config string isa     = "430X";
     override readonly config string rts     = "ti.targets.msp430.rts430";
     override readonly config xdc.bld.ITarget.Model model = {
         endian: "little",
@@ -50,8 +50,8 @@ metaonly module MSP430X_small inherits ITarget {
     };
 
     override readonly config ITarget.Command lnk = {
-        cmd:  "lnk430",
-        opts: ""
+        cmd:  "cl430",
+        opts: "-z"
     };
 
     /*!
@@ -118,16 +118,6 @@ metaonly module MSP430X_small inherits ITarget {
         ["coverage", {
             compileOpts: {
                 copts: "-g",
-            },
-        }],
-        ["whole_program", {
-            compileOpts: {
-                copts: "-oe -O2 -g --optimize_with_debug",
-            },
-        }],
-        ["whole_program_debug", {
-            compileOpts: {
-                copts: "-oe --symdebug:dwarf",
             },
         }],
     ];

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,8 +62,6 @@
 #define OMAP5_AUX_CORE_BOOT_0   (OMAP5_WUGEN_BASE_ADDR + 0x800)
 #define OMAP5_AUX_CORE_BOOT_1   (OMAP5_WUGEN_BASE_ADDR + 0x804)
 
-#define K2_BOOT_MAGIC_ADDR      0x0C5AD000
-
 extern void _exit(int code);
 extern Void ti_sysbios_hal_Hwi_initStack(Void);
 
@@ -77,6 +75,19 @@ Int Core_Module_startup(Int status)
     Core_lock();
 
     return (Startup_DONE);
+}
+
+/*
+ *  ======== Core_enableActlrSmp ========
+ */
+Void __attribute__((naked)) Core_enableActlrSmp()
+{
+    __asm__ __volatile__ (
+        /* Enable ACTLR SMP bit if non-secure access allowed */
+        "mov   r0, #0x40\n\t"
+        "mcr   p15, #0, r0, c1, c0, #1\n\t"
+        "bx    lr"
+    );
 }
 
 /*
@@ -282,7 +293,7 @@ Void Core_startCoreXKeystone2()
     }
     else {
         for (idx = 1; idx < Core_numCores; idx++) {
-            REG32(K2_BOOT_MAGIC_ADDR + 0x4*idx) = (UInt32)(&Core_smpBoot);
+            REG32(Core_bootMagicBase + 0x4*idx) = (UInt32)(&Core_smpBoot);
         }
         __asm__ __volatile__ (
             "dsb\n\t"       /* Ensure writes are visible to other cores */
@@ -339,6 +350,10 @@ Void __attribute__((naked)) Core_smpBoot()
         "mcr   p15, #0, r0, c8, c7, #0\n\t"
         "dsb\n\t"
         "isb\n\t"
+
+        /* Enable ACTLR SMP bit if non-secure access allowed */
+        "mov   r0, #0x40\n\t"
+        "mcr   p15, #0, r0, c1, c0, #1\n\t"
 
 #if (defined(__VFP_FP__) && !defined(__SOFTFP__))
         /* Enable access to cp10 and cp11 - required for SIMD and VFP to work */

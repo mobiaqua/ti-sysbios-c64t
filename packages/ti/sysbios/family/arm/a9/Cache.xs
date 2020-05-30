@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,12 +31,12 @@
  */
 /*
  *  ======== Cache.xs ========
- *
  */
 
 var Cache;
 var Hwi;
 var Mmu;
+var Reset;
 var Startup;
 var l2CacheIntNum;
 var supportsL2Sram;
@@ -186,6 +186,7 @@ function module$use()
 {
     Hwi = xdc.useModule('ti.sysbios.family.arm.gic.Hwi');
     Mmu = xdc.useModule('ti.sysbios.family.arm.a8.Mmu');
+    Reset = xdc.useModule('xdc.runtime.Reset');
     Startup = xdc.useModule('xdc.runtime.Startup');
 
     /* Enable cache early */
@@ -194,6 +195,9 @@ function module$use()
     if (Cache.configureL2Sram && (supportsL2Sram == false)) {
         Cache.$logError("Configuring L2 as SRAM not supported for " + device +
                 " device.", this);
+    }
+    else if (Cache.configureL2Sram) {
+        Reset.fxns[Reset.fxns.length++] = Cache.initL2Sram;
     }
 }
 

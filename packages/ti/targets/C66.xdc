@@ -1,5 +1,5 @@
 /* 
- *  Copyright (c) 2010 Texas Instruments and others.
+ *  Copyright (c) 2010-2015 Texas Instruments Incorporated
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -56,8 +56,8 @@ metaonly module C66 inherits ITarget {
     };
 
     override readonly config xdc.bld.ITarget2.Command lnk = {
-        cmd: "lnk6x",
-        opts: "--abi=coffabi"
+        cmd: "cl6x",
+        opts: "--abi=coffabi -z"
     };
 
     /*!

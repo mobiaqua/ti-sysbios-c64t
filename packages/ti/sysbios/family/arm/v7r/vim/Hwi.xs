@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,6 +36,7 @@
 var Hwi = null;
 var BIOS = null;
 var Core = null;
+var Build = null;
 var Memory = null;
 var device = null;
 var Exception = null;
@@ -43,16 +44,40 @@ var Exception = null;
 if (xdc.om.$name == "cfg") {
     var deviceTable = {
         "RM57D8xx": {
+            lockstepDevice      : false,
             vimBaseAddress      : 0xFFFFFDEC,
+            vimRamAddress       : 0xFFF82000,
             resetVectorAddress  : 0x00000000,
             vectorTable0Address : 0x00000100,
             vectorTable1Address : 0x00200000,
-            numInterrupts       : 128
+            numInterrupts       : 128,
+            errataInitEsm       : false,
+            resetVIM            : false
+        },
+        "RM57L8xx": {
+            lockstepDevice      : true,
+            vimBaseAddress      : 0xFFFFFDEC,
+            vimRamAddress       : 0xFFF82000,
+            resetVectorAddress  : 0x00000000,
+            numInterrupts       : 128,
+            errataInitEsm       : false,
+            resetVIM            : false,
+        },
+        "AR14XX": {
+            lockstepDevice      : true,
+            vimBaseAddress      : 0xFFFFFDEC,
+            vimRamAddress       : 0xFFF82000,
+            resetVectorAddress  : 0x00000000,
+            numInterrupts       : 128,
+            errataInitEsm       : true,
+            resetVIM            : true
         }
     }
 
-    deviceTable["TMS570DC.*"] = deviceTable["RM57D8xx"];
     deviceTable["RM57D8.*"] = deviceTable["RM57D8xx"];
+    deviceTable["RM57L8.*"] = deviceTable["RM57L8xx"];
+    deviceTable["RM48L.*"] = deviceTable["RM57L8xx"];
+    deviceTable["AR16XX"] = deviceTable["AR14XX"];
 }
 
 /*
@@ -63,8 +88,9 @@ if (xdc.om.$name == "cfg") {
 function getAsmFiles(targetName)
 {
     switch(targetName) {
+        case "ti.targets.arm.elf.R4F":
         case "ti.targets.arm.elf.R5F":
-            if (Core.id == 0) {
+            if ((Core.id == 0) && (!Hwi.lockstepDevice)) {
                 return (["Hwi_asm.sv7R", "Hwi_asm_vecs.sv7R",
                          "Hwi_asm_switch.sv7R"]);
             }
@@ -107,17 +133,30 @@ function module$meta$init()
     }
 
     if (device == null) {
-        print("The " + Program.cpu.deviceName + " device is not currently supported.");
-        print("The following devices are supported for the " + Program.build.target.name + " target:");
+        print("The " + Program.cpu.deviceName +
+              " device is not currently supported.");
+        print("The following devices are supported for the " +
+              Program.build.target.name + " target:");
         for (device in deviceTable) {
-                print("\t" + device);
+            print("\t" + device);
         }
         throw new Error ("Unsupported device!");
     }
 
+    Hwi.errataInitEsm = device.errataInitEsm;
+    Hwi.resetVIM = device.resetVIM;
+    Hwi.lockstepDevice = device.lockstepDevice;
+
+    if (!Hwi.lockstepDevice) {
+        Hwi.core0VectorTableAddress = device.vectorTable0Address;
+        Hwi.core1VectorTableAddress = device.vectorTable1Address;
+    }
+    else {
+        Hwi.core0VectorTableAddress = 0;
+        Hwi.core1VectorTableAddress = 0;
+    }
+
     Hwi.vimBaseAddress = device.vimBaseAddress;
-    Hwi.core0VectorTableAddress = device.vectorTable0Address;
-    Hwi.core1VectorTableAddress = device.vectorTable1Address;
     Hwi.NUM_INTERRUPTS = device.numInterrupts;
 
     var numRegs;
@@ -165,6 +204,10 @@ function module$meta$init()
     Hwi.dataAbortFunc = Exception.excHandlerDataAsm;
 
     Hwi.reservedFunc = Exception.excHandlerAsm;
+
+    Hwi.irqFunc = Hwi.dispatchIRQ;
+
+    Hwi.phantomFunc = Hwi.phantomIntHandler;
 }
 
 /*
@@ -174,6 +217,7 @@ function module$use()
 {
     BIOS = xdc.useModule('ti.sysbios.BIOS');
     Core = xdc.useModule('ti.sysbios.family.arm.v7r.tms570.Core');
+    Build = xdc.useModule('ti.sysbios.Build');
     Memory = xdc.useModule('xdc.runtime.Memory');
 
     xdc.useModule('xdc.runtime.Log');
@@ -220,22 +264,31 @@ function module$use()
         Hwi.taskRestoreHwi = null;
     }
 
-    if (Core.id == 0) {
+    if ((Core.id == 0) && (!Hwi.lockstepDevice)) {
         /* place .resetVecs section */
         if (Program.sectMap[".resetVecs"] === undefined) {
             Program.sectMap[".resetVecs"] = new Program.SectionSpec();
-            Program.sectMap[".resetVecs"].loadAddress = device.resetVectorAddress;
+            Program.sectMap[".resetVecs"].loadAddress =
+                device.resetVectorAddress;
         }
     }
 
     /* place .vecs section */
     if (Program.sectMap[".vecs"] === undefined) {
         Program.sectMap[".vecs"] = new Program.SectionSpec();
-        if (Core.id == 0) {
-            Program.sectMap[".vecs"].loadAddress = Hwi.core0VectorTableAddress;
+        if (!Hwi.lockstepDevice) {
+            if (Core.id == 0) {
+                Program.sectMap[".vecs"].loadAddress =
+                    Hwi.core0VectorTableAddress;
+            }
+            else {
+                Program.sectMap[".vecs"].loadAddress =
+                    Hwi.core1VectorTableAddress;
+            }
         }
         else {
-            Program.sectMap[".vecs"].loadAddress = Hwi.core1VectorTableAddress;
+            Program.sectMap[".vecs"].loadAddress =
+                    device.resetVectorAddress;
         }
     }
 }
@@ -245,8 +298,7 @@ function module$use()
  */
 function module$static$init(mod, params)
 {
-    mod.vimRam = $addr(0xFFF82000);
-    mod.irp = 0;
+    mod.vimRam = device.vimRamAddress;
     mod.taskSP = null;
     mod.isrStack = null;
     mod.isrStackBase = $externPtr('__TI_STACK_BASE');
@@ -278,30 +330,19 @@ function module$static$init(mod, params)
         Memory.staticPlace(mod.fiqStack, align, params.fiqStackSection);
     }
 
-    /*
-     * round stackSize up to the nearest multiple of the alignment.
-     */
-    var nonDispatchedIRQStackSize =
-        (params.nonDispatchedIRQStackSize + align - 1) & -align;
-    if (nonDispatchedIRQStackSize != params.nonDispatchedIRQStackSize) {
-        Hwi.$logWarning("stack size was adjusted to guarantee proper" +
-            " alignment", this, "Hwi.nonDispatchedIRQStackSize");
-    }
-
-    mod.nonDispatchedIRQStackSize = nonDispatchedIRQStackSize;
-
-    if (params.nonDispatchedIRQStack) {
-        mod.nonDispatchedIRQStack = params.nonDispatchedIRQStack;
-    }
-    else {
-        mod.nonDispatchedIRQStack.length = params.nonDispatchedIRQStackSize;
-        Memory.staticPlace(mod.nonDispatchedIRQStack, align,
-            params.nonDispatchedIRQStackSection);
-    }
-
     for (var i = 0; i < 4; i++) {
         mod.zeroLatencyFIQMask[i] = 0xffffffff;
     }
+
+    /* add -D to compile line to optimize exception code */
+    Build.ccArgs.$add("-Dti_sysbios_family_arm_v7r_vim_Hwi_lockstepDevice__D=" +
+        (Hwi.lockstepDevice ? "TRUE" : "FALSE"));
+
+    Build.ccArgs.$add("-Dti_sysbios_family_arm_v7r_vim_Hwi_errataInitEsm__D=" +
+        (Hwi.errataInitEsm ? "TRUE" : "FALSE"));
+
+    Build.ccArgs.$add("-Dti_sysbios_family_arm_v7r_vim_Hwi_resetVIM__D=" +
+        (Hwi.resetVIM ? "TRUE" : "FALSE"));
 }
 
 /*
@@ -356,7 +397,6 @@ function instance$static$init(obj, intNum, fxn, params)
     obj.intNum = intNum;
     obj.irp = null;
     obj.type = params.type;
-    obj.useDispatcher = params.useDispatcher;
 
     if (params.enableInt) {
         Hwi.intReqEnaSet[intNum >>> 5] |= (1 << (intNum % 32));
@@ -371,9 +411,8 @@ function instance$static$init(obj, intNum, fxn, params)
         mod.zeroLatencyFIQMask[index] &= ~(1 << offset);
     }
 
-    if (obj.useDispatcher && (Hwi.dispatcherAutoNestingSupport == false) &&
+    if ((Hwi.dispatcherAutoNestingSupport == false) &&
         (params.maskSetting != Hwi.MaskingOption_ALL)) {
-        // TODO should we warn or just cdoc this ???
         Hwi.$logWarning("With dispatcherAutoNestingSupport, only " +
                         "Hwi.MaskingOption_ALL is supported.",
                         this, "maskSetting");
@@ -495,6 +534,83 @@ function convertToUInt32(value)
 }
 
 /*
+ *  ======== viewScanDispatchTable ========
+ *  Scans dispatch table for constructed Hwis to add them to the Hwi ROV view.
+ *
+ *  The Hwi dispatch table is scanned for handles that are not in
+ *  the raw instance view. These Hwi objects are then manually added to
+ *  ROV's scanned object list.
+ *
+ *  This function does not perform any error handling because it has nowhere
+ *  to display an error. If any of the APIs called within this function throw
+ *  an exception, it will propagate up and be displayed to the user in ROV.
+ */
+function viewScanDispatchTable(data, viewLevel)
+{
+    var Program = xdc.useModule('xdc.rov.Program');
+    var Hwi = xdc.useModule('ti.sysbios.family.arm.v7r.vim.Hwi');
+
+    /* Check if the constructed Hwis have already been scanned. */
+    if (data.scannedConstructedHwis) {
+        return;
+    }
+
+    /*
+     * Set the flag to true now to prevent recursive calls of this function
+     * when we scan the constructed Hwis.
+     */
+    data.scannedConstructedHwis = true;
+
+    /* Get the Task module config to get the number of constructed tasks. */
+    var modCfg = Program.getModuleConfig('ti.sysbios.family.arm.v7r.vim.Hwi');
+
+    var numHwis = modCfg.NUM_INTERRUPTS;
+
+    /*
+     * Retrieve the raw view to get at the module state.
+     * This should just return, we don't need to catch exceptions.
+     */
+    var rawView = Program.scanRawView('ti.sysbios.family.arm.v7r.vim.Hwi');
+
+    var dispatchTableAddr = rawView.modState.dispatchTable;
+
+    var ScalarStructs = xdc.useModule('xdc.rov.support.ScalarStructs');
+
+    /* Retrieve the dispatchTable array of handles */
+    var hwiHandles = Program.fetchArray(ScalarStructs.S_Ptr$fetchDesc,
+                                         dispatchTableAddr, numHwis);
+
+    /*
+     * Scan the dispatchTable for non-zero Hwi handles
+     */
+    for (var i = 0; i < numHwis; i++) {
+        var hwiHandle = hwiHandles[i];
+        if (Number(hwiHandle.elem) != 0) {
+            var alreadyScanned = false;
+            /* skip Hwis that are already known to ROV */
+            for (var j in rawView.instStates) {
+                rawInstance = rawView.instStates[j];
+                if (Number(rawInstance.$addr) == Number(hwiHandle.elem)) {
+                    alreadyScanned = true;
+                    break;
+                }
+            }
+            if (alreadyScanned == false) {
+                /* Retrieve the embedded instance */
+                var obj = Program.fetchStruct(Hwi.Instance_State$fetchDesc,
+                                              hwiHandle.elem);
+                /*
+                 * Retrieve the view for the object. This will automatically
+                 * add the object to the instance list.
+                 */
+                Program.scanObjectView('ti.sysbios.family.arm.v7r.vim.Hwi',
+                                       obj, viewLevel);
+            }
+        }
+    }
+}
+
+/*
  *  ======== viewVimFetch ========
  *  Once per halt, fetch current vim contents
  *  Called from viewInitBasic()
@@ -527,14 +643,18 @@ function viewInitBasic(view, obj)
     var Program = xdc.useModule('xdc.rov.Program');
     var halHwi = xdc.useModule('ti.sysbios.hal.Hwi');
 
+    /* Add constructed Hwis to ROV object list */
+    viewScanDispatchTable(this, 'Basic');
+
     view.halHwiHandle =  halHwi.viewGetHandle(obj.$addr);
     view.label = Program.getShortName(obj.$label);
     view.intNum = obj.intNum;
+
     if (obj.type == Hwi.Type_FIQ) {
-        view.useDispatcher = false;
+        view.type = "FIQ";
     }
     else {
-        view.useDispatcher = obj.useDispatcher;
+        view.type = "IRQ";
     }
 
     var fxn = Program.lookupFuncName(Number(obj.fxn));

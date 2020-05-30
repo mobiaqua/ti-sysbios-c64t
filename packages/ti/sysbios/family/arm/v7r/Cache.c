@@ -37,11 +37,9 @@
 
 #include <ti/sysbios/hal/Hwi.h>
 #include <ti/sysbios/knl/Intrinsics.h>
-#include <ti/sysbios/family/arm/Mpu.h>
+#include <ti/sysbios/family/arm/MPU.h>
 
 #include "package/internal/Cache.xdc.h"
-
-// TODO assert for L2 type or ignore ?
 
 /*
  *  ======== Cache_initModuleState ========
@@ -98,14 +96,14 @@ Void Cache_startup()
     }
 
     /* Init MPU module */
-    Mpu_startup();
+    MPU_startup();
 }
 
 /*
  *  ======== Cache_disable ========
  *  Disable the cache(s) specified by the 'type' paramter.
  */
-Void Cache_disable(Bits16 type )
+Void Cache_disable(Bits16 type)
 {
     UInt enabled, key;
 
@@ -113,12 +111,14 @@ Void Cache_disable(Bits16 type )
     enabled = Cache_getEnabled();
 
     if (enabled & (type & Cache_Type_L1D)) {
-        key = Hwi_disable();            // TODO FIQs remain enabled!!!
+        key = Hwi_disable();
         Cache_disableL1d();             /* Disable L1D Cache */
         Hwi_restore(key);
     }
     if (enabled & (type & Cache_Type_L1P)) {
+        key = Hwi_disable();
         Cache_disableL1p();             /* Disable L1P Cache */
+        Hwi_restore(key);
     }
 
 }

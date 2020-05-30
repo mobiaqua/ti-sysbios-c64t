@@ -1,5 +1,5 @@
 /*
- *  Copyright 2015 by Texas Instruments Incorporated.
+ *  Copyright 2016 by Texas Instruments Incorporated.
  *
  */
 
@@ -13,7 +13,7 @@ Pkg.otherSrcs = ['boot.c', 'autoinit.c'];
 Pkg.otherFiles = Pkg.otherSrcs;
 
 var attrs = {
-    profile: Pkg.attrs.profile == "debug" ? "debug" : "whole_program",
+    profile: Pkg.attrs.profile == "debug" ? "debug" : "release",
     copts: "--symdebug:dwarf --optimize_with_debug"
 };
 

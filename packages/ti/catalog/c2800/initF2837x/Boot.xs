@@ -1,14 +1,34 @@
 /*
- *  Copyright (c) 2015 by Texas Instruments and others.
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2016, Texas Instruments Incorporated
+ * All rights reserved.
  *
- *  Contributors:
- *      Texas Instruments - initial implementation
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *
- * */
+ * *  Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * *  Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * *  Neither the name of Texas Instruments Incorporated nor the names of
+ *    its contributors may be used to endorse or promote products derived
+ *    from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 /*
  *  ======== Boot.xs ========
@@ -32,17 +52,9 @@ function module$meta$init()
 
     Boot = this;
     Program = xdc.module('xdc.cfg.Program');
-    
+
     /* set default loadSegment */
-    if (Program.platformName.match(/ti\.platforms\.tms320x28:F2807/) ||
-        Program.platformName.match(/ti\.platforms\.tms320x28:F2837/) ||
-        Program.platformName.match(/ti\.platforms\.tms320x28:TMS320F2807/) ||
-        Program.platformName.match(/ti\.platforms\.tms320x28:TMS320F2837/)) {
-        Boot.loadSegment = "FLASHA | FLASHB | FLASHC | FLASHD | FLASHE | FLASHF | FLASHG | FLASHH | FLASHI | FLASHJ | FLASHK | FLASHL | FLASHM | FLASHN PAGE = 0";
-    }
-    else {
-        Boot.loadSegment = "FLASHA | FLASHB | FLASHC | FLASHD | FLASHE | FLASHF | FLASHG PAGE = 0";
-    }
+    Boot.loadSegment = "FLASHA PAGE = 0";
 
     /* default runSegment */
     Boot.runSegment = "D01SARAM PAGE = 0";
@@ -213,21 +225,66 @@ function viewInitModule(view, obj)
  */
 function updateFlashWaitState(freq)
 {
-    /*
-     * Compute wait states.  These threshold values are from datasheet
-     * (RWAIT = [(SYSCLK/50)-1] round up to next integer)
-     */
-    if (freq <= 50000000) {
-        Boot.flashWaitStates = 0;
-    }
-    else if (freq <= 100000000) {
-        Boot.flashWaitStates = 1;
-    }
-    else if (freq <= 150000000) {
-        Boot.flashWaitStates = 2;
-    }
-    else {
-        Boot.flashWaitStates = 3;
+    if (Program.cpu != undefined) {
+        if (Program.cpu.deviceName.match(/F28004/)) {
+            /* external oscillator case */
+            if (Boot.OSCCLKSRCSEL == Boot.OscClk_XTAL) {
+                if (freq <= 20000000) {
+                    Boot.flashWaitStates = 0;
+                }
+                else if (freq <= 40000000) {
+                    Boot.flashWaitStates = 1;
+                }
+                else if (freq <= 60000000) {
+                    Boot.flashWaitStates = 2;
+                }
+                else if (freq <= 80000000) {
+                    Boot.flashWaitStates = 3;
+                }
+                else {
+                    Boot.flashWaitStates = 4;
+                }
+            }
+            else { /* internal oscillator case */
+                if (freq <= 19000000) {
+                    Boot.flashWaitStates = 0;
+                }
+                else if (freq <= 38000000) {
+                    Boot.flashWaitStates = 1;
+                }
+                else if (freq <= 58000000) {
+                    Boot.flashWaitStates = 2;
+                }
+                else if (freq <= 77000000) {
+                    Boot.flashWaitStates = 3;
+                }
+                else if (freq <= 97000000) {
+                    Boot.flashWaitStates = 4;
+                }
+                else {
+                    Boot.flashWaitStates = 5;
+                }
+            }
+        }
+        else {
+            /*
+             *  For F2837x devices
+             *  Compute wait states.  These threshold values are from datasheet
+             *  (RWAIT = [(SYSCLK/50)-1] round up to next integer)
+             */
+            if (freq <= 50000000) {
+                Boot.flashWaitStates = 0;
+            }
+            else if (freq <= 100000000) {
+                Boot.flashWaitStates = 1;
+            }
+            else if (freq <= 150000000) {
+                Boot.flashWaitStates = 2;
+            }
+            else {
+                Boot.flashWaitStates = 3;
+            }
+        }
     }
 }
 
@@ -251,7 +308,7 @@ function getFrequency()
             fractMult = 0.75;
         }
 
-        if (Boot.SPLLIMULT == 0) {      /* multiplier bypasses PLL ? */
+        if (Boot.SPLLIMULT == 0) {  /* multiplier bypasses PLL ? */
             frequency = Boot.OSCCLK;
         }
         else {
@@ -338,6 +395,3 @@ function freqToString(freq)
         return (freq + " Hz");
     }
 }
-/*
- */
-

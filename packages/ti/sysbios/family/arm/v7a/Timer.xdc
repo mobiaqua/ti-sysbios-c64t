@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@ import xdc.rov.ViewInfo;
 
 import xdc.runtime.Error;
 import xdc.runtime.Types;
-
+import ti.sysbios.hal.Hwi;
 import ti.sysbios.interfaces.ITimer;
 
 /*!
@@ -207,6 +207,10 @@ module Timer inherits ti.sysbios.interfaces.ITimer
      *  @param(id)      timer Id.
      */
     Handle getHandle(UInt id);
+instance:
+
+    /*! Hwi Params for Hwi Object. Default is null. */
+    config Hwi.Params *hwiParams = null;
 
 internal:   /* not for client use */
 
@@ -239,9 +243,11 @@ internal:   /* not for client use */
         ITimer.RunMode      runMode;
         ITimer.StartMode    startMode;
         UInt32              period;
+        Types.FreqHz        extFreq;
         ITimer.PeriodType   periodType;
         UArg                arg;
         TimerFuncPtr        tickFxn;
+        Hwi.Handle          hwi;
     }
 
     struct Module_State {

@@ -345,14 +345,6 @@ module Hwi inherits ti.sysbios.interfaces.IHwi
     extern volatile NVIC nvic;
 
     /*!
-     * Virtual Nested Vectored Interrupt Controller structure
-     * written to by both cores for SMP.
-     * Short name is "Hwi_vnvic"
-     * Long name is "ti_sysbios_family_arm_v6m_Hwi_vnvic"
-     */
-    extern volatile NVIC vnvic;
-
-    /*!
      *  Exception Context - Register contents at the time of an exception.
      */
     struct ExcContext {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, Texas Instruments Incorporated
+ * Copyright (c) 2013-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,6 @@
  */
 /*
  *  ======== Cache.xs ========
- *
  */
 
 var Cache;
@@ -45,72 +44,6 @@ var origSizes = {
 /*  This information should be placed and obtained from catalog files */
 if (xdc.om.$name == "cfg") {
     var deviceTable = {
-        "TMS320CDM6446": {
-            emifACfg: $addr(0x01e00000),
-            emifABase:   0x02000000,
-            emifALength: 0x08000000,
-            emifBCfg: $addr(0x20000000),
-            emifBBase:   0x80000000,
-            emifBLength: 0x10000000,
-            emifCCfg: $addr(0x01e00000),
-            emifCBase:   0x42000000,
-            emifCLength: 0x08000000,
-        },
-        "TMS320CDM6437": {
-            emifACfg: $addr(0x01e00000),
-            emifABase:   0x02000000,
-            emifALength: 0x08000000,
-            emifBCfg: $addr(0x20000000),
-            emifBBase:   0x80000000,
-            emifBLength: 0x10000000,
-            emifCCfg: $addr(0x01e00000),
-            emifCBase:   0x42000000,
-            emifCLength: 0x08000000,
-        },
-        "TMS320CDM6467": {
-            emifACfg: $addr(0x01e00000),
-            emifABase:   0x02000000,
-            emifALength: 0x08000000,
-            emifBCfg: $addr(0x20000000),
-            emifBBase:   0x80000000,
-            emifBLength: 0x10000000,
-            emifCCfg: $addr(0x01e00000),
-            emifCBase:   0x42000000,
-            emifCLength: 0x08000000,
-        },
-        "TMS320CTCI6482": {
-            emifACfg: $addr(0x70000000),
-            emifABase:   0x80000000,
-            emifALength: 0x60000000,
-            emifBCfg: $addr(0x78000000),
-            emifBBase:   0xe0000000,
-            emifBLength: 0x10000000,
-            emifCCfg:  null,
-            emifCBase:   null,
-            emifCLength: null,
-        },
-        "TMS320CTCI6484": {
-            emifACfg: $addr(0x70000000),
-            emifABase:   0x80000000,
-            emifALength: 0x60000000,
-            emifBCfg: $addr(0x78000000),
-            emifBBase:   0xe0000000,
-            emifBLength: 0x20000000,
-            emifCCfg:  null,
-            emifCBase:   null,
-            emifCLength: null,
-        },
-        "TMS320CDM648": {
-            emifACfg: $addr(0x70000000),
-            emifABase:   0x80000000,
-            emifALength: 0x60000000,
-            emifBCfg: $addr(0x78000000),
-            emifBBase:   0xe0000000,
-            emifBLength: 0x10000000,
-            emifCCfg:  null,
-            emifCBase:   null,
-            emifCLength: null,
-        },
         "TMS320TI816X": {
             emifACfg: $addr(0x4c000000),
             emifABase:   0x80000000,
@@ -118,28 +51,6 @@ if (xdc.om.$name == "cfg") {
             emifBCfg: $addr(0x4d000000),
             emifBBase:   0xc0000000,
             emifBLength: 0x40000000,
-            emifCCfg:  null,
-            emifCBase:   null,
-            emifCLength: null,
-        },
-        "TMS320CTCI6486": {
-            emifACfg: $addr(0x78000000),
-            emifABase:   0xe0000000,
-            emifALength: 0x20000000,
-            emifBCfg:  null,
-            emifBBase:   null,
-            emifBLength: null,
-            emifCCfg:  null,
-            emifCBase:   null,
-            emifCLength: null,
-        },
-        "TMS320CTCI6488": {
-            emifACfg: $addr(0x70000000),
-            emifABase:   0x80000000,
-            emifALength: 0x20000000,
-            emifBCfg:  null,
-            emifBBase:   null,
-            emifBLength: null,
             emifCCfg:  null,
             emifCBase:   null,
             emifCLength: null,
@@ -155,7 +66,7 @@ if (xdc.om.$name == "cfg") {
             emifCBase:   null,
             emifCLength: null,
         },
-        "TMS320C3430": {
+        "DM37XX": {
             emifACfg: $addr(0x0),
             emifABase:   0x0,
             emifALength: 0x0,
@@ -177,44 +88,18 @@ if (xdc.om.$name == "cfg") {
             emifCBase:   0x0,
             emifCLength: 0x0,
         },
+        "AR16XX": {
+            emifACfg: $addr(0x0),
+            emifABase:   0x0,
+            emifALength: 0x0,
+            emifBCfg: $addr(0x0),
+            emifBBase:   0x0,
+            emifBLength: 0x0,
+            emifCCfg: $addr(0x0),
+            emifCBase:   0x0,
+            emifCLength: 0x0,
+        },
     };
-
-    deviceTable["TMS320CDM415"]  = deviceTable["TMS320CDM6446"];
-    deviceTable["TMS320CDM420"]  = deviceTable["TMS320CDM6446"];
-    deviceTable["TMS320CDM421"]  = deviceTable["TMS320CDM6446"];
-    deviceTable["TMS320CDM425"]  = deviceTable["TMS320CDM6446"];
-    deviceTable["TMS320CDM426"]  = deviceTable["TMS320CDM6446"];
-    deviceTable["TMS320CDM6441"]  = deviceTable["TMS320CDM6446"];
-    deviceTable["TMS320CDM6443"]  = deviceTable["TMS320CDM6446"];
-
-    deviceTable["TMS320C6421"]   = deviceTable["TMS320CDM6437"];
-    deviceTable["TMS320C6424"]   = deviceTable["TMS320CDM6437"];
-    deviceTable["TMS320CDM6431"]   = deviceTable["TMS320CDM6437"];
-    deviceTable["TMS320CDM6433"]   = deviceTable["TMS320CDM6437"];
-    deviceTable["TMS320CDM6435"]   = deviceTable["TMS320CDM6437"];
-
-    deviceTable["TMS320C6452"]   = deviceTable["TMS320CTCI6482"];
-    deviceTable["TMS320C6454"]   = deviceTable["TMS320CTCI6482"];
-    deviceTable["TMS320C6455"]   = deviceTable["TMS320CTCI6482"];
-    deviceTable["TMS320CDM647"]  = deviceTable["TMS320CTCI6482"];
-    deviceTable["TMS320CDM648"]  = deviceTable["TMS320CTCI6482"];
-
-    deviceTable["TMS320C6457"]  = deviceTable["TMS320CTCI6484"];
-
-    deviceTable["TMS320C6472"]     = deviceTable["TMS320CTCI6486"];
-
-    deviceTable["TMS320C6474"]     = deviceTable["TMS320CTCI6488"];
-    deviceTable["TMS320CTCI6487"]  = deviceTable["TMS320CTCI6488"];
-    deviceTable["TMS320TCI6485"]  = deviceTable["TMS320CTCI6488"];
-    deviceTable["TMS320TCI6489"]  = deviceTable["TMS320CTCI6488"];
-
-    deviceTable["TMS320C2430"]   = deviceTable["TMS320C3430"];
-    deviceTable["OMAP2431"]      = deviceTable["TMS320C3430"];
-    deviceTable["OMAP2530"]      = deviceTable["TMS320C3430"];
-    deviceTable["OMAP2531"]      = deviceTable["TMS320C3430"];
-    deviceTable["OMAP3425"]      = deviceTable["TMS320C3430"];
-    deviceTable["OMAP3525"]      = deviceTable["TMS320C3430"];
-    deviceTable["OMAP3530"]      = deviceTable["TMS320C3430"];
 
     deviceTable["TMS320DA802"]   = deviceTable["TMS320DA830"];
     deviceTable["TMS320DA803"]   = deviceTable["TMS320DA830"];
@@ -444,71 +329,81 @@ function module$use()
         Cache.MAR224_255 = marwords[7];
     }
 
-    /* 
-     *  Override the original sizes if we find the cache settings
-     *  in the platform.
-     */
-    if ("l1PMode" in Program.platform.$orig ||
-        "l1DMode" in Program.platform.$orig ||
-        "l2Mode" in Program.platform.$orig) {
-        if (Program.platform.$orig.l1PMode != null) {
-            origSizes["l1pSize"] =
-                getL1CacheSize(Program.platform.$orig.l1PMode);
-        }
-        if (Program.platform.$orig.l1DMode != null) {
-            origSizes["l1dSize"] =
-                getL1CacheSize(Program.platform.$orig.l1DMode);
-        }
-        if (Program.platform.$orig.l2Mode != null) {
-            origSizes["l2Size"] = getL2CacheSize(Program.platform.$orig.l2Mode);
-        }
-    }
-    else {
-        /* This code deals with the platforms generated by the Platform
-         * Wizard. In XDCtools 3.24, getCreateArgs() returns a structure with
-         * cache settings if different from the default ones, but in 3.25
-         * we need to use the 'CPU' property (see ECL410545), or 'plat' for very
-         * old platforms generated by the Platform Wizard.
+    if (!Program.platformName.match(/ti\.platforms\.c6x/)) {
+        /*
+         *  Override the original sizes if we find the cache settings
+         *  in the platform.
          */
-        var regs;
-        if ("CPU" in Program.platform.$module) {
-            regs = Program.platform.$module.CPU;
-        }
-        else if ("plat" in Program.platform.$module) {
-            /* Early versions of the Platform Wizard in 3.20 (06/2010) used
-             * 'plat' instead of 'CPU'. If such platforms are rebuilt outside of
-             * the Platform Wizard with newer tools, they will be recognized as
-             * compatible packages, so we have to deal with them.
-             */
-            regs = Program.platform.$module.plat;
+        if ("l1PMode" in Program.platform.$orig ||
+            "l1DMode" in Program.platform.$orig ||
+            "l2Mode" in Program.platform.$orig) {
+            if (Program.platform.$orig.l1PMode != null) {
+                origSizes["l1pSize"] =
+                    getL1CacheSize(Program.platform.$orig.l1PMode);
+            }
+            if (Program.platform.$orig.l1DMode != null) {
+                origSizes["l1dSize"] =
+                    getL1CacheSize(Program.platform.$orig.l1DMode);
+            }
+            if (Program.platform.$orig.l2Mode != null) {
+                origSizes["l2Size"] = getL2CacheSize(Program.platform.$orig.l2Mode);
+            }
         }
         else {
-            Cache.$logWarning("Can't read cache settings from the platform '"
-                + Program.platformName + "'. The memory map defined by the "
-                + "platform could be incompatible with SYS/BIOS cache settings."
-                + " Rebuild the platform using the Platform Wizard.",
-                this, null);
-        }
+            /* This code deals with the platforms generated by the Platform
+             * Wizard. In XDCtools 3.24, getCreateArgs() returns a structure with
+             * cache settings if different from the default ones, but in 3.25
+             * we need to use the 'CPU' property (see ECL410545), or 'plat' for very
+             * old platforms generated by the Platform Wizard.
+             */
+            var regs;
+            if ("CPU" in Program.platform.$module) {
+                regs = Program.platform.$module.CPU;
+            }
+            else if ("plat" in Program.platform.$module) {
+                /* Early versions of the Platform Wizard in 3.20 (06/2010) used
+                 * 'plat' instead of 'CPU'. If such platforms are rebuilt outside of
+                 * the Platform Wizard with newer tools, they will be recognized as
+                 * compatible packages, so we have to deal with them.
+                 */
+                regs = Program.platform.$module.plat;
+            }
+            else {
+                Cache.$logWarning("Can't read cache settings from the platform '"
+                    + Program.platformName + "'. The memory map defined by the "
+                    + "platform could be incompatible with SYS/BIOS cache settings."
+                    + " Rebuild the platform using the Platform Wizard.",
+                    this, null);
+            }
 
-        if (regs != null) {
-            if ("l1PMode" in regs && regs.l1PMode != null) {
-                origSizes["l1pSize"] = getL1CacheSize(regs.l1PMode);
-            }
-            if ("l1DMode" in regs && regs.l1DMode != null) {
-                origSizes["l1dSize"] = getL1CacheSize(regs.l1DMode);
-            }
-            if ("l2Mode" in regs && regs.l2Mode != null) {
-                origSizes["l2Size"] = getL2CacheSize(regs.l2Mode);
+            if (regs != null) {
+                if ("l1PMode" in regs && regs.l1PMode != null) {
+                    origSizes["l1pSize"] = getL1CacheSize(regs.l1PMode);
+                }
+                if ("l1DMode" in regs && regs.l1DMode != null) {
+                    origSizes["l1dSize"] = getL1CacheSize(regs.l1DMode);
+                }
+                if ("l2Mode" in regs && regs.l2Mode != null) {
+                    origSizes["l2Size"] = getL2CacheSize(regs.l2Mode);
+                }
             }
         }
     }
+
     /* Check if Cache.initSize written by cfg script */
     if (Cache.initSize.$written("l1pSize") ||
         Cache.initSize.$written("l1dSize") ||
         Cache.initSize.$written("l2Size")) {
-        if ((Cache.initSize.l1pSize != origSizes["l1pSize"]) ||
-            (Cache.initSize.l1dSize != origSizes["l1dSize"]) ||
-            (Cache.initSize.l2Size != origSizes["l2Size"])) {
+        if (Program.platformName.match(/ti\.platforms\.c6x/)) {
+            Cache.$logWarning("Cache settings cannot be changed in " +
+                "user configuration when using the ti.platforms.c6x " +
+                "platform. Please update the cache size symbols in " +
+                "the linker cmd file to change the L1/L2 cache sizes.",
+                this, null);
+        }
+        else if ((Cache.initSize.l1pSize != origSizes["l1pSize"]) ||
+                 (Cache.initSize.l1dSize != origSizes["l1dSize"]) ||
+                 (Cache.initSize.l2Size != origSizes["l2Size"])) {
             Cache.$logWarning("Cache settings were changed in user " +
                 "configuration. User configuration options will override " +
                 "platform settings. Check your memory map to make sure " +

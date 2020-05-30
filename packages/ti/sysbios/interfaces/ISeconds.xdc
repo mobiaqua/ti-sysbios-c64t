@@ -72,7 +72,9 @@ interface ISeconds
 
     /*!
      *  ======== set ========
-     *  Update the real time clock with number of seconds since 1970
+     *  Update the real time clock with number of seconds since 1970.
+     *
+     *  Note: This function is non-reentrant.
      */
     Void set(UInt32 seconds);
 }

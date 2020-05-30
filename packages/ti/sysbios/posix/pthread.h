@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,9 +46,7 @@ extern "C" {
 
 #include <ti/sysbios/posix/types.h>
 #include <ti/sysbios/posix/_time.h>
-
-#define sched_get_priority_min() 1
-#define sched_get_priority_max() Task_numPriorities
+#include <ti/sysbios/posix/sched.h>
 
 #define PTHREAD_BARRIER_SERIAL_THREAD -1
 
@@ -131,12 +129,7 @@ extern void _pthread_cleanup_push(struct _pthread_cleanup_context *context,
 extern int pthread_create(pthread_t *newthread, const pthread_attr_t *attr,
             void *(*startroutine)(void *), void *arg);
 extern int pthread_detach(pthread_t pthread);
-
-static int inline pthread_equal(pthread_t pt1, pthread_t pt2)
-{
-    return (pt1 == pt2);
-}
-
+extern int pthread_equal(pthread_t pt1, pthread_t pt2);
 extern void pthread_exit(void *ptr);
 extern int pthread_getschedparam(pthread_t thread, int *policy,
         struct sched_param *param);
@@ -186,6 +179,16 @@ extern int pthread_cond_signal(pthread_cond_t *cond);
 extern int pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
         const struct timespec *abstime);
 extern int pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex);
+
+/*
+ *************************************************************************
+ *                      pthread_key
+ *************************************************************************
+ */
+extern int pthread_key_create(pthread_key_t *key, void (*destructor)(void*));
+extern int pthread_key_delete(pthread_key_t key);
+extern void *pthread_getspecific(pthread_key_t key);
+extern int pthread_setspecific(pthread_key_t key, const void *value);
 
 /*
  *************************************************************************

@@ -35,7 +35,7 @@
  */
 
 var Cache = null;
-var Mpu = null;
+var MPU = null;
 var Startup = null;
 var Reset = null;
 
@@ -84,7 +84,7 @@ function module$meta$init()
  */
 function module$use()
 {
-    Mpu = xdc.useModule('ti.sysbios.family.arm.Mpu');
+    MPU = xdc.useModule('ti.sysbios.family.arm.MPU');
     Reset = xdc.useModule('xdc.runtime.Reset');
     Startup = xdc.useModule('xdc.runtime.Startup');
 

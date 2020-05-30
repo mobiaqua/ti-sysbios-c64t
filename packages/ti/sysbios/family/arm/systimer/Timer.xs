@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,6 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 /*
  *  ======== Timer.xs ========
  */
@@ -72,6 +71,9 @@ if (xdc.om.$name == "cfg") {
 
     deviceTable["DRA7XX"] = deviceTable["Vayu"];
     deviceTable["OMAP5430"] = deviceTable["Vayu"];
+    deviceTable["C66AK2E05"] = deviceTable["TCI6636K2H"];
+    deviceTable["TCI6630K2L"] = deviceTable["TCI6636K2H"];
+    deviceTable["TCI6638K2K"] = deviceTable["TCI6636K2H"];
     deviceTable["TCI66AK2G02"] = deviceTable["TCI6636K2H"];
 }
 

@@ -17,9 +17,6 @@ var SEP = "\x13";
 var TAB = "\x14";
 var DEPTH = 4;
 
-//var fileModule = xdc.module('xdc.services.io.File');
-//var file = fileModule.open("D:/bar.txt", "a");
-
 /*
  *  ======== errorString ========
  *  Returns a error string packed within delimiter ERR
@@ -155,6 +152,9 @@ function formatTreeView(obj, level)
 {
     var objString = "";
     for (var prop in obj) {
+        if (prop == "$status") {
+           continue;
+        }
         objString = objString + prop + TAB;
         if (typeof obj[prop] == 'object' && obj[prop] != null) {
             if (obj[prop].$category == "Addr") {
@@ -204,7 +204,7 @@ function formatTreeTableView(arr)
             }
 
             /* 'label' was already used to name the object 'obj'. */
-            if (prop == "label") {
+            if (prop == "label" || prop == "$status") {
                 continue;
             }
 
@@ -590,7 +590,8 @@ function retrieveModuleList()
         while (len < tabs.length) {
             var tab = tabs[len];
             len++;
-            if (tab.name == "CallStacks" && this.clientVers < 2) {
+            if ((tab.name == "CallStacks" || tab.name == "Exception")
+                && this.clientVers < 3) {
                 continue;
             }
 

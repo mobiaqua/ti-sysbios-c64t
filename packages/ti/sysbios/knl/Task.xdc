@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -94,7 +94,7 @@ import ti.sysbios.knl.Queue;
  *
  *  Certain system configuration settings will result in
  *  task stacks needing to be large enough to absorb two interrupt
- *  contexts rather than just one. 
+ *  contexts rather than just one.
  *  Setting {@link ti.sysbios.BIOS#logsEnabled BIOS.logsEnabled} to 'true'
  *  or installing any Task hooks will have the side effect of allowing
  *  up to two interrupt contexts to be placed on a task stack. Also
@@ -172,7 +172,7 @@ import ti.sysbios.knl.Queue;
  *  @a(Hook Functions)
  *
  *  Sets of hook functions can be specified for the Task module.  Each
- *  set can contains these hook functions:
+ *  set can contain these hook functions:
  *  @p(blist)
  *  -Register: A function called before any statically created tasks
  *      are initialized at runtime.  The register hook is called at boot time
@@ -180,23 +180,36 @@ import ti.sysbios.knl.Queue;
  *  -Create: A function that is called when a task is created.
  *      This includes tasks that are created statically and those
  *      created dynamically using {@link #create} or {@link #construct}.
- *      The create hook is called outside of a Task_disable/enable block and
- *   before the task has been added to the ready list.
+ *      For statically created tasks, create hook is called before main()
+ *      and before interrupts are enabled. For dynamically created or
+ *      constructed tasks, create hook is called in the same context the
+ *      task is created or constructed in i.e. if a task is created in
+ *      main(), the create hook is called in main context and if the task
+ *      is created within another task, it is called in task context. The
+ *      create hook is called outside of a Task_disable/enable block and
+ *      before the task has been added to the ready list.
  *  -Ready: A function that is called when a task becomes ready to run.
- *   The ready hook is called from within a Task_disable/enable block with
- *   interrupts enabled.
+ *      The ready hook is called in the context of the thread unblocking
+ *      a task and therefore it can be called in Hwi, Swi or Task context.
+ *      If a Swi or Hwi posts a semaphore that unblocks a task, the ready
+ *      hook would be called in the Swi or Hwi's context. The ready hook is
+ *      called from within a Task_disable/enable block with interrupts enabled.
  *  -Switch: A function that is called just before a task switch
- *      occurs. The 'prev' and 'next' task handles are passed to the Switch
+ *      occurs. The 'prev' and 'next' task handles are passed to the switch
  *      hook. 'prev' is set to NULL for the initial task switch that occurs
- *      during SYS/BIOS startup.  The Switch hook is called from within a
- *      Task_disable/enable block with interrupts enabled.
- *  -Exit:      A function that is called when a task exits using
- *      {@link #exit}.  The exit hook is passed the handle of the exiting
- *      task.  The exit hook is called outside of a Task_disable/enable block
- *      and before the task has been removed from the kernel lists.
+ *      during SYS/BIOS startup.  The switch hook is called from within a
+ *      Task_disable/enable block with interrupts enabled, in the
+ *      context of the task being switched from (ie: the `prev` task).
+ *  -Exit: A function that is called when a task exits using {@link #exit}.
+ *      It is called in the exiting task's context. The exit hook is passed
+ *      the handle of the exiting task. The exit hook is called outside of a
+ *      Task_disable/enable block and before the task has been removed from
+ *      the kernel lists.
  *  -Delete: A function that is called when any task is deleted at
- *      run-time with {@link #delete}.  The delete hook is called outside
- *      of a Task_disable/enable block.
+ *      run-time with {@link #delete}. The delete hook is called in idle task
+ *      context if {@link #deleteTerminatedTasks} is set to true. Otherwise,
+ *      it is called in the context of the task that is deleting another task.
+ *      The delete hook is called outside of a Task_disable/enable block.
  *  @p
  *  Hook functions can only be configured statically.
  *
@@ -390,6 +403,18 @@ module Task
 
     /*! "All Task Blocked" function type definition. */
     typedef Void (*AllBlockedFuncPtr)(Void);
+
+    /*! Check value computation function type definition. */
+    typedef UInt32 (*ModStateCheckValueFuncPtr)(Task.Module_State *);
+
+    /*! Data Integrity Check function type definition */
+    typedef Int (*ModStateCheckFuncPtr)(Task.Module_State *, UInt32);
+
+    /*! Check value computation function type definition. */
+    typedef UInt32 (*ObjectCheckValueFuncPtr)(Task.Handle);
+
+    /*! Task object data integrity check function type definition */
+    typedef Int (*ObjectCheckFuncPtr)(Task.Handle, UInt32);
 
     /*!
      *  Task execution modes.
@@ -617,6 +642,24 @@ module Task
 
     config Error.Id E_deleteNotAllowed = {
         msg: "E_deleteNotAllowed: Task 0x%x."
+    };
+
+    /*!
+     *  Error raised when the check value of the Task module state does not
+     *  match the stored check value (computed during startup). This indicates
+     *  that the Task module state was corrupted.
+     */
+    config Error.Id E_moduleStateCheckFailed = {
+        msg: "E_moduleStateCheckFailed: Task module state data integrity check failed."
+    };
+
+    /*!
+     *  Error raised when the check value of the Task object does not match
+     *  the stored check value (computed during startup). This indicates
+     *  that the Task object was corrupted.
+     */
+    config Error.Id E_objectCheckFailed = {
+        msg: "E_objectCheckFailed: Task 0x%x object data integrity check failed."
     };
 
     // Asserts
@@ -870,6 +913,9 @@ module Task
     /*!
      *  Initialize stack with known value for stack checking at runtime
      *  (see {@link #checkStackFlag}).
+     *  If this flag is set to false, while the
+     *  {@link ti.sysbios.hal.Hwi#checkStackFlag} is set to true, only the
+     *  first byte of the stack is initialized.
      *
      *  This is also useful for inspection of stack in debugger or core
      *  dump utilities.
@@ -885,9 +931,6 @@ module Task
      *  longer at this value, the assumption is that the task has
      *  overrun its stack. If the test fails, then the
      *  {@link #E_stackOverflow} error is raised.
-     *
-     *  Runtime stack checking is only performed if {@link #initStackFlag} is
-     *  also true.
      *
      *  Default is true.
      *
@@ -933,6 +976,273 @@ module Task
      *  See {@link #hookfunc Hook Functions} for details about HookSets.
      */
     config HookSet hooks[length] = [];
+
+    /*!
+     *  ======== moduleStateCheckFxn ========
+     *  Function called to perform module state data integrity check
+     *
+     *  If {@link #moduleStateCheckFlag} is set to true, SYS/BIOS kernel
+     *  will call this function each time Task_disable() function is called.
+     *  SYS/BIOS provides a default implementation of this function that
+     *  computes the check value for the static module state fields and
+     *  compares the resulting check value against the stored value. In
+     *  addition, the check function validates some of the pointers used
+     *  by the Task scheduler. The application can install its own
+     *  implementation of the module state check function.
+     *
+     *  Here's an example module state check function:
+     *
+     *  *.cfg
+     *  @p(code)
+     *  var Task = xdc.useModule('ti.sysbios.knl.Task');
+     *
+     *  // Enable Task module state data integrity check
+     *  Task.moduleStateCheckFlag = true;
+     *
+     *  // Install custom module state check function
+     *  Task.moduleStateCheckFxn = "&myCheckFunc";
+     *  @p
+     *
+     *  *.c
+     *  @p(code)
+     *  #define ti_sysbios_knl_Task__internalaccess
+     *  #include <ti/sysbios/knl/Task.h>
+     *
+     *  Int myCheckFunc(Task_Module_State *moduleState, UInt32 checkValue)
+     *  {
+     *      UInt32 newCheckValue;
+     *
+     *      newCheckValue = Task_moduleStateCheckValueFxn(moduleState);
+     *      if (newCheckValue != checkValue) {
+     *          // Return '-1' to indicate data corruption. SYS/BIOS kernel
+     *          // will raise an error.
+     *          return (-1);
+     *      }
+     *
+     *      return (0);
+     *  }
+     *  @p
+     */
+    config ModStateCheckFuncPtr moduleStateCheckFxn = Task.moduleStateCheck;
+
+    /*!
+     *  ======== moduleStateCheckValueFxn ========
+     *  Function called to compute module state check value
+     *
+     *  If {@link #moduleStateCheckFlag} is set to true, SYS/BIOS kernel
+     *  will call this function during startup to compute the Task module
+     *  state's check value.
+     *
+     *  SYS/BIOS provides a default implementation of this function that
+     *  computes a 32-bit checksum for the static module state fields (i.e.
+     *  module state fields that do not change during the lifetime of the
+     *  application). The application can install its own implementation
+     *  of this function.
+     *
+     *  Here's an example module state check value computation function:
+     *
+     *  *.cfg
+     *  @p(code)
+     *  var Task = xdc.useModule('ti.sysbios.knl.Task');
+     *
+     *  // Enable Task module state data integrity check
+     *  Task.moduleStateCheckFlag = true;
+     *
+     *  // Install custom module state check value function
+     *  Task.moduleStateCheckValueFxn = "&myCheckValueFunc";
+     *  @p
+     *
+     *  *.c
+     *  @p(code)
+     *  #define ti_sysbios_knl_Task__internalaccess
+     *  #include <ti/sysbios/knl/Task.h>
+     *
+     *  UInt32 myCheckValueFunc(Task_Module_State *moduleState)
+     *  {
+     *      UInt64 checksum;
+     *
+     *      checksum = (uintptr_t)moduleState->readyQ +
+     *                 (uintptr_t)moduleState->smpCurSet +
+     *                 (uintptr_t)moduleState->smpCurMask +
+     *                 (uintptr_t)moduleState->smpCurTask +
+     *                 (uintptr_t)moduleState->smpReadyQ +
+     *                 (uintptr_t)moduleState->idleTask +
+     *                 (uintptr_t)moduleState->constructedTasks;
+     *      checksum = (checksum >> 32) + (checksum & 0xFFFFFFFF);
+     *      checksum = checksum + (checksum >> 32);
+     *
+     *      return ((UInt32)(~checksum));
+     *  }
+     *  @p
+     */
+    config ModStateCheckValueFuncPtr moduleStateCheckValueFxn =
+        Task.getModuleStateCheckValue;
+
+    /*!
+     *  ======== moduleStateCheckFlag ========
+     *  Perform a runtime data integrity check on the Task module state
+     *
+     *  This configuration parameter determines whether a data integrity
+     *  check is performed on the Task module state in order to detect
+     *  data corruption.
+     *
+     *  If this field is set to true, a check value of the static fields in
+     *  the Task module state (i.e. fields that do not change during the
+     *  lifetime of the application) is computed during startup. The
+     *  computed check value is stored for use by the Task module state check
+     *  function. The application can implement its own check value
+     *  computation function (see {@link #moduleStateCheckValueFxn}).
+     *  By default, SYS/BIOS installs a check value computation function that
+     *  computes a 32-bit checksum of the static fields in the Task module
+     *  state.
+     *
+     *  The module state check function (see {@link #moduleStateCheckFxn})
+     *  is called from within the Task_disable() function. The application
+     *  can provide its own implementation of this function. By default,
+     *  SYS/BIOS installs a check function that computes the check value
+     *  for select module state fields and compares the resulting check
+     *  value against the stored value.
+     *
+     *  If the module state check function returns a '-1' (i.e. check failed),
+     *  then the SYS/BIOS kernel will raise an error.
+     */
+    config Bool moduleStateCheckFlag = false;
+
+    /*!
+     *  ======== objectCheckFxn ========
+     *  Function called to perform Task object data integrity check
+     *
+     *  If {@link #objectCheckFlag} is set to true, SYS/BIOS kernel
+     *  will call this function from within a Task switch hook and
+     *  each time a Task blocks or unblocks. SYS/BIOS provides a default
+     *  implementation of this function that computes the check value
+     *  for the static Task object fields and compares the resulting
+     *  check value against the stored value. The application can install
+     *  its own implementation of the object check function.
+     *
+     *  Here's an example Task object check function:
+     *
+     *  *.cfg
+     *  @p(code)
+     *  var Task = xdc.useModule('ti.sysbios.knl.Task');
+     *
+     *  // Enable Task object data integrity check
+     *  Task.objectCheckFlag = true;
+     *
+     *  // Install custom Task object check function
+     *  Task.objectCheckFxn = "&myCheckFunc";
+     *  @p
+     *
+     *  *.c
+     *  @p(code)
+     *  #define ti_sysbios_knl_Task__internalaccess
+     *  #include <ti/sysbios/knl/Task.h>
+     *
+     *  Int myCheckFunc(Task_Handle handle, UInt32 checkValue)
+     *  {
+     *      UInt32 newCheckValue;
+     *
+     *      newCheckValue = Task_objectCheckValueFxn(handle);
+     *      if (newCheckValue != checkValue) {
+     *          // Return '-1' to indicate data corruption. SYS/BIOS kernel
+     *          // will raise an error.
+     *          return (-1);
+     *      }
+     *
+     *      return (0);
+     *  }
+     *  @p
+     */
+    config ObjectCheckFuncPtr objectCheckFxn = Task.objectCheck;
+
+    /*!
+     *  ======== objectCheckValueFxn ========
+     *  Function called to compute Task object check value
+     *
+     *  If {@link #objectCheckFlag} is set to true, SYS/BIOS kernel
+     *  will call this function to compute the Task object's check value
+     *  each time a Task is created.
+     *
+     *  SYS/BIOS provides a default implementation of this function that
+     *  computes a 32-bit checksum for the static Task object fields (i.e.
+     *  Task object fields that do not change during the lifetime of the
+     *  Task). The application can install its own implementation of this
+     *  function.
+     *
+     *  Here's an example Task object check value computation function:
+     *
+     *  *.cfg
+     *  @p(code)
+     *  var Task = xdc.useModule('ti.sysbios.knl.Task');
+     *
+     *  // Enable Task object data integrity check
+     *  Task.objectCheckFlag = true;
+     *
+     *  // Install custom Task object check value function
+     *  Task.objectCheckValueFxn = "&myCheckValueFunc";
+     *  @p
+     *
+     *  *.c
+     *  @p(code)
+     *  #define ti_sysbios_knl_Task__internalaccess
+     *  #include <ti/sysbios/knl/Task.h>
+     *
+     *  UInt32 myCheckValueFunc(Task_Handle taskHandle)
+     *  {
+     *      UInt64 checksum;
+     *
+     *      checksum = taskHandle->stackSize +
+     *                 (uintptr_t)taskHandle->stack +
+     *                 (uintptr_t)taskHandle->stackHeap +
+     *  #if defined(__IAR_SYSTEMS_ICC__)
+     *                 (UInt64)taskHandle->fxn +
+     *  #else
+     *                 (uintptr_t)taskHandle->fxn +
+     *  #endif
+     *                 taskHandle->arg0 +
+     *                 taskHandle->arg1 +
+     *                 (uintptr_t)taskHandle->hookEnv +
+     *                 taskHandle->vitalTaskFlag;
+     *      checksum = (checksum >> 32) + (checksum & 0xFFFFFFFF);
+     *      checksum = checksum + (checksum >> 32);
+     *
+     *      return ((UInt32)(~checksum));
+     *  }
+     *  @p
+     */
+    config ObjectCheckValueFuncPtr objectCheckValueFxn =
+        Task.getObjectCheckValue;
+
+    /*!
+     *  ======== objectCheckFlag ========
+     *  Perform a runtime data integrity check on each Task object
+     *
+     *  This configuration parameter determines whether a data integrity
+     *  check is performed on each Task object in the system in order to detect
+     *  data corruption.
+     *
+     *  If this field is set to true, a check value of the static fields in
+     *  the Task object (i.e. fields that do not change during the lifetime
+     *  of the Task) is computed when the Task is created. The computed check
+     *  value is stored for use by the Task object check function. The
+     *  application can implement its own check value computation function
+     *  (see {@link #objectCheckValueFxn}). By default, SYS/BIOS installs a
+     *  check value computation function that computes a 32-bit checksum of
+     *  the static fields in the Task object.
+     *
+     *  The Task object check function (see {@link #objectCheckFxn})
+     *  is called from within a Task switch hook if stack checking
+     *  (see {@link #checkStackFlag}) is enabled. It is also called when
+     *  a task blocks or unblocks. The application can provide its own
+     *  implementation of this function. By default, SYS/BIOS installs a
+     *  check function that computes the check value for select Task
+     *  object fields and compares the resulting check value against the
+     *  stored value.
+     *
+     *  If the Task object check function returns a '-1' (i.e. check failed),
+     *  then the SYS/BIOS kernel will raise an error.
+     */
+    config Bool objectCheckFlag = false;
 
     // -------- Module Functions --------
 
@@ -1439,13 +1749,16 @@ instance:
      *
      *  Null indicates that the stack is to be allocated by create().
      *
-     *  Example: To statically initialize "tsk0"'s stack to a literal
-     *  address, use the following syntax:
+     *  @a(Static Configuration Usage Warning)
+     *  This parameter can only be assigned a non-null value
+     *  during runtime Task creates or constructs.
      *
-     *  @p(code)
-     *      Program.global.tsk0.stack = $addr(literal);
-     *  @p
+     *  Static configuration of the 'stack' parameter is not supported.
      *
+     *  Note that if {@link ti.sysbios.BIOS#runtimeCreatesEnabled
+     *  BIOS.runtimeCreatesEnabled} is set to false, then the user is required
+     *  to provide the stack buffer when constructing the Task object.
+     *  If 'stack' is not provided, then Task_construct() will fail.
      */
     config Ptr stack = null;
 
@@ -1737,7 +2050,7 @@ instance:
     /*!
      *  ======== setAffinity ========
      *  Set task's core affinity (should be used only in applications built
-     *  with {@link ti.sysbios.BIOS#smpEnabled} set to true)
+     *  with {@link ti.sysbios.BIOS#smpEnabled BIOS.smpEnabled} set to true)
      *
      *  If the new core ID is different than the current core affinity
      *  a reschedule will be performed immediately.
@@ -1887,6 +2200,26 @@ internal:   /* not for client use */
     Void processVitalTaskFlag(Object *task);
 
     /*
+     *  ======== moduleStateCheck ========
+     */
+    Int moduleStateCheck(Task.Module_State *moduleState, UInt32 checkValue);
+
+    /*
+     *  ======== getModuleStateCheckValue ========
+     */
+    UInt32 getModuleStateCheckValue(Task.Module_State *moduleState);
+
+    /*
+     *  ======== objectCheck ========
+     */
+    Int objectCheck(Task.Handle handle, UInt32 checkValue);
+
+    /*
+     *  ======== getObjectCheckValue ========
+     */
+    UInt32 getObjectCheckValue(Task.Handle handle);
+
+    /*
      *  ======== startupHookFunc ========
      *  Called by core 0 just before switch to first task
      */
@@ -1963,9 +2296,9 @@ internal:   /* not for client use */
     };
 
     struct Module_StateSmp {
-        Queue.Object            *sortedRunQ;     // A queue of RunQEntry elems
+        Queue.Object        *sortedRunQ;         // A queue of RunQEntry elems
                                                  // that is  sorted by priority
-        volatile RunQEntry       smpRunQ[];      // Run queue entry handles for
+        volatile RunQEntry  smpRunQ[];           // Run queue entry handles for
                                                  // each core
     };
 }

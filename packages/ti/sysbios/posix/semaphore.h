@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,12 +42,6 @@ extern "C" {
 
 #include <stdint.h>
 
-#if defined(__GNUC__) && !defined(__ti__)
-
-#include <time.h>
-
-#else
-
 /*
  *  Include definitions of timespec and clockid_t that would
  *  be in sys/types.h.  TI and IAR tool chains do not have a
@@ -56,12 +50,10 @@ extern "C" {
  */
 #include <ti/sysbios/posix/_time.h>
 
-#endif
-
 #include <ti/sysbios/knl/Semaphore.h>
 
 typedef struct sem_t {
-    Semaphore_Struct  sem;
+    ti_sysbios_knl_Semaphore_Struct  sem;
 } sem_t;
 
 

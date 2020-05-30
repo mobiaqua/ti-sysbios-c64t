@@ -1,5 +1,5 @@
 /* 
- *  Copyright (c) 2008 Texas Instruments and others.
+ *  Copyright (c) 2008-2016 Texas Instruments Incorporated
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -51,8 +51,8 @@ metaonly module Arm9 inherits ti.targets.arm.elf.IArm {
     };
 
     override readonly config xdc.bld.ITarget2.Command lnk = {
-        cmd:  "armlnk",
-        opts: "--silicon_version=5e --strict_compatibility=on"
+        cmd:  "armcl",
+        opts: "--silicon_version=5e -z --strict_compatibility=on"
     };
 
     /*!
@@ -95,7 +95,7 @@ metaonly module Arm9 inherits ti.targets.arm.elf.IArm {
         suffix: "$(ccOpts.suffix)"
     };
 
-    override config string includeOpts = "-I$(rootDir)/include/rts -I$(rootDir)/include ";
+    override config string includeOpts = "-I$(rootDir)/include ";
 
     override readonly config xdc.bld.ITarget.StdTypes stdTypes = {
         t_IArg          : { size: 4, align: 4 },

@@ -56,6 +56,7 @@
 #define INTERRUPT_CORE_1        0x40001002
 #define INTER_CORE_INTNUM       19
 
+extern void _exit(int code);
 extern Void ti_sysbios_hal_Hwi_initStack(Void);
 
 /*
@@ -100,7 +101,18 @@ Void Core_hwiFunc(UArg arg)
         Task_unlockSched();
         Swi_unlockSched();
         Core_unlock();
+
+#if defined(__GNUC__) && !defined(__ti__)
+        /*
+         * Call _exit() instead of abort. abort() internally
+         * calls raise() which will invoke ReentSupport_getReent()
+         * from a Hwi context and cause an assertion failure.
+         */
+        _exit(0);
+#else
         abort();
+#endif
+
     }
 
     Hwi_flushVnvic();
@@ -136,8 +148,8 @@ Void Core_startCore1()
     }
 
     /* put C stack in the middle of core 1's Hwi stack to avoid collision */
-    *(Char **)(0x0008) = &Core_module->core1HwiStack[Core_core1HwiStackSize/2];
-    *(UInt32 *)(0x000C) = (UInt32)Core_core1Startup;
+    *(volatile Char **)(0x0008) = &Core_module->core1HwiStack[Core_core1HwiStackSize/2];
+    *(volatile UInt32 *)(0x000C) = (UInt32)Core_core1Startup;
 }
 
 /*

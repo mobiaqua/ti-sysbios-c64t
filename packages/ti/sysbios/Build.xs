@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -79,6 +79,7 @@ var ccOptsList = {
     "ti.targets.arm.elf.M3"                     : customArmOpts,
     "ti.targets.arm.elf.M4"                     : customArmOpts,
     "ti.targets.arm.elf.M4F"                    : customArmOpts,
+    "ti.targets.arm.elf.R4F"                    : customArmOpts,
     "ti.targets.arm.elf.R5F"                    : customArmOpts,
     "ti.targets.arm.elf.R5F_big_endian"         : customArmOpts,
     "gnu.targets.arm.M3"                        : customGnuArmM3Opts,
@@ -136,21 +137,16 @@ function module$use()
     }
 
     /*
-     * Gracefully handle non-supported whole_program profiles
+     * Handle non-supported whole_program profiles
      */
-    if (profile.match(/whole_program/)
-        && (BIOS.libType != BIOS.LibType_Debug)) {
-        /* allow build to proceed */
-        BIOS.libType = BIOS.LibType_Debug;
-        /* but warning the user */
-        BIOS.$logWarning("The '" + profile +
-            "' build profile will not be supported " +
-            "in future releases of SYS/BIOS.  " +
+    if (profile.match(/whole_program/)) {
+        BIOS.$logError("The '" + profile +
+            "' build profile is no longer supported in SYS/BIOS. " +
             "Use 'release' or 'debug' profiles together with the " +
             "'BIOS.libType' configuration parameter to specify your " +
             "preferred library.  See the compatibility section of " +
             "your SYS/BIOS release notes for more information.",
-            "Profile Deprecation Warning", BIOS);
+            "Profile Unsupported Error", BIOS);
     }
 
     /* 
@@ -164,46 +160,46 @@ function module$use()
     /* inform getLibs() about location of library */
     switch (BIOS.libType) {
         case BIOS.LibType_Instrumented:
-	    if ((BIOS.$written("assertsEnabled") == true) &&
-		(BIOS.assertsEnabled == false)) {
-		BIOS.$logWarning(
-		    "Asserts are enabled when BIOS.libType " +
-		    "is set to BIOS.LibType_Instrumented",
+            if ((BIOS.$written("assertsEnabled") == true) &&
+                (BIOS.assertsEnabled == false)) {
+                BIOS.$logWarning(
+                    "Asserts are enabled when BIOS.libType " +
+                    "is set to BIOS.LibType_Instrumented",
                     BIOS, "assertsEnabled"
-		);
-	    }
-	    BIOS.assertsEnabled = true;
-	    
-	    if ((BIOS.$written("logsEnabled") == true) &&
-		(BIOS.logsEnabled == false)) {
-		BIOS.$logWarning(
-		    "Logs are enabled when BIOS.libType " +
-		    "is set to BIOS.LibType_Instrumented",
+                );
+            }
+            BIOS.assertsEnabled = true;
+
+            if ((BIOS.$written("logsEnabled") == true) &&
+                (BIOS.logsEnabled == false)) {
+                BIOS.$logWarning(
+                    "Logs are enabled when BIOS.libType " +
+                    "is set to BIOS.LibType_Instrumented",
                     BIOS, "logsEnabled"
-		);
-	    }
-	    BIOS.logsEnabled = true;
+                );
+            }
+            BIOS.logsEnabled = true;
             break;
 
         case BIOS.LibType_NonInstrumented:
-	    if ((BIOS.$written("assertsEnabled") == true) &&
-		(BIOS.assertsEnabled == true)) {
-		BIOS.$logWarning(
-		    "Asserts are disabled when BIOS.libType " +
-		    "is set to BIOS.LibType_NonInstrumented",
+            if ((BIOS.$written("assertsEnabled") == true) &&
+                (BIOS.assertsEnabled == true)) {
+                BIOS.$logWarning(
+                    "Asserts are disabled when BIOS.libType " +
+                    "is set to BIOS.LibType_NonInstrumented",
                     BIOS, "assertsEnabled"
-		);
-	    }
-	    BIOS.assertsEnabled = false;
-	    if ((BIOS.$written("logsEnabled") == true) &&
-		(BIOS.logsEnabled == true)) {
-		BIOS.$logWarning(
-		    "Logs are disabled when BIOS.libType " +
-		    "is set to BIOS.LibType_NonInstrumented",
+                );
+            }
+            BIOS.assertsEnabled = false;
+            if ((BIOS.$written("logsEnabled") == true) &&
+                (BIOS.logsEnabled == true)) {
+                BIOS.$logWarning(
+                    "Logs are disabled when BIOS.libType " +
+                    "is set to BIOS.LibType_NonInstrumented",
                     BIOS, "logsEnabled"
-		);
-	    }
-	    BIOS.logsEnabled = false;
+                );
+            }
+            BIOS.logsEnabled = false;
             break;
 
         case BIOS.LibType_Debug:
@@ -285,7 +281,6 @@ var biosPackages = [
     "ti.sysbios.family.arm.cc26xx",
     "ti.sysbios.family.arm.cc32xx",
     "ti.sysbios.family.arm.da830",
-    "ti.sysbios.family.arm.dm6446",
     "ti.sysbios.family.arm.ducati",
     "ti.sysbios.family.arm.ducati.dm8148",
     "ti.sysbios.family.arm.ducati.omap4430",
@@ -299,12 +294,9 @@ var biosPackages = [
     "ti.sysbios.family.arm.m3",
     "ti.sysbios.family.arm.msp432",
     "ti.sysbios.family.arm.msp432.init",
-    "ti.sysbios.family.arm.omap1030",
     "ti.sysbios.family.arm.v7r",
     "ti.sysbios.family.arm.v7r.tms570",
-    "ti.sysbios.family.arm.v7r.rti",
     "ti.sysbios.family.arm.v7r.vim",
-    "ti.sysbios.family.arm.sim1030",
     "ti.sysbios.family.arm.tms570",
     "ti.sysbios.family.arm.v7a",
     "ti.sysbios.family.arm.v7a.smp",
@@ -314,11 +306,8 @@ var biosPackages = [
     "ti.sysbios.family.c62",
     "ti.sysbios.family.c64",
     "ti.sysbios.family.c64p",
-    "ti.sysbios.family.c64p.dm6437",
-    "ti.sysbios.family.c64p.dm6446",
     "ti.sysbios.family.c64p.omap3430",
     "ti.sysbios.family.c64p.primus",
-    "ti.sysbios.family.c64p.tci6482",
     "ti.sysbios.family.c64p.tci6488",
     "ti.sysbios.family.c64p.tesla",
     "ti.sysbios.family.c64p.ti81xx",
@@ -339,15 +328,16 @@ var biosPackages = [
     "ti.sysbios.knl",
     "ti.sysbios.misc",
     "ti.sysbios.posix",
-    "ti.sysbios.rta",
     "ti.sysbios.rts",
     "ti.sysbios.rts.gnu",
     "ti.sysbios.rts.iar",
+    "ti.sysbios.rts.ti",
     "ti.sysbios.rom.c28",
     "ti.sysbios.smp",
     "ti.sysbios.syncs",
     "ti.sysbios.timers.dmtimer",
     "ti.sysbios.timers.gptimer",
+    "ti.sysbios.timers.rti",
     "ti.sysbios.timers.timer64",
     "ti.sysbios.utils",
     "ti.sysbios.xdcruntime",
@@ -373,7 +363,15 @@ function getDefaultCustomCCOpts()
 
     /* Gnu targets need to pick up ccOpts.prefix and suffix */
     if (Program.build.target.$name.match(/gnu/)) {
-        customCCOpts += " -O3 -I" + Program.build.target.targetPkgPath +
+        var gnuDevice = Program.cpu.deviceName.toUpperCase();
+        /* optimize for size with cc13xx and cc26xx devices */
+        if (gnuDevice.match(/CC26/) || gnuDevice.match(/CC13/)) {
+            customCCOpts += " -Os ";
+        }
+        else {
+            customCCOpts += " -O3 ";
+        }
+        customCCOpts += " -I" + Program.build.target.targetPkgPath +
             "/libs/install-native/$(GCCTARG)/include ";
         customCCOpts = Program.build.target.ccOpts.prefix + " " + customCCOpts;
         customCCOpts += Program.build.target.ccOpts.suffix + " ";
@@ -446,7 +444,9 @@ function getDefs()
     var defs =   " -Dti_sysbios_BIOS_swiEnabled__D=" + (BIOS.swiEnabled ? "TRUE" : "FALSE")
                + " -Dti_sysbios_BIOS_taskEnabled__D=" + (BIOS.taskEnabled ? "TRUE" : "FALSE")
                + " -Dti_sysbios_BIOS_clockEnabled__D=" + (BIOS.clockEnabled ? "TRUE" : "FALSE")
-               + " -Dti_sysbios_BIOS_runtimeCreatesEnabled__D=" + (BIOS.runtimeCreatesEnabled ? "TRUE" : "FALSE");
+               + " -Dti_sysbios_BIOS_runtimeCreatesEnabled__D=" + (BIOS.runtimeCreatesEnabled ? "TRUE" : "FALSE")
+               + " -Dti_sysbios_knl_Task_moduleStateCheckFlag__D=" + (Task.moduleStateCheckFlag ? "TRUE" : "FALSE")
+               + " -Dti_sysbios_knl_Task_objectCheckFlag__D=" + (Task.objectCheckFlag ? "TRUE" : "FALSE");
 
     if (xdc.module(HwiDelegate).hooks.length == 0) {
         defs += " -Dti_sysbios_hal_Hwi_DISABLE_ALL_HOOKS";
@@ -454,10 +454,6 @@ function getDefs()
 
     if (Swi.hooks.length == 0) {
         defs += " -Dti_sysbios_knl_Swi_DISABLE_ALL_HOOKS";
-    }
-
-    if (Task.hooks.length == 0) {
-        defs += " -Dti_sysbios_knl_Task_DISABLE_ALL_HOOKS";
     }
 
     defs += " -Dti_sysbios_BIOS_smpEnabled__D="
@@ -472,9 +468,14 @@ function getDefs()
         defs += " -Dti_sysbios_knl_Task_deleteTerminatedTasks__D=" + (Task.deleteTerminatedTasks ? "TRUE" : "FALSE");
         defs += " -Dti_sysbios_knl_Task_numPriorities__D=" + Task.numPriorities;
         defs += " -Dti_sysbios_knl_Task_checkStackFlag__D=" + (Task.checkStackFlag ? "TRUE" : "FALSE");
+        defs += " -Dti_sysbios_knl_Task_initStackFlag__D=" + (Task.initStackFlag ? "TRUE" : "FALSE");
 
         if (BIOS.useSK) {
             defs += " -Dti_sysbios_BIOS_useSK__D=1";
+        }
+
+        if (Task.hooks.length == 0) {
+            defs += " -Dti_sysbios_knl_Task_DISABLE_ALL_HOOKS";
         }
 
         /*
@@ -598,6 +599,8 @@ function getDefs()
         defs += " -Dxdc_runtime_Log_DISABLE_ALL";
     }
 
+    defs += Build.getCommandLineDefs();
+
     return (defs);
 }
 
@@ -610,13 +613,27 @@ function getCFiles(target)
     var xdcSources = "";
     var cfgBase = "";
     var File = xdc.module("xdc.services.io.File");
+
+    /*
+     * determine if mod_config.c files are pre-pended with app name.
+     * xdc-A tools do not prepend the app name
+     */
+    var xdcPkg = xdc.loadPackage("xdc");
+    xdcVer = Packages.xdc.services.global.Vers.getXdcString(xdcPkg.packageBase + "/package/package.defs.h");
+    if (xdcVer.match("xdc-A")) {
+        var longConfigNames = false;
+    }
+    else {
+        var longConfigNames = true;
+    }
+
     
     cfgBase = String(java.io.File(Program.cfgBase + ".c").getCanonicalPath());
     cfgBase = File.getDOSPath(cfgBase);
     cfgBase = cfgBase.replace(/\\/g, "/");
     cfgBase = cfgBase.substring(0, cfgBase.lastIndexOf('/') + 1);
-    var appName = Program.name.substring(0, Program.name.lastIndexOf('.'));
-    appName = appName + "_p" + Program.build.target.suffix + "_config.c";
+    var appName = Program.name.substring(Program.name.lastIndexOf('/')+1, Program.name.lastIndexOf('.'));
+    appName = appName + "_p" + Program.build.target.suffix + "_";
 
     /*
      * logic to trim the C files down to just what the application needs
@@ -665,7 +682,12 @@ function getCFiles(target)
 
         var Types = xdc.module('xdc.runtime.Types');
         if (packageMatch && mod.common$.outPolicy == Types.SEPARATE_FILE) {
-            biosSources += cfgBase + mn + "_config.c ";
+            if (longConfigNames == true) {
+                biosSources += cfgBase + appName + mn.replace(/\./g,"_") + "_config.c ";
+            }
+            else {
+                biosSources += cfgBase + mn + "_config.c ";
+            }
         }
     }
     
@@ -706,9 +728,29 @@ function getCFiles(target)
                 }
             }
 
+            /*
+             * pull in file contributions from non ti.sysbios
+             * and non xdc.runtime packages
+             * if mod.$private.getCFiles() exists
+             */
+            if ((packageMatch == false) && (mod.$private.getCFiles !== undefined)) {
+                /* pull in file contributions from non ti.sysbios and non xdc.runtime packages */
+                if (!pn.match(/sysbios/)) {
+                    var modCFiles = mod.$private.getCFiles(target);
+                    for (var j in modCFiles) {
+                        biosSources += modCFiles[j] + " ";
+                    }
+                }
+            }
+
             var Types = xdc.module('xdc.runtime.Types');
             if (packageMatch && mod.common$.outPolicy == Types.SEPARATE_FILE) {
-                biosSources += cfgBase + mn + "_config.c ";
+                if (longConfigNames == true) {
+                    biosSources += cfgBase + appName + mn.replace(/\./g,"_") + "_config.c ";
+                }
+                else {
+                    biosSources += cfgBase + mn + "_config.c ";
+                }
             }
         }
 
@@ -759,20 +801,48 @@ function getAsmFiles(target)
                 var modstr = mn.substr(mn.lastIndexOf(".")+1);
                 prefix = prefix.substring(0, prefix.lastIndexOf('.')+1);
                 prefix = prefix.replace(/\./g, "/");
-		var modAsmFiles = mod.$private.getAsmFiles(target);
-		for (var j in modAsmFiles) {
-		    asmSources += prefix + modAsmFiles[j] + " ";
-		}
+                var modAsmFiles = mod.$private.getAsmFiles(target);
+                for (var j in modAsmFiles) {
+                    asmSources += prefix + modAsmFiles[j] + " ";
+                }
             }
-	}
+        }
     }
 
     if (asmSources.length != 0) {
-	/* remove trailing " " */
-	asmSources = asmSources.substring(0, asmSources.length-1);
-    }	
+        /* remove trailing " " */
+        asmSources = asmSources.substring(0, asmSources.length-1);
+    }
 
     return (asmSources.split(' '));
+}
+
+/*
+ *  ======== getCommandLineDefs ========
+ *  get the -D's and --define's from the compiler command line
+ */
+function getCommandLineDefs()
+{
+    var defs = " ";
+    var type = 0; /* 1: quotes */
+    var prefix = Program.build.target.ccOpts.prefix;
+
+    var tokens = prefix.split(" ");
+
+    /*
+     * absorb all the "-Dxyz"'s and "--define"'s in the compiler command line
+     */
+    for (i = 0; i < tokens.length; i++) {
+        if (tokens[i].match(/-D/) || tokens[i].match(/--define/)) {
+            defs += tokens[i];
+            if (tokens[i] == "-D") {
+                defs += tokens[++i];  /* intentionally removes spaces for IAR Assembler */
+            }
+            defs += " ";
+        }
+    }
+
+    return (defs);
 }
 
 /*
@@ -786,15 +856,25 @@ function getIncludePaths()
     var prefix = Program.build.target.ccOpts.prefix;
 
     /*
-     * First look for TI compiler's '--include_path=' option. This is
-     * a contiguous string (no spaces) so it will be a single token.
+     * First look for TI compiler's '--include_path=' option.
+     * This will be a quoted string which may include embedded
+     * spaces.
      */
     var tokens = prefix.split(" ");
+
     for (i=0; i < tokens.length; i++) {
         if (tokens[i].match(/--include_path/)) {
-	    incs += tokens[i] + " ";
+            incs += tokens[i] + " ";
+            if (tokens[i].lastIndexOf('"') == -1) {
+                continue;
+            }
+            /* pull in tokens until last character of token is '"' */
+            while (tokens[i].lastIndexOf('"') != tokens[i].length-1) {
+                incs += tokens[++i] + " ";
+            }
         }
     }
+
 
     /*
      * Now look for TI, IAR and gcc's -I options.  There may be 0 or more
@@ -836,7 +916,7 @@ function getIncludePaths()
                 for (;i < prefix.length; i++) {
                      incs += prefix[i];
                      if (((type == 1) && (prefix[i] == '"')) ||
-		             ((type == 0) && (prefix[i] == ' '))) {
+                         ((type == 0) && (prefix[i] == ' '))) {
                          type = 0;
                          incs += " ";
                          break;
@@ -1022,11 +1102,16 @@ function buildLibs(objList, relList, filter, xdcArgs, incs)
 
                 if ((targ.$name == "ti.targets.arm.elf.R4F") ||
                     (targ.$name == "ti.targets.arm.elf.R5F")) {
-                    ccopts += " -Dti_sysbios_hal_Core_numCores__D=1";
-                    asmopts += " -Dti_sysbios_hal_Core_numCores__D=1";
+                    ccopts += " -Dti_sysbios_hal_Core_numCores__D=1 " +
+                        "-Dti_sysbios_family_arm_v7r_vim_Hwi_lockstepDevice__D=FALSE";
+                    asmopts += " -Dti_sysbios_hal_Core_numCores__D=1 " +
+                        "-Dti_sysbios_family_arm_v7r_vim_Hwi_lockstepDevice__D=FALSE";
+                }
+                /* insert rts includes before "." in command line */
+                if (targ.$name.match("iar.targets.arm")) {
+                    ccopts += " -I" + targ.rootDir+"/inc/c";
                 }
             }
-
             /* confirm that this target supports this profile */
             if (targ.profiles[profiles[j]] !== undefined) {
                 var profile = profiles[j];
@@ -1036,7 +1121,7 @@ function buildLibs(objList, relList, filter, xdcArgs, incs)
                                 copts: ccopts,
                                 aopts: asmopts,
                                 releases: relList,
-				incs: incs,
+                                incs: incs,
                                 });
                 lib.addObjects(objList);
                 /* suppress debug libs from exports */

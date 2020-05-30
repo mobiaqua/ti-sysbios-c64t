@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,7 @@ if (xdc.om.$name == "cfg") {
         "ti.catalog.arm.cortexa15": {
             "TCI6636K2H": {
                 baseAddr: 0x02608000,
-                numSystemInterrupts: 479,
+                numSystemInterrupts: 480,
                 armIntsForHostInts: {
                     448: [29],
                     449: [30],
@@ -139,6 +139,13 @@ if (xdc.om.$name == "cfg") {
             },
         }
     }
+
+    deviceTable["ti.catalog.arm.cortexa15"]["C66AK2E05"] =
+        deviceTable["ti.catalog.arm.cortexa15"]["TCI6636K2H"];
+    deviceTable["ti.catalog.arm.cortexa15"]["TCI6630K2L"] =
+        deviceTable["ti.catalog.arm.cortexa15"]["TCI6636K2H"];
+    deviceTable["ti.catalog.arm.cortexa15"]["TCI6638K2K"] =
+        deviceTable["ti.catalog.arm.cortexa15"]["TCI6636K2H"];
 }
 
 /*

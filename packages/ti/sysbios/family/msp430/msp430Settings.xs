@@ -16,6 +16,14 @@ var devices = [
     "MSP430F5224",
     "MSP430F5227",
     "MSP430F5229",
+    "MSP430F5252",
+    "MSP430F5253",
+    "MSP430F5254",
+    "MSP430F5255",
+    "MSP430F5256",
+    "MSP430F5257",
+    "MSP430F5258",
+    "MSP430F5259",
     "MSP430F5310",
     "MSP430F5324",
     "MSP430F5325",
@@ -150,6 +158,7 @@ var devices = [
     "MSP430FR5967",
     "MSP430FR5968",
     "MSP430FR5969",
+    "MSP430FR5994",
     "MSP430FR5987",
     "MSP430FR5988",
     "MSP430FR5989",
@@ -171,6 +180,6 @@ for each (device in devices) {
         timestampDelegate : "ti.sysbios.family.msp430.TimestampProvider",
         taskSupportDelegate : "ti.sysbios.family.msp430.TaskSupport",
         intrinsicsSupportDelegate : "ti.sysbios.family.msp430.IntrinsicsSupport",
-        targets : [ "ti.targets.msp430.elf.MSP430X", "ti.targets.msp430.elf.MSP430X_small" ]
+        targets : [ "ti.targets.msp430.elf.MSP430X" ]
     }
 }

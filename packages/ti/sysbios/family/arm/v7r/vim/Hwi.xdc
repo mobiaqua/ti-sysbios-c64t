@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,6 @@ import xdc.rov.ViewInfo;
 import ti.sysbios.interfaces.IHwi;
 
 /*!
- * TODO add examples showing how to change stack address
  *  ======== Hwi ========
  *  Hardware Interrupt Support Module.
  *
@@ -131,9 +130,9 @@ import ti.sysbios.interfaces.IHwi;
  *
  *  @a(Interrupt Channel configuration)
  *  Each VIM interrupt request (source) can be mapped to any of the interrupt
- *  channels. Lower numbered channels in each FIQ and IRQ have higher priority.
- *  Therefore, channel mapping provides a mechanism for prioritizing the
- *  interrupt requests.
+ *  channels (same as intNums). Lower numbered channels in each FIQ and IRQ
+ *  have higher priority. Therefore, channel mapping provides a mechanism for
+ *  prioritizing the interrupt requests.
  *
  *  Additionally, it is possible to configure a channel interrupt as a wakeup
  *  interrupt so it can bring the core out of low power mode (LPM).
@@ -152,22 +151,34 @@ import ti.sysbios.interfaces.IHwi;
  *  *.cfg:
  *  var Hwi = xdc.useModule('ti.sysbios.family.arm.v7r.vim.Hwi');
  *
- *  // Map interrupt request line 86 to channel 2 and disable wakeup feature
+ *  // Map interrupt request line 86 to channel 2 (i.e. intNum 2) and disable
+ *  // wakeup feature
  *  Hwi.configChannelMeta(2, 86, false);
  *  @p
  *
- *  @a(Non-dispatched interrupts)
- *  Cortex-R5 supports hardware vectored IRQ interrupts (i.e. interrupts are
- *  automatically dispatched to ISR). In order to leverage this feature for
- *  a given IRQ interrupt, the SYS/BIOS Hwi dispatcher needs to be bypassed
- *  for the particular interrupt. The Hwi params contain a
- *  {@link #useDispatcher} param that can be used for this purpose.
+ *  @a(More Hwi examples)
+ *  Here's an example showing how to construct a Hwi at runtime:
+ *  @p(code)
+ *  *.c:
+ *  #include <ti/sysbios/family/arm/v7r/vim/Hwi.h>
  *
- *  When {@link #useDispatcher} Hwi param is set to false, the Hwi function's
- *  address is written to the hardware interrupt vector table (VIM RAM). After
- *  an IRQ interrupt is received by the CPU, the CPU reads the address of the
- *  ISR directly from the VIM RAM and jumps to the function (See
- *  {@link #useDispatcher} for more info).
+ *  Hwi_Struct hwiStruct;
+ *
+ *  Void myIsrIRQ(UArg arg)
+ *  {
+ *      ...
+ *  }
+ *
+ *  Void main(Void)
+ *  {
+ *      Hwi_Params hwiParams;
+ *
+ *      Hwi_Params_init(&hwiParams);
+ *      Hwi_construct(&hwiStruct, INT_NUM_IRQ, myIsrIRQ, &hwiParams, NULL);
+ *      ...
+ *      BIOS_start();
+ *  }
+ *  @p
  *
  *  @p(html)
  *  <h3> Calling Context </h3>
@@ -290,8 +301,8 @@ module Hwi inherits ti.sysbios.interfaces.IHwi
     metaonly struct BasicView {
         Ptr         halHwiHandle;
         String      label;
+        String      type;
         Int         intNum;
-        Bool        useDispatcher;
         String      fxn;
         UArg        arg;
         Ptr         irp;
@@ -400,20 +411,44 @@ module Hwi inherits ti.sysbios.interfaces.IHwi
     /*! Reset Handler. Default is c_int00 */
     metaonly config VectorFuncPtr resetFunc;
 
-    /*! Undefined instruction exception handler. Default is self loop */
+    /*!
+     *  Undefined instruction exception handler.
+     *  Default is set to an internal exception handler.
+     */
     metaonly config VectorFuncPtr undefinedInstFunc;
 
     /*! SWI Handler. Default is internal SWI handler */
     metaonly config VectorFuncPtr swiFunc;
 
-    /*! Prefetch abort exception handler. Default is self loop */
+    /*!
+     *  Prefetch abort exception handler.
+     *  Default is set to an internal exception handler.
+     */
     metaonly config VectorFuncPtr prefetchAbortFunc;
 
-    /*! Data abort exception handler. Default is self loop */
+    /*!
+     *  Data abort exception handler.
+     *  Default is set to an internal exception handler.
+     */
     metaonly config VectorFuncPtr dataAbortFunc;
 
-    /*! Reserved exception handler. Default is self loop */
+    /*!
+     *  Reserved exception handler.
+     *  Default is set to an internal exception handler.
+     */
     metaonly config VectorFuncPtr reservedFunc;
+
+    /*!
+     *  IRQ exception handler.
+     *  Default is set to internal IRQ dispatcher.
+     */
+    metaonly config VectorFuncPtr irqFunc;
+
+    /*!
+     *  Phantom interrupt handler.
+     *  Default is set to internal phantom interrupt handler.
+     */
+    config VectorFuncPtr phantomFunc;
 
     /*!
      *  FIQ stack pointer. Default = null.
@@ -435,28 +470,29 @@ module Hwi inherits ti.sysbios.interfaces.IHwi
     metaonly config String fiqStackSection = null;
 
     /*!
-     *  Non dispatched IRQ stack pointer. Default = null.
-     *  (Indicates that stack is to be created using
-     *  staticPlace())
-     */
-    config Ptr nonDispatchedIRQStack = null;
-
-    /*!
-     *  Non dispatched IRQ stack size in MAUs.
-     *  Default is 1024 bytes.
-     */
-    metaonly config SizeT nonDispatchedIRQStackSize = 1024;
-
-    /*!
-     *  Memory section used for non dispatched IRQ stack
-     *  Default is null.
-     */
-    metaonly config String nonDispatchedIRQStackSection = null;
-
-    /*!
+     * @_nodoc
      * VIM base address
      */
     metaonly config Ptr vimBaseAddress;
+
+    /*!
+     *  ======== errataInitESM ========
+     *  Clear ESM errors for AR1xxx devices. Default is true for AR1xxx devices.
+     *
+     *  Errata brief description:
+     *  Cortex-R4 on AR14xx devices generates a VIM RAM compare error
+     *  during startup due to a ROM code bug. This error needs to be cleared
+     *  before SYS/BIOS is started and interrupts are enabled.
+     */
+    config Bool errataInitEsm = false;
+
+    /*!
+     *  ======== resetVIM ========
+     *  Reset VIM hardware. Default is true for AR1xxx devices.
+     *
+     *  This feature is available only on certain devices.
+     */
+    config Bool resetVIM = false;
 
     /*!
      *  ======== A_badChannelId ========
@@ -497,6 +533,13 @@ module Hwi inherits ti.sysbios.interfaces.IHwi
     };
 
     /*!
+     *  Error raised when a phantom interrupt occurs.
+     */
+    config Error.Id E_phantomInterrupt = {
+        msg: "E_phantomInterrupt: A phantom interrupt has occurred."
+    };
+
+    /*!
      *  Issued just prior to Hwi function invocation (with interrupts disabled)
      */
     config Log.Event LM_begin = {
@@ -517,6 +560,49 @@ module Hwi inherits ti.sysbios.interfaces.IHwi
 
     /*!
      *  ======== disable ========
+     *  Globally disable interrupts.
+     *
+     *  Hwi_disable globally disables hardware interrupts and returns an
+     *  opaque key indicating whether interrupts were globally enabled or
+     *  disabled on entry to Hwi_disable().
+     *  The actual value of the key is target/device specific and is meant
+     *  to be passed to Hwi_restore().
+     *
+     *  Call Hwi_disable before a portion of a function that needs
+     *  to run without interruption. When critical processing is complete, call
+     *  Hwi_restore or Hwi_enable to reenable hardware interrupts.
+     *
+     *  Servicing of interrupts that occur while interrupts are disabled is
+     *  postponed until interrupts are reenabled. However, if the same type
+     *  of interrupt occurs several times while interrupts are disabled,
+     *  the interrupt's function is executed only once when interrupts are
+     *  reenabled.
+     *
+     *  A context switch can occur when calling Hwi_enable or Hwi_restore if
+     *  an enabled interrupt occurred while interrupts are disabled.
+     *
+     *  Hwi_disable may be called from main(). However, since Hwi interrupts
+     *  are already disabled in main(), such a call has no effect.
+     *
+     *  @a(constraints)
+     *  If a Task switching API such as
+     *  {@link ti.sysbios.knl.Semaphore#pend Semaphore_pend()},
+     *  {@link ti.sysbios.knl.Semaphore#post Semaphore_post()},
+     *  {@link ti.sysbios.knl.Task#sleep Task_sleep()}, or
+     *  {@link ti.sysbios.knl.Task#yield Task_yield()}
+     *  is invoked which results in a context switch while
+     *  interrupts are disabled, an embedded call to
+     *  {@link #enable Hwi_enable} occurs
+     *  on the way to the new thread context which unconditionally re-enables
+     *  interrupts. Interrupts will remain enabled until a subsequent
+     *  {@link #disable Hwi_disable}
+     *  invocation.
+     *
+     *  Swis always run with interrupts enabled.
+     *  See {@link ti.sysbios.knl.Swi#post Swi_post()} for a discussion Swis and
+     *  interrupts.
+     *
+     *  @b(returns)     opaque key for use by Hwi_restore()
      */
     @Macro
     override UInt disable();
@@ -589,7 +675,7 @@ module Hwi inherits ti.sysbios.interfaces.IHwi
      *  A channel interrupt can also be configured to be a wakeup interrupt
      *  so it can bring the core out of low power mode (LPM).
      *
-     *  @param(channelId)       Channel number
+     *  @param(channelId)       Channel number (intNum)
      *  @param(intRequestId)    VIM Interrupt request (source) number
      *  @param(wakeupEnable)    Enable wakeup interrupt functionality ?
      */
@@ -597,6 +683,7 @@ module Hwi inherits ti.sysbios.interfaces.IHwi
         Bool wakeupEnable);
 
     /*!
+     *  @_nodoc
      *  ======== setType ========
      *  Set an interrupt's type (FIQ/IRQ).
      *
@@ -614,42 +701,6 @@ instance:
     config Type type = Type_IRQ;
 
     /*!
-     *  ======== useDispatcher ========
-     *  Use the SYS/BIOS Hwi dispatcher. Default is true.
-     *
-     *  This param can be set to false for IRQ interrupts to bypass
-     *  the SYS/BIOS interrupt dispatcher. FIQ interrupts do not go
-     *  through the dispatcher and therefore this param has no affect
-     *  on FIQ interrupts.
-     *
-     *  Unlike dispatched IRQ interrupts, non-dispatched IRQ interrupts
-     *  do not use the system stack. The stack pointer, stack size and
-     *  stack section for the non-dispatched interrupts can be set using
-     *  the {@link #nonDispatchedIRQStack}, {@link #nonDispatchedIRQStackSize}
-     *  and {@link #nonDispatchedIRQStackSection} module wise config params.
-     *
-     *  @a(constraints)
-     *  - Interrupts configured to bypass the dispatcher are not allowed
-     *  to call ANY SYS/BIOS APIs that effect thread scheduling. Examples
-     *  of API that should not be invoked are:
-     *
-     *  @p(dlist)
-     *    - Swi_post(),
-     *    - Semaphore_post(),
-     *    - Event_post(),
-     *    - Task_yield()
-     *  @p
-     *
-     *  - Additionally, although the signature for a non-dispatched interrupt
-     *  function is the same as that for a dispatched interrupt
-     *  (see {@link #FuncPtr}), no argument is actually passed to the
-     *  non-dispatched ISR handler.
-     *
-     *  //TODO we need the "interrupt" keyword
-     */
-    config Bool useDispatcher = true;
-
-    /*!
      *  Default setting for this Hwi module is IHwi.MaskingOption_LOWER
      */
     override config IHwi.MaskingOption maskSetting = IHwi.MaskingOption_LOWER;
@@ -661,6 +712,8 @@ instance:
     Void reconfig(FuncPtr fxn, const Params *params);
 
 internal:   /* not for client use */
+
+    metaonly config Bool lockstepDevice;
 
     /*
      *  ======== channelMap ========
@@ -691,6 +744,11 @@ internal:   /* not for client use */
     config Void (*taskRestoreHwi)(UInt);
 
     /*
+     *  ======== initEsm ========
+     */
+    Void initEsm();
+
+    /*
      *  ======== postInit ========
      *  finish initializing static and dynamic Hwis
      */
@@ -710,8 +768,8 @@ internal:   /* not for client use */
     /* IRQ Interrupt Dispatcher */
     Void dispatchIRQC(Irp irp);
 
-    /* default FIQ Interrupt Dispatcher */
-    Void dispatchFIQC();
+    /* default Phantom Interrupt Handler */
+    Void phantomIntHandler();
 
     /*
      *  ======== mapChannel ========
@@ -754,7 +812,6 @@ internal:   /* not for client use */
 
     struct Instance_State {
         Type        type;                   // Interrupt Type
-        Bool        useDispatcher;          // Use dispatcher?
         UArg        arg;                    // Argument to Hwi function.
         FuncPtr     fxn;                    // Hwi function.
         Int         intNum;                 // Interrupt number
@@ -764,8 +821,6 @@ internal:   /* not for client use */
     };
 
     struct Module_State {
-        UInt        irp;                    // temporary irp storage for
-                                            // IRQ handler
         Char        *taskSP;                // temporary storage of interrupted
                                             // Task's SP during ISR execution
         Char        *isrStack;              // Points to isrStack address
@@ -773,9 +828,6 @@ internal:   /* not for client use */
         Ptr         isrStackSize;           // _STACK_SIZE
         Char        fiqStack[];             // buffer used for FIQ stack
         SizeT       fiqStackSize;
-        Char        nonDispatchedIRQStack[];// buffer used for non dispatched
-                                            // IRQ stack
-        SizeT       nonDispatchedIRQStackSize;
         UInt        *vimRam;                // VIM RAM
         Handle      dispatchTable[];        // dispatch table
         UInt        zeroLatencyFIQMask[4];

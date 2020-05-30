@@ -1,6 +1,6 @@
 %%{
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,10 +40,11 @@
 
 %var BIOS = xdc.module("ti.sysbios.BIOS");
 %var Core = xdc.module("ti.sysbios.hal.Core");
-%if (BIOS.smpEnabled && (Core.numCores > 2)) {
+%var Task = xdc.module("ti.sysbios.knl.Task");
+%if (BIOS.smpEnabled) {
 
 #if defined(__ti__)
-#pragma DATA_SECTION(ti_sysbios_knl_Task_Module_StateSmp_sortedRunQ,
+#pragma DATA_SECTION(ti_sysbios_knl_Task_Module_StateSmp_sortedRunQ, \
     ".data:ti_sysbios_knl_Task_Module_StateSmp_sortedRunQ");
 #elif defined(__IAR_SYSTEMS_ICC__)
 #pragma location = ".data_ti_sysbios_knl_Task_Module_StateSmp_sortedRunQ"
@@ -58,7 +59,7 @@ ti_sysbios_knl_Queue_Object
 ti_sysbios_knl_Queue_Object ti_sysbios_knl_Task_Module_StateSmp_sortedRunQ;
 
 #if defined(__ti__)
-#pragma DATA_SECTION(ti_sysbios_knl_Task_Module_StateSmp_smpRunQ__A,
+#pragma DATA_SECTION(ti_sysbios_knl_Task_Module_StateSmp_smpRunQ__A, \
     ".data:ti_sysbios_knl_Task_Module_StateSmp_smpRunQ__A");
 #elif defined(__IAR_SYSTEMS_ICC__)
 #pragma location = ".data_ti_sysbios_knl_Task_Module_StateSmp_smpRunQ__A"
@@ -76,7 +77,7 @@ ti_sysbios_knl_Task_RunQEntry
     {
         { NULL, NULL },
         `i`,
-        0
+        -1
 %   if (i != (Core.numCores - 1)) {
     },
 %   }
@@ -87,7 +88,7 @@ ti_sysbios_knl_Task_RunQEntry
 };
 
 #if defined(__ti__)
-#pragma DATA_SECTION(ti_sysbios_knl_Task_Module__stateSmp__V,
+#pragma DATA_SECTION(ti_sysbios_knl_Task_Module__stateSmp__V, \
     ".data:ti_sysbios_knl_Task_Module__stateSmp__V");
 #elif defined(__IAR_SYSTEMS_ICC__)
 #pragma location = ".data_ti_sysbios_knl_Task_Module__stateSmp__V"
@@ -101,4 +102,28 @@ ti_sysbios_knl_Task_Module_StateSmp ti_sysbios_knl_Task_Module__stateSmp__V = {
     &ti_sysbios_knl_Task_Module_StateSmp_sortedRunQ,
     ti_sysbios_knl_Task_Module_StateSmp_smpRunQ__A
 };
+%}
+
+%if (Task.moduleStateCheckFlag) {
+#if defined(__ti__)
+#pragma DATA_SECTION(ti_sysbios_knl_Task_moduleStateCheckValue, \
+%    if (Program.build.target.name.match(/C6.*/)) {
+        ".far:ti_sysbios_knl_Task_moduleStateCheckValue");
+%    }
+%    else if (Program.build.target.name.match(/C28.*/)) {
+        ".ebss:ti_sysbios_knl_Task_moduleStateCheckValue");
+%    }
+%    else {
+        ".bss:ti_sysbios_knl_Task_moduleStateCheckValue");
+%    }
+#elif defined(__IAR_SYSTEMS_ICC__) && !defined(__ICC430__)
+#pragma location = ".bss:ti_sysbios_knl_Task_moduleStateCheckValue"
+#elif defined(__GNUC__) && !defined(__ti__)
+UInt32 ti_sysbios_knl_Task_moduleStateCheckValue
+    __attribute__ ((section(".bss.ti_sysbios_knl_Task_moduleStateCheckValue")));
+#elif !defined(__ICC430__)
+#error "Unsupported compiler"
+#endif
+
+UInt32 ti_sysbios_knl_Task_moduleStateCheckValue;
 %}

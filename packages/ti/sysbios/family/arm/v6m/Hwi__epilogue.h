@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,17 +62,17 @@ extern "C" {
 /*
  *  ======== Hwi_disable ========
  */
-#define ti_sysbios_family_arm_v6m_Hwi_disable() ti_sysbios_family_arm_v6m_Hwi_disableFxn()
+#define ti_sysbios_family_arm_v6m_Hwi_disable() __set_PRIMASK(1)
 
 /*
  *  ======== Hwi_enable ========
  */
-#define ti_sysbios_family_arm_v6m_Hwi_enable() ti_sysbios_family_arm_v6m_Hwi_enableFxn()
+#define ti_sysbios_family_arm_v6m_Hwi_enable() __set_PRIMASK(0)
 
 /*
  *  ======== Hwi_restore ========
  */
-#define ti_sysbios_family_arm_v6m_Hwi_restore(key) ti_sysbios_family_arm_v6m_Hwi_restoreFxn(key)
+#define ti_sysbios_family_arm_v6m_Hwi_restore(key) __set_PRIMASK(key)
 
 #else /* defined(__ti__) */
 

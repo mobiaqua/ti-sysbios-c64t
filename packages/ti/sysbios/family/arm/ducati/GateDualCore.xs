@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -102,7 +102,12 @@ function module$static$init(mod, params)
 
     if (Program.sectMap[".ducatiGates"] === undefined) {
         Program.sectMap[".ducatiGates"] = new Program.SectionSpec();
-        Program.sectMap[".ducatiGates"].loadAddress = GateDualCore.gateArrayAddress;
+        Program.sectMap[".ducatiGates"].loadAddress =
+            GateDualCore.gateArrayAddress;
+        if (Program.build.target.$name.match(/gnu/)) {
+            Program.sectMap[".ducatiGates"].runAddress =
+                GateDualCore.gateArrayAddress;
+        }
     }
 
     /* 
@@ -111,7 +116,12 @@ function module$static$init(mod, params)
      *
      * Make sure the boot code doesn't zero it out for us.
      */
-    Program.sectMap[".ducatiGates"].type = "NOINIT";
+    if (Program.build.target.$name.match(/gnu/)) {
+        Program.sectMap[".ducatiGates"].type = "NOLOAD";
+    }
+    else {
+        Program.sectMap[".ducatiGates"].type = "NOINIT";
+    }
 }
 
 /*

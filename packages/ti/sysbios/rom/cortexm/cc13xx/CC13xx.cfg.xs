@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -105,9 +105,6 @@ Timestamp.SupportProxy = rtcTimestamp;
 
 /* don't check for interrupt stack overflow during Idle loop */
 var halHwi = xdc.useModule('ti.sysbios.hal.Hwi');
-if (halHwi.$written("checkStackFlag") && halHwi.checkStackFlag == true) {
-    CC13xx.$logWarning("Hwi.checkStackFlag must be set to false for ROM applications.", halHwi, "checkStackFlag");
-}
 halHwi.checkStackFlag = false; /* avoids pulling in hal Hwi_checkStack() */
 
 xdc.loadCapsule("ti/sysbios/rom/cortexm/cc13xx/CC13xx_externs.xs");

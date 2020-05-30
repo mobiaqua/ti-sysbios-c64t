@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,35 +59,7 @@ extern "C" {
 #endif
 
 #if defined(__GNUC__) && !defined(__ti__)
-
-#include <sched.h>
-
 #else
-
-/*
- *  These defines would be in a sched.h, which TI and IAR
- *  toolchains don't have.
- */
-#ifndef SCHED_FIFO
-#define SCHED_FIFO 0
-#endif
-
-#ifndef SCHED_RR
-#define SCHED_RR 0
-#endif
-
-#ifndef SCHED_OTHER
-#define SCHED_OTHER 0
-#endif
-
-/*
- *  ======== sched_param ========
- *  This was taken from sys/sched.h
- */
-struct sched_param {
-  int sched_priority; /* Thread execution priority */
-};
-
 /*
  *  TI and IAR tools do not have sys/types.h where timespec and itimerspec
  *  would be defined.
@@ -107,9 +79,11 @@ struct itimerspec {
 typedef unsigned long timer_t;
 #endif
 
-#endif
-
 typedef uint32_t clockid_t;
+
+#endif    /* #if defined(__GNUC__) && !defined(__ti__) */
+
+typedef unsigned long useconds_t;
 
 /*
  *************************************************************************
@@ -130,6 +104,8 @@ typedef struct pthread_attr_t {
 typedef uint32_t pthread_barrierattr_t;
 typedef uint32_t pthread_condattr_t;
 
+typedef void *pthread_key_t;
+
 typedef struct pthread_mutexattr_t {
     int type;
     int protocol;
@@ -143,7 +119,7 @@ typedef void *pthread_t;
  *  ======== pthread_barrier_t ========
  */
 typedef struct pthread_barrier_t {
-    Semaphore_Struct  sem;
+    ti_sysbios_knl_Semaphore_Struct  sem;
     int               count;
     int               pendCount;
 } pthread_barrier_t;
@@ -152,7 +128,7 @@ typedef struct pthread_barrier_t {
  *  ======== pthread_cond_t ========
  */
 typedef struct pthread_cond_t {
-    Queue_Struct     waitList;
+    ti_sysbios_knl_Queue_Struct     waitList;
 } pthread_cond_t;
 
 typedef void *pthread_mutex_t;
@@ -167,13 +143,13 @@ typedef struct pthread_rwlock_t {
      *  A readlock can be obtained if there is already a read lock
      *  acquired, or by acquiring this semaphore.
      */
-    Semaphore_Struct  sem;
+    ti_sysbios_knl_Semaphore_Struct  sem;
 
     /*
      *  This semaphore is used to block readers when sem is in use
      *  by a write lock.
      */
-    Semaphore_Struct  readSem;
+    ti_sysbios_knl_Semaphore_Struct  readSem;
 
     int       activeReaderCnt;   /* Number of read locks acquired */
     int       blockedReaderCnt;  /* Number of readers blocked on readSem */

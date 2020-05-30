@@ -2345,7 +2345,8 @@ function instance$static$init(obj, id, tickFxn, params)
     }
 
     obj.tsicr = (params.tsicr.sft << 1) |
-                (params.tsicr.posted << 2);
+                (params.tsicr.posted << 2) |
+                (params.tsicr.readmode << 3);
 
     obj.twer = (params.twer.mat_wup_ena << 0) |
                (params.twer.ovf_wup_ena << 1) |

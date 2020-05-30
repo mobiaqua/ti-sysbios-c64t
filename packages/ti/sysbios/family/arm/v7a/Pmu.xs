@@ -83,6 +83,12 @@ if (xdc.om.$name == "cfg") {
         deviceTable["ti.catalog.arm.cortexa15"]["DRA7XX"];
     deviceTable["ti.catalog.arm.cortexa15"]["OMAP5430"] =
         deviceTable["ti.catalog.arm.cortexa15"]["DRA7XX"];
+    deviceTable["ti.catalog.arm.cortexa15"]["C66AK2E05"] =
+        deviceTable["TCI6636K2H"];
+    deviceTable["ti.catalog.arm.cortexa15"]["TCI6630K2L"] =
+        deviceTable["ti.catalog.arm.cortexa15"]["TCI6636K2H"];
+    deviceTable["ti.catalog.arm.cortexa15"]["TCI6638K2K"] =
+        deviceTable["ti.catalog.arm.cortexa15"]["TCI6636K2H"];
 
     deviceTable["ti.catalog.arm.cortexr5"]["TMS570DC.*"] =
         deviceTable["ti.catalog.arm.cortexr5"]["RM57D8XX"];

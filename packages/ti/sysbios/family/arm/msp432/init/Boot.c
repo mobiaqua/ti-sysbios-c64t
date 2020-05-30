@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2014-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,28 +35,28 @@
 
 #include <xdc/std.h>
 #include <xdc/runtime/Assert.h>
-
+#include <stdbool.h>
 #include "package/internal/Boot.xdc.h"
 
 #define REG16(x)  (*(volatile UInt16 *)(x))
 #define REG32(x)  (*(volatile UInt32 *)(x))
 
 /* CS defines */
-#define CSKEY     0x695A
-#define CSACC     0x40010400
-#define CSCTL0    0x40010404
-#define CSCTL1    0x40010408
-
-#define DCO_BITS_48     0x00050000   /* 48 MHz */
-#define DIV_SEL_BITS_H  0x20100033   /* DIVS=4, DIVA=1, DIVHS=2, DIVM=1 */
-                                    /* SELA=LFXT/REFO, SELS=SELM=DCO */
-
-#define DIV_SEL_BITS_M  0x20210033   /* DIVS=4, DIVA=1, DIVHS=4, DIVM=2 */
-                                    /* SELA=LFXT/REFO, SELS=SELM=DCO */
-
-#define DCO_BITS_12     0x00030000   /* 12 MHz */
-#define DIV_SEL_BITS_L  0x20200033   /* DIVS=4, DIVA=1, DIVHS=4, DIVM=1 */
-                                    /* SELA=LFXT/REFO, SELS=SELM=DCO */
+#define CSKEY         (REG32(0x40010400))
+#define CSCTL0        (REG32(0x40010404))
+#define CSCTL1        (REG32(0x40010408))
+#define CSCTL2        (REG32(0x4001040C))
+#define CSIFG         (REG32(0x40010448))
+#define CSCLRIFG      (REG32(0x40010450))
+#define LFXT_EN       (0x00000100)
+#define LFXTIFG       (0x00000001)
+#define LFXTBYPASS    (0x00000200)
+#define CLR_LFXTIFG   (0x00000001)
+#define HFXT_EN       (0x01000000)
+#define HFXTIFG       (0x00000002)
+#define HFXTBYPASS    (0x02000000)
+#define CLR_HFXTIFG   (0x00000002)
+#define HFXTFREQDRIVE (0x00410000)  /* HFXTFREQ and HFXTDRIVE for 48MHz */
 
 /* WDT defines */
 #define WDTCTL   0x4000480C
@@ -77,15 +77,85 @@
 #define ROM_PCMTABLE ((unsigned long *)(ROM_APITABLE[13]))
 #define ROM_PCM_setPowerState ((UInt8 (*)(UInt8 state))ROM_PCMTABLE[6])
 
+/* DIO defines */
+#define PJSEL0                REG16(0x40004D2A)
+#define PJSEL1                REG16(0x40004D2C)
+#define BIT0                  0x0001
+#define BIT1                  0x0002
+#define BIT2                  0x0004
+#define BIT3                  0x0008
+
 #define Boot_configureClocksLow ti_sysbios_family_arm_msp432_init_Boot_configureClocksLow
 #define Boot_configureClocksMed ti_sysbios_family_arm_msp432_init_Boot_configureClocksMed
 #define Boot_configureClocksHigh ti_sysbios_family_arm_msp432_init_Boot_configureClocksHigh
 #define Boot_disableWatchdog ti_sysbios_family_arm_msp432_init_Boot_disableWatchdog
+#define Boot_setupCS ti_sysbios_family_arm_msp432_init_Boot_setupCS
+
+/*
+ *  ======== Boot_setupCS ========
+ */
+Void ti_sysbios_family_arm_msp432_init_Boot_setupCS(UInt32 regCSTCL0,
+    UInt32 regCSTCL1)
+{
+    /* unlock Clock System (CS) registers */
+    CSKEY = 0x695A;
+
+    /* if LFXT is to be enabled ... */
+    if (Boot_enableLFXT) {
+
+        /* configure pins for LFXT function */
+        PJSEL0 |= BIT0;
+        PJSEL1 &= ~BIT0;
+
+        /* if not bypassing LFXT, start and wait for LF osc stabilization */
+        if (!Boot_bypassLFXT) {
+            CSCTL2 |= LFXT_EN;
+            while (CSIFG & LFXTIFG) {
+                CSCLRIFG |= CLR_LFXTIFG;
+            }
+        }
+        /* else, enable bypass */
+        else {
+            CSCTL2 |= LFXTBYPASS;
+        }
+    }
+
+    /* if HFXT is to be enabled ... */
+    if (Boot_enableHFXT) {
+
+        /* configure pins for HFXT function */
+        PJSEL0 |= BIT3;
+        PJSEL1 &= ~BIT3;
+
+        /* if not bypassing HFXT, start and wait for HF osc stabilization */
+        if (!Boot_bypassHFXT) {
+            CSCTL2 |= HFXTFREQDRIVE;
+            CSCTL2 |= HFXT_EN;
+            while (CSIFG & HFXTIFG) {
+               CSCLRIFG |= CLR_HFXTIFG;
+            }
+         }
+        /* else, enable bypass */
+        else {
+            CSCTL2 |= HFXTBYPASS;
+        }
+    }
+
+    /* setup the clock selectors and dividers */
+    CSCTL1 = regCSTCL1;
+
+    /* set DCO center frequency */
+    CSCTL0 = regCSTCL0;
+
+    /* re-lock CS register access */
+    CSKEY = 0;
+}
 
 /*
  *  ======== Boot_configureClocksLow ========
  */
-Void ti_sysbios_family_arm_msp432_init_Boot_configureClocksLow()
+Void ti_sysbios_family_arm_msp432_init_Boot_configureClocksLow(UInt32 CTL0,
+    UInt32 CTL1)
 {
     UInt32 temp;
 
@@ -95,23 +165,15 @@ Void ti_sysbios_family_arm_msp432_init_Boot_configureClocksLow()
     temp = REG32(FLCTL_RDCTL_BNK1_REG) & ~WAIT_MASK;
     REG32(FLCTL_RDCTL_BNK1_REG) = temp | WAIT_0_BITS;
 
-    /* setup Clock System
-     *  MCLK =  12MHz from DCO
-     *  HSMCLK = 3MHz from DCO
-     *  SMCLK =  3MHz from DCO
-     *  ACLK =  32KHz from REFOCLK
-     *  BCLK =  32KHz from REFOCLK
-     */
-    REG32(CSACC) = CSKEY;           /* unlock CS register access */
-    REG32(CSCTL1) = DIV_SEL_BITS_L; /* set clock selector and divider bits */
-    REG32(CSCTL0) = DCO_BITS_12;    /* set DCO to 12 MHz */
-    REG32(CSACC) = 0;               /* lock CS register access */
+    /* setup Clock System registers */
+    Boot_setupCS(CTL0, CTL1);
 }
 
 /*
  *  ======== Boot_configureClocksMed ========
  */
-Void ti_sysbios_family_arm_msp432_init_Boot_configureClocksMed()
+Void ti_sysbios_family_arm_msp432_init_Boot_configureClocksMed(UInt32 CTL0,
+    UInt32 CTL1)
 {
     UInt32 temp;
 
@@ -124,23 +186,15 @@ Void ti_sysbios_family_arm_msp432_init_Boot_configureClocksMed()
     temp = REG32(FLCTL_RDCTL_BNK1_REG) & ~WAIT_MASK;
     REG32(FLCTL_RDCTL_BNK1_REG) = temp | WAIT_1_BITS;
 
-    /* setup Clock System
-     *  MCLK =   24MHz from DCO
-     *  HSMCLK =  6MHz from DCO
-     *  SMCLK =   6MHz from DCO
-     *  ACLK =   32KHz from REFOCLK
-     *  BCLK =   32KHz from REFOCLK
-     */
-    REG32(CSACC) = CSKEY;           /* unlock CS register access */
-    REG32(CSCTL1) = DIV_SEL_BITS_M; /* set clock selector and divider bits */
-    REG32(CSCTL0) = DCO_BITS_48;    /* set DCO to 48MHz */
-    REG32(CSACC) = 0;               /* lock CS register access */
+    /* setup Clock System registers */
+    Boot_setupCS(CTL0, CTL1);
 }
 
 /*
  *  ======== Boot_configureClocksHigh ========
  */
-Void ti_sysbios_family_arm_msp432_init_Boot_configureClocksHigh()
+Void ti_sysbios_family_arm_msp432_init_Boot_configureClocksHigh(UInt32 CTL0,
+    UInt32 CTL1)
 {
     UInt32 temp;
 
@@ -153,17 +207,8 @@ Void ti_sysbios_family_arm_msp432_init_Boot_configureClocksHigh()
     temp = REG32(FLCTL_RDCTL_BNK1_REG) & ~WAIT_MASK;
     REG32(FLCTL_RDCTL_BNK1_REG) = temp | WAIT_2_BITS;
 
-    /* setup Clock System
-     *  MCLK =   48MHz from DCO
-     *  HSMCLK = 24MHz from DCO
-     *  SMCLK =  12MHz from DCO
-     *  ACLK =   32KHz from REFOCLK
-     *  BCLK =   32KHz from REFOCLK
-     */
-    REG32(CSACC) = CSKEY;           /* unlock CS register access */
-    REG32(CSCTL1) = DIV_SEL_BITS_H; /* set clock selector and divider bits */
-    REG32(CSCTL0) = DCO_BITS_48;    /* set DCO to 48MHz */
-    REG32(CSACC) = 0;               /* lock CS register access */
+    /* setup Clock System registers */
+    Boot_setupCS(CTL0, CTL1);
 }
 
 /*

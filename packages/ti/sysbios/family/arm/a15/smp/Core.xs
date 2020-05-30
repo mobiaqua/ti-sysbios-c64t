@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,7 @@ var Core = null;
 var BIOS = null;
 var Task = null;
 var Build = null;
+var Reset = null;
 var HalHwi = null;
 var Memory = null;
 var System = null;
@@ -45,11 +46,25 @@ var Startup = null;
 
 if (xdc.om.$name == "cfg") {
     var deviceTable = {
+        "C66AK2E05": {
+            bootMagicBase    : 0x0C1AD000,
+            numCores         : 4
+        },
+        "TCI6630K2L": {
+            bootMagicBase    : 0x0C1D2500,
+            numCores         : 2
+        },
         "TCI6636K2H": {
-            numCores       : 4
+            bootMagicBase    : 0x0C5AD000,
+            numCores         : 4
+        },
+        "TCI6638K2K": {
+            bootMagicBase    : 0x0C5AD000,
+            numCores         : 4
         },
         "OMAP5430": {
-            numCores       : 2
+            bootMagicBase    : 0x0,         /* Not used */
+            numCores         : 2
         }
     };
 
@@ -71,6 +86,7 @@ function module$meta$init()
 
     for (device in deviceTable) {
         if (device == Program.cpu.deviceName) {
+            Core.bootMagicBase = deviceTable[device].bootMagicBase;
             Core.numCores = deviceTable[device].numCores;
             Core.CPUMASK = (0x1 << Core.numCores) - 1;
             return;
@@ -92,6 +108,7 @@ function module$use()
     Hwi = xdc.module('ti.sysbios.family.arm.gic.Hwi');
     Task = xdc.module('ti.sysbios.knl.Task');
     Build = xdc.module('ti.sysbios.Build');
+    Reset = xdc.useModule('xdc.runtime.Reset');
     Memory = xdc.module('xdc.runtime.Memory');
     System = xdc.useModule('xdc.runtime.System');
     Startup = xdc.useModule('xdc.runtime.Startup');
@@ -132,6 +149,9 @@ function module$use()
     }
 
     Core.initStackFlag = HalHwi.initStackFlag;
+
+    /* Install Core_enableActlrSmp() as a reset function */
+    Reset.fxns[Reset.fxns.length++] = Core.enableActlrSmp;
 }
 
 /*

@@ -1,5 +1,5 @@
 /* 
- *  Copyright (c) 2008 Texas Instruments and others.
+ *  Copyright (c) 2008-2015 Texas Instruments Incorporated
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -21,7 +21,7 @@
  *  TI C28 large model little endian
  */
 metaonly module C28_large inherits ti.targets.ITarget {
-    override readonly config string name                = "C28_large"; 
+    override readonly config string name                = "C28_large";
     override readonly config string suffix              = "28L";
     override readonly config string isa                 = "28";
     override readonly config xdc.bld.ITarget.Model model    = {dataModel: "large", endian: "little"};
@@ -100,8 +100,8 @@ metaonly module C28_large inherits ti.targets.ITarget {
      *  Define linker executable
      */
     override readonly config xdc.bld.ITarget2.Command lnk = {
-        cmd: "lnk2000",
-        opts: ""
+        cmd: "cl2000",
+        opts: "-z"
     };
 
     /*!
@@ -160,16 +160,6 @@ metaonly module C28_large inherits ti.targets.ITarget {
         ["coverage", {
             compileOpts: {
                 copts: "-gp",
-            },
-        }],
-        ["whole_program", {
-            compileOpts: {
-                copts: "-oe -O2 -mo",
-            },
-        }],
-        ["whole_program_debug", {
-            compileOpts: {
-                copts: "-oe --symdebug:dwarf -mo",
             },
         }],
     ];

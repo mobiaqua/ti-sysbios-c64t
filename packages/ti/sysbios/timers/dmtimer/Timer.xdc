@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -201,10 +201,18 @@ module Timer inherits ti.sysbios.interfaces.ITimer
         Bits8 gpocfg; /*! PWM output/event detection input pin */
     };
 
-    /*! L4 Interface Synchronization Control Register (TSICR). */
+    /*!
+     *  ======== Tsicr ========
+     *  L4 Interface Synchronization Control Register (TSICR).
+     *
+     *  Note: 'readmode' field is not available on some older Silicon.
+     *  Please check the technical reference manual of your device to
+     *  determine if this field is available before using it.
+     */
     struct Tsicr {
-        Bits8 sft;    /*! Reset software functional registers */
-        Bits8 posted; /*! Posted mode selection */
+        Bits8 sft;      /*! Reset software functional registers */
+        Bits8 posted;   /*! Posted mode selection */
+        Bits8 readmode; /*! Select posted/non-posted mode for read operation */
     };
 
     /*! Timer Settings. */
@@ -488,7 +496,7 @@ instance:
      *  For a detailed description of this timer register, please
      *  refer to your device's Technical Reference Manual.
      */
-    config Tsicr tsicr = {sft: 0, posted: 0};
+    config Tsicr tsicr = {sft: 0, posted: 0, readmode: 0};
 
     /*! 
      *  ======== tmar ========

@@ -1,13 +1,13 @@
 /* 
- *  Copyright (c) 2008 Texas Instruments and others.
+ *  Copyright (c) 2008-2015 Texas Instruments Incorporated
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *  Contributors:
  *      Texas Instruments - initial implementation
- * 
+ *
  * */
 /*
  *  ======== ITarget.xdc ========
@@ -28,10 +28,10 @@ metaonly interface ITarget inherits ti.targets.ITarget {
     };
 
     override readonly config xdc.bld.ITarget2.Command lnk = {
-        cmd: "lnk6x",
-        opts: "--abi=eabi"
+        cmd: "cl6x",
+        opts: "--abi=eabi -z"
     };
-    
+
     override readonly config xdc.bld.ITarget2.Command vers = {
         cmd: "cl6x",
         opts: "--compiler_revision"
@@ -94,16 +94,6 @@ metaonly interface ITarget inherits ti.targets.ITarget {
                 copts: "-O2",
             },
         }],
-        ["whole_program", {
-            compileOpts: {
-                copts: "-oe -O2 -mo",
-            },
-        }],
-        ["whole_program_debug", {
-            compileOpts: {
-                copts: "-oe --symdebug:dwarf -mo",
-            },
-        }],
     ];
 
     final override readonly config string sectMap[string] = [
@@ -141,6 +131,7 @@ metaonly interface ITarget inherits ti.targets.ITarget {
         [".cio", true],
         [".c6xabi.extab", true]
     ];
+
     override readonly config xdc.bld.ITarget.StdTypes stdTypes = {
         t_IArg          : { size: 4, align: 4 },
         t_Char          : { size: 1, align: 1 },
@@ -159,7 +150,7 @@ metaonly interface ITarget inherits ti.targets.ITarget {
         t_Short         : { size: 2, align: 2 },
         t_Size          : { size: 4, align: 4 },
     };
-    
+
     override config String includeOpts = "-I$(rootDir)/include";
 
     override config String stdInclude = "ti/targets/elf/std.h";

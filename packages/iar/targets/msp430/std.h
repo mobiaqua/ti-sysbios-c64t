@@ -79,7 +79,7 @@ static inline xdc_Ptr xdc_uargToPtr(xdc_UArg a) { return ((xdc_Ptr)(int)a); }
  *  ======== xdc__META ========
  */
 #if (__VER__ >= 610)
-#define xdc__META(n,s) __no_alloc const char (n)[] @ "xdc.meta" = {s}
+#define xdc__META(n,s) __no_alloc const char (n)[] @ "xdc.meta" = {(s)}
 #endif
 
 #endif /* iar_targets_msp430_STD_ */

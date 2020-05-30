@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -231,7 +231,12 @@ function module$meta$init()
  */
 function module$use ()
 {
-    Hwi = xdc.useModule("ti.sysbios.hal.Hwi");
+    if (Program.build.target.$name.match(/M3/) || Program.build.target.$name.match(/M4/)) {
+        Hwi = xdc.useModule("ti.sysbios.family.arm.m3.Hwi");
+    }
+    else {
+        Hwi = xdc.useModule("ti.sysbios.family.c64p.Hwi");
+    }
     AMMU = xdc.useModule("ti.sysbios.hal.ammu.AMMU");
     Reset = xdc.useModule("xdc.runtime.Reset");
 

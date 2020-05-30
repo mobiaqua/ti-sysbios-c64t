@@ -30,128 +30,123 @@
 ;  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ;
 ;
-; ======== Mpu_asm.asm ========
+; ======== MPU_asm.asm ========
 ;
 
-        .cdecls C,NOLIST,"package/internal/Mpu.xdc.h"
+        .cdecls C,NOLIST,"package/internal/MPU.xdc.h"
 
-        .global ti_sysbios_family_arm_Mpu_disableAsm__I
-        .global ti_sysbios_family_arm_Mpu_disableBR__E
-        .global ti_sysbios_family_arm_Mpu_enableAsm__I
-        .global ti_sysbios_family_arm_Mpu_enableBR__E
-        .global ti_sysbios_family_arm_Mpu_isEnabled__E
-        .global ti_sysbios_family_arm_Mpu_setRegionAsm__I
+        .global ti_sysbios_family_arm_MPU_disableAsm__I
+        .global ti_sysbios_family_arm_MPU_disableBRAsm__I
+        .global ti_sysbios_family_arm_MPU_enableAsm__I
+        .global ti_sysbios_family_arm_MPU_enableBRAsm__I
+        .global ti_sysbios_family_arm_MPU_isEnabledAsm__I
+        .global ti_sysbios_family_arm_MPU_setRegionAsm__I
 
         .state32
         .align  4
 
 ;
-; ======== Mpu_disableAsm ========
+; ======== MPU_disableAsm ========
 ; Disable MPU.
 ;
-        .sect ".text:ti_sysbios_family_arm_Mpu_disableAsm"
+        .sect ".text:ti_sysbios_family_arm_MPU_disableAsm"
         .clink
-        .armfunc ti_sysbios_family_arm_Mpu_disableAsm__I
+        .armfunc ti_sysbios_family_arm_MPU_disableAsm__I
 
-ti_sysbios_family_arm_Mpu_disableAsm__I
+ti_sysbios_family_arm_MPU_disableAsm__I
         .asmfunc
         mrc     p15, #0, r0, c1, c0, #0  ; read SCTLR register
         bic     r0, r0, #0x1             ; clear bit 1 in r0
         dsb
-        mcr     p15, #0, r0, c1, c0, #0  ; mpu disabled (bit 1 = 0)
+        mcr     p15, #0, r0, c1, c0, #0  ; MPU disabled (bit 1 = 0)
         isb                              ; flush instruction pipeline
 
         bx      r14
         .endasmfunc
 
 ;
-; ======== Mpu_disableBR ========
+; ======== MPU_disableBRAsm ========
 ; Disable background region.
 ;
-        .sect ".text:ti_sysbios_family_arm_Mpu_disableBR"
+        .sect ".text:ti_sysbios_family_arm_MPU_disableBRAsm"
         .clink
-        .armfunc ti_sysbios_family_arm_Mpu_disableBR__E
+        .armfunc ti_sysbios_family_arm_MPU_disableBRAsm__I
 
-ti_sysbios_family_arm_Mpu_disableBR__E
+ti_sysbios_family_arm_MPU_disableBRAsm__I
         .asmfunc
         mrc     p15, #0, r0, c1, c0, #0  ; read SCTLR register
         bic     r0, r0, #0x20000         ; clear bit 17 in r0
         mcr     p15, #0, r0, c1, c0, #0  ; disable background region
-
         bx      r14
         .endasmfunc
 
 ;
-; ======== Mpu_enableAsm ========
+; ======== MPU_enableAsm ========
 ; Enable MPU.
 ;
-        .sect ".text:ti_sysbios_family_arm_Mpu_enableAsm"
+        .sect ".text:ti_sysbios_family_arm_MPU_enableAsm"
         .clink
-        .armfunc ti_sysbios_family_arm_Mpu_enableAsm__I
+        .armfunc ti_sysbios_family_arm_MPU_enableAsm__I
 
-ti_sysbios_family_arm_Mpu_enableAsm__I
+ti_sysbios_family_arm_MPU_enableAsm__I
         .asmfunc
         mrc     p15, #0, r0, c1, c0, #0  ; read SCTLR register
         orr     r0, r0, #0x1             ; set bit 1 in r0
         dsb
-        mcr     p15, #0, r0, c1, c0, #0  ; mpu enabled (bit 1 = 1)
+        mcr     p15, #0, r0, c1, c0, #0  ; MPU enabled (bit 1 = 1)
         isb                              ; flush instruction pipeline
-
         bx      r14
         .endasmfunc
 
 ;
-; ======== Mpu_enableBR ========
+; ======== MPU_enableBRAsm ========
 ; Enable background region.
 ;
-        .sect ".text:ti_sysbios_family_arm_Mpu_enableBR"
+        .sect ".text:ti_sysbios_family_arm_MPU_enableBRAsm"
         .clink
-        .armfunc ti_sysbios_family_arm_Mpu_enableBR__E
+        .armfunc ti_sysbios_family_arm_MPU_enableBRAsm__I
 
-ti_sysbios_family_arm_Mpu_enableBR__E
+ti_sysbios_family_arm_MPU_enableBRAsm__I
         .asmfunc
         mrc     p15, #0, r0, c1, c0, #0  ; read SCTLR register
         orr     r0, r0, #0x20000         ; set bit 1 in r0
         mcr     p15, #0, r0, c1, c0, #0  ; background region enabled
-
         bx      r14
         .endasmfunc
 
 ;
-; ======== Mpu_isEnabled ========
+; ======== MPU_isEnabledAsm ========
 ; Determines if MPU is enabled. Returns TRUE if enabled otherwise FALSE.
 ;
-        .sect ".text:ti_sysbios_family_arm_Mpu_isEnabled"
+        .sect ".text:ti_sysbios_family_arm_MPU_isEnabledAsm"
         .clink
-        .armfunc ti_sysbios_family_arm_Mpu_isEnabled__E
+        .armfunc ti_sysbios_family_arm_MPU_isEnabledAsm__I
 
-ti_sysbios_family_arm_Mpu_isEnabled__E
+ti_sysbios_family_arm_MPU_isEnabledAsm__I
         .asmfunc
         mov     r0, #0
         mrc     p15, #0, r1, c1, c0, #0  ; read SCTLR register to r1
         tst     r1, #0x1                 ; test bit 1
         movne   r0, #1                   ; if not 0, MPU is enabled
-
-        bx r14
+        bx      r14
         .endasmfunc
 
 ;
-; ======== Mpu_setRegionAsm ========
+; ======== MPU_setRegionAsm ========
 ; r0 = regionId
 ; r1 = regionBaseAddr
 ; r2 = sizeAndEnable
 ; r3 = regionAttrs
 ;
-        .sect ".text:ti_sysbios_family_arm_Mpu_setRegionAsm"
+        .sect ".text:ti_sysbios_family_arm_MPU_setRegionAsm"
         .clink
-        .armfunc ti_sysbios_family_arm_Mpu_setRegionAsm__I
+        .armfunc ti_sysbios_family_arm_MPU_setRegionAsm__I
 
-ti_sysbios_family_arm_Mpu_setRegionAsm__I:
+ti_sysbios_family_arm_MPU_setRegionAsm__I:
         .asmfunc
         mcr     p15, #0, r0, c6, c2, #0  ; select MPU region
         mcr     p15, #0, r1, c6, c1, #0  ; set region base address
         mcr     p15, #0, r2, c6, c1, #2  ; set region size and enable it
         mcr     p15, #0, r3, c6, c1, #4  ; set protection attributes
-
         bx      r14
         .endasmfunc

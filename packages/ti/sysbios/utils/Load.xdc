@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, Texas Instruments Incorporated
+ * Copyright (c) 2013-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,7 +78,7 @@ import xdc.runtime.Error;
  *  is automatically done for every period specified by
  *  {@link #windowInMs windowInMs} in an {@link ti.sysbios.knl.Idle Idle}
  *  function when {@link #updateInIdle updateInIdle} is
- *  set to true. The time between 2 calls to {@link #update} is called the
+ *  set to true. The time between two calls to {@link #update} is called the
  *  benchmark time window.
  *
  *  By passing in a function pointer of type
@@ -107,7 +107,7 @@ import xdc.runtime.Error;
  *  @p
  *
  *  The first method of calculating CPU load is used when
- *  Task load logging is disabled, ie, {@link #taskEnable}
+ *  Task load logging is disabled, ie, {@link #taskEnabled}
  *  is false, and Power management is not used. The CPU load is computed as
  *  the percentage of time in the benchmark window which was NOT spent in the
  *  idle loop. More specifically, the load is computed as follows:
@@ -131,7 +131,7 @@ import xdc.runtime.Error;
  *  @p
  *
  *  The second method of calculating CPU load is used when Task load logging
- *  is enabled ({@link #taskEnable} = true) and Power management is not used.
+ *  is enabled ({@link #taskEnabled} = true) and Power management is not used.
  *  In this case the CPU load is calculted as
  *
  *      global CPU load = 100 - (Idle task load)
@@ -146,6 +146,10 @@ import xdc.runtime.Error;
  *  @p(html)
  *  <B>Power Management Enabled</B>
  *  @p
+ *
+ *  This method applies to targets that have a SYS/BIOS Power
+ *  module, for example, MSP430.  It does not apply to targets
+ *  where Power management is part of TI-RTOS (e.g., CC3200).
  *
  *  The third method of calculating CPU load is used when Power
  *  management is enabled.  In this case, the idle loop has a
@@ -169,6 +173,19 @@ import xdc.runtime.Error;
  *  is calculated as the percentage of time that the processor is not
  *  powered down, while the idle task load includes powered down time
  *  plus time executing idle functions.
+ *
+ *  @p(html)
+ *  <B>Power Management Enabled outside of SYS/BIOS</B>
+ *  @p
+ *
+ *  Some targets have Power management support outside of SYS/BIOS.  For
+ *  example, CC3200 and CC26XX devices have Power management in TI-RTOS.
+ *  In these cases, the best way to get CPU load is to make sure that
+ *  {@link #taskEnabled} is set to true.  Then the CPU load will be
+ *  calculated as 100 - the idle task load.  However, for BIOS in ROM builds,
+ *  this method will not work, as Task hooks are not allowed.  So to
+ *  use Load for any devices that support BIOS in ROM builds, make
+ *  sure the ROM build is disabled.
  *
  *  @a(Examples)
  *  Configuration example: The following statements configure the Load module
@@ -444,6 +461,20 @@ module Load
     config Bool updateInIdle = true;
 
     /*!
+     *  ======== enableCPULoadCalc ========
+     *  Automatically update the Load module's CPU load value in
+     *  {@link #update}.
+     *
+     *  If this parameter is set to `true`, Load_update() will calculate
+     *  the CPU load for the elapsed time.  In some cases, the user may
+     *  prefer to use the statistics gathered by the Load module and do
+     *  the CPU load calculation themself.  Set this parameter to false,
+     *  to disable the Load module's CPU load calculations.  This can
+     *  improve performance of the Load_update() call.
+     */
+    metaonly config Bool enableCPULoadCalc = true;
+
+    /*!
      *  ======== minIdle ========
      *  Specifies the minimum time used to compute idle time
      *
@@ -567,6 +598,18 @@ module Load
      */
     @DirectCall
     Void updateLoads();
+
+    /*!
+     *  @_nodoc
+     *  ======== updateContextsAndPost ========
+     *  This function is called by Load_update() when Load.enableCPULoadCalc
+     *  is false.
+     *  Updates the current thread's time and hook contexts for all threads.
+     *  Call the postUpdate() function.  It is up to the application to
+     *  calculate the loads.
+     */
+    @DirectCall
+    Void updateContextsAndPost();
 
     /*!
      *  @_nodoc

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2014-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -243,6 +243,36 @@ function getEnumString(enumProperty)
     var enumStrArray = String(enumProperty).split(".");
     var len = enumStrArray.length;
     return (enumStrArray[len - 1]);
+}
+
+/*
+ *  ======== viewGetCurrentClockTick ========
+ *  Compute and return the current Clock tick value.
+ */
+function viewGetCurrentClockTick()
+{
+    var tickPeriod = Program.$modules['ti.sysbios.knl.Clock'].tickPeriod;
+    var period64 = Math.floor(0x100000000 * tickPeriod / 1000000);
+    var ticks = 0;
+
+    try {
+        var SEC = Program.fetchArray(
+            { type: 'xdc.rov.support.ScalarStructs.S_UInt32', isScalar: true },
+            Number("0x40092008"), 1, false);
+        var SUBSEC = Program.fetchArray(
+            { type: 'xdc.rov.support.ScalarStructs.S_UInt32', isScalar: true },
+            Number("0x4009200C"), 1, false);
+    }
+    catch (e) {
+        print("Error: Problem fetching RTC values: " + e.toString());
+    }
+
+    /* only 51 bits resolution in JavaScript; break into SEC & SUBSEC pieces */
+    ticks = SUBSEC / period64;                    /* ticks from SUBSEC */
+    ticks = ticks + (SEC * 1000000 / tickPeriod); /* plus ticks from SEC */
+    ticks = Math.floor(ticks);                    /* clip total */
+
+    return ticks;
 }
 
 /*

@@ -6,6 +6,7 @@
 00000000 t .text:_ti_sysbios_BIOS_exit__E__mangled__
 00000000 t .text:_ti_sysbios_BIOS_getCpuFreq__E__mangled__
 00000000 t .text:_ti_sysbios_BIOS_getThreadType__E__mangled__
+00000000 t .text:_ti_sysbios_BIOS_linkedWithIncorrectBootLibrary__E__mangled__
 00000000 t .text:_ti_sysbios_BIOS_Module__startupDone__S
 00000000 t .text:_ti_sysbios_BIOS_RtsGateProxy_create
 00000000 t .text:_ti_sysbios_BIOS_RtsGateProxy_delete
@@ -80,6 +81,7 @@
 00000000 t .text:_ti_sysbios_family_c28_IntrinsicsSupport_Module__startupDone__S
 00000000 t .text:_ti_sysbios_family_c28_TaskSupport_buildTaskStack
 00000000 t .text:_ti_sysbios_family_c28_TaskSupport_checkStack__E__mangled__
+00000000 t .text:_ti_sysbios_family_c28_TaskSupport_getCheckValueAddr__E
 00000000 t .text:_ti_sysbios_family_c28_TaskSupport_getDefaultStackSize__E__mangled__
 00000000 t .text:_ti_sysbios_family_c28_TaskSupport_getStackAlignment__E__mangled__
 00000000 t .text:_ti_sysbios_family_c28_TaskSupport_glue
@@ -205,6 +207,7 @@
 00000000 t .text:_ti_sysbios_hal_Hwi_HwiProxy_startup__E__mangled__
 00000000 t .text:_ti_sysbios_hal_Hwi_HwiProxy_switchFromBootStack__E__mangled__
 00000000 t .text:_ti_sysbios_hal_Hwi_initStack__mangled__
+00000000 t .text:_ti_sysbios_hal_Hwi_initStack__mangled__Min
 00000000 t .text:_ti_sysbios_hal_Hwi_Instance_finalize__E__mangled__
 00000000 t .text:_ti_sysbios_hal_Hwi_Instance_init__E__mangled__
 00000000 t .text:_ti_sysbios_hal_Hwi_Module__startupDone__S
@@ -305,6 +308,7 @@
 00000000 t .text:_ti_sysbios_knl_Clock_scheduleNextTick__E__mangled__
 00000000 t .text:_ti_sysbios_knl_Clock_setFunc__E__mangled__
 00000000 t .text:_ti_sysbios_knl_Clock_setPeriod__E__mangled__
+00000000 t .text:_ti_sysbios_knl_Clock_setTicks__E
 00000000 t .text:_ti_sysbios_knl_Clock_setTimeout__E__mangled__
 00000000 t .text:_ti_sysbios_knl_Clock_start__E__mangled__
 00000000 t .text:_ti_sysbios_knl_Clock_startI__E__mangled__
@@ -315,6 +319,7 @@
 00000000 t .text:_ti_sysbios_knl_Clock_tickStop__E__mangled__
 00000000 t .text:_ti_sysbios_knl_Clock_triggerFunc__I
 00000000 t .text:_ti_sysbios_knl_Clock_walkQueueDynamic__E__mangled__
+00000000 t .text:_ti_sysbios_knl_Clock_walkQueuePeriodic__E
 00000000 t .text:_ti_sysbios_knl_Clock_workFuncDynamic__E__mangled__
 00000000 t .text:_ti_sysbios_knl_Clock_workFunc__E__mangled__
 00000000 t .text:_ti_sysbios_knl_Event_checkEvents__I__mangled__
@@ -479,12 +484,16 @@
 00000000 t .text:_ti_sysbios_knl_Task_getIdleTask__E__mangled__
 00000000 t .text:_ti_sysbios_knl_Task_getIdleTaskHandle__E__mangled__
 00000000 t .text:_ti_sysbios_knl_Task_getMode__E__mangled__
+00000000 t .text:_ti_sysbios_knl_Task_getModuleStateCheckValue__I
+00000000 t .text:_ti_sysbios_knl_Task_getObjectCheckValue__I
 00000000 t .text:_ti_sysbios_knl_Task_getPri__E__mangled__
 00000000 t .text:_ti_sysbios_knl_Task_Handle__label__S
 00000000 t .text:_ti_sysbios_knl_Task_Instance_finalize__E__mangled__
 00000000 t .text:_ti_sysbios_knl_Task_Instance_init__E__mangled__
 00000000 t .text:_ti_sysbios_knl_Task_Module__startupDone__S
 00000000 t .text:_ti_sysbios_knl_Task_Module_startup__E__mangled__
+00000000 t .text:_ti_sysbios_knl_Task_moduleStateCheck__I
+00000000 t .text:_ti_sysbios_knl_Task_objectCheck__I
 00000000 t .text:_ti_sysbios_knl_Task_Object__create__S
 00000000 t .text:_ti_sysbios_knl_Task_Object__delete__S__mangled__
 00000000 t .text:_ti_sysbios_knl_Task_Object__destruct__S

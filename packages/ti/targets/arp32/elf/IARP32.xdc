@@ -1,13 +1,13 @@
 /* 
- *  Copyright (c) 2012 Texas Instruments and others.
+ *  Copyright (c) 2012-2015 Texas Instruments Incorporated
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *  Contributors:
  *      Texas Instruments - initial implementation
- * 
+ *
  * */
 /*
  *  ======== IARP32.xdc ========
@@ -19,21 +19,21 @@
  *  TI IARP32 interface (little endian)
  */
 metaonly interface IARP32 inherits ti.targets.ITarget {
-    override readonly config string isa             = "arp32";  
+    override readonly config string isa             = "arp32";
 
     override readonly config string rts = "ti.targets.arp32.rts";
     override config string platform     = "ti.platforms.simARP32";
-    
+
     override readonly config xdc.bld.ITarget2.Command ar = {
         cmd: "ar-arp32",
         opts: "rq"
     };
 
     override readonly config xdc.bld.ITarget2.Command lnk = {
-        cmd: "lnk-arp32",
-        opts: ""
+        cmd: "cl-arp32",
+        opts: "-z"
     };
-    
+
     override readonly config xdc.bld.ITarget2.Command vers = {
         cmd: "cl-arp32",
         opts: "--compiler_revision"
@@ -105,7 +105,7 @@ metaonly interface IARP32 inherits ti.targets.ITarget {
     ];
 
     override readonly config Int bitsPerChar = 8;
-    
+
     /*!
      *  ======== profiles ========
      *  Standard options profiles for the TI tool-chain.
@@ -152,7 +152,7 @@ metaonly interface IARP32 inherits ti.targets.ITarget {
         t_Short         : { size: 2, align: 2 },
         t_Size          : { size: 4, align: 4 },
     };
-    
+
     override config String stdInclude = "ti/targets/arp32/elf/std.h";
 
     override config String binaryParser = "ti.targets.omf.elf.Elf32";

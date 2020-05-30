@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,4 +67,12 @@ metaonly module MemAlloc
      *  By default, SYS/BIOS will generate malloc() and free() APIs that use Memory_alloc() and Memory_free().
      */
     metaonly config Bool generateFunctions = true;
+
+    /*!
+     *  @_nodoc
+     *  ======== configureProgramHeap ========
+     *  set Program.heap to zero if HeapStd is not used and we are generating malloc()
+     *  This function is called by BIOS.module$use().
+     */
+    metaonly Void configureProgramHeap();
 }

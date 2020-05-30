@@ -420,7 +420,7 @@ Bits16 Hwi_disablePIEIER(UInt groupNum, Bits16 pieMask)
 
     /* Step b. */
     oldPIEIER = *((UInt16 *)PIECTRL_ADDR + (groupNum * 2));
-    *((UInt16 *)PIECTRL_ADDR + (groupNum * 2)) &= (~pieMask & 0xff);
+    *((UInt16 *)PIECTRL_ADDR + (groupNum * 2)) &= (~pieMask);
 
     /*
      * Step c.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,91 +32,91 @@
 
 /* 
  * For LibType_Custom build, force all ROM required modules to have
- * outPolicy = Types.SEPARATE_FILE
+ * outPolicy = Types.NO_FILE
  */
 var Types = xdc.useModule('xdc.runtime.Types');
 
 var BIOS = xdc.useModule('ti.sysbios.BIOS');
-BIOS.common$.outPolicy = Types.SEPARATE_FILE;
+BIOS.common$.outPolicy = Types.NO_FILE;
 
 var BIOSRtsGateProxy = xdc.module('ti.sysbios.BIOS_RtsGateProxy');
-BIOSRtsGateProxy.common$.outPolicy = Types.SEPARATE_FILE;
+BIOSRtsGateProxy.common$.outPolicy = Types.NO_FILE;
 
 var Clock = xdc.useModule('ti.sysbios.knl.Clock');
-Clock.common$.outPolicy = Types.SEPARATE_FILE;
+Clock.common$.outPolicy = Types.NO_FILE;
 
 var ClockTimerProxy = xdc.module('ti.sysbios.knl.Clock_TimerProxy');
-ClockTimerProxy.common$.outPolicy = Types.SEPARATE_FILE;
+ClockTimerProxy.common$.outPolicy = Types.NO_FILE;
 
 var Task = xdc.useModule('ti.sysbios.knl.Task');
-Task.common$.outPolicy = Types.SEPARATE_FILE;
+Task.common$.outPolicy = Types.NO_FILE;
 
 var TaskSupportProxy = xdc.module('ti.sysbios.knl.Task_SupportProxy');
-TaskSupportProxy.common$.outPolicy = Types.SEPARATE_FILE;
+TaskSupportProxy.common$.outPolicy = Types.NO_FILE;
 
 var Swi = xdc.useModule('ti.sysbios.knl.Swi');
-Swi.common$.outPolicy = Types.SEPARATE_FILE;
+Swi.common$.outPolicy = Types.NO_FILE;
 
 var Semaphore = xdc.useModule('ti.sysbios.knl.Semaphore');
-Semaphore.common$.outPolicy = Types.SEPARATE_FILE;
+Semaphore.common$.outPolicy = Types.NO_FILE;
 
 var Mailbox = xdc.useModule('ti.sysbios.knl.Mailbox');
-Mailbox.common$.outPolicy = Types.SEPARATE_FILE;
+Mailbox.common$.outPolicy = Types.NO_FILE;
 
 var Queue = xdc.useModule('ti.sysbios.knl.Queue');
-Queue.common$.outPolicy = Types.SEPARATE_FILE;
+Queue.common$.outPolicy = Types.NO_FILE;
 
 var halHwi = xdc.useModule('ti.sysbios.hal.Hwi');
-halHwi.common$.outPolicy = Types.SEPARATE_FILE;
+halHwi.common$.outPolicy = Types.NO_FILE;
 
 var halHwiProxy = xdc.module('ti.sysbios.hal.Hwi_HwiProxy');
-halHwiProxy.common$.outPolicy = Types.SEPARATE_FILE;
+halHwiProxy.common$.outPolicy = Types.NO_FILE;
 
 var m3Hwi = xdc.useModule('ti.sysbios.family.arm.m3.Hwi');
-m3Hwi.common$.outPolicy = Types.SEPARATE_FILE;
+m3Hwi.common$.outPolicy = Types.NO_FILE;
 
 var TaskSupport = xdc.useModule('ti.sysbios.family.arm.m3.TaskSupport');
-TaskSupport.common$.outPolicy = Types.SEPARATE_FILE;
+TaskSupport.common$.outPolicy = Types.NO_FILE;
 
 var GateHwi = xdc.useModule('ti.sysbios.gates.GateHwi');
-GateHwi.common$.outPolicy = Types.SEPARATE_FILE;
+GateHwi.common$.outPolicy = Types.NO_FILE;
 
 var GateMutex = xdc.useModule('ti.sysbios.gates.GateMutex');
-GateMutex.common$.outPolicy = Types.SEPARATE_FILE;
+GateMutex.common$.outPolicy = Types.NO_FILE;
 
 var System = xdc.useModule('xdc.runtime.System');
-System.common$.outPolicy = Types.SEPARATE_FILE;
+System.common$.outPolicy = Types.NO_FILE;
 
 var System_Module_GateProxy = xdc.module('xdc.runtime.System_Module_GateProxy');
-System_Module_GateProxy.common$.outPolicy = Types.SEPARATE_FILE;
+System_Module_GateProxy.common$.outPolicy = Types.NO_FILE;
 
 var SysCallback = xdc.module('xdc.runtime.SysCallback');
-SysCallback.common$.outPolicy = Types.SEPARATE_FILE;
+SysCallback.common$.outPolicy = Types.NO_FILE;
 
 var Timestamp = xdc.useModule('xdc.runtime.Timestamp');
-Timestamp.common$.outPolicy = Types.SEPARATE_FILE;
+Timestamp.common$.outPolicy = Types.NO_FILE;
 
 var Timestamp_SupportProxy = xdc.module('xdc.runtime.Timestamp_SupportProxy');
-Timestamp_SupportProxy.common$.outPolicy = Types.SEPARATE_FILE;
+Timestamp_SupportProxy.common$.outPolicy = Types.NO_FILE;
 
 var LocalError = xdc.module('xdc.runtime.Error');
-LocalError.common$.outPolicy = Types.SEPARATE_FILE;
+LocalError.common$.outPolicy = Types.NO_FILE;
 
 var Memory = xdc.module('xdc.runtime.Memory');
-Memory.common$.outPolicy = Types.SEPARATE_FILE;
+Memory.common$.outPolicy = Types.NO_FILE;
 
 var Memory_HeapProxy = xdc.module('xdc.runtime.Memory_HeapProxy');
-Memory_HeapProxy.common$.outPolicy = Types.SEPARATE_FILE;
+Memory_HeapProxy.common$.outPolicy = Types.NO_FILE;
 
 var HeapMem = xdc.useModule('ti.sysbios.heaps.HeapMem');
-HeapMem.common$.outPolicy = Types.SEPARATE_FILE;
+HeapMem.common$.outPolicy = Types.NO_FILE;
 
 var HeapMem_Module_GateProxy = xdc.module('ti.sysbios.heaps.HeapMem_Module_GateProxy');
-HeapMem_Module_GateProxy.common$.outPolicy = Types.SEPARATE_FILE;
+HeapMem_Module_GateProxy.common$.outPolicy = Types.NO_FILE;
 
 /* use the cc26xx Timer and TimestampProvider modules */
 var rtcTimer = xdc.useModule('ti.sysbios.family.arm.cc26xx.Timer');
-rtcTimer.common$.outPolicy = Types.SEPARATE_FILE;
+rtcTimer.common$.outPolicy = Types.NO_FILE;
 
 var rtcTimestamp = xdc.useModule('ti.sysbios.family.arm.cc26xx.TimestampProvider');
-rtcTimestamp.common$.outPolicy = Types.SEPARATE_FILE;
+rtcTimestamp.common$.outPolicy = Types.NO_FILE;

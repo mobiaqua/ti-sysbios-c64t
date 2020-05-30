@@ -1,5 +1,5 @@
 /* 
- *  Copyright (c) 2008 Texas Instruments and others.
+ *  Copyright (c) 2008-2016 Texas Instruments and others.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -24,6 +24,7 @@ package gnu.targets.arm [1,0,0] {
     module GCArmv5T, GCArmv6, GCArmv7A, GCArmv7AF;
     module M3, M4, M4F;
     module A8F, A9F, A15F;
+    module A53F;
 }
 
 /*

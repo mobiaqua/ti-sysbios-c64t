@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Texas Instruments Incorporated
+ * Copyright (c) 2014-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,13 +43,15 @@
 #include <ti/sysbios/BIOS.h>
 #include <ti/sysbios/hal/Hwi.h>
 
-#include <inc/hw_types.h>
-#include <inc/hw_memmap.h>
-#include <inc/hw_aon_rtc.h>
-#include <inc/hw_ints.h>
-#include <driverlib/aon_rtc.h>
-#include <driverlib/aon_event.h>
-#include <driverlib/interrupt.h>
+#ifdef DEVICE_FAMILY
+#define DEVICE_FAMILY_PREFIX(x) <ti/devices/DEVICE_FAMILY/x>
+#else
+#define DEVICE_FAMILY_PREFIX(x) <x>
+#endif
+
+#include DEVICE_FAMILY_PREFIX(driverlib/aon_rtc.h)
+#include DEVICE_FAMILY_PREFIX(driverlib/aon_event.h)
+#include DEVICE_FAMILY_PREFIX(driverlib/interrupt.h)
 
 #include "package/internal/Timer.xdc.h"
 
@@ -91,7 +93,6 @@ UInt32 Timer_getMaxTicks(Timer_Object *obj)
     UInt32 ticks;
     UInt64 temp;
 
-    /* for PG1 max suppress for only 1 hour */
     temp = (UInt64)(MAX_SKIP) / obj->period64;
 
     /* clip value to Clock tick count limit of 32-bits */
@@ -240,7 +241,7 @@ Void Timer_start(Timer_Object *obj)
     /* reset timer */
     AONRTCReset();
     AONRTCEventClear(AON_RTC_CH0);
-    IntPendClear(INT_AON_RTC);
+    IntPendClear(INT_AON_RTC_COMB);
 
     /* 
      * set the compare register to the counter start value plus one period.
@@ -517,7 +518,7 @@ Void Timer_initDevice(Timer_Object *obj)
     HWREG(AON_RTC_BASE + AON_RTC_O_SYNC);
 
     AONRTCEventClear(AON_RTC_CH0);
-    IntPendClear(INT_AON_RTC);
+    IntPendClear(INT_AON_RTC_COMB);
 
     HWREG(AON_RTC_BASE + AON_RTC_O_SYNC);
 

@@ -1,5 +1,5 @@
 #
-#  Copyright 2015 by Texas Instruments Incorporated.
+#  Copyright 2016 by Texas Instruments Incorporated.
 #  
 #
 
@@ -26,7 +26,7 @@ java.test: java/package.jar
 
 
 #
-#  @(#) ti.targets.omf.cof; 1,0,0,0; 7-10-2015 13:56:33; /db/ztree/library/trees/xdctargets/xdctargets-j04/src/ xlibrary
+#  @(#) ti.targets.omf.cof; 1,0,0,0; 10-21-2016 18:37:04; /db/ztree/library/trees/xdctargets/xdctargets-l07/src/ xlibrary
 
 #
 

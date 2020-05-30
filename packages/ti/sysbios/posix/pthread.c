@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -176,7 +176,7 @@ int pthread_attr_setschedparam(pthread_attr_t *attr,
 {
     int     priority = schedparam->sched_priority;
 
-    if ((priority >= Task_numPriorities) || (priority == 0) ||
+    if ((priority >= (int)Task_numPriorities) || (priority == 0) ||
             (priority < -1)) {
         /* Bad priority value */
         return (EINVAL);
@@ -247,6 +247,9 @@ int pthread_cancel(pthread_t pthread)
         while (thread->cleanupList != NULL) {
             _pthread_cleanup_pop(thread->cleanupList, 1);
         }
+
+        /* Cleanup any pthread specific data */
+        _pthread_removeThreadKeys(pthread);
 
         if (thread->detached) {
             /* Free memory */
@@ -321,6 +324,9 @@ int pthread_create(pthread_t *newthread, const pthread_attr_t *attr,
     Queue_construct(&(thread->mutexList), NULL);
 #endif
 
+    /* List of keys for which thread has called pthread_setspecific() */
+    Queue_construct(&(thread->keyList), NULL);
+
     Semaphore_Params_init(&semParams);
     semParams.mode = Semaphore_Mode_BINARY;
 
@@ -380,6 +386,14 @@ int pthread_detach(pthread_t pthread)
 }
 
 /*
+ *  ======== pthread_equal ========
+ */
+int pthread_equal(pthread_t pt1, pthread_t pt2)
+{
+    return (pt1 == pt2);
+}
+
+/*
  *  ======== pthread_exit ========
  */
 void pthread_exit(void *retval)
@@ -407,6 +421,9 @@ void pthread_exit(void *retval)
     while (thread->cleanupList != NULL) {
         _pthread_cleanup_pop(thread->cleanupList, 1);
     }
+
+    /* Cleanup any pthread specific data */
+    _pthread_removeThreadKeys((pthread_t)thread);
 
     if (!thread->detached) {
         Semaphore_post(Semaphore_handle(&(thread->joinSem)));
@@ -477,6 +494,11 @@ int pthread_join(pthread_t pthread, void **thread_return)
          */
         Task_restore(key);
         return (EINVAL);
+    }
+
+    if (pthread == pthread_self()) {
+        Task_restore(key);
+        return (EDEADLK);
     }
 
     /*
@@ -570,7 +592,7 @@ int pthread_setschedparam(pthread_t pthread, int policy,
     int                 maxPri;
 #endif
 
-    if ((priority >= Task_numPriorities) || ((priority == 0)) ||
+    if ((priority >= (int)Task_numPriorities) || ((priority == 0)) ||
             (priority < -1)) {
         /* Bad priority value */
         return (EINVAL);
@@ -663,6 +685,9 @@ static void _pthread_runStub(UArg arg0, UArg arg1)
     while (thread->cleanupList != NULL) {
         _pthread_cleanup_pop(thread->cleanupList, 1);
     }
+
+    /* Cleanup any pthread specific data */
+    _pthread_removeThreadKeys((pthread_t)thread);
 
     key = Task_disable();
 

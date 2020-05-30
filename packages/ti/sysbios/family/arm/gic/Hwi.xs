@@ -170,6 +170,9 @@ if (xdc.om.$name == "cfg") {
     };
 
     deviceTable["DRA7XX"] = deviceTable["Vayu"];
+    deviceTable["C66AK2E05"] = deviceTable["TCI6636K2H"];
+    deviceTable["TCI6630K2L"] = deviceTable["TCI6636K2H"];
+    deviceTable["TCI6638K2K"] = deviceTable["TCI6636K2H"];
 }
 
 
@@ -546,6 +549,11 @@ function module$static$init(mod, params)
     }
 
     mod.curIntId = ~(0);
+
+    /* add -D to compile line to optimize code */
+    Build.ccArgs.$add(
+        "-Dti_sysbios_family_arm_gic_Hwi_initGicd__D=" +
+        (Hwi.initGicd ? "TRUE" : "FALSE"));
 }
 
 /*

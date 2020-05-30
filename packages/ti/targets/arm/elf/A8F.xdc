@@ -10,6 +10,7 @@
  * 
  * */
 /*!
+ *  @_nodoc
  *  ======== A8F.xdc ========
  *  Cortex A8 little endian with floating point support (NEON) (ELF)
  */

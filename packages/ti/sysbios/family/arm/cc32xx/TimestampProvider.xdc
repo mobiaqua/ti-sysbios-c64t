@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2014-2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,22 +56,24 @@ package ti.sysbios.family.arm.cc32xx;
  *  @p
  */
 
-@ModuleStartup          /* To get Clock Timer Handle */
-
 module TimestampProvider inherits ti.sysbios.interfaces.ITimestamp
 {
     // -------- Module Types --------
 
     /*!
+     *  @_nodoc
      *  ======== timerId ========
+     *  This configuration parameter has been deprecated.
+     *
      *  Id of the timer to use for creating timestamps
      *
      */
     config UInt timerId = 0;
 
     /*!
+     *  @_nodoc
      *  ======== useClockTimer ========
-     *  Use the same timer as Clock
+     *  This configuration parameter has been deprecated.
      *
      *  Set this parameter when you want TimestampProvider to use the same
      *  timer as the BIOS {@link ti.sysbios.knl.Clock Clock} module.
@@ -87,13 +89,4 @@ module TimestampProvider inherits ti.sysbios.interfaces.ITimestamp
      *  @_nodoc Internal use.
      */
     Void startTimer();
-
-internal:   /* not for client use */
-
-    /*
-     *  ======== Module_State ========
-     */
-    struct Module_State {
-        Timer.Handle    timer;          /* timer instance used */
-    }
 }

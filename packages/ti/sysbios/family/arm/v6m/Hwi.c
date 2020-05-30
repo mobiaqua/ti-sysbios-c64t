@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Texas Instruments Incorporated
+ * Copyright (c) 2015 Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -398,8 +398,33 @@ Void Hwi_startup()
 {
     Hwi_enable();
 }
+#ifdef __ti__
 
-#ifndef __ti__
+/*
+ *  ======== Hwi_disableFxn ========
+ */
+UInt Hwi_disableFxn()
+{
+    return (__set_PRIMASK(1));
+}
+
+/*
+ *  ======== Hwi_enableFxn ========
+ */
+UInt Hwi_enableFxn()
+{
+    return (__set_PRIMASK(0));
+}
+
+/*
+ *  ======== Hwi_restoreFxn ========
+ */
+Void Hwi_restoreFxn(UInt key)
+{
+    __set_PRIMASK(key);
+}
+
+#else
 
 /*
  *  ======== Hwi_disableFxn ========
@@ -1154,7 +1179,7 @@ Void Hwi_excDumpRegs(UInt lr)
         name = "(unnamed)";
     }
 
-    System_printf("Core %d: Exception occurred in ThreadType_%s.\n", coreId, ttype);
+    System_printf("Exception occurred in ThreadType_%s.\n", ttype);
 
     System_printf("%s name: %s, handle: 0x%x.\n", ttype, name, excp->threadHandle);
     System_printf("%s stack base: 0x%x.\n", ttype, excp->threadStack);

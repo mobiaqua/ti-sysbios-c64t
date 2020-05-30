@@ -75,7 +75,7 @@
  *
  *  So a value of 37 hours will be sufficient.
  */
-#define MAX_SKIP  (0x104280000)    /* (37 hours * 3600 secs/hr) * 32768 tics/sec */
+#define MAX_SKIP  (0x104280000) /* (37 hours * 3600 secs/hr) * 32768 tics/sec */
 
 #define COMPARE_MARGIN 12
 
@@ -102,18 +102,6 @@
         count = count << 32;                                         \
         count |= HWREG(HIB1P2_BASE + HIB1P2_O_HIB_RTC_TIMER_LSW_1P2);
 
-/*
- *  Since we can't read the timer registers in CCS, we use an
- *  array to periodically store timer register values.  We can
- *  then look at this array in CCS.  To compile the Timer code
- *  with this array, set TESTING to non-zero.
- */
-
-
-/*
- *  Read the RTC timer registers from the 40MHz domain.
- */
-#define USE_40MZ_DOMAIN 1
 
 /*
  *  For testing, use a fake timer counter rollover point.  The RTC
@@ -144,25 +132,7 @@
 #endif
 
 #if TESTING
-typedef struct TimerData {
-    UInt32 timeLo;
-    UInt32 timeHi;
-    UInt32 compLo;
-    UInt32 compHi;
-} TimerData;
-
-TimerData timerData[64];
-
-Int timerDataIndex = 0;
-Int shouldNeverGetHere = 0;
-
-Int setMaxTickCount = 0;
-Int setThresholdUpperCnt = 0;
-
-TimerData rolloverData[64];
 Int rolloverCount = 0;
-Int rolloverDataIdx = 0;
-
 UInt32 nextThresholdUpper = 0;
 UInt32 setNextThresholdUpperCnt = 0;
 
@@ -213,7 +183,6 @@ Void Timer_setThreshold(Timer_Object *obj, UInt64 next)
 {
     UInt64 curTime;
 #if TESTING
-    Int i;
     UInt32 nextUpper;
 #endif
     curTime = Timer_getCount64(obj);
@@ -231,17 +200,6 @@ Void Timer_setThreshold(Timer_Object *obj, UInt64 next)
     if ((next >> 32) != (Timer_module->nextThreshold >> 32)) {
         HWREG(HIB3P3_BASE + HIB3P3_O_MEM_HIB_RTC_IRQ_MSW_CONF)
             = (UInt32)(next >> 32);
-
-#if TESTING
-        setThresholdUpperCnt++;
-
-        i = timerDataIndex & 0x3f;
-        timerData[i].timeLo = curTime;
-        timerData[i].timeHi = (UInt32)(curTime >> 32);
-        timerData[i].compLo = (UInt32)(next);
-        timerData[i].compHi = (UInt32)(next >> 32);
-        timerDataIndex++;
-#endif
     }
 
 #if TESTING
@@ -282,12 +240,6 @@ Void Timer_setNextMaxTick(UArg arg)
     tUpper = (UInt32)(t >> (32 - UPPERSHIFT));
 
 #if TESTING
-    rolloverDataIdx &= 0x3f;
-    rolloverData[rolloverDataIdx].timeLo = (UInt32)t;
-    rolloverData[rolloverDataIdx].timeHi = (UInt32)(t >> 32);
-    rolloverData[rolloverDataIdx].compLo = tLower;
-    rolloverData[rolloverDataIdx].compHi = tUpper;
-    rolloverDataIdx++;
     rolloverCount++;
 #endif
 
@@ -324,10 +276,6 @@ Void Timer_setNextMaxTick(UArg arg)
     Clock_setTimeout(Timer_module->clock, (UInt32)ticks);
     Clock_start(Timer_module->clock);
 
-#if TESTING
-    setMaxTickCount++;
-#endif
-
     Hwi_restore(key);
 }
 
@@ -346,8 +294,8 @@ Void Timer_setNextTick(Timer_Object *obj, UInt32 ticks)
 
 /*
  *  ======== Timer_Module_startup ========
- *  Calls postInit for all statically-created & constructed
- *  timers to initialize them.
+ *  Called before main(), initializes all statically-created & constructed
+ *  timers.
  */
 Int Timer_Module_startup(Int status)
 {
@@ -357,7 +305,8 @@ Int Timer_Module_startup(Int status)
         obj = Timer_module->handle;
         /* if timer was statically created/constructed */
         if ((obj != NULL) && (obj->staticInst)) {
-            Timer_postInit(obj, NULL);
+            Timer_initDevice(obj);
+            Timer_setPeriod(obj, obj->period64);
         }
     }
 
@@ -516,7 +465,7 @@ UInt32 Timer_getCount(Timer_Object *obj)
 {
     UInt64 count = Timer_getCount64(obj);
 
-    return((UInt32)count);
+    return ((UInt32)count);
 }
 
 /*
@@ -524,7 +473,6 @@ UInt32 Timer_getCount(Timer_Object *obj)
  */
 UInt64 Timer_getCount64(Timer_Object *obj)
 {
-#if USE_40MZ_DOMAIN
     UInt64 count[3];
     Int    i;
     UInt key;
@@ -542,24 +490,7 @@ UInt64 Timer_getCount64(Timer_Object *obj)
     RET_IF_WITHIN_TRESHOLD(count[2], count[0], 1);
 
     /* Should never get here */
-#if TESTING
-    shouldNeverGetHere = 1;
-#endif
-
     return ((UInt64)-1);
-#else
-    UInt64 count;
-
-    /* Latch the RTC vlaue */
-    HWREG(HIB3P3_BASE + HIB3P3_O_MEM_HIB_RTC_TIMER_READ) = 0x1;
-
-    /* Read latched values as 2 32-bit vlaues */
-    count = HWREG(HIB3P3_BASE + HIB3P3_O_MEM_HIB_RTC_TIMER_MSW);
-    count = count << 32;
-    count |= HWREG(HIB3P3_BASE + HIB3P3_O_MEM_HIB_RTC_TIMER_LSW);
-
-    return (count);
-#endif
 }
 
 
@@ -716,24 +647,6 @@ Void Timer_initDevice(Timer_Object *obj)
 
         (void)status;	/* suppress unused variable warning */
     }
-}
-
-/*
- *  ======== Timer_postInit ========
- */
-Int Timer_postInit (Timer_Object *obj, Error_Block *eb)
-{
-    UInt key;
-
-    key = Hwi_disable();
-
-    Timer_initDevice(obj);
-
-    Timer_setPeriod(obj, obj->period64);
-
-    Hwi_restore(key);
-
-    return (0);
 }
 
 /*

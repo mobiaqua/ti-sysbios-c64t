@@ -34,6 +34,7 @@ ti.targets.elf.C674 ?=
 
 ti.targets.arm.elf.Arm9 ?=
 ti.targets.arm.elf.A8Fnv ?=
+ti.targets.arm.elf.R4F ?=
 ti.targets.arm.elf.M3 ?=
 ti.targets.arm.elf.M4 ?=
 ti.targets.arm.elf.M4F ?=
@@ -49,6 +50,7 @@ gnu.targets.arm.M4 ?=
 gnu.targets.arm.M4F ?=
 
 gnu.targets.arm.A8F ?=
+gnu.targets.arm.A9F ?=
 gnu.targets.arm.A15F ?=
 
 iar.targets.msp430.MSP430X_small ?=
@@ -79,6 +81,7 @@ XDCARGS= \
     ti.targets.C674=\"$(ti.targets.C674)\" \
     ti.targets.arm.elf.Arm9=\"$(ti.targets.arm.elf.Arm9)\" \
     ti.targets.arm.elf.A8Fnv=\"$(ti.targets.arm.elf.A8Fnv)\" \
+    ti.targets.arm.elf.R4F=\"$(ti.targets.arm.elf.R4F)\" \
     ti.targets.arm.elf.M3=\"$(ti.targets.arm.elf.M3)\" \
     ti.targets.arm.elf.M4=\"$(ti.targets.arm.elf.M4)\" \
     ti.targets.arm.elf.M4F=\"$(ti.targets.arm.elf.M4F)\" \
@@ -138,7 +141,6 @@ all:
 	    ./packages/gnu ./packages/iar \
 	    ./packages/ti/targets ./packages/ti/platforms ./packages/ti/catalog
 	@ $(XDC) XDCARGS="$(XDCARGS)" all -P \
-	    ./packages/ti/sysbios/fatfs \
 	    ./packages/ti/sysbios/family/c674/pmi \
 	    ./packages/ti/sysbios/family/c674/pscl
 

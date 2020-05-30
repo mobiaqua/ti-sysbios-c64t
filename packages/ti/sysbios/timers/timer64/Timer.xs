@@ -2140,6 +2140,214 @@ if (xdc.om.$name == "cfg" || typeof(genCdoc) != "undefined") {
             },
         },
         "ti.catalog.arm.cortexa15": {
+            "C66AK2E05": {
+                freqDivisor: 0,
+                numLocalTimers: 4,
+                localTimerBaseId: 16,
+                useTimer64pRegMap: true,
+                timer: [
+                    {
+                        name: "Timer0",         // Reserved for DSP
+                        baseAddr: 0x02200000,
+                        intNum:  [ -1, -1],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer1",         // Reserved (Unavailable)
+                        baseAddr: 0x02210000,
+                        intNum:  [ -1, -1],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer2",         // Reserved (Unavailable)
+                        baseAddr: 0x02220000,
+                        intNum:  [ -1, -1],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer3",         // Reserved (Unavailable)
+                        baseAddr: 0x02230000,
+                        intNum:  [ -1, -1],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer4",         // Reserved (Unavailable)
+                        baseAddr: 0x02240000,
+                        intNum:  [ -1, -1],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer5",         // Reserved (Unavailable)
+                        baseAddr: 0x02250000,
+                        intNum:  [ -1, -1],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer6",         // Reserved (Unavailable)
+                        baseAddr: 0x02260000,
+                        intNum:  [ -1, -1],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer7",         // Reserved (Unavailable)
+                        baseAddr: 0x02270000,
+                        intNum:  [ -1, -1],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer8",
+                        baseAddr: 0x02280000,       /* shared Timer8 */
+                        intNum:  [ 128, 129],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer9",
+                        baseAddr: 0x02290000,       /* shared Timer9 */
+                        intNum:  [ 130, 131],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer10",
+                        baseAddr: 0x022A0000,       /* shared Timer10 */
+                        intNum:  [ 132, 133],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer11",
+                        baseAddr: 0x022B0000,       /* shared Timer11 */
+                        intNum:  [ 134, 135],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer12",
+                        baseAddr: 0x022C0000,       /* shared Timer12 */
+                        intNum:  [ 136, 137],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer13",
+                        baseAddr: 0x022D0000,       /* shared Timer13 */
+                        intNum:  [ 138, 139],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer14",
+                        baseAddr: 0x022E0000,       /* shared Timer14 */
+                        intNum:  [ 140, 141],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer15",
+                        baseAddr: 0x022F0000,       /* shared Timer15 */
+                        intNum:  [ 142, 143],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer16",
+                        baseAddr: 0x022F0080,       /* local Timer 16 */
+                        intNum:  [ 144, 145],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer17",
+                        baseAddr: 0x022F0100,       /* local Timer 17 */
+                        intNum:  [ 146, 147],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer18",
+                        baseAddr: 0x022F0180,       /* local Timer 18 */
+                        intNum:  [ 148, 149],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer19",
+                        baseAddr: 0x022F0200,       /* local Timer 19 */
+                        intNum:  [ 150, 151],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                ]
+            },
             "TCI66AK2G02": {
                 freqDivisor: 0,
                 numLocalTimers: 1,
@@ -2218,7 +2426,403 @@ if (xdc.om.$name == "cfg" || typeof(genCdoc) != "undefined") {
                     },
                 ]
             },
+            "TCI6630K2L": {
+                freqDivisor: 0,
+                numLocalTimers: 2,
+                localTimerBaseId: 16,
+                useTimer64pRegMap: true,
+                timer: [
+                    {
+                        name: "Timer0",         // Reserved for DSP
+                        baseAddr: 0x02200000,
+                        intNum:  [ -1, -1],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer1",         // Reserved for DSP
+                        baseAddr: 0x02210000,
+                        intNum:  [ -1, -1],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer2",         // Reserved for DSP
+                        baseAddr: 0x02220000,
+                        intNum:  [ -1, -1],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer3",         // Reserved for DSP
+                        baseAddr: 0x02230000,
+                        intNum:  [ -1, -1],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer4",         // Reserved (Unavailable)
+                        baseAddr: 0x02240000,
+                        intNum:  [ -1, -1],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer5",         // Reserved (Unavailable)
+                        baseAddr: 0x02250000,
+                        intNum:  [ -1, -1],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer6",         // Reserved (Unavailable)
+                        baseAddr: 0x02260000,
+                        intNum:  [ -1, -1],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer7",         // Reserved (Unavailable)
+                        baseAddr: 0x02270000,
+                        intNum:  [ -1, -1],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer8",
+                        baseAddr: 0x02280000,       /* shared Timer8 */
+                        intNum:  [ 128, 129],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer9",
+                        baseAddr: 0x02290000,       /* shared Timer9 */
+                        intNum:  [ 130, 131],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer10",
+                        baseAddr: 0x022A0000,       /* shared Timer10 */
+                        intNum:  [ 132, 133],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer11",
+                        baseAddr: 0x022B0000,       /* shared Timer11 */
+                        intNum:  [ 134, 135],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer12",
+                        baseAddr: 0x022C0000,       /* shared Timer12 */
+                        intNum:  [ 136, 137],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer13",
+                        baseAddr: 0x022D0000,       /* shared Timer13 */
+                        intNum:  [ 138, 139],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer14",
+                        baseAddr: 0x022E0000,       /* shared Timer14 */
+                        intNum:  [ 140, 141],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer15",
+                        baseAddr: 0x022F0000,       /* shared Timer15 */
+                        intNum:  [ 142, 143],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer16",
+                        baseAddr: 0x022F0080,       /* local Timer 16 */
+                        intNum:  [ 144, 145],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer17",
+                        baseAddr: 0x022F0100,       /* local Timer 17 */
+                        intNum:  [ 146, 147],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                ]
+            },
             "TCI6636K2H": {
+                freqDivisor: 0,
+                numLocalTimers: 4,
+                localTimerBaseId: 16,
+                useTimer64pRegMap: true,
+                timer: [
+                    {
+                        name: "Timer0",         // Reserved for DSP
+                        baseAddr: 0x02200000,
+                        intNum:  [ -1, -1],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer1",         // Reserved for DSP
+                        baseAddr: 0x02210000,
+                        intNum:  [ -1, -1],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer2",         // Reserved for DSP
+                        baseAddr: 0x02220000,
+                        intNum:  [ -1, -1],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer3",         // Reserved for DSP
+                        baseAddr: 0x02230000,
+                        intNum:  [ -1, -1],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer4",         // Reserved for DSP
+                        baseAddr: 0x02240000,
+                        intNum:  [ -1, -1],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer5",         // Reserved for DSP
+                        baseAddr: 0x02250000,
+                        intNum:  [ -1, -1],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer6",         // Reserved for DSP
+                        baseAddr: 0x02260000,
+                        intNum:  [ -1, -1],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer7",         // Reserved for DSP
+                        baseAddr: 0x02270000,
+                        intNum:  [ -1, -1],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer8",
+                        baseAddr: 0x02280000,       /* shared Timer8 */
+                        intNum:  [ 128, 129],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer9",
+                        baseAddr: 0x02290000,       /* shared Timer9 */
+                        intNum:  [ 130, 131],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer10",
+                        baseAddr: 0x022A0000,       /* shared Timer10 */
+                        intNum:  [ 132, 133],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer11",
+                        baseAddr: 0x022B0000,       /* shared Timer11 */
+                        intNum:  [ 134, 135],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer12",
+                        baseAddr: 0x022C0000,       /* shared Timer12 */
+                        intNum:  [ 136, 137],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer13",
+                        baseAddr: 0x022D0000,       /* shared Timer13 */
+                        intNum:  [ 138, 139],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer14",
+                        baseAddr: 0x022E0000,       /* shared Timer14 */
+                        intNum:  [ 140, 141],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer15",
+                        baseAddr: 0x022F0000,       /* shared Timer15 */
+                        intNum:  [ 142, 143],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer16",
+                        baseAddr: 0x022F0080,       /* local Timer 16 */
+                        intNum:  [ 144, 145],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer17",
+                        baseAddr: 0x022F0100,       /* local Timer 17 */
+                        intNum:  [ 146, 147],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer18",
+                        baseAddr: 0x022F0180,       /* local Timer 18 */
+                        intNum:  [ 148, 149],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "Timer19",
+                        baseAddr: 0x022F0200,       /* local Timer 19 */
+                        intNum:  [ 150, 151],
+                        eventId: [ -1, -1],
+                        intFreq: {
+                            lo: 20480000,
+                            hi: 0,
+                        },
+                    },
+                ]
+            },
+            "TCI6638K2K": {
                 freqDivisor: 0,
                 numLocalTimers: 4,
                 localTimerBaseId: 16,
@@ -2613,7 +3217,7 @@ function module$meta$init()
                  * If localTimerBaseId is set then use the base id and the
                  * number of local timers to generate the any mask. For
                  * instance, if base id is 4 and there are 8 local timers,
-                 * any mask should be 0x 0000 0000 00FF FF00
+                 * any mask should be 0x 0000 0000 0000 FF00
                  */
 
                 if (device.length > 32) {

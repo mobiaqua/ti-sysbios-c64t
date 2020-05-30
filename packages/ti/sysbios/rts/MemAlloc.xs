@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,8 @@ var BIOS = null;
 function module$use()
 {
     BIOS = xdc.module("ti.sysbios.BIOS");
+    var MemAlloc = xdc.module('ti.sysbios.rts.MemAlloc');
+    var HeapStd = xdc.module('xdc.runtime.HeapStd');
 
     if (Program.build.target.$name.match(/gnu/) &&
        (BIOS.taskEnabled == true) &&
@@ -54,6 +56,36 @@ function module$use()
         if (lnkOpts.match(/--threaded_lib/)) {
             var thrSup = xdc.useModule('ti.sysbios.rts.iar.MultithreadSupport');
             thrSup.enableMultithreadSupport = true;
+        }
+    }
+    else if (Program.build.target.$name.match(/ti/) &&
+             (Program.build.target.isa.match(/66/) ||
+              Program.build.target.isa.match(/674/)) &&
+             (BIOS.taskEnabled == true) &&
+             (BIOS.heapSize != 0)) {
+        xdc.useModule('ti.sysbios.rts.ti.ThreadLocalStorage');
+    }
+}
+
+/*
+ *  ======== configureProgramHeap ========
+ */
+function configureProgramHeap()
+{
+    var MemAlloc = xdc.module('ti.sysbios.rts.MemAlloc');
+    var HeapStd = xdc.module('xdc.runtime.HeapStd');
+
+    var nogenFunctions = (MemAlloc.generateFunctions == false) ||
+                     ((BIOS.heapSize != 0) &&
+                      (HeapStd.$used));
+
+    if (nogenFunctions == false) {
+        /*
+         * If we are generating malloc() and HeapStd is not in use,
+         * then there is no need for Program.heap.
+         */
+        if (HeapStd.$used == false) {
+            Program.heap = 0;
         }
     }
 }

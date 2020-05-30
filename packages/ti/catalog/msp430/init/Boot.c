@@ -1,15 +1,35 @@
-/* 
- *  Copyright (c) 2008 Texas Instruments. All rights reserved. 
- *  This program and the accompanying materials are made available under the 
- *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License
- *  v. 1.0 which accompanies this distribution. The Eclipse Public License is
- *  available at http://www.eclipse.org/legal/epl-v10.html and the Eclipse
- *  Distribution License is available at 
- *  http://www.eclipse.org/org/documents/edl-v10.php.
+/*
+ * Copyright (c) 2015, Texas Instruments Incorporated
+ * All rights reserved.
  *
- *  Contributors:
- *      Texas Instruments - initial implementation
- * */
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * *  Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * *  Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * *  Neither the name of Texas Instruments Incorporated nor the names of
+ *    its contributors may be used to endorse or promote products derived
+ *    from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 /*
  *  ======== Boot.c ========
  *
@@ -17,8 +37,8 @@
  *
  *  1) Optionally disable the watchdog timer.
  *  2) Optionally configure the DCO and clocks.
- *
  */
+
 #include <xdc/std.h>
 #if defined(__ICC430__)
     #include <intrinsics.h>
@@ -96,9 +116,9 @@ Void Boot_disableWatchdog(UInt address)
 /*
  *  ======== Boot_configureDCO ========
  *  Initializes MSP430F5xxx clocks and DCO for:
- *      ACLK = REFO = 32768Hz 
+ *      ACLK = REFO = 32768Hz
  *      MCLK = SMCLK = 8.192MHz
- *  Derived from the msp430x54x_UCS_3.c and MSP430F552x_UCS_03.c examples. 
+ *  Derived from the msp430x54x_UCS_3.c and MSP430F552x_UCS_03.c examples.
  */
 #if defined(__ICC430__)
     #pragma location="CSTART"
@@ -111,19 +131,19 @@ Void Boot_configureDCO(Void)
     __bis_SR_register(SCG0);            /* disable FLL */
     REG(UCSCTL0) = 0x0000;              /* set lowest DCOx and MODx bits */
     REG(UCSCTL1) = DCORSEL_5;           /* select 24 MHz range */
-    
-    REG(UCSCTL2)  = FLLD_1 + 249;       /* 
+
+    REG(UCSCTL2)  = FLLD_1 + 249;       /*
                                          * set multiplier for 8.192MHz:
-                                         *     (N + 1) * FLLRef = Fdco 
+                                         *     (N + 1) * FLLRef = Fdco
                                          *   (249 + 1) * 32768  = 8.192 MHz
-                                         *      FLL Div = fDCOCLK/2  
+                                         *      FLL Div = fDCOCLK/2
                                          */
 
     __bic_SR_register(SCG0);            /* enable FLL */
 
-    /* 
+    /*
      * worst-case settling time (MCLK cylces)
-     *    =  N x 32 x 32 x f_MCLK / f_FLL_ref 
+     *    =  N x 32 x 32 x f_MCLK / f_FLL_ref
      *
      * 250000 =  32 x 32 x 8 MHz / 32768 Hz
      */
@@ -133,7 +153,7 @@ Void Boot_configureDCO(Void)
     do {
        REG(UCSCTL7) &= ~(XT2OFFG + XT1LFOFFG + XT1HFOFFG + DCOFFG);
        REG(SFRIFG1) &= ~OFIFG;
-    } while (REG(SFRIFG1) &OFIFG); 
+    } while (REG(SFRIFG1) &OFIFG);
 
 }
 
@@ -163,7 +183,7 @@ Void Boot_configureDCO_CS_A(Void)
  *  ======== Boot_configureDCO_CS_A_useLFXT ========
  *  Initializes MSP430FR58x and FR430FR59x clocks and DCO for:
  *      MCLK = SMCLK = 8MHz
- *      ACLK = LFXT = 32768Hz (crystal required) 
+ *      ACLK = LFXT = 32768Hz (crystal required)
  *
  *  Derived from the msp430fr59xx_CS_01.c and msp430fr59xx_CS_03.c examples.
  */
@@ -189,6 +209,3 @@ Void Boot_configureDCO_CS_A_useLFXT(Void)
 
     BYTEREG(CSCTL0_H) = 0;              /* reset password to lock access */
 }
-/*
- */
-

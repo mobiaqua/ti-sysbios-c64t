@@ -30,7 +30,7 @@
 ;  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ;
 ;
-; ======== Cache_asm.asm ========
+; ======== Cache_asm.sv7R ========
 ;
 
         .cdecls C,NOLIST,"package/internal/Cache.xdc.h"
@@ -162,7 +162,7 @@ ti_sysbios_family_arm_v7r_Cache_invL1d__I
         .asmfunc
         push    {r4}
         add     r1, r0, r1              ; calculate last address
-        ldr     r3, l1dCacheLineSizeInvL1d
+        ldr     r3, l1dCacheLineSizeInvL1dAddr
         ldr     r3, [r3]
         sub     r4, r3, #1
         bic     r0, r0, r4              ; align blockPtr to cache line
@@ -179,7 +179,7 @@ invL1d_finished:
         bx      lr                      ; return
         .endasmfunc
 
-l1dCacheLineSizeInvL1d:
+l1dCacheLineSizeInvL1dAddr:
         .word   ti_sysbios_family_arm_v7r_Cache_Module__state__V.l1dCacheLineSize
 
 
@@ -200,7 +200,7 @@ ti_sysbios_family_arm_v7r_Cache_invL1p__I
         .asmfunc
         push    {r4}
         add     r1, r0, r1              ; calculate last address
-        ldr     r3, l1pCacheLineSize
+        ldr     r3, l1pCacheLineSizeAddr
         ldr     r3, [r3]
         sub     r4, r3, #1
         bic     r0, r0, r4              ; align blockPtr to cache line
@@ -218,7 +218,7 @@ invL1p_finished:
         bx      lr
         .endasmfunc
 
-l1pCacheLineSize:
+l1pCacheLineSizeAddr:
         .word   ti_sysbios_family_arm_v7r_Cache_Module__state__V.l1pCacheLineSize
 
 
@@ -277,7 +277,7 @@ ti_sysbios_family_arm_v7r_Cache_wb__E
         dmb                              ; Ensure all previous memory accesses
                                          ; complete
         add     r1, r0, r1               ; calculate last address
-        ldr     r4, l1dCacheLineSizeWb
+        ldr     r4, l1dCacheLineSizeWbAddr
         ldr     r4, [r4]
         sub     r5, r4, #1
         bic     r0, r0, r5               ; align address to cache line
@@ -294,7 +294,7 @@ wb_finished:
         bx      lr
         .endasmfunc
 
-l1dCacheLineSizeWb:
+l1dCacheLineSizeWbAddr:
         .word   ti_sysbios_family_arm_v7r_Cache_Module__state__V.l1dCacheLineSize
 
 
@@ -320,7 +320,7 @@ ti_sysbios_family_arm_v7r_Cache_wbInv__E
         dmb                              ; Ensure all previous memory accesses
                                          ; complete
         add     r1, r0, r1               ; calculate last address
-        ldr     r4, l1dCacheLineSizeWbInv
+        ldr     r4, l1dCacheLineSizeWbInvAddr
         ldr     r4, [r4]
         sub     r5, r4, #1
         bic     r0, r0, r5               ; align blockPtr to cache line
@@ -337,7 +337,7 @@ wbInv_finished:
         bx      lr
         .endasmfunc
 
-l1dCacheLineSizeWbInv:
+l1dCacheLineSizeWbInvAddr:
         .word   ti_sysbios_family_arm_v7r_Cache_Module__state__V.l1dCacheLineSize
 
 
@@ -379,7 +379,7 @@ ti_sysbios_family_arm_v7r_Cache_wbAll__E
 wbaloop1:
         add     r2, r10, r10, lsr #1    ; work out 3x current cache level
         mov     r1, r0, lsr r2          ; extract cache type bits from clidr
-        and     r1, r1, #7              ; mask of the bits for current cache only
+        and     r1, r1, #7              ; mask of bits for current cache only
         cmp     r1, #2                  ; see what cache we have at this level
         blt     wbaskip                 ; skip if no cache, or just i-cache
 
@@ -394,7 +394,7 @@ wbaloop1:
         add     r2, r2, #4              ; add 4 (line length offset)
         mov     r4, #0x3ff
         ands    r4, r4, r1, lsr #3      ; find maximum number on the way size
-        clz     r5, r4                  ; find bit position of way size increment
+        clz     r5, r4                  ; find bit position of way size inc.
         mov     r7, #0x7fff
         ands    r7, r7, r1, lsr #13     ; extract max number of the index size
 wbaloop2:
@@ -465,7 +465,7 @@ ti_sysbios_family_arm_v7r_Cache_wbInvAllI__I
 loop1:
         add     r2, r10, r10, lsr #1    ; work out 3x current cache level
         mov     r1, r0, lsr r2          ; extract cache type bits from clidr
-        and     r1, r1, #7              ; mask of the bits for current cache only
+        and     r1, r1, #7              ; mask of bits for current cache only
         cmp     r1, #2                  ; see what cache we have at this level
         blt     skip                    ; skip if no cache, or just i-cache
 
@@ -480,7 +480,7 @@ loop1:
         add     r2, r2, #4              ; add 4 (line length offset)
         mov     r4, #0x3ff
         ands    r4, r4, r1, lsr #3      ; find maximum number on the way size
-        clz     r5, r4                  ; find bit position of way size increment
+        clz     r5, r4                  ; find bit position of way size inc.
         mov     r7, #0x7fff
         ands    r7, r7, r1, lsr #13     ; extract max number of the index size
 loop2:
@@ -528,7 +528,7 @@ ti_sysbios_family_arm_v7r_Cache_getEnabled__E
         addne   r0, r0, #2              ; if C bit is true, L1D is enabled
 
                                         ; Do L2 next
-        mrc     p15, #0, r1, c1, c0, #1 ; fetch Auxiliary Control Register into r1
+        mrc     p15, #0, r1, c1, c0, #1 ; fetch Auxiliary Ctrl Register into r1
 
         tst     r1, #0x0002             ; test L2EN bit (bit 1) for L2EN
         beq     getEnabledDone

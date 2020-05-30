@@ -1,5 +1,5 @@
 ;
-;  Copyright (c) 2012, Texas Instruments Incorporated
+;  Copyright (c) 2015-2016, Texas Instruments Incorporated
 ;  All rights reserved.
 ; 
 ;  Redistribution and use in source and binary forms, with or without
@@ -36,9 +36,6 @@
 
         .cdecls C,NOLIST,"package/internal/Core.xdc.h" 
 
-    .if ti_sysbios_BIOS_smpEnabled__D
-        .include "Core_smp_asm.sv7M"
-    .else
         .thumb
 
         .global ti_sysbios_family_arm_ducati_Core_reset
@@ -82,7 +79,7 @@ core1Stall:
 
         ; Core 1 waits until core 0 initializes the system
 core1Wait:
-        ldr     r0, ti_sysbios_family_arm_ducati_Core_core1WaitFlag
+        ldr     r0, local_ti_sysbios_family_arm_ducati_Core_core1WaitFlag
         cmp     r0, #0
         bne     core1Wait
 
@@ -100,6 +97,7 @@ coreid: .word   0xE00FFFE0
 ;
 
 ti_sysbios_family_arm_ducati_Core_core1WaitFlag:
+local_ti_sysbios_family_arm_ducati_Core_core1WaitFlag:
         .word   0
 
 waitFlagAddr:
@@ -110,8 +108,6 @@ reset0: .word   0x00000404      ; reset vector addr for core 0
 reset1: .word   0x00000804      ; reset vector addr for core 1
 
         .endasmfunc
-
-    .endif
 
         .end
 

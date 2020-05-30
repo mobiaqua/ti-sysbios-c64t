@@ -1,13 +1,13 @@
 /* 
- *  Copyright (c) 2009 Texas Instruments and others.
+ *  Copyright (c) 2009-2015 Texas Instruments Incorporated
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *  Contributors:
  *      Texas Instruments - initial implementation
- * 
+ *
  * */
 /*
  *  ======== ITarget.xdc ========
@@ -22,7 +22,7 @@
 metaonly interface ITarget inherits xdc.bld.ITarget3 {
 
     override readonly config string stdInclude = "ti/targets/std.h";
-    
+
     /*!
      *  ======== binDir ========
      *  This parameter controls the location of the target's commands.
@@ -36,8 +36,8 @@ metaonly interface ITarget inherits xdc.bld.ITarget3 {
      *  @p
      *  where, `$(binDir)` is this target's `binDir` value and `$(cc.cmd)` is
      *  the value of this target's `cc.cmd` string.
-     *  
-     *  If `binDir` is non-empty then it must end with '/'.  If it is empty, 
+     *
+     *  If `binDir` is non-empty then it must end with '/'.  If it is empty,
      *  the target's commands (compiler, linker, archiver, etc.) will be
      *  located along a path constructed from this target's `pathPrefix`.
      */
@@ -62,7 +62,7 @@ metaonly interface ITarget inherits xdc.bld.ITarget3 {
      *  appropriate separator; i.e., ':'.
      */
     config string pathPrefix = "";
-    
+
     override config String binaryParser = "ti.targets.omf.cof.Coff";
 
     /*!
@@ -70,7 +70,7 @@ metaonly interface ITarget inherits xdc.bld.ITarget3 {
      *  TI Debugger/IDE file generation support.
      *
      *  @_nodoc
-     *  These templates below a long outdated and are no longer used.
+     *  These templates below are long outdated and are no longer used.
      *  They remain as an example in the event that we want to generate
      *  project suport in the future.
      *
@@ -101,7 +101,7 @@ metaonly interface ITarget inherits xdc.bld.ITarget3 {
         packageTemplate: null,
         packagePattern : null
     };
-    
+
     /*!
      *  ======== extensions ========
      *  File extensions recognized by TI targets
@@ -109,8 +109,8 @@ metaonly interface ITarget inherits xdc.bld.ITarget3 {
      *  @a(TI Specifics)
      *  For TI targets, the `typ` string field of an
      *  `xdc.bld.ITarget.Extension` structure may be of the form
-     * `"<cmd>:<langOpt>"` where `<cmd>` is one of `"asm"`, `"c"`, `"cpp"`,
-     *  and `<langOpt>` is the language option to used to identify the source
+     *  `"<cmd>:<langOpt>"` where `<cmd>` is one of `"asm"`, `"c"`, `"cpp"`,
+     *  and `<langOpt>` is the language option used to identify the source
      *  language of a source file.  This allows one to explicitly control the
      *  language flag passed to the compiler based on a source file's
      *  extension; in particular, one can define separate source extensions
@@ -147,16 +147,6 @@ metaonly interface ITarget inherits xdc.bld.ITarget3 {
         ["release", {
             compileOpts: {
                 copts: "-O2",
-            },
-        }],
-        ["whole_program", {
-            compileOpts: {
-                copts: "-oe -O2 -mo",
-            },
-        }],
-        ["whole_program_debug", {
-            compileOpts: {
-                copts: "-oe --symdebug:dwarf -mo",
             },
         }],
     ];
@@ -209,14 +199,14 @@ metaonly interface ITarget inherits xdc.bld.ITarget3 {
     override config string versionMap[string] = [
         ["TMS320C6x_4.32", "1,0,4.32,0"],
         ["TMS320C2000_3.07", "1,0,3.07,0"],
-    ];    
-    
+    ];
+
     /*!
      *  ======== alignDirectiveSupported ========
      *  The compiler supports an align directive.
      */
     override readonly config Bool alignDirectiveSupported = true;
-    
+
     /*!
      *  ======== ccConfigOpts ========
      *  User configurable compiler options for the generated config C file.
@@ -244,10 +234,10 @@ metaonly interface ITarget inherits xdc.bld.ITarget3 {
      *          archive library file as linker input
      */
     override config xdc.bld.ITarget2.Options lnkOpts = {
-        prefix: "-w -q -u _c_int00",
-        suffix: "-c -m $(XDCCFGDIR)/$@.map -l $(rootDir)/lib/libc.a"
+        prefix: "-q -u _c_int00",
+        suffix: "-w -c -m $(XDCCFGDIR)/$@.map -l $(rootDir)/lib/libc.a"
     };
-        
+
     /*!
      *  ======== asmName ========
      *  The function that converts a C name into an assembly name
@@ -271,13 +261,13 @@ metaonly interface ITarget inherits xdc.bld.ITarget3 {
      *  fifth component is the version of an Alpha or Beta release.
      *
      *  @a(Example)
-     *  If this target's `rootDir` points to the compiler version 6.0.11, the 
+     *  If this target's `rootDir` points to the compiler version 6.0.11, the
      *  Compatibility Key is [1,0,6.0,11]. If this target's `rootDir` points to
-     *  the compiler version 7.0.0B1, the Compatibility Key is [1,0,7.0,0,1]. 
-     *  
+     *  the compiler version 7.0.0B1, the Compatibility Key is [1,0,7.0,0,1].
+     *
      */
     override metaonly config String version;
-        
+
     /*
      *  ======== rawVersion ========
      *  The raw version string from the compiler

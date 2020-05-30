@@ -70,6 +70,7 @@ function main(args)
 
     var srcFile = new java.io.BufferedReader(new java.io.FileReader(sourceFile));
     var dstFile = new java.io.FileWriter(destFile);
+    var symbolMap = args[0] + "_SYMS=";
 
     if (args[3] === undefined) {
         var funcsArr = readFile(funcsFile);
@@ -103,11 +104,26 @@ function main(args)
                 if (result != null) {
 		    /* mangle the function name so it won't be found in the sysbios lib */
 		    srcLine = srcLine.replace(result[0], result[0]+"__mangled__");
+                    symbolMap += result[0] +"|";
 	        }
             }
         }
         dstFile.write(srcLine + "\n");
     }
+
+    /* write matching symbol maps to common output file */
+    if (args[4] !== undefined) {
+        if (symbolMap.lastIndexOf("|") != -1) {
+            symbolMap = symbolMap.substring(0,symbolMap.lastIndexOf("|"));
+        }
+        else {
+            symbolMap += "\"\"";
+        }
+        var symbolMapFile = new java.io.FileWriter(args[4], true);
+        symbolMapFile.write(symbolMap + "\n");
+        symbolMapFile.close(); 
+    }
+
 //print(sourceFile, linesProcessed);
     dstFile.flush();
     srcFile.close();

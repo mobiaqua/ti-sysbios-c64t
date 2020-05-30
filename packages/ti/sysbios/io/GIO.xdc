@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2014-2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -223,6 +223,41 @@ instance:
      *  device-specific manner.  
      */
     config Ptr chanParams = null;
+
+    /*!
+     *  ======== packets ========
+     *  The address of the buffer used for IOM packets.
+     *
+     *  If set to 'null', the packets will be allocated from the heap
+     *  during runtime, otherwise the user may set this to a buffer of their
+     *  creation to be used for the IOM packets.
+     *
+     *  The packets will be split into
+     *  {@link ti.sysbios.io.GIO#numPackets} each the size of IOM_Packet.
+     *
+     *  Please note that if the packets is user supplied, then it is the user's
+     *  responsibility to ensure that it is aligned properly and is also large
+     *  enough to contain {@link ti.sysbios.io.GIO#numPackets} number of
+     *  IOM_Packet packets.  The size of packets buffer, if provided,
+     *  should be
+     *
+     *  @p(code)
+     *      sizeof(IOM_Packet) * numPackets
+     *  @p
+     *
+     *  Example:
+     *  @p(code)
+     *  #define NUMPACKETS  2
+     *  IOM_Packet inPackets[NUMPACKETS];
+     *
+     *  GIO_Params params;
+     *
+     *  GIO_Params_init(&params);
+     *  params.numPackets = NUMPACKETS;
+     *  params.packets = inPackets;
+     *  @p
+     */
+    config Ptr packets = null;
 
     /*!
      *  ======== abort ========
@@ -622,7 +657,8 @@ internal:
         UInt                timeout;        /* STANARD or ISSUERECLAIM */
         IHeap.Handle        packetHeap;     /* heap used to alloc packets */
         ISync.Handle        sync;           /* completion sync */
-        Bool                userSync;       /* user supplied sync handle*/
+        Bool                userSync;       /* user supplied sync handle */
+        Bool                userPackets;    /* user supplied packets buffer */
         Queue.Object        doneList;       /* done packets */
         Queue.Object        freeList;       /* free packets */
         Ptr                 packets;        /* allocated packet block */

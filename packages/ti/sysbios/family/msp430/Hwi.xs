@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,6 @@ function getAsmFiles(targetName)
 {
     switch(targetName) {
         case "ti.targets.msp430.elf.MSP430X":
-        case "ti.targets.msp430.elf.MSP430X_small":
             return (["Hwi_switch_asm.asm"]);
             break;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -94,13 +94,34 @@
 #define HWREG(x)                 (*((volatile UInt32 *)(x)))
 
 /*
+ *  ======== Cache_initL2Sram ========
+ *  This function is registered as a resetFxn.
+ */
+Void Cache_initL2Sram()
+{
+    UInt32 enabled, ctrlRegVal;
+
+    enabled = Cache_getEnabled();
+
+    /* disable the L2 cache if it is currently enabled */
+    if (enabled & Cache_Type_L2) {
+        /* Disable L2 cache */
+        Cache_disableL2();
+    }
+
+    ctrlRegVal = HWREG((UInt32)Cache_controlModuleReg + CONTROL_SEC_SPARE0);
+    HWREG((UInt32)Cache_controlModuleReg + CONTROL_SEC_SPARE0) =
+        (ctrlRegVal | 0x10000);
+}
+
+/*
  *  ======== Cache_startup ========
  *  Enable cache early if Cache_enableCache == TRUE.
  */
 Void Cache_startup()
 {
     UInt32 auxCtrlReg, prefetchReg;
-    UInt32 enabled, info, l2CacheLockMask, ctrlRegVal;
+    UInt32 enabled, info, l2CacheLockMask;
 
     /* Read L1D and L1P cache info registers for ROV */
     Cache_module->l1dInfo = Cache_getCacheLevelInfo(0);
@@ -259,18 +280,6 @@ Void Cache_startup()
 
             Cache_setL2PrefetchControl(prefetchReg);
         }
-    }
-
-    /*
-     * Cache_controlModuleReg is initialized as NULL for all devices
-     * except those that support configuring L2 as SRAM. Checking if
-     * Cache_controlModuleReg is NULL will ensure that the user did not
-     * erroneously set configureL2Sram to "true".
-     */
-    if (Cache_configureL2Sram) {
-        ctrlRegVal = HWREG((UInt32)Cache_controlModuleReg + CONTROL_SEC_SPARE0);
-        HWREG((UInt32)Cache_controlModuleReg + CONTROL_SEC_SPARE0) =
-            (ctrlRegVal | 0x10000);
     }
 
     /*

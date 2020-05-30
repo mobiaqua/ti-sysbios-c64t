@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Texas Instruments Incorporated
+ * Copyright (c) 2015-2018 Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,6 +53,8 @@
 
 #include <ti/sysbios/BIOS.h>
 
+#include <string.h>
+
 #include "package/internal/Hwi.xdc.h"
 
 extern Char *ti_sysbios_family_xxx_Hwi_switchToIsrStack();
@@ -82,6 +84,7 @@ extern UInt32 ti_sysbios_family_arm_m3_Hwi_dispatchTable[];
 #endif
 
 volatile Hwi_NVIC ti_sysbios_family_arm_m3_Hwi_vnvic;
+Bool ti_sysbios_family_arm_m3_Hwi_vnvicInitialized = FALSE;
 
 /*
  *  ======== Hwi_Module_startup ========
@@ -240,7 +243,11 @@ Int Hwi_postInit (Hwi_Object *hwi, Error_Block *eb)
     if (((hwi->irp & 0x2) == 0) ||
         (hwi->priority < Hwi_disablePriority)) {
         Hwi_plug(hwi->intNum, (Void *)(UArg)hwi->fxn);
-        /* encode useDispatcher == FALSE as a negative intNum */
+        /*
+         * encode useDispatcher == FALSE as a negative intNum
+         * This is done to inform ROV that this is a non-dispatched interrupt
+         * without adding a new field to the Hwi object.
+         */
         hwi->intNum = 0 - hwi->intNum;
     }
     else {
@@ -272,7 +279,11 @@ Int Hwi_postInit (Hwi_Object *hwi, Error_Block *eb)
             }
             else {
                 Error_raise(eb, Hwi_E_hwiLimitExceeded, 0, 0);
+#ifndef ti_sysbios_hal_Hwi_DISABLE_ALL_HOOKS
                 return (Hwi_hooks.length); /* unwind all Hwi_hooks */
+#else
+                return (0);
+#endif
             }
         }
         else {
@@ -325,7 +336,13 @@ Void Hwi_Instance_finalize(Hwi_Object *hwi, Int status)
     }
 #endif
 
-    intNum = hwi->intNum;
+    /* compensate for encoded intNum */
+    if (hwi->intNum < 0) {
+        intNum = 0 - hwi->intNum;
+    }
+    else {
+        intNum = hwi->intNum;
+    }
 
     Hwi_disableInterrupt(intNum);
     Hwi_plug(intNum, (Void *)(UArg)Hwi_nullIsrFunc);
@@ -362,6 +379,12 @@ Void Hwi_initNVIC()
     UInt i;
     UInt intNum;
     UInt32 *ramVectors;
+
+    /* Initialize VNVIC data structure */
+    if (!ti_sysbios_family_arm_m3_Hwi_vnvicInitialized) {
+        memset((void *)&Hwi_vnvic, 0, sizeof(Hwi_vnvic));
+        ti_sysbios_family_arm_m3_Hwi_vnvicInitialized = TRUE;
+    }
 
     /* configure Vector Table Offset Register */
     Hwi_nvic.VTOR = (UInt32)Hwi_module->vectorTableBase;
@@ -626,7 +649,10 @@ Void Hwi_plug(UInt intNum, Void *fxn)
 
     func = (UInt32 *)Hwi_module->vectorTableBase + intNum;
 
-    *func = (UInt32)fxn;
+    /* guard against writing to static const vector table in flash */
+    if (*func !=  (UInt32)fxn) {
+        *func = (UInt32)fxn;
+    }
 }
 
 /*
@@ -655,7 +681,7 @@ Bool Hwi_getStackInfo(Hwi_StackInfo *stkInfo, Bool computeStackDepth)
     Bool stackOverflow;
 
     /* Copy the stack base address and size */
-    stkInfo->hwiStackSize = Hwi_module->isrStackSize;
+    stkInfo->hwiStackSize = (SizeT)Hwi_module->isrStackSize;
     stkInfo->hwiStackBase = Hwi_module->isrStackBase;
 
     isrSP = stkInfo->hwiStackBase;
@@ -688,7 +714,7 @@ Bool Hwi_getCoreStackInfo(Hwi_StackInfo *stkInfo, Bool computeStackDepth,
 
     /* Copy the stack base address and size */
     if (coreId == 0) {
-        stkInfo->hwiStackSize = Hwi_module->isrStackSize;
+        stkInfo->hwiStackSize = (SizeT)Hwi_module->isrStackSize;
         stkInfo->hwiStackBase = Hwi_module->isrStackBase;
     }
     else {
@@ -1010,7 +1036,7 @@ Void Hwi_excFillContext(UInt *excStack)
             if (BIOS_swiEnabled) {
                 excContext->threadHandle = (Ptr)Swi_self();
                 stack = Hwi_module->isrStackBase;
-                stackSize = Hwi_module->isrStackSize;
+                stackSize = (SizeT)Hwi_module->isrStackSize;
             }
             break;
         }
@@ -1018,13 +1044,13 @@ Void Hwi_excFillContext(UInt *excStack)
             excContext->threadHandle =
                 (Ptr)Hwi_getHandle((UInt)(excContext->psr) & 0xff);
             stack = Hwi_module->isrStackBase;
-            stackSize = Hwi_module->isrStackSize;
+            stackSize = (SizeT)Hwi_module->isrStackSize;
             break;
         }
         case BIOS_ThreadType_Main: {
             excContext->threadHandle = NULL;
             stack = Hwi_module->isrStackBase;
-            stackSize = Hwi_module->isrStackSize;
+            stackSize = (SizeT)Hwi_module->isrStackSize;
             break;
         }
     }
@@ -1533,4 +1559,3 @@ Void Hwi_doTaskRestore(UInt swiTskKey)
         TASK_RESTORE(swiTskKey >> 8);   /* returns with ints disabled */
     }
 }
-

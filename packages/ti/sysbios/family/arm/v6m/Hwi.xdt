@@ -1,6 +1,6 @@
 %%{
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@
 %var Hwi = xdc.module("ti.sysbios.family.arm.v6m.Hwi");
 %
 %/*
-% * M3 Exception Vector table
+% * M0 Exception Vector table
 % */
 extern Void `String(Hwi.resetFunc).substr(1)`();
 %   if (Hwi.numSparseInterrupts) {
