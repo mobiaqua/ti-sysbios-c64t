@@ -1,5 +1,5 @@
 /*
- *  Copyright 2018 by Texas Instruments Incorporated.
+ *  Copyright 2019 by Texas Instruments Incorporated.
  *
  */
 
@@ -52,7 +52,7 @@ metaonly module A53F inherits gnu.targets.arm.ITarget {
     override readonly config string isa                 = "v8A";
     override readonly config xdc.bld.ITarget.Model model= {
         endian: "little",
-        shortEnums: true
+        shortEnums: false
     };
 
     override readonly config Bool alignDirectiveSupported = true;
@@ -62,7 +62,7 @@ metaonly module A53F inherits gnu.targets.arm.ITarget {
 
     override config string GCCTARG = "aarch64-elf";
 
-    override config String binaryParser = "ti.targets.omf.elf.Elf";
+    override config String binaryParser = "xdc.targets.omf.Elf";
 
     override readonly config String stdInclude = "gnu/targets/arm/std.h";
 

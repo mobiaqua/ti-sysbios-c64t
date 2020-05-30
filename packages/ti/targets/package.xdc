@@ -1,5 +1,5 @@
 /* 
- *  Copyright (c) 2008-2017 Texas Instruments and others.
+ *  Copyright (c) 2008-2018 Texas Instruments and others.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -26,13 +26,13 @@ requires xdc.bld;
  *  that enables these tools to to be used by the XDC Build Engine.
  */
 package ti.targets [1,0,3] {
-    module C64P, C64P_big_endian, C674, C674_big_endian;
     module C64T, C66, C66_big_endian;
     module C28, C28_large, C28_float;
+    module C64P, C674;
+    module C66;
 
     interface ITarget;
 }
-
 /*
 
  */
