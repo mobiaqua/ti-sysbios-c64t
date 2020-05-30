@@ -96,7 +96,7 @@ function link(goal)
      * Acceptable values for this field are "nosys" and "rdimon".
      */
     if (("bspLib" in target) && target.bspLib != null) {
-        lib = " -Wl,--start-group -l" + target.bspLib + " -Wl,--end-group";
+        lib = " --specs=" + target.bspLib + ".specs";
     }
 
     if (tool2cmd != null) {

@@ -4,7 +4,7 @@
  */
 
 /*
- * Copyright (c) 2016, Texas Instruments Incorporated
+ * Copyright (c) 2016-2017 Texas Instruments Incorporated - http://www.ti.com
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -117,13 +117,6 @@ metaonly module A53F inherits gnu.targets.arm.ITarget {
      *  being "nosys".
      */
     override config string bspLib = "nosys";
-
-    /*!
-     *  ======== targetPkgPath ========
-     *  targetPkgPath controls the path to the package that contains the GNU
-     *  libraries.
-     */
-    config string targetPkgPath = null;
 
     /*
      *  ======== profiles ========

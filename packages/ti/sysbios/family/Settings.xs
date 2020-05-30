@@ -36,7 +36,6 @@
 var family = {
     "ti.targets.C28_large" :                    "c28",
     "ti.targets.C28_float" :                    "c28",
-    "ti.targets.C64P" :                         "c64p",
     "ti.targets.elf.C64P" :                     "c64p",
     "ti.targets.elf.C66" :                      "c64p",
     "ti.targets.elf.C66_big_endian" :           "c64p",
