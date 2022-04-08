@@ -258,10 +258,15 @@ int pthread_mutex_destroy(pthread_mutex_t *mutex)
 {
     pthread_mutex_Obj *mutexObj = (pthread_mutex_Obj *)*mutex;
 
-    Assert_isTrue(mutexObj->owner == NULL, 0);
+    if (mutexObj->owner != NULL) {
+        return (EBUSY);
+    }
 
 #if ti_posix_tirtos_Settings_enableMutexPriority__D
-    Assert_isTrue(Queue_empty(Queue_handle(&(mutexObj->waitList))), 0);
+    if (!Queue_empty(Queue_handle(&(mutexObj->waitList)))) {
+        return (EBUSY);
+    }
+
     Queue_destruct(&mutexObj->waitList);
 #endif
 
@@ -326,8 +331,6 @@ int pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t *attr)
     mutexObj->type = mAttrs->type;
 
 #if ti_posix_tirtos_Settings_enableMutexPriority__D
-    mutexObj->prioceiling = 0;
-    mutexObj->protocol = PTHREAD_PRIO_NONE;
     mutexObj->protocol = mAttrs->protocol;
     mutexObj->prioceiling = (mAttrs->protocol == PTHREAD_PRIO_PROTECT) ?
             mAttrs->prioceiling : 0;
@@ -450,14 +453,23 @@ int pthread_mutex_timedlock(pthread_mutex_t *mutex,
     UInt32             timeout;
     int                retc;
 
+    /* must attempt operation before validating abstime */
+    retc = acquireMutex(mutexObj, 0);
+
+    if (retc != EBUSY) {
+        return (retc);
+    }
+
     if (_pthread_abstime2ticks(CLOCK_REALTIME, abstime, &timeout) != 0) {
         return (EINVAL);
     }
 
-    retc = acquireMutex(mutexObj, timeout);
-    retc = (retc == EBUSY) ? ETIMEDOUT : retc;
+    /* requested abstime has already passed */
+    if (timeout == 0) {
+        return (ETIMEDOUT);
+    }
 
-    return (retc);
+    return (acquireMutex(mutexObj, timeout));
 }
 
 /*

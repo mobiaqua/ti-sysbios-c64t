@@ -102,7 +102,15 @@ function getExecCmd(prog, packagePath)
  */
 function getLinkTemplate(prog)
 {
-    return ("ti/platforms/cortexM/linkcmd_gnu.xdt");
+    if (prog.build.target.$name.match(/gnu/)) {
+        return ("ti/platforms/cortexM/linkcmd_gnu.xdt");
+    }
+    else if (prog.build.target.$name.match(/iar/)) {
+        return ("ti/platforms/cortexM/linkcmd_iar.xdt");
+    }
+    else {
+        return ("ti/platforms/cortexM/linkcmd.xdt");
+    }
 }
 
 /*
@@ -176,6 +184,16 @@ function instance$meta$init(name)
             this.CPU.catalogName = "ti.catalog.arm.cortexm33";
             this.CPU.deviceName = "CortexM";
             this.CPU.clockRate = 25;
+        }
+        else if (this.deviceName.match(/^SIMMAXWELL/)) {
+            this.CPU.catalogName = "ti.catalog.arm.cortexm3";
+            this.CPU.deviceName = "CortexM";
+            this.CPU.clockRate = 1;
+        }
+        else if (this.deviceName.match(/^MTL1_VSOC/)) {
+            this.CPU.catalogName = "ti.catalog.arm.cortexm33";
+            this.CPU.deviceName = "CortexM";
+            this.CPU.clockRate = 120;
         }
     }
 }

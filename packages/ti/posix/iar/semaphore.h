@@ -57,13 +57,6 @@
 extern "C" {
 #endif
 
-/* Temporary: maximumum count for semaphore
- *
- *  TODO - Should be in limits.h
- *  TODO - Not used by TI-RTOS implementation
- */
-#define SEM_VALUE_MAX 65535
-
 typedef union {
     struct sysbios_Semaphore sysbios;
     struct freertos_Semaphore freertos;

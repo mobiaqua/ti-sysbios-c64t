@@ -30,4 +30,4 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Pkg.otherFiles = ["linkcmd_gnu.xdt", "include_gnu"];
+Pkg.otherFiles = ["linkcmd_gnu.xdt", "include", "include_gnu"];

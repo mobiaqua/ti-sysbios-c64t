@@ -89,9 +89,6 @@ extern "C" {
  *  or Seconds_set().
  *  For clockId = CLOCK_MONOTONIC, clock_gettime() returns a time based on
  *  ti.sysbios.knl.Clock ticks.
- *
- *  For FreeRTOS, only the CLOCK_REALTIME clock is supported.
- *  For FreeRTOS, clock_settime() is not supported.
  */
 extern int clock_gettime(clockid_t clockId, struct timespec *ts);
 

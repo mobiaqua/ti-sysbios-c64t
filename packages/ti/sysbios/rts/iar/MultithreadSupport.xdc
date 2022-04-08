@@ -72,7 +72,12 @@ import ti.sysbios.knl.Task;
  *  no mechanism for the IAR IDE to communicate the project selections to
  *  this module.
  *
- *  @(note)
+ *  On memory limited devices, it is possible to disable the re-entrant
+ *  support in order to minimize the memory footprint. See
+ *  {@link #metaenableMultithreadSupport enableMultithreadSupport} for
+ *  details.
+ *
+ *  @a(note)
  *  Calling C run-time functions from SWI or HWI threads is not supported
  *  and will generate an exception if  multi-thread support is enabled.
  */
@@ -83,9 +88,22 @@ module MultithreadSupport
 {
     /*!
      *  ======== enableMultithreadSupport ========
-     *  Enable/Disable multithread support
+     *  Disable the multi-thread support feature
      *
-     *  @_nodoc
+     *  When necessary, it is possible to disable the re-entrant support in
+     *  order to minimize the memory footprint. For example, if using POSIX
+     *  support on a memory limited device, you may disable re-entrant support
+     *  by adding the following to your application configuration script.
+     *
+     *  @p(code)
+     *  var MultithreadSupport = xdc.useModule('ti.sysbios.rts.iar.MultithreadSupport');
+     *  MultithreadSupport.enableMultithreadSupport = false;
+     *  @p
+     *
+     *  @a(note)
+     *  When multi-thread support is disabled, errno will be a global
+     *  symbol. If multiple threads are referencing errno, it will not
+     *  be thread-safe.
      */
     config Bool enableMultithreadSupport = true;
 

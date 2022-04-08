@@ -99,6 +99,10 @@ extern "C" {
 #define EDEADLK         45
 #endif
 
+#ifndef EEXIST
+#define EEXIST          17
+#endif
+
 #ifndef EFAULT
 #define EFAULT          14
 #endif
@@ -107,8 +111,16 @@ extern "C" {
 #define EINVAL          22
 #endif
 
+#ifndef EMSGSIZE
+#define EMSGSIZE        122
+#endif
+
 #ifndef ENOMEM
 #define ENOMEM          12
+#endif
+
+#ifndef ENOENT
+#define ENOENT          2
 #endif
 
 #ifndef ENOSPC
@@ -179,6 +191,10 @@ extern "C" {
 #define EOPNOTSUPP              95
 #endif
 
+#ifndef EOVERFLOW
+#define EOVERFLOW               139
+#endif
+
 #ifndef EPROTONOSUPPORT
 #define EPROTONOSUPPORT         123
 #endif
@@ -242,6 +258,10 @@ extern "C" {
 #define EDEADLK                 45
 #endif
 
+#ifndef EEXIST
+#define EEXIST                  17
+#endif
+
 #ifndef EFAULT
 #define EFAULT                  14
 #endif
@@ -250,8 +270,16 @@ extern "C" {
 #define EINVAL                  22
 #endif
 
+#ifndef EMSGSIZE
+#define EMSGSIZE                122
+#endif
+
 #ifndef ENOMEM
 #define ENOMEM                  12
+#endif
+
+#ifndef ENOENT
+#define ENOENT                  2
 #endif
 
 #ifndef ENOSPC
@@ -316,6 +344,10 @@ extern "C" {
 
 #ifndef EOPNOTSUPP
 #define EOPNOTSUPP              95
+#endif
+
+#ifndef EOVERFLOW
+#define EOVERFLOW               139
 #endif
 
 #ifndef EPROTONOSUPPORT
@@ -370,6 +402,10 @@ extern "C" {
 #define EDEADLK                 45
 #endif
 
+#ifndef EEXIST
+#define EEXIST                  17
+#endif
+
 #ifndef EFAULT
 #define EFAULT                  14
 #endif
@@ -378,8 +414,16 @@ extern "C" {
 #define EINVAL                  22
 #endif
 
+#ifndef EMSGSIZE
+#define EMSGSIZE                122
+#endif
+
 #ifndef ENOMEM
 #define ENOMEM                  12
+#endif
+
+#ifndef ENOENT
+#define ENOENT                  2
 #endif
 
 #ifndef ENOSPC
@@ -444,6 +488,10 @@ extern "C" {
 
 #ifndef EOPNOTSUPP
 #define EOPNOTSUPP              95
+#endif
+
+#ifndef EOVERFLOW
+#define EOVERFLOW               139
 #endif
 
 #ifndef EPROTONOSUPPORT

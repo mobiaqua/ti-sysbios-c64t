@@ -34,18 +34,29 @@
  *  ======== signal.h ========
  */
 
+#ifndef ti_posix_iar_signal__include
+#define ti_posix_iar_signal__include
+
 /* compiler vendor check */
 #ifndef __IAR_SYSTEMS_ICC__
 #error Incompatible compiler: use this include path (.../ti/posix/iar) only with an IAR compiler. You appear to be using a different compiler.
 #endif
 
-#ifndef ti_posix_iar_signal__include
-#define ti_posix_iar_signal__include
-
 #include "sys/types.h"
+
+/* include toolchain's header file */
+#if defined(__430_CORE__) || defined(__430X_CORE__)
+#include <../inc/dlib/c/signal.h>
+#else
+#include <../inc/c/signal.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
+#endif
+
+#ifndef SIGEV_NONE
+#define SIGEV_NONE 1
 #endif
 
 #ifndef SIGEV_SIGNAL
@@ -62,25 +73,38 @@ extern "C" {
  *                      signal types
  *************************************************************************
  */
+
 /*
  *  ======== sigval ========
  */
-typedef union sigval {
-    int sival_int;
-    void *sival_ptr;
-} sigval;
+union sigval {
+    int     sival_int;      /* integer signal value */
+    void   *sival_ptr;      /* pointer signal value */
+};
+
+/*  Deprecated. This typedef is for compatibility with old SDKs. It is
+ *  not part of the POSIX standard. It will be removed in a future
+ *  release. TIRTOS-1317
+ */
+typedef union sigval sigval;
 
 /*
  *  ======== sigevent ========
  */
-typedef struct sigevent {
-    int sigev_notify;     /* e.g., SIGEV_SIGNAL, SIGEV_THREAD */
-    int sigev_signo;
-    sigval sigev_value;
+struct sigevent {
+    int             sigev_notify;       /* notification type */
+    int             sigev_signo;        /* signal number */
+    union sigval    sigev_value;        /* signal value */
 
-    void (*sigev_notify_function)(sigval val);
-    pthread_attr_t *sigev_notify_attributes;
-} sigevent;
+    void (*sigev_notify_function)(union sigval val);    /* notify function */
+    pthread_attr_t *sigev_notify_attributes;            /* notify attributes */
+};
+
+/*  Deprecated. This typedef is for compatibility with old SDKs. It is
+ *  not part of the POSIX standard. It will be removed in a future
+ *  release. TIRTOS-1317
+ */
+typedef struct sigevent sigevent;
 
 
 #ifdef __cplusplus

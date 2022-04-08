@@ -94,9 +94,10 @@ struct sysbios_Barrier {
 };
 
 struct freertos_Barrier {
-    struct freertos_Semaphore sem;
     int count;
     int pendCount;
+    struct Opaque_Struct__ *waitList;
+    struct Opaque_Struct__ *last;
 };
 
 struct sysbios_RWLock {
@@ -122,6 +123,7 @@ struct sysbios_Cond {
 
 struct freertos_Cond {
     struct Opaque_QueueElem waitList;
+    uint32_t clockId;
 };
 
 

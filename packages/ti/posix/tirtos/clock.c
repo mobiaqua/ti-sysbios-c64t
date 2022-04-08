@@ -122,6 +122,11 @@ int clock_gettime(clockid_t clockId, struct timespec *ts)
     UInt         key;
     UInt32       numRollovers;
 
+    if ((clockId != CLOCK_MONOTONIC) && (clockId != CLOCK_REALTIME)) {
+        errno = EINVAL;
+        return (-1);
+    }
+
     if (clockId == CLOCK_REALTIME) {
         Seconds_getTime(&t);
 
@@ -171,7 +176,11 @@ int clock_nanosleep(clockid_t clockId, int flags,
 {
     uint32_t ticks;
 
-    if (rmtp != NULL) {
+    if ((clockId != CLOCK_MONOTONIC) && (clockId != CLOCK_REALTIME)) {
+        return (EINVAL);
+    }
+
+    if ((rmtp != NULL) && (flags & TIMER_ABSTIME) == 0) {
         /*
          *  In the relative case, rmtp will contain the amount of time
          *  remaining (requested time - actual time slept).  For BIOS,
@@ -190,6 +199,11 @@ int clock_nanosleep(clockid_t clockId, int flags,
         }
     }
     else {
+        /* max interval, needs to be fixed: TIRTOS-1314 */
+        if (rqtp->tv_sec >= MAX_SECONDS) {
+            return (EINVAL);
+        }
+
         if ((rqtp->tv_sec == 0) && (rqtp->tv_nsec == 0)) {
             return (0);
         }
@@ -219,8 +233,13 @@ int clock_nanosleep(clockid_t clockId, int flags,
  */
 int clock_settime(clockid_t clock_id, const struct timespec *ts)
 {
-    if (clock_id == CLOCK_MONOTONIC) {
-        /* errno = EINVAL */
+    if (clock_id != CLOCK_REALTIME) {
+        errno = EINVAL;
+        return (-1);
+    }
+
+    if ((ts->tv_nsec < 0) || (ts->tv_nsec >= 1000000000)) {
+        errno = EINVAL;
         return (-1);
     }
 

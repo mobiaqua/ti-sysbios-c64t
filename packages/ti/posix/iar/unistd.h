@@ -34,13 +34,13 @@
  *  ======== unistd.h ========
  */
 
+#ifndef ti_posix_iar_unistd__include
+#define ti_posix_iar_unistd__include
+
 /* compiler vendor check */
 #ifndef __IAR_SYSTEMS_ICC__
 #error Incompatible compiler: use this include path (.../ti/posix/iar) only with an IAR compiler. You appear to be using a different compiler.
 #endif
-
-#ifndef ti_posix_iar_unistd__include
-#define ti_posix_iar_unistd__include
 
 #include "sys/types.h"
 

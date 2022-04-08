@@ -43,6 +43,7 @@
 #include <ti/sysbios/BIOS.h>
 #include <ti/sysbios/knl/Queue.h>
 #include <ti/sysbios/knl/Semaphore.h>
+#define ti_sysbios_knl_Task__internalaccess     /* modify fxn */
 #include <ti/sysbios/knl/Task.h>
 
 /*  For custom builds, this will always be defined, but it will
@@ -175,10 +176,9 @@ int pthread_attr_setguardsize(pthread_attr_t *attr, size_t guardsize)
 int pthread_attr_setschedparam(pthread_attr_t *attr,
         const struct sched_param *schedparam)
 {
-    int     priority = schedparam->sched_priority;
+    int priority = schedparam->sched_priority;
 
-    if ((priority >= (int)Task_numPriorities) || (priority == 0) ||
-            (priority < -1)) {
+    if ((priority >= (int)Task_numPriorities) || (priority <= 0)) {
         /* Bad priority value */
         return (EINVAL);
     }
@@ -346,6 +346,13 @@ int pthread_create(pthread_t *newthread, const pthread_attr_t *attr,
 
         return (ENOMEM);
     }
+
+    /*  Replace task object fxn field with address of startroutine.
+     *  This allows all POSIX threads to render in the execution
+     *  graph with the startroutine function name instead of
+     *  _pthread_runStub.
+     */
+    thread->task->fxn = (Task_FuncPtr)startroutine;
 
     *newthread = (pthread_t)thread;
     Task_setPri(thread->task, pAttr->priority);
@@ -562,8 +569,7 @@ int pthread_setcancelstate(int state, int *oldstate)
 {
     pthread_Obj *thread = (pthread_Obj *)pthread_self();
 
-    if ((state != PTHREAD_CANCEL_ENABLE) &&
-            (state != PTHREAD_CANCEL_DISABLE)) {
+    if ((state != PTHREAD_CANCEL_ENABLE) && (state != PTHREAD_CANCEL_DISABLE)) {
         return (EINVAL);
     }
 
@@ -593,8 +599,7 @@ int pthread_setschedparam(pthread_t pthread, int policy,
     int                 maxPri;
 #endif
 
-    if ((priority >= (int)Task_numPriorities) || ((priority == 0)) ||
-            (priority < -1)) {
+    if ((priority >= (int)Task_numPriorities) || (priority <= 0)) {
         /* Bad priority value */
         return (EINVAL);
     }

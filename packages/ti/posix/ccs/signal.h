@@ -45,8 +45,15 @@ with a Texas Instruments compiler. You appear to be using a different compiler.
 
 #include "sys/types.h"
 
+/* include toolchain's header file */
+#include <../include/signal.h>
+
 #ifdef __cplusplus
 extern "C" {
+#endif
+
+#ifndef SIGEV_NONE
+#define SIGEV_NONE 1
 #endif
 
 #ifndef SIGEV_SIGNAL
@@ -63,25 +70,38 @@ extern "C" {
  *                      signal types
  *************************************************************************
  */
+
 /*
  *  ======== sigval ========
  */
-typedef union sigval {
-    int sival_int;
-    void *sival_ptr;
-} sigval;
+union sigval {
+    int     sival_int;      /* integer signal value */
+    void   *sival_ptr;      /* pointer signal value */
+};
+
+/*  Deprecated. This typedef is for compatibility with old SDKs. It is
+ *  not part of the POSIX standard. It will be removed in a future
+ *  release. TIRTOS-1317
+ */
+typedef union sigval sigval;
 
 /*
  *  ======== sigevent ========
  */
-typedef struct sigevent {
-    int sigev_notify;     /* e.g., SIGEV_SIGNAL, SIGEV_THREAD */
-    int sigev_signo;
-    sigval sigev_value;
+struct sigevent {
+    int             sigev_notify;       /* notification type */
+    int             sigev_signo;        /* signal number */
+    union sigval    sigev_value;        /* signal value */
 
-    void (*sigev_notify_function)(sigval val);
-    pthread_attr_t *sigev_notify_attributes;
-} sigevent;
+    void (*sigev_notify_function)(union sigval val);    /* notify function */
+    pthread_attr_t *sigev_notify_attributes;            /* notify attributes */
+};
+
+/*  Deprecated. This typedef is for compatibility with old SDKs. It is
+ *  not part of the POSIX standard. It will be removed in a future
+ *  release. TIRTOS-1317
+ */
+typedef struct sigevent sigevent;
 
 
 #ifdef __cplusplus

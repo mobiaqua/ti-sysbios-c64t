@@ -47,6 +47,9 @@
 
 #include "pthread_util.h"
 
+/* temporary until limits.h is restored, TIRTOS-1315 */
+#define SEM_VALUE_MAX 65535
+
 typedef struct {
     Semaphore_Struct sem;
 } sem_obj;
@@ -86,12 +89,12 @@ int sem_init(sem_t *semaphore, int pshared, unsigned value)
     /* object size validation */
     Assert_isTrue(sizeof(sem_obj) <= sizeof(sem_t), NULL);
 
-    count = (int)value;
-
-    if (count < 0) {
-        /* value to large */
-        return (EINVAL);
+    if (value > SEM_VALUE_MAX) {
+        errno = EINVAL;
+        return (-1);
     }
+
+    count = (int)value;
 
     /* default semaphore mode is Semaphore_Mode_COUNTING */
     Semaphore_construct(&(obj->sem), count, NULL);
@@ -118,15 +121,20 @@ int sem_timedwait(sem_t *semaphore, const struct timespec *abstime)
     UInt32 timeout;
     sem_obj *obj = (sem_obj*)(&semaphore->sysbios);
 
+    /* don't bother checking the time if the semaphore is available */
+    if (Semaphore_pend(Semaphore_handle(&(obj->sem)), BIOS_NO_WAIT)) {
+        return (0);
+    }
+
     if (_pthread_abstime2ticks(CLOCK_REALTIME, abstime, &timeout) != 0) {
-        /* EINVAL */
+        errno = EINVAL;
         return (-1);
     }
 
     retVal = Semaphore_pend(Semaphore_handle(&(obj->sem)), timeout);
 
     if (!retVal) {
-        /* ETIMEDOUT */
+        errno = ETIMEDOUT;
         return (-1);
     }
 
@@ -141,11 +149,10 @@ int sem_trywait(sem_t *semaphore)
     Bool retVal;
     sem_obj *obj = (sem_obj*)(&semaphore->sysbios);
 
-    /* returns EAGAIN if the semaphore is already locked */
     retVal = Semaphore_pend(Semaphore_handle(&(obj->sem)), 0);
 
     if (!retVal) {
-        /* EAGAIN */
+        errno = EAGAIN;
         return (-1);
     }
 

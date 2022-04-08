@@ -104,6 +104,10 @@ int pthread_barrier_init(pthread_barrier_t *barrier,
     /* object size validation */
     Assert_isTrue(sizeof(pthread_barrier_obj)<=sizeof(pthread_barrier_t),NULL);
 
+    if (count == 0) {
+        return (EINVAL);
+    }
+
     obj->count = count;
     obj->pendCount = 0;
 

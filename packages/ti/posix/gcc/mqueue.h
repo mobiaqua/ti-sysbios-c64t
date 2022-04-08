@@ -56,15 +56,21 @@ extern "C" {
 typedef void *mqd_t;
 
 /*
- *  Message queue attributes.
+ *  ======== mq_attr ========
  */
-typedef struct mq_attr {
+struct mq_attr {
     long    mq_flags;    /* Message queue description flags: 0 or O_NONBLOCK.
                             Initialized from oflag argument of mq_open(). */
     long    mq_maxmsg;   /* Maximum number of messages on queue.  */
     long    mq_msgsize;  /* Maximum message size. */
     long    mq_curmsgs;  /* Number of messages currently queued. */
-} mq_attr;
+};
+
+/*  Deprecated. This typedef is for compatibility with old SDKs. It is
+ *  not part of the POSIX standard. It will be removed in a future
+ *  release. TIRTOS-1317
+ */
+typedef struct mq_attr mq_attr;
 
 /* For mq_open() */
 #define O_CREAT         0x200   /* TODO: sys/fcntl.h? */
@@ -76,11 +82,6 @@ typedef struct mq_attr {
 
 typedef uint32_t mode_t;  /* TODO: sys/stat.h? */
 
-/*
- *  TODO: mq_receive() and mq_timedreceive() should return a type
- *  of ssize_t (signed version of size_t, negative value indicates error).
- *  ssize_t is a POSIX type, not standard C.
- */
 extern int mq_close(mqd_t mqdes);
 extern int mq_getattr(mqd_t mqdes, struct mq_attr *mqstat);
 extern mqd_t mq_open(const char *name, int oflags, ...);

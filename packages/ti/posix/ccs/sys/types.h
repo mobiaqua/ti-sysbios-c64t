@@ -52,17 +52,25 @@ extern "C" {
 #endif
 
 /*  TI compiler does not define type ssize_t. However, the compiler does
- *  define size_t as 'unsigned int'. We define ssize_t as 'int' to match
- *  same bit-width of size_t. Set declaration flag using same name as GNU
- *  compiler, which defines both types.
+ *  define size_t as __SIZE_T_TYPE__ for all ISAs. We define ssize_t by
+ *  changing 'unsigned' to 'signed' for this one definition to ensure both
+ *  types have the same bit-width. Set declaration flag using same name
+ *  as GNU compiler, which defines both types.
  */
-typedef int ssize_t;
+#ifdef __SIZE_T_TYPE__
+#define unsigned signed
+typedef __SIZE_T_TYPE__ ssize_t;
+#undef unsigned
 #define _SSIZE_T_DECLARED
+#else
+#error __SIZE_T_TYPE__ not defined
+#endif
 
 typedef uint32_t clockid_t;
 typedef unsigned long useconds_t;
 typedef unsigned long timer_t;
 typedef long suseconds_t;
+typedef unsigned short uid_t;
 
 
 /*

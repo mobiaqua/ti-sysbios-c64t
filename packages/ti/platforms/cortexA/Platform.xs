@@ -172,10 +172,10 @@ function instance$meta$init(name)
         this.CPU.revision = this.deviceName;
 
         /* figure out the clock configuration */
-        /*if (this.deviceName.match(/^SIMMAXWELL/)) {
+        if (this.deviceName.match(/^SIMMAXWELL/)) {
             this.CPU.catalogName = "ti.catalog.arm.cortexa53";
             this.CPU.deviceName = "CortexA";
-            this.CPU.clockRate = 300;
-        }*/
+            this.CPU.clockRate = 1;
+        }
     }
 }

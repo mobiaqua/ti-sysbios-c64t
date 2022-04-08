@@ -37,6 +37,7 @@
 #include <xdc/std.h>
 #include <xdc/runtime/Assert.h>
 #include <xdc/runtime/Error.h>
+#include <xdc/runtime/IHeap.h>
 #include <xdc/runtime/Memory.h>
 
 #include <stdint.h>
@@ -64,7 +65,7 @@ typedef struct MQueueObj {
     struct MQueueObj  *next;
     struct MQueueObj  *prev;
     Mailbox_Handle     mailbox;
-    mq_attr            attrs;
+    struct mq_attr     attrs;
     int                refCount;
     char              *name;
 } MQueueObj;
@@ -122,26 +123,34 @@ int mq_getattr(mqd_t mqdes, struct mq_attr *mqstat)
  */
 mqd_t mq_open(const char *name, int oflags, ...)
 {
-    va_list           va;
-    mode_t            mode;
-    mq_attr          *attrs = NULL;
-    MQueueObj        *msgQueue;
-    MQueueDesc       *msgQueueDesc = NULL;
-    MQueueDesc       *mqd = (MQueueDesc *)(-1);
-    Error_Block       eb;
-    UInt              key;
-    Bool              failedStatus = FALSE;
+    va_list             va;
+    mode_t              mode;
+    struct mq_attr     *attrs = NULL;
+    MQueueObj          *msgQueue;
+    MQueueDesc         *msgQueueDesc = NULL;
+    Error_Block         eb;
+    UInt                key;
+    IHeap_Handle        heap = Task_Object_heap();
+    size_t              nameLen;
 
     va_start(va, oflags);
 
     if (oflags & O_CREAT) {
         mode = va_arg(va, mode_t);
-        attrs = va_arg(va, mq_attr*);
+        attrs = va_arg(va, struct mq_attr *);
     }
 
     va_end(va);
 
     if (name == NULL) {
+        errno = EINVAL;
+        return ((mqd_t)(-1));
+    }
+    nameLen = strlen(name);
+
+    if ((oflags & O_CREAT) && (attrs != NULL) && ((attrs->mq_maxmsg <= 0)
+            || (attrs->mq_msgsize <= 0))) {
+        errno = EINVAL;
         return ((mqd_t)(-1));
     }
 
@@ -153,42 +162,36 @@ mqd_t mq_open(const char *name, int oflags, ...)
 
     if ((msgQueue != NULL) && (oflags & O_CREAT) && (oflags & O_EXCL)) {
         /* Error: Message queue has alreadey been opened and O_EXCL is set */
+        errno = EEXIST;
         return ((mqd_t)(-1));
     }
 
-    if ((msgQueue == NULL) && (!(oflags & O_CREAT) ||
-                (attrs == NULL) || (attrs->mq_maxmsg <= 0))) {
-        /*
-         *  Error: Message has not been opened and O_CREAT is not set or
-         *  attrs are bad.
-         */
+    if (!(oflags & O_CREAT) && (msgQueue == NULL)) {
+        errno = ENOENT;
         return ((mqd_t)(-1));
     }
 
-    msgQueueDesc = (MQueueDesc *)Memory_alloc(Task_Object_heap(),
-            sizeof(MQueueDesc), 0, &eb);
+    msgQueueDesc = (MQueueDesc *)Memory_alloc(heap, sizeof(MQueueDesc), 0, &eb);
     if (msgQueueDesc == NULL) {
+        errno = ENOMEM;
         return ((mqd_t)(-1));
     }
 
     if (msgQueue == NULL) {
         /* Allocate the MQueueObj */
-        msgQueue = (MQueueObj *)Memory_alloc(Task_Object_heap(),
-                sizeof(MQueueObj), 0, &eb);
+        msgQueue = (MQueueObj *)Memory_alloc(heap, sizeof(MQueueObj), 0, &eb);
+
         if (msgQueue == NULL) {
-            failedStatus = TRUE;
-            goto done;
+            goto error_handler;
         }
 
         msgQueue->refCount = 1;
         msgQueue->attrs = *attrs;
 
-        msgQueue->name = (char *)Memory_alloc(Task_Object_heap(),
-                strlen(name) + 1, 0, &eb);
+        msgQueue->name = (char *)Memory_alloc(heap, nameLen + 1, 0, &eb);
 
         if (msgQueue->name == NULL) {
-            failedStatus = TRUE;
-            goto done;
+            goto error_handler;
         }
 
         strcpy(msgQueue->name, name);
@@ -197,8 +200,7 @@ mqd_t mq_open(const char *name, int oflags, ...)
                 attrs->mq_maxmsg, NULL, &eb);
 
         if (msgQueue->mailbox == NULL) {
-            failedStatus = TRUE;
-            goto done;
+            goto error_handler;
         }
 
         /*
@@ -223,34 +225,30 @@ mqd_t mq_open(const char *name, int oflags, ...)
     Task_restore(key);
 
     msgQueueDesc->msgQueue = msgQueue;
-
-    msgQueueDesc->flags = (oflags & O_NONBLOCK) ? O_NONBLOCK : 0;
-
-done:
-    if (failedStatus) {
-        /*
-         *  We only get here if we attempted to allocate msgQueue (i.e., it
-         *  was not already in the list), so we're ok to free it.
-         */
-        if (msgQueue != NULL) {
-            if (msgQueue->name != NULL) {
-                Memory_free(Task_Object_heap(), msgQueue->name,
-                    strlen(name) + 1);
-            }
-            Memory_free(Task_Object_heap(), msgQueue, sizeof(MQueueObj));
-        }
-
-        if (msgQueueDesc != NULL) {
-            Memory_free(Task_Object_heap(), msgQueueDesc, sizeof(MQueueDesc));
-        }
-    }
-    else {
-        mqd = msgQueueDesc;
-    }
+    msgQueueDesc->flags = ((oflags & O_NONBLOCK) ? O_NONBLOCK : 0);
 
     (void)mode;
 
-    return ((mqd_t)mqd);
+    return ((mqd_t)msgQueueDesc);
+
+error_handler:
+    /*
+     *  We only get here if we attempted to allocate msgQueue (i.e., it
+     *  was not already in the list), so we're ok to free it.
+     */
+    if (msgQueue != NULL) {
+        if (msgQueue->name != NULL) {
+            Memory_free(heap, msgQueue->name, nameLen + 1);
+        }
+        Memory_free(heap, msgQueue, sizeof(MQueueObj));
+    }
+
+    if (msgQueueDesc != NULL) {
+        Memory_free(heap, msgQueueDesc, sizeof(MQueueDesc));
+    }
+
+    errno = ENOMEM;
+    return ((mqd_t)(-1));
 }
 
 /*
@@ -269,6 +267,7 @@ ssize_t mq_receive(mqd_t mqdes, char *msg_ptr, size_t msg_len,
      *  queue, return an error.
      */
     if (msg_len < (size_t)((msgQueue->attrs).mq_msgsize)) {
+        errno = EMSGSIZE;
         return (-1);
     }
 
@@ -282,6 +281,9 @@ ssize_t mq_receive(mqd_t mqdes, char *msg_ptr, size_t msg_len,
     /* Receive a message */
     if (Mailbox_pend(msgQueue->mailbox, (Ptr)msg_ptr, timeout)) {
         retVal = (msgQueue->attrs).mq_msgsize;
+    }
+    else {
+        errno = EAGAIN;
     }
 
     return (retVal);
@@ -297,6 +299,11 @@ int mq_send(mqd_t mqdes, const char *msg_ptr, size_t msg_len,
     MQueueObj  *msgQueue = mqd->msgQueue;
     UInt32 timeout;
 
+    if (msg_len > (size_t)(msgQueue->attrs.mq_msgsize)) {
+        errno = EMSGSIZE;
+        return (-1);
+    }
+
     if (mqd->flags & O_NONBLOCK) {
         timeout = BIOS_NO_WAIT;
     }
@@ -306,6 +313,7 @@ int mq_send(mqd_t mqdes, const char *msg_ptr, size_t msg_len,
 
     /* Send a message */
     if (!Mailbox_post(msgQueue->mailbox, (Ptr)msg_ptr, timeout)) {
+        errno = EAGAIN;
         return (-1);
     }
 
@@ -322,8 +330,11 @@ int mq_setattr(mqd_t mqdes, const struct mq_attr *mqstat,
     MQueueObj  *msgQueue = mqd->msgQueue;
     UInt        key;
 
-    Assert_isTrue((mqstat->mq_flags == 0) || (mqstat->mq_flags == O_NONBLOCK),
-        0);
+    /* mq_flags should be 0 or O_NONBLOCK */
+    if ((mqstat->mq_flags != 0) && (mqstat->mq_flags != O_NONBLOCK)) {
+        errno = EINVAL;
+        return (-1);
+    }
 
     /*
      *  The message queue attributes corresponding to the following
@@ -339,6 +350,8 @@ int mq_setattr(mqd_t mqdes, const struct mq_attr *mqstat,
     key = Task_disable();
 
     if (omqstat != NULL) {
+        msgQueue->attrs.mq_curmsgs = Mailbox_getNumPendingMsgs(
+                msgQueue->mailbox);
         *omqstat = msgQueue->attrs;
         omqstat->mq_flags = mqd->flags;
     }
@@ -356,34 +369,49 @@ int mq_setattr(mqd_t mqdes, const struct mq_attr *mqstat,
 ssize_t mq_timedreceive(mqd_t mqdes, char *msg_ptr, size_t msg_len,
         unsigned int *msg_prio, const struct timespec *abstime)
 {
-    MQueueDesc         *mqd = (MQueueDesc *)mqdes;
-    MQueueObj          *msgQueue = mqd->msgQueue;
-    UInt32              timeout;
-    int                 retVal = -1;
+    MQueueDesc *mqd = (MQueueDesc *)mqdes;
+    MQueueObj  *msgQueue = mqd->msgQueue;
+    UInt32      timeout;
+    int         msgsize = msgQueue->attrs.mq_msgsize;
 
     /*
      *  If msg_len is less than the message size attribute of the message
      *  queue, return an error.
      */
-    if (msg_len < (size_t)((msgQueue->attrs).mq_msgsize)) {
+    if (msg_len < (size_t)(msgQueue->attrs.mq_msgsize)) {
+        errno = EMSGSIZE;
         return (-1);
     }
 
-    if (mqd->flags & O_NONBLOCK) {
-        timeout = BIOS_NO_WAIT;
+    /* should not fail if message already available (don't validate abstime) */
+    if (Mailbox_pend(msgQueue->mailbox, (Ptr)msg_ptr, BIOS_NO_WAIT)) {
+        return (msgsize);
     }
     else {
-        if (_pthread_abstime2ticks(CLOCK_REALTIME, abstime, &timeout) != 0) {
+        /* message queue is empty */
+        if (mqd->flags & O_NONBLOCK) {
+            errno = EAGAIN;
             return (-1);
         }
     }
 
-    /* Wait forever to receive a message */
-    if (Mailbox_pend(msgQueue->mailbox, (Ptr)msg_ptr, timeout)) {
-        retVal = (msgQueue->attrs).mq_msgsize;
+    if (_pthread_abstime2ticks(CLOCK_REALTIME, abstime, &timeout) != 0) {
+        errno = EINVAL;
+        return (-1);
     }
 
-    return (retVal);
+    /* requested abstime has already passed */
+    if (timeout == 0) {
+        errno = ETIMEDOUT;
+        return (-1);
+    }
+
+    if (!Mailbox_pend(msgQueue->mailbox, (Ptr)msg_ptr, timeout)) {
+        errno = ETIMEDOUT;
+        return (-1);
+    }
+
+    return (msgsize);
 }
 
 /*
@@ -392,26 +420,44 @@ ssize_t mq_timedreceive(mqd_t mqdes, char *msg_ptr, size_t msg_len,
 int mq_timedsend(mqd_t mqdes, const char *msg_ptr, size_t msg_len,
         unsigned int msg_prio, const struct timespec *abstime)
 {
-    MQueueDesc         *mqd = (MQueueDesc *)mqdes;
-    MQueueObj          *msgQueue = mqd->msgQueue;
-    UInt32              timeout;
-    int                 retVal = 0;
+    MQueueDesc *mqd = (MQueueDesc *)mqdes;
+    MQueueObj  *msgQueue = mqd->msgQueue;
+    UInt32      timeout;
 
-    if (mqd->flags & O_NONBLOCK) {
-        timeout = BIOS_NO_WAIT;
+    if (msg_len > (size_t)(msgQueue->attrs.mq_msgsize)) {
+        errno = EMSGSIZE;
+        return (-1);
+    }
+
+    /* should not fail if able to send message (don't validate abstime) */
+    if (Mailbox_post(msgQueue->mailbox, (Ptr)msg_ptr, BIOS_NO_WAIT)) {
+        return (0);
     }
     else {
-        if (_pthread_abstime2ticks(CLOCK_REALTIME, abstime, &timeout) != 0) {
+        /* message queue is full */
+        if (mqd->flags & O_NONBLOCK) {
+            errno = EAGAIN;
             return (-1);
         }
     }
 
-    /* Wait for timeout to send a message */
-    if (!Mailbox_post(msgQueue->mailbox, (Ptr)msg_ptr, timeout)) {
-        retVal = -1;
+    if (_pthread_abstime2ticks(CLOCK_REALTIME, abstime, &timeout) != 0) {
+        errno = EINVAL;
+        return (-1);
     }
 
-    return (retVal);
+    /* requested abstime has already passed */
+    if (timeout == 0) {
+        errno = ETIMEDOUT;
+        return (-1);
+    }
+
+    if (!Mailbox_post(msgQueue->mailbox, (Ptr)msg_ptr, timeout)) {
+        errno = ETIMEDOUT;
+        return (-1);
+    }
+
+    return (0);
 }
 
 /*
@@ -427,7 +473,12 @@ int mq_unlink(const char *name)
 
     msgQueue = findInList(name);
 
-    if ((msgQueue != NULL) && (msgQueue->refCount == 0)) {
+    if (msgQueue == NULL) {
+        errno = ENOENT;
+        goto done_restore;
+    }
+
+    if (msgQueue->refCount == 0) {
         /* If the message queue is in the list, remove it. */
         if (mqList == msgQueue) {
             mqList = msgQueue->next;
@@ -462,6 +513,7 @@ int mq_unlink(const char *name)
         return (0);
     }
 
+done_restore:
     Task_restore(key);
 
     return (-1);

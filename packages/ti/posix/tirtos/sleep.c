@@ -34,12 +34,12 @@
  *  ======== sleep.c ========
  */
 
-#include <xdc/std.h>
+#include <errno.h>
+#include <unistd.h>
 
+#include <xdc/std.h>
 #include <ti/sysbios/knl/Clock.h>
 #include <ti/sysbios/knl/Task.h>
-
-#include <unistd.h>
 
 /*
  *  ======== sleep ========
@@ -58,9 +58,15 @@ unsigned sleep(unsigned seconds)
 /*
  *  ======== usleep ========
  */
-int usleep(useconds_t useconds)
+int usleep(useconds_t usec)
 {
     UInt32 timeout;
+
+    /* usec must be less than 1000000 */
+    if (usec >= 1000000) {
+        errno = EINVAL;
+        return (-1);
+    }
 
     /*  Implementations may place limitations on the granularity of timer
      *  values. For each interval timer, if the requested timer value requires
@@ -68,7 +74,7 @@ int usleep(useconds_t useconds)
      *  value shall be rounded up to the next supported value.
      */
     /* Clock_tickPeriod is the Clock period in microseconds */
-    timeout = (UInt32)((useconds + Clock_tickPeriod - 1) / Clock_tickPeriod);
+    timeout = (UInt32)((usec + Clock_tickPeriod - 1) / Clock_tickPeriod);
 
     Task_sleep(timeout);
 

@@ -1,0 +1,1999 @@
+******************************************************************************
+                  TI ARM Linker Unix v16.9.0                   
+******************************************************************************
+>> Linked Mon Nov  6 09:54:19 2017
+
+OUTPUT FILE NAME:   <rtos_rom.xem4f>
+ENTRY POINT SYMBOL: "_c_int00"  address: 00001e49
+
+
+MEMORY CONFIGURATION
+
+         name            origin    length      used     unused   attr    fill
+----------------------  --------  ---------  --------  --------  ----  --------
+  VECS                  00000000   00000100  0000003c  000000c4  R  X
+  RTOS_FLASH            00001000   00000700  00000000  00000700  R  X
+  FLASH                 00001800   0000e800  000013d4  0000d42c  R  X
+  FLASH_CCFG            0001ffa8   00000058  00000058  00000000  R  X
+  RTOS_ROM              1002c800   00003c00  00003578  00000688  R  X
+  VRAM                  20000000   00000100  000000c8  00000038  RW X
+  RTOS_SRAM             20000100   00000500  0000000c  000004f4  RW X
+  SRAM                  20000600   00004a00  00001d2a  00002cd6  RW X
+
+
+SEGMENT ALLOCATION MAP
+
+run origin  load origin   length   init length attrs members
+----------  ----------- ---------- ----------- ----- -------
+00000000    00000000    0000003c   0000003c    r--
+  00000000    00000000    0000003c   0000003c    r-- .resetVecs
+00001800    00001800    000013d4   000013d4    r-x
+  00001800    00001800    00000a2c   00000a2c    r-x .text
+  0000222c    0000222c    00000464   00000464    r-- .const
+  00002690    00002690    00000374   00000374    r-x .bigc_text
+  00002a04    00002a04    000001d0   000001d0    r-x .mangled_apis_text
+0001ffa8    0001ffa8    00000058   00000058    r--
+  0001ffa8    0001ffa8    00000058   00000058    r-- .ccfg
+1002c800    1002c800    0000357a   0000357a    r-x
+  1002c800    1002c800    00000004   00000004    r-- .sysbios_rom_text
+  1002c804    1002c804    000029ac   000029ac    r-x .sysbios_rom_text
+  1002f1b0    1002f1b0    00000750   00000750    r-x .sysbios_rom_text
+  1002f900    1002f900    0000026e   0000026e    r-x .sysbios_rom_text
+  1002fb70    1002fb70    000001dc   000001dc    r-- .sysbios_rom_text
+  1002fd4c    1002fd4c    0000002e   0000002e    r-x .sysbios_rom_text
+20000100    20000100    0000000c   0000000c    rw-
+  20000100    20000100    0000000c   0000000c    rw- .sysbios_rom_data
+20000600    20000600    00000908   00000000    rw-
+  20000600    20000600    00000908   00000000    rw- .bss
+20000f08    20000f08    00000422   00000422    rw-
+  20000f08    20000f08    00000422   00000422    rw- .data
+20004000    20004000    00001000   00000000    rw-
+  20004000    20004000    00001000   00000000    rw- .stack
+
+
+SECTION ALLOCATION MAP
+
+ output                                  attributes/
+section   page    origin      length       input sections
+--------  ----  ----------  ----------   ----------------
+.text      0    00001800    00000a2c     
+                  00001800    000001f4     rtsv7M4_T_le_v4SPD16_eabi.lib : ull_div_t2.obj (.text)
+                  000019f4    0000019c     CC26xx.obj (.text:main)
+                  00001b90    00000100     driverlib.lib : setup.obj (.text:TrimAfterColdResetWakeupFromShutDown)
+                  00001c90    000000a0     auto_init.aem4f : auto_init.oem4f (.text)
+                  00001d30    00000098     driverlib.lib : setup.obj (.text:NOROM_SetupTrimDevice)
+                  00001dc8    00000080                   : setup_rom.obj (.text:NOROM_SetupStepVddrTrimTo)
+                  00001e48    00000058     boot.aem4f : boot.oem4f (.text)
+                  00001ea0    00000054     rtsv7M4_T_le_v4SPD16_eabi.lib : exit.obj (.text)
+                  00001ef4    0000004c                                   : cpy_tbl.obj (.text)
+                  00001f40    00000040     driverlib.lib : interrupt.obj (.text:NOROM_IntPendClear)
+                  00001f80    00000040                   : setup.obj (.text:Step_RCOSCHF_CTRIM)
+                  00001fc0    00000040                   : setup.obj (.text:Step_VBG)
+                  00002000    00000028                   : aon_event.obj (.text:NOROM_AONEventMcuWakeUpSet)
+                  00002028    0000001c                   : chipinfo.obj (.text:NOROM_ChipInfo_GetChipFamily)
+                  00002044    00000018     rtsv7M4_T_le_v4SPD16_eabi.lib : args_main.obj (.text)
+                  0000205c    00000018                                   : ll_mul_t2.obj (.text)
+                  00002074    00000014     driverlib.lib : aon_rtc.obj (.text:NOROM_AONRTCCurrent64BitValueGet)
+                  00002088    00000014     rtsv7M4_T_le_v4SPD16_eabi.lib : _lock.obj (.text)
+                  0000209c    0000000e     driverlib.lib : chipinfo.obj (.text:NOROM_ThisLibraryIsFor_CC13x2_13x4_26x2_26x4_HaltIfViolated)
+                  000020aa    0000000c                   : cpu.obj (.text:NOROM_CPUcpsid)
+                  000020b6    0000000c                   : cpu.obj (.text:NOROM_CPUcpsie)
+                  000020c2    00000002     CC26xx.obj (.text:smallErrorPolicy)
+                  000020c4    00000008     CC26xx.obj (.tramp.memcpy.1)
+                  000020cc    00000008     mangled_BIOS_rom.obj (.tramp.xdc_runtime_System_exit__E.1)
+                  000020d4    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Clock_start__E.1)
+                  000020dc    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Mailbox_pend__E.1)
+                  000020e4    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Mailbox_post__E.1)
+                  000020ec    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Semaphore_post__E.1)
+                  000020f4    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Semaphore_pend__E.1)
+                  000020fc    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Event_post__E.1)
+                  00002104    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Event_pend__E.1)
+                  0000210c    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Mailbox_destruct.1)
+                  00002114    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Swi_destruct.1)
+                  0000211c    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_family_arm_m3_Hwi_destruct.1)
+                  00002124    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Clock_destruct.1)
+                  0000212c    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Event_destruct.1)
+                  00002134    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Semaphore_destruct.1)
+                  0000213c    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Task_destruct.1)
+                  00002144    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Mailbox_delete.1)
+                  0000214c    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Swi_delete.1)
+                  00002154    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_family_arm_m3_Hwi_delete.1)
+                  0000215c    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Clock_delete.1)
+                  00002164    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Event_delete.1)
+                  0000216c    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Semaphore_delete.1)
+                  00002174    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Task_delete.1)
+                  0000217c    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Mailbox_construct.1)
+                  00002184    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Swi_construct.1)
+                  0000218c    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_family_arm_m3_Hwi_construct.1)
+                  00002194    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Clock_construct.1)
+                  0000219c    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Event_construct.1)
+                  000021a4    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Semaphore_construct.1)
+                  000021ac    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Task_construct.1)
+                  000021b4    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Mailbox_create.1)
+                  000021bc    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Swi_create.1)
+                  000021c4    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_family_arm_m3_Hwi_create.1)
+                  000021cc    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Clock_create.1)
+                  000021d4    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Event_create.1)
+                  000021dc    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Semaphore_create.1)
+                  000021e4    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Task_create.1)
+                  000021ec    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Mailbox_Params__init__S.1)
+                  000021f4    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Swi_Params__init__S.1)
+                  000021fc    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_family_arm_m3_Hwi_Params__init__S.1)
+                  00002204    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Event_Params__init__S.1)
+                  0000220c    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Semaphore_Params__init__S.1)
+                  00002214    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Clock_Params__init__S.1)
+                  0000221c    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Task_Params__init__S.1)
+                  00002224    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_BIOS_start__E.1)
+
+.const     0    0000222c    00000464     
+                  0000222c    0000039c     CC26xx_pem4f.obj (.const:ROM_constStruct)
+                  000025c8    00000048     CC26xx_pem4f.obj (.const:.string)
+                  00002610    00000040     CC26xx_pem4f.obj (.const:ROM_externFuncPtrs)
+                  00002650    00000024     CC26xx_pem4f.obj (.const:xdc_runtime_Startup_sfxnTab__A)
+                  00002674    00000012     CC26xx_pem4f.obj (.const:xdc_runtime_Startup_sfxnRts__A)
+                  00002686    00000001     CC26xx_pem4f.obj (.const:xdc_runtime_Text_charTab__A)
+                  00002687    00000001     --HOLE-- [fill = 0]
+                  00002688    00000008     CC26xx_pem4f.obj (.const:xdc_runtime_Startup_firstFxns__A)
+
+.cinit     0    00001800    00000000     UNINITIALIZED
+
+.init_array 
+*          0    00001800    00000000     UNINITIALIZED
+
+.ccfg      0    0001ffa8    00000058     
+                  0001ffa8    00000058     CC26xx_pem4f.obj (.ccfg:retain)
+
+.bss       0    20000600    00000908     UNINITIALIZED
+                  20000600    00000800     CC26xx_pem4f.obj (.bss:taskStackSection)
+                  20000e00    000000c8     (.common:ti_sysbios_family_arm_m3_Hwi_dispatchTable)
+                  20000ec8    00000040     (.common:ti_sysbios_heaps_HeapMem_Instance_State_0_buf__A)
+
+.data      0    20000f08    00000422     
+                  20000f08    00000108     CC26xx_pem4f.obj (.data:ROM_stateStruct)
+                  20001010    00000080     CC26xx_pem4f.obj (.data:ti_sysbios_knl_Swi_Module_State_0_readyQ__A)
+                  20001090    00000080     CC26xx_pem4f.obj (.data:ti_sysbios_knl_Task_Module_State_0_readyQ__A)
+                  20001110    0000004c     CC26xx_pem4f.obj (.data:ti_sysbios_knl_Task_Object__table__V)
+                  2000115c    00000004     rtsv7M4_T_le_v4SPD16_eabi.lib : stkdepth_vars.obj (.data)
+                  20001160    00000048     CC26xx_pem4f.obj (.data:ti_sysbios_family_arm_cc26xx_Timer_Object__table__V)
+                  200011a8    00000038     CC26xx_pem4f.obj (.data:ti_sysbios_gates_GateMutex_Object__table__V)
+                  200011e0    00000030     CC26xx_pem4f.obj (.data:ti_sysbios_knl_Swi_Object__table__V)
+                  20001210    00000020     CC26xx_pem4f.obj (.data:ti_sysbios_knl_Clock_Object__table__V)
+                  20001230    00000020     CC26xx_pem4f.obj (.data:xdc_runtime_Error_IgnoreBlock)
+                  20001250    00000020     CC26xx_pem4f.obj (.data:xdc_runtime_System_Module_State_0_atexitHandlers__A)
+                  20001270    00000018     CC26xx_pem4f.obj (.data:ti_sysbios_family_arm_m3_Hwi_Object__table__V)
+                  20001288    00000018     CC26xx_pem4f.obj (.data:ti_sysbios_heaps_HeapMem_Object__table__V)
+                  200012a0    0000000c     rtsv7M4_T_le_v4SPD16_eabi.lib : exit.obj (.data:$O1$$)
+                  200012ac    00000008                                   : _lock.obj (.data:$O1$$)
+                  200012b4    00000008     CC26xx_pem4f.obj (.data:ti_sysbios_family_arm_m3_Hwi_Module__root__V)
+                  200012bc    00000008     CC26xx_pem4f.obj (.data:ti_sysbios_gates_GateHwi_Module__root__V)
+                  200012c4    00000008     CC26xx_pem4f.obj (.data:ti_sysbios_gates_GateMutex_Module__root__V)
+                  200012cc    00000008     CC26xx_pem4f.obj (.data:ti_sysbios_hal_Hwi_Module__root__V)
+                  200012d4    00000008     CC26xx_pem4f.obj (.data:ti_sysbios_heaps_HeapMem_Module__root__V)
+                  200012dc    00000008     CC26xx_pem4f.obj (.data:ti_sysbios_heaps_HeapTrack_Module__root__V)
+                  200012e4    00000008     CC26xx_pem4f.obj (.data:ti_sysbios_knl_Clock_Module__root__V)
+                  200012ec    00000008     CC26xx_pem4f.obj (.data:ti_sysbios_knl_Event_Module__root__V)
+                  200012f4    00000008     CC26xx_pem4f.obj (.data:ti_sysbios_knl_Mailbox_Module__root__V)
+                  200012fc    00000008     CC26xx_pem4f.obj (.data:ti_sysbios_knl_Queue_Module__root__V)
+                  20001304    00000008     CC26xx_pem4f.obj (.data:ti_sysbios_knl_Semaphore_Module__root__V)
+                  2000130c    00000008     CC26xx_pem4f.obj (.data:ti_sysbios_knl_Swi_Module__root__V)
+                  20001314    00000008     CC26xx_pem4f.obj (.data:ti_sysbios_knl_Task_Module__root__V)
+                  2000131c    00000004     CC26xx_pem4f.obj (.data:ti_sysbios_family_arm_m3_Hwi_Module_State_0_excContext__A)
+                  20001320    00000004     CC26xx_pem4f.obj (.data:ti_sysbios_family_arm_m3_Hwi_Module_State_0_excStack__A)
+                  20001324    00000004     CC26xx_pem4f.obj (.data:ti_sysbios_knl_Task_Module_State_0_idleTask__A)
+                  20001328    00000002     CC26xx_pem4f.obj (.data:ti_sysbios_family_arm_m3_Hwi_Module_State_0_excActive__A)
+
+.stack     0    20004000    00001000     UNINITIALIZED
+                  20004000    00001000     --HOLE--
+
+.bootVecs 
+*          0    00000000    00000008     DSECT
+                  00000000    00000008     boot.aem4f : boot.oem4f (.bootVecs)
+
+.resetVecs 
+*          0    00000000    0000003c     
+                  00000000    0000003c     CC26xx_pem4f.obj (.resetVecs)
+
+.bigc_text 
+*          0    00002690    00000374     
+                  00002690    0000008c     CC26xx_pem4f.obj (.text:xdc_runtime_Startup_getState__I)
+                  0000271c    00000030     CC26xx_pem4f.obj (.text:ti_sysbios_BIOS_atExitFunc__I)
+                  0000274c    00000030     CC26xx_pem4f.obj (.text:ti_sysbios_BIOS_rtsLock__I)
+                  0000277c    00000030     CC26xx_pem4f.obj (.text:ti_sysbios_BIOS_startFunc__I)
+                  000027ac    0000002c     CC26xx_pem4f.obj (.text:ti_sysbios_BIOS_rtsUnlock__I)
+                  000027d8    00000024     CC26xx_pem4f.obj (.text:ti_sysbios_BIOS_registerRTSLock__I)
+                  000027fc    00000020     CC26xx_pem4f.obj (.text:ti_sysbios_BIOS_errorRaiseHook__I)
+                  0000281c    00000020     CC26xx_pem4f.obj (.text:ti_sysbios_BIOS_removeRTSLock__I)
+                  0000283c    0000001c     CC26xx_pem4f.obj (.text:ti_sysbios_rom_cortexm_cc26xx_cc26x2r2_CC26xx_checkRevision__E)
+                  00002858    00000018     CC26xx_pem4f.obj (.text:ti_sysbios_knl_Clock_doTick__I)
+                  00002870    00000018     CC26xx_pem4f.obj (.text:xdc_runtime_Startup_exec__I)
+                  00002888    00000016     CC26xx_pem4f.obj (.text:ti_sysbios_BIOS_exitFunc__I)
+                  0000289e    00000010     CC26xx_pem4f.obj (.text:xdc_runtime_System_SupportProxy_putch__E)
+                  000028ae    00000002     CC26xx_pem4f.obj (.text:ti_sysbios_BIOS_nullFunc__I)
+                  000028b0    0000000c     CC26xx_pem4f.obj (.text:ti_sysbios_family_arm_cc26xx_Timer_dynamicStub__E)
+                  000028bc    0000000c     CC26xx_pem4f.obj (.text:ti_sysbios_family_arm_cc26xx_Timer_getCount64__E)
+                  000028c8    0000000c     CC26xx_pem4f.obj (.text:ti_sysbios_family_arm_cc26xx_Timer_getCurrentTick__E)
+                  000028d4    0000000c     CC26xx_pem4f.obj (.text:ti_sysbios_family_arm_cc26xx_Timer_getMaxTicks__E)
+                  000028e0    0000000c     CC26xx_pem4f.obj (.text:ti_sysbios_family_arm_cc26xx_Timer_initDevice__I)
+                  000028ec    0000000c     CC26xx_pem4f.obj (.text:ti_sysbios_family_arm_cc26xx_Timer_setNextTick__E)
+                  000028f8    0000000c     CC26xx_pem4f.obj (.text:ti_sysbios_family_arm_cc26xx_Timer_setThreshold__I)
+                  00002904    0000000c     CC26xx_pem4f.obj (.text:ti_sysbios_family_arm_cc26xx_Timer_start__E)
+                  00002910    0000000c     CC26xx_pem4f.obj (.text:ti_sysbios_family_arm_cc26xx_TimestampProvider_get32__E)
+                  0000291c    0000000c     CC26xx_pem4f.obj (.text:xdc_runtime_Startup_reset__I)
+                  00002928    0000000c     CC26xx_pem4f.obj (.text:xdc_runtime_System_SupportProxy_abort__E)
+                  00002934    0000000c     CC26xx_pem4f.obj (.text:xdc_runtime_System_SupportProxy_exit__E)
+                  00002940    00000008     CC26xx_pem4f.obj (.text:xdc_runtime_System_SupportProxy_Module__startupDone__S)
+                  00002948    00000008     CC26xx_pem4f.obj (.text:xdc_runtime_System_SupportProxy_flush__E)
+                  00002950    00000008     CC26xx_pem4f.obj (.text:xdc_runtime_System_SupportProxy_ready__E)
+                  00002958    00000002     CC26xx_pem4f.obj (.text:ti_sysbios_rom_cortexm_cc26xx_cc26x2r2_CC26xx_badRomRevision__E)
+                  0000295a    00000002     --HOLE-- [fill = 0]
+                  0000295c    00000008     mangled_BIOS_rom.obj (.tramp.xdc_runtime_SysCallback_ready__E.1)
+                  00002964    00000008     mangled_BIOS_rom.obj (.tramp.xdc_runtime_SysCallback_flush__E.1)
+                  0000296c    00000008     mangled_BIOS_rom.obj (.tramp.xdc_runtime_SysCallback_Module__startupDone__S.1)
+                  00002974    00000008     mangled_BIOS_rom.obj (.tramp.xdc_runtime_SysCallback_exit__E.1)
+                  0000297c    00000008     mangled_BIOS_rom.obj (.tramp.xdc_runtime_SysCallback_abort__E.1)
+                  00002984    00000008     mangled_BIOS_rom.obj (.tramp.xdc_runtime_SysCallback_putch__E.1)
+                  0000298c    00000008     mangled_BIOS_rom.obj (.tramp.xdc_runtime_System_exit__E.2)
+                  00002994    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Swi_post__E.1)
+                  0000299c    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Clock_logTick__E.1)
+                  000029a4    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_BIOS_RtsGateProxy_leave__E.1)
+                  000029ac    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Task_startup__E.1)
+                  000029b4    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Swi_startup__E.1)
+                  000029bc    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_hal_Hwi_startup__E.1)
+                  000029c4    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_family_arm_cc26xx_Timer_startup__E.1)
+                  000029cc    00000008     mangled_BIOS_rom.obj (.tramp.xdc_runtime_System_atexit__E.1)
+                  000029d4    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_BIOS_linkedWithIncorrectBootLibrary__E.1)
+                  000029dc    00000008     mangled_BIOS_rom.obj (.tramp.xdc_runtime_Startup_rtsDone__E.1)
+                  000029e4    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_BIOS_RtsGateProxy_enter__E.1)
+                  000029ec    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_BIOS_setThreadType__E.1)
+                  000029f4    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Task_disable__E.1)
+                  000029fc    00000008     mangled_BIOS_rom.obj (.tramp.ti_sysbios_knl_Swi_disable__E.1)
+
+.mangled_apis_text 
+*          0    00002a04    000001d0     
+                  00002a04    00000078     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_cc26xx_Timer_start__E__mangled__)
+                  00002a7c    00000044     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_cc26xx_Timer_getCurrentTick__E__mangled__)
+                  00002ac0    00000040     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_cc26xx_Timer_setNextTick__E__mangled__)
+                  00002b00    00000040     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_cc26xx_Timer_setThreshold__I__mangled__)
+                  00002b40    00000028     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_cc26xx_Timer_initDevice__I__mangled__)
+                  00002b68    00000024     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_cc26xx_Timer_dynamicStub__E__mangled__)
+                  00002b8c    00000024     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_cc26xx_Timer_getMaxTicks__E__mangled__)
+                  00002bb0    00000020     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_cc26xx_TimestampProvider_get32__E__mangled__)
+                  00002bd0    00000004     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_cc26xx_Timer_getCount64__E__mangled__)
+
+.sysbios_rom_text 
+*          0    1002c800    00000004     
+                  1002c800    00000004     CC26xx_pem4f.obj (.const:ti_sysbios_rom_cortexm_cc26xx_cc26x2r2_CC26xx_REVISION__C)
+
+.sysbios_rom_text 
+*          0    1002c804    000029ac     
+                  1002c804    000000f4     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Semaphore_pend__E)
+                  1002c8f8    000000e0     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Event_pend__E)
+                  1002c9d8    000000cc     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Task_Instance_init__E)
+                  1002caa4    000000b4     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_m3_Hwi_postInit__I)
+                  1002cb58    000000b0     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Mailbox_Instance_init__E)
+                  1002cc08    0000009c     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Clock_workFuncDynamic__E)
+                  1002cca4    00000094     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_cc26xx_Timer_periodicStub__E)
+                  1002cd38    00000094     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_m3_Hwi_Instance_init__E)
+                  1002cdcc    00000094     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Task_Instance_finalize__E)
+                  1002ce60    00000090     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_m3_Hwi_initNVIC__E)
+                  1002cef0    00000088     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Clock_startI__E)
+                  1002cf78    00000084     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Swi_restoreHwi__E)
+                  1002cffc    00000082     mangled_BIOS_rom.obj (.text:ti_sysbios_heaps_HeapTrack_alloc__E)
+                  1002d07e    00000002     mangled_BIOS_rom.obj (.text:ti_sysbios_BIOS_linkedWithIncorrectBootLibrary__E)
+                  1002d080    00000080     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Task_postInit__I)
+                  1002d100    00000078     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Clock_workFunc__E)
+                  1002d178    00000074     mangled_BIOS_rom.obj (.text:ti_sysbios_heaps_HeapMem_allocUnprotected__E)
+                  1002d1ec    00000074     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Clock_walkQueueDynamic__E)
+                  1002d260    00000074     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Task_startCore__E)
+                  1002d2d4    00000070     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Semaphore_post__E)
+                  1002d344    00000070     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Swi_run__I)
+                  1002d3b4    00000070     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Task_schedule__I)
+                  1002d424    00000070     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Task_sleep__E)
+                  1002d494    0000006c     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_m3_Hwi_Instance_finalize__E)
+                  1002d500    0000006c     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_m3_Hwi_dispatchC__I)
+                  1002d56c    0000006a     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Mailbox_post__E)
+                  1002d5d6    00000068     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Event_post__E)
+                  1002d63e    00000002     mangled_BIOS_rom.obj (.text:ti_sysbios_gates_GateHwi_Instance_init__E)
+                  1002d640    00000064     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Semaphore_Instance_init__E)
+                  1002d6a4    00000060     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Swi_runLoop__I)
+                  1002d704    00000060     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Swi_schedule__I)
+                  1002d764    00000060     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Task_Module_startup__E)
+                  1002d7c4    0000005c     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_m3_Hwi_create)
+                  1002d820    0000005c     mangled_BIOS_rom.obj (.text:ti_sysbios_hal_Hwi_create)
+                  1002d87c    0000005c     mangled_BIOS_rom.obj (.text:ti_sysbios_heaps_HeapMem_alloc__E)
+                  1002d8d8    0000005c     mangled_BIOS_rom.obj (.text:ti_sysbios_heaps_HeapTrack_free__E)
+                  1002d934    0000005c     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Mailbox_Instance_finalize__E)
+                  1002d990    0000005c     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Mailbox_create)
+                  1002d9ec    0000005c     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Swi_Instance_init__E)
+                  1002da48    00000058     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_m3_Hwi_Module_startup__E)
+                  1002daa0    00000058     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_m3_Hwi_construct)
+                  1002daf8    00000058     mangled_BIOS_rom.obj (.text:ti_sysbios_heaps_HeapMem_freeUnprotected__E)
+                  1002db50    00000058     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Mailbox_construct)
+                  1002dba8    00000058     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Task_create)
+                  1002dc00    00000056     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Mailbox_pend__E)
+                  1002dc56    00000002     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Clock_logTick__E)
+                  1002dc58    00000054     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Task_construct)
+                  1002dcac    00000050     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Task_allBlockedFunction__I)
+                  1002dcfc    0000004c     mangled_BIOS_rom.obj (.text:ti_sysbios_heaps_HeapMem_getStats__E)
+                  1002dd48    0000004c     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Swi_construct)
+                  1002dd94    0000004c     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Swi_create)
+                  1002dde0    0000004c     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Task_yield__E)
+                  1002de2c    00000048     mangled_BIOS_rom.obj (.text:ti_sysbios_heaps_HeapMem_Instance_init__E)
+                  1002de74    00000048     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Swi_post__E)
+                  1002debc    00000048     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Task_blockI__E)
+                  1002df04    00000044     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_m3_Hwi_disableInterrupt__E)
+                  1002df48    00000044     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_m3_Hwi_enableInterrupt__E)
+                  1002df8c    00000044     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_m3_Hwi_getStackInfo__E)
+                  1002dfd0    00000044     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Mailbox_Module_startup__E)
+                  1002e014    0000003c     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_m3_TaskSupport_start__E)
+                  1002e050    0000003c     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Clock_create)
+                  1002e08c    0000003c     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Swi_restore__E)
+                  1002e0c8    0000003a     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Task_exit__E)
+                  1002e102    00000002     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Clock_triggerFunc__I)
+                  1002e104    00000038     mangled_BIOS_rom.obj (.text:ti_sysbios_heaps_HeapMem_free__E)
+                  1002e13c    00000038     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Clock_getTicks__E)
+                  1002e174    00000038     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Semaphore_create)
+                  1002e1ac    00000038     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Task_processVitalTaskFlag__I)
+                  1002e1e4    00000034     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_cc26xx_Timer_startup__E)
+                  1002e218    00000034     mangled_BIOS_rom.obj (.text:ti_sysbios_heaps_HeapMem_init__I)
+                  1002e24c    00000034     mangled_BIOS_rom.obj (.text:ti_sysbios_heaps_HeapTrack_Object__create__S)
+                  1002e280    00000034     mangled_BIOS_rom.obj (.text:ti_sysbios_heaps_HeapTrack_create)
+                  1002e2b4    00000034     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Clock_Instance_init__E)
+                  1002e2e8    00000034     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Clock_construct)
+                  1002e31c    00000034     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Semaphore_construct)
+                  1002e350    00000034     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Task_unblockI__E)
+                  1002e384    00000030     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_m3_Hwi_excHandler__I)
+                  1002e3b4    00000030     mangled_BIOS_rom.obj (.text:ti_sysbios_gates_GateMutex_Object__create__S)
+                  1002e3e4    00000030     mangled_BIOS_rom.obj (.text:ti_sysbios_gates_GateMutex_create)
+                  1002e414    00000030     mangled_BIOS_rom.obj (.text:ti_sysbios_heaps_HeapMem_Object__create__S)
+                  1002e444    00000030     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Event_create)
+                  1002e474    00000030     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Queue_construct)
+                  1002e4a4    00000030     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Queue_create)
+                  1002e4d4    00000030     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Task_restore__E)
+                  1002e504    0000002e     mangled_BIOS_rom.obj (.text:ti_sysbios_hal_Hwi_initStack)
+                  1002e532    00000002     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Swi_Instance_finalize__E)
+                  1002e534    0000002c     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_cc26xx_Timer_Module_startup__E)
+                  1002e560    0000002c     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_cc26xx_Timer_postInit__I)
+                  1002e58c    0000002c     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_cc26xx_TimestampProvider_get64__E)
+                  1002e5b8    0000002c     mangled_BIOS_rom.obj (.text:ti_sysbios_gates_GateHwi_Object__create__S)
+                  1002e5e4    0000002c     mangled_BIOS_rom.obj (.text:ti_sysbios_gates_GateMutex_construct)
+                  1002e610    0000002c     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Event_construct)
+                  1002e63c    0000002c     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Event_pendTimeout__I)
+                  1002e668    0000002c     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Semaphore_pendTimeout__I)
+                  1002e694    00000028     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_cc26xx_Timer_Module__startupDone__S)
+                  1002e6bc    00000028     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_m3_Hwi_Module__startupDone__S)
+                  1002e6e4    00000028     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_m3_Hwi_Object__delete__S)
+                  1002e70c    00000028     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_m3_Hwi_Object__get__S)
+                  1002e734    00000028     mangled_BIOS_rom.obj (.text:ti_sysbios_gates_GateMutex_Object__delete__S)
+                  1002e75c    00000028     mangled_BIOS_rom.obj (.text:ti_sysbios_gates_GateMutex_enter__E)
+                  1002e784    00000028     mangled_BIOS_rom.obj (.text:ti_sysbios_hal_Hwi_Object__delete__S)
+                  1002e7ac    00000028     mangled_BIOS_rom.obj (.text:ti_sysbios_heaps_HeapMem_Object__get__S)
+                  1002e7d4    00000028     mangled_BIOS_rom.obj (.text:ti_sysbios_heaps_HeapTrack_Object__delete__S)
+                  1002e7fc    00000028     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Clock_Object__delete__S)
+                  1002e824    00000028     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Clock_stop__E)
+                  1002e84c    00000028     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Idle_run__E)
+                  1002e874    00000028     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Mailbox_Object__delete__S)
+                  1002e89c    00000028     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Mailbox_Object__get__S)
+                  1002e8c4    00000028     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Semaphore_Object__delete__S)
+                  1002e8ec    00000028     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Swi_Object__get__S)
+                  1002e914    00000028     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Task_Object__delete__S)
+                  1002e93c    00000028     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Task_restoreHwi__E)
+                  1002e964    00000026     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Mailbox_postInit__I)
+                  1002e98a    00000002     --HOLE-- [fill = 0]
+                  1002e98c    00000024     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_cc26xx_TimestampProvider_Module_startup__E)
+                  1002e9b0    00000024     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_m3_Hwi_destruct)
+                  1002e9d4    00000024     mangled_BIOS_rom.obj (.text:ti_sysbios_gates_GateHwi_Handle__label__S)
+                  1002e9f8    00000024     mangled_BIOS_rom.obj (.text:ti_sysbios_gates_GateHwi_Object__delete__S)
+                  1002ea1c    00000024     mangled_BIOS_rom.obj (.text:ti_sysbios_gates_GateMutex_Handle__label__S)
+                  1002ea40    00000024     mangled_BIOS_rom.obj (.text:ti_sysbios_gates_GateMutex_destruct)
+                  1002ea64    00000024     mangled_BIOS_rom.obj (.text:ti_sysbios_heaps_HeapMem_Handle__label__S)
+                  1002ea88    00000024     mangled_BIOS_rom.obj (.text:ti_sysbios_heaps_HeapMem_Object__delete__S)
+                  1002eaac    00000024     mangled_BIOS_rom.obj (.text:ti_sysbios_heaps_HeapTrack_Handle__label__S)
+                  1002ead0    00000024     mangled_BIOS_rom.obj (.text:ti_sysbios_heaps_HeapTrack_getStats__E)
+                  1002eaf4    00000024     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Clock_Module_startup__E)
+                  1002eb18    00000024     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Clock_addI__E)
+                  1002eb3c    00000024     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Clock_destruct)
+                  1002eb60    00000024     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Event_Object__delete__S)
+                  1002eb84    00000024     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Mailbox_destruct)
+                  1002eba8    00000024     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Queue_Object__delete__S)
+                  1002ebcc    00000024     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Semaphore_Instance_finalize__E)
+                  1002ebf0    00000024     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Semaphore_destruct)
+                  1002ec14    00000024     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Swi_Module_startup__E)
+                  1002ec38    00000024     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Swi_Object__delete__S)
+                  1002ec5c    00000024     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Task_Object__get__S)
+                  1002ec80    00000024     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Task_destruct)
+                  1002eca4    00000024     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Task_enter__I)
+                  1002ecc8    00000020     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Clock_scheduleNextTick__E)
+                  1002ece8    00000020     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Event_checkEvents__I)
+                  1002ed08    00000020     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Event_destruct)
+                  1002ed28    00000020     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Queue_Object__get__S)
+                  1002ed48    00000020     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Queue_destruct)
+                  1002ed68    00000020     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Swi_destruct)
+                  1002ed88    0000001e     mangled_BIOS_rom.obj (.text:ti_sysbios_hal_Hwi_Instance_init__E)
+                  1002eda6    00000002     --HOLE-- [fill = 0]
+                  1002eda8    0000001c     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_m3_Hwi_plug__E)
+                  1002edc4    0000001c     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_m3_Hwi_setPriority__E)
+                  1002ede0    0000001c     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_m3_Hwi_switchFromBootStack__E)
+                  1002edfc    0000001c     mangled_BIOS_rom.obj (.text:ti_sysbios_heaps_HeapTrack_Instance_init__E)
+                  1002ee18    0000001c     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Queue_get__E)
+                  1002ee34    0000001c     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Queue_put__E)
+                  1002ee50    0000001a     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Task_sleepTimeout__I)
+                  1002ee6a    00000018     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Task_unblock__E)
+                  1002ee82    00000016     mangled_BIOS_rom.obj (.text:ti_sysbios_gates_GateMutex_Instance_init__E)
+                  1002ee98    00000016     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Clock_Instance_finalize__E)
+                  1002eeae    00000016     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Clock_start__E)
+                  1002eec4    00000014     mangled_BIOS_rom.obj (.text:ti_sysbios_BIOS_getCpuFreq__E)
+                  1002eed8    00000014     mangled_BIOS_rom.obj (.text:ti_sysbios_BIOS_setThreadType__E)
+                  1002eeec    00000014     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Swi_disable__E)
+                  1002ef00    00000014     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Swi_enabled__E)
+                  1002ef14    00000014     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Task_disable__E)
+                  1002ef28    00000012     mangled_BIOS_rom.obj (.text:ti_sysbios_hal_Hwi_Module_startup__E)
+                  1002ef3a    00000012     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Event_sync__E)
+                  1002ef4c    00000010     mangled_BIOS_rom.obj (.text:ti_sysbios_BIOS_exit__E)
+                  1002ef5c    00000010     mangled_BIOS_rom.obj (.text:ti_sysbios_BIOS_getThreadType__E)
+                  1002ef6c    00000010     mangled_BIOS_rom.obj (.text:ti_sysbios_BIOS_start__E)
+                  1002ef7c    00000010     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_m3_TaskSupport_getStackAlignment__E)
+                  1002ef8c    00000010     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Clock_TimerProxy_getCurrentTick__E)
+                  1002ef9c    00000010     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Clock_TimerProxy_getMaxTicks__E)
+                  1002efac    00000010     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Clock_TimerProxy_setNextTick__E)
+                  1002efbc    00000010     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Task_self__E)
+                  1002efcc    0000000e     mangled_BIOS_rom.obj (.text:ti_sysbios_gates_GateMutex_leave__E)
+                  1002efda    0000000e     mangled_BIOS_rom.obj (.text:ti_sysbios_heaps_HeapMem_restore__E)
+                  1002efe8    0000000e     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Queue_empty__E)
+                  1002eff6    0000000e     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Queue_remove__E)
+                  1002f004    0000000c     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_cc26xx_TimestampProvider_getFreq__E)
+                  1002f010    0000000c     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_m3_Hwi_Params__init__S)
+                  1002f01c    0000000c     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_m3_Hwi_disableFxn__E)
+                  1002f028    0000000c     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_m3_Hwi_enableFxn__E)
+                  1002f034    0000000c     mangled_BIOS_rom.obj (.text:ti_sysbios_gates_GateHwi_enter__E)
+                  1002f040    0000000c     mangled_BIOS_rom.obj (.text:ti_sysbios_gates_GateMutex_Params__init__S)
+                  1002f04c    0000000c     mangled_BIOS_rom.obj (.text:ti_sysbios_heaps_HeapTrack_Params__init__S)
+                  1002f058    0000000c     mangled_BIOS_rom.obj (.text:ti_sysbios_heaps_HeapTrack_isBlocking__E)
+                  1002f064    0000000c     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Clock_Params__init__S)
+                  1002f070    0000000c     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Clock_getTimerHandle__E)
+                  1002f07c    0000000c     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Event_Params__init__S)
+                  1002f088    0000000c     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Mailbox_Params__init__S)
+                  1002f094    0000000c     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Queue_dequeue__E)
+                  1002f0a0    0000000c     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Queue_enqueue__E)
+                  1002f0ac    0000000c     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Semaphore_Params__init__S)
+                  1002f0b8    0000000c     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Swi_Params__init__S)
+                  1002f0c4    0000000c     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Task_Params__init__S)
+                  1002f0d0    0000000a     mangled_BIOS_rom.obj (.text:ti_sysbios_hal_Hwi_Instance_finalize__E)
+                  1002f0da    0000000a     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Event_Instance_init__E)
+                  1002f0e4    00000008     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_m3_Hwi_doSwiRestore__I)
+                  1002f0ec    00000008     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_m3_Hwi_startup__E)
+                  1002f0f4    00000008     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Idle_loop__E)
+                  1002f0fc    00000006     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_m3_Hwi_doTaskRestore__I)
+                  1002f102    00000006     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_m3_Hwi_restoreFxn__E)
+                  1002f108    00000006     mangled_BIOS_rom.obj (.text:ti_sysbios_gates_GateHwi_leave__E)
+                  1002f10e    00000006     mangled_BIOS_rom.obj (.text:ti_sysbios_gates_GateMutex_Instance_finalize__E)
+                  1002f114    00000006     mangled_BIOS_rom.obj (.text:ti_sysbios_heaps_HeapMem_isBlocking__E)
+                  1002f11a    00000006     mangled_BIOS_rom.obj (.text:ti_sysbios_heaps_HeapTrack_Instance_finalize__E)
+                  1002f120    00000006     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Queue_Instance_init__E)
+                  1002f126    00000006     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Queue_elemClear__E)
+                  1002f12c    00000006     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Swi_startup__E)
+                  1002f132    00000006     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Task_enable__E)
+                  1002f138    00000004     mangled_BIOS_rom.obj (.text:ti_sysbios_BIOS_RtsGateProxy_enter__E)
+                  1002f13c    00000004     mangled_BIOS_rom.obj (.text:ti_sysbios_BIOS_RtsGateProxy_leave__E)
+                  1002f140    00000004     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_cc26xx_Timer_getExpiredTicks__E)
+                  1002f144    00000004     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_cc26xx_Timer_getPeriod__E)
+                  1002f148    00000004     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_cc26xx_Timer_setPeriod__E)
+                  1002f14c    00000004     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_m3_Hwi_delete)
+                  1002f150    00000004     mangled_BIOS_rom.obj (.text:ti_sysbios_family_arm_m3_TaskSupport_Module__startupDone__S)
+                  1002f154    00000004     mangled_BIOS_rom.obj (.text:ti_sysbios_gates_GateHwi_query__E)
+                  1002f158    00000004     mangled_BIOS_rom.obj (.text:ti_sysbios_gates_GateMutex_delete)
+                  1002f15c    00000004     mangled_BIOS_rom.obj (.text:ti_sysbios_gates_GateMutex_query__E)
+                  1002f160    00000004     mangled_BIOS_rom.obj (.text:ti_sysbios_hal_Hwi_HwiProxy_create)
+                  1002f164    00000004     mangled_BIOS_rom.obj (.text:ti_sysbios_hal_Hwi_HwiProxy_delete)
+                  1002f168    00000004     mangled_BIOS_rom.obj (.text:ti_sysbios_hal_Hwi_delete)
+                  1002f16c    00000004     mangled_BIOS_rom.obj (.text:ti_sysbios_heaps_HeapMem_Module_GateProxy_enter__E)
+                  1002f170    00000004     mangled_BIOS_rom.obj (.text:ti_sysbios_heaps_HeapMem_Module_GateProxy_leave__E)
+                  1002f174    00000004     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Clock_TimerProxy_getExpiredTicks__E)
+                  1002f178    00000004     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Clock_TimerProxy_getPeriod__E)
+                  1002f17c    00000004     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Clock_delete)
+                  1002f180    00000004     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Clock_removeI__E)
+                  1002f184    00000004     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Clock_setTimeout__E)
+                  1002f188    00000004     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Event_delete)
+                  1002f18c    00000004     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Mailbox_delete)
+                  1002f190    00000004     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Queue_delete)
+                  1002f194    00000004     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Queue_head__E)
+                  1002f198    00000004     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Queue_next__E)
+                  1002f19c    00000004     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Semaphore_delete)
+                  1002f1a0    00000004     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Swi_delete)
+                  1002f1a4    00000004     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Swi_postInit__I)
+                  1002f1a8    00000004     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Task_delete)
+                  1002f1ac    00000004     mangled_BIOS_rom.obj (.text:ti_sysbios_knl_Task_startup__E)
+
+.sysbios_rom_text 
+*          0    1002f1b0    00000750     
+                  1002f1b0    00000108     mangled_BIOS_rom.obj (.text:xdc_runtime_Startup_startMods__I)
+                  1002f2b8    000000bc     mangled_BIOS_rom.obj (.text:xdc_runtime_Error_policyDefault__E)
+                  1002f374    00000070     mangled_BIOS_rom.obj (.text:xdc_runtime_Memory_alloc__E)
+                  1002f3e4    0000006e     mangled_BIOS_rom.obj (.text:xdc_runtime_Core_createObject__I)
+                  1002f452    0000005e     mangled_BIOS_rom.obj (.text:xdc_runtime_Core_deleteObject__I)
+                  1002f4b0    00000054     mangled_BIOS_rom.obj (.text:xdc_runtime_Assert_raise__I)
+                  1002f504    00000054     mangled_BIOS_rom.obj (.text:xdc_runtime_Startup_exec__E)
+                  1002f558    00000048     mangled_BIOS_rom.obj (.text:xdc_runtime_Core_assignParams__I)
+                  1002f5a0    00000048     mangled_BIOS_rom.obj (.text:xdc_runtime_Core_constructObject__I)
+                  1002f5e8    00000048     mangled_BIOS_rom.obj (.text:xdc_runtime_Error_setX__E)
+                  1002f630    00000048     mangled_BIOS_rom.obj (.text:xdc_runtime_System_atexit__E)
+                  1002f678    00000040     mangled_BIOS_rom.obj (.text:xdc_runtime_System_processAtExit__E)
+                  1002f6b8    00000030     mangled_BIOS_rom.obj (.text:xdc_runtime_Core_assignLabel__I)
+                  1002f6e8    0000002c     mangled_BIOS_rom.obj (.text:xdc_runtime_Text_cordText__E)
+                  1002f714    00000028     mangled_BIOS_rom.obj (.text:xdc_runtime_System_abort__E)
+                  1002f73c    00000020     mangled_BIOS_rom.obj (.text:xdc_runtime_Error_raiseX__E)
+                  1002f75c    0000001c     mangled_BIOS_rom.obj (.text:xdc_runtime_Error_check__E)
+                  1002f778    0000001c     mangled_BIOS_rom.obj (.text:xdc_runtime_Memory_valloc__E)
+                  1002f794    0000001c     mangled_BIOS_rom.obj (.text:xdc_runtime_System_exit__E)
+                  1002f7b0    0000001c     mangled_BIOS_rom.obj (.text:xdc_runtime_Text_ropeText__E)
+                  1002f7cc    00000018     mangled_BIOS_rom.obj (.text:xdc_runtime_Core_destructObject__I)
+                  1002f7e4    00000018     mangled_BIOS_rom.obj (.text:xdc_runtime_Error_init__E)
+                  1002f7fc    00000014     mangled_BIOS_rom.obj (.text:xdc_runtime_Memory_free__E)
+                  1002f810    00000014     mangled_BIOS_rom.obj (.text:xdc_runtime_Memory_getStats__E)
+                  1002f824    00000014     mangled_BIOS_rom.obj (.text:xdc_runtime_SysCallback_abort__E)
+                  1002f838    00000014     mangled_BIOS_rom.obj (.text:xdc_runtime_SysCallback_exit__E)
+                  1002f84c    00000014     mangled_BIOS_rom.obj (.text:xdc_runtime_SysCallback_flush__E)
+                  1002f860    00000014     mangled_BIOS_rom.obj (.text:xdc_runtime_SysCallback_putch__E)
+                  1002f874    00000014     mangled_BIOS_rom.obj (.text:xdc_runtime_SysCallback_ready__E)
+                  1002f888    00000010     mangled_BIOS_rom.obj (.text:xdc_runtime_Memory_getMaxDefaultTypeAlign__E)
+                  1002f898    00000010     mangled_BIOS_rom.obj (.text:xdc_runtime_Timestamp_SupportProxy_get32__E)
+                  1002f8a8    0000000c     mangled_BIOS_rom.obj (.text:xdc_runtime_Memory_calloc__E)
+                  1002f8b4    0000000c     mangled_BIOS_rom.obj (.text:xdc_runtime_Startup_rtsDone__E)
+                  1002f8c0    0000000a     mangled_BIOS_rom.obj (.text:xdc_runtime_IHeap_alloc$66)
+                  1002f8ca    0000000a     mangled_BIOS_rom.obj (.text:xdc_runtime_IHeap_free$66)
+                  1002f8d4    0000000a     mangled_BIOS_rom.obj (.text:xdc_runtime_IHeap_getStats$66)
+                  1002f8de    00000006     mangled_BIOS_rom.obj (.text:xdc_runtime_Gate_leaveSystem__E)
+                  1002f8e4    00000006     mangled_BIOS_rom.obj (.text:xdc_runtime_System_Module_startup__E)
+                  1002f8ea    00000004     mangled_BIOS_rom.obj (.text:xdc_runtime_Gate_enterSystem__E)
+                  1002f8ee    00000004     mangled_BIOS_rom.obj (.text:xdc_runtime_SysCallback_Module__startupDone__S)
+                  1002f8f2    00000004     mangled_BIOS_rom.obj (.text:xdc_runtime_System_Module_GateProxy_enter__E)
+                  1002f8f6    00000004     mangled_BIOS_rom.obj (.text:xdc_runtime_System_Module_GateProxy_leave__E)
+                  1002f8fa    00000002     mangled_BIOS_rom.obj (.text:xdc_runtime_Error_policySpin__E)
+                  1002f8fc    00000002     mangled_BIOS_rom.obj (.text:xdc_runtime_System_abortSpin__E)
+                  1002f8fe    00000002     mangled_BIOS_rom.obj (.text:xdc_runtime_System_exitSpin__E)
+
+.sysbios_rom_text 
+*          0    1002f900    0000026e     
+                  1002f900    000000fc     arm_m3_Hwi_asm_rom.obj (.text:ti_sysbios_family_arm_m3_Hwi_dispatch__I)
+                  1002f9fc    0000008c     arm_m3_TaskSupport_asm_rom.obj (.text:ti_sysbios_family_arm_m3_TaskSupport_buildTaskStack)
+                  1002fa88    00000058     arm_m3_Hwi_asm_switch_rom.obj (.text:ti_sysbios_family_arm_m3_Hwi_initStacks__E)
+                  1002fae0    00000026     arm_m3_Hwi_asm_rom.obj (.text:ti_sysbios_family_arm_m3_Hwi_pendSV__I)
+                  1002fb06    00000002     --HOLE-- [fill = 0]
+                  1002fb08    00000020     arm_m3_Hwi_asm_rom.obj (.text:ti_sysbios_family_arm_m3_Hwi_excHandlerAsm__I)
+                  1002fb28    0000001e     arm_m3_Hwi_asm_switch_rom.obj (.text:ti_sysbios_family_xxx_Hwi_switchAndRunFunc)
+                  1002fb46    00000018     arm_m3_TaskSupport_asm_rom.obj (.text:ti_sysbios_family_arm_m3_TaskSupport_swap__E)
+                  1002fb5e    00000010     arm_m3_TaskSupport_asm_rom.obj (.text:ti_sysbios_family_arm_m3_TaskSupport_glue)
+
+.sysbios_rom_text 
+*          0    1002fb70    000001dc     
+                  1002fb70    0000003c     CC26xx_pem4f.obj (.const:ti_sysbios_knl_Task_Object__PARAMS__C)
+                  1002fbac    00000034     CC26xx_pem4f.obj (.const:ti_sysbios_knl_Mailbox_Object__PARAMS__C)
+                  1002fbe0    00000030     CC26xx_pem4f.obj (.const:ti_sysbios_family_arm_m3_Hwi_Object__PARAMS__C)
+                  1002fc10    0000002c     CC26xx_pem4f.obj (.const:ti_sysbios_hal_Hwi_Object__PARAMS__C)
+                  1002fc3c    00000028     CC26xx_pem4f.obj (.const:ti_sysbios_knl_Swi_Object__PARAMS__C)
+                  1002fc64    00000024     CC26xx_pem4f.obj (.const:ti_sysbios_heaps_HeapMem_Object__PARAMS__C)
+                  1002fc88    00000024     CC26xx_pem4f.obj (.const:ti_sysbios_knl_Clock_Object__PARAMS__C)
+                  1002fcac    00000024     CC26xx_pem4f.obj (.const:ti_sysbios_knl_Semaphore_Object__PARAMS__C)
+                  1002fcd0    0000001c     CC26xx_pem4f.obj (.const:ti_sysbios_heaps_HeapTrack_Object__PARAMS__C)
+                  1002fcec    00000018     CC26xx_pem4f.obj (.const:ti_sysbios_gates_GateHwi_Object__PARAMS__C)
+                  1002fd04    00000018     CC26xx_pem4f.obj (.const:ti_sysbios_gates_GateMutex_Object__PARAMS__C)
+                  1002fd1c    00000018     CC26xx_pem4f.obj (.const:ti_sysbios_knl_Event_Object__PARAMS__C)
+                  1002fd34    00000018     CC26xx_pem4f.obj (.const:ti_sysbios_knl_Queue_Object__PARAMS__C)
+
+.sysbios_rom_text 
+*          0    1002fd4c    0000002e     
+                  1002fd4c    00000018     CC26xx.obj (.text:memcpy)
+                  1002fd64    00000016     CC26xx.obj (.text:memset)
+
+.vecs      0    20000000    000000c8     NOLOAD SECTION
+                  20000000    000000c8     CC26xx_pem4f.obj (.vecs)
+
+.sysbios_rom_data 
+*          0    20000100    0000000c     
+                  20000100    00000004     CC26xx_pem4f.obj (.data:xdcRomConstPtr)
+                  20000104    00000004     CC26xx_pem4f.obj (.data:xdcRomExternFuncPtr)
+                  20000108    00000004     CC26xx_pem4f.obj (.data:xdcRomStatePtr)
+
+xdc.meta   0    00000000    000000fe     COPY SECTION
+                  00000000    000000fe     CC26xx_pem4f.obj (xdc.meta)
+
+xdc.noload 
+*          0    00000000    00000000     COPY SECTION
+
+MODULE SUMMARY
+
+       Module                           code    ro data   rw data
+       ------                           ----    -------   -------
+    <current directory>
+       mangled_BIOS_rom.obj             13520   0         0      
+       CC26xx_pem4f.obj                 714     1751      3558   
+       CC26xx.obj                       468     0         0      
+       arm_m3_Hwi_asm_rom.obj           322     0         0      
+       arm_m3_TaskSupport_asm_rom.obj   180     0         0      
+       arm_m3_Hwi_asm_switch_rom.obj    118     0         0      
+    +--+--------------------------------+-------+---------+---------+
+       Total:                           15322   1751      3558   
+                                                                 
+    /db/rtree/library/trees/platformprod/platformprod-p03/exports/packages/ti/targets/arm/rtsarm/lib/auto_init.aem4f
+       auto_init.oem4f                  160     0         0      
+    +--+--------------------------------+-------+---------+---------+
+       Total:                           160     0         0      
+                                                                 
+    /db/rtree/library/trees/platformprod/platformprod-p03/exports/packages/ti/targets/arm/rtsarm/lib/boot.aem4f
+       boot.oem4f                       88      0         0      
+    +--+--------------------------------+-------+---------+---------+
+       Total:                           88      0         0      
+                                                                 
+    /db/vendors/ti/CCWare/driverlib_cc13xx_cc26xx_3_02_00_17858b/both/source/ti/devices/cc13x2_cc26x2/driverlib/bin/ccs/driverlib.lib
+       setup.obj                        536     0         0      
+       setup_rom.obj                    128     0         0      
+       interrupt.obj                    64      0         0      
+       chipinfo.obj                     42      0         0      
+       aon_event.obj                    40      0         0      
+       cpu.obj                          24      0         0      
+       aon_rtc.obj                      20      0         0      
+    +--+--------------------------------+-------+---------+---------+
+       Total:                           854     0         0      
+                                                                 
+    /db/vendors/ti/arm/16.9.0/Linux/lib/rtsv7M4_T_le_v4SPD16_eabi.lib
+       ull_div_t2.obj                   500     0         0      
+       exit.obj                         84      0         12     
+       cpy_tbl.obj                      76      0         0      
+       _lock.obj                        20      0         8      
+       args_main.obj                    24      0         0      
+       ll_mul_t2.obj                    24      0         0      
+       stkdepth_vars.obj                0       0         4      
+    +--+--------------------------------+-------+---------+---------+
+       Total:                           728     0         24     
+                                                                 
+       Stack:                           0       0         4096   
+    +--+--------------------------------+-------+---------+---------+
+       Grand Total:                     17152   1751      7678   
+
+
+FAR CALL TRAMPOLINES
+
+callee name               trampoline name
+   callee addr  tramp addr   call addr  call info
+--------------  -----------  ---------  ----------------
+memcpy                    $Tramp$TT$L$PI$$memcpy
+   1002fd4d     000020c4     00001f28   rtsv7M4_T_le_v4SPD16_eabi.lib : cpy_tbl.obj (.text)
+xdc_runtime_System_exit__E  $Tramp$TT$L$PI$$xdc_runtime_System_exit__E
+   1002f795     000020cc     00001e88   boot.aem4f : boot.oem4f (.text)
+ti_sysbios_knl_Clock_start__E  $Tramp$TT$L$PI$$ti_sysbios_knl_Clock_start__E
+   1002eeaf     000020d4     00001b82   CC26xx.obj (.text:main)
+ti_sysbios_knl_Mailbox_pend__E  $Tramp$TT$L$PI$$ti_sysbios_knl_Mailbox_pend__E
+   1002dc01     000020dc     00001b7c   CC26xx.obj (.text:main)
+ti_sysbios_knl_Mailbox_post__E  $Tramp$TT$L$PI$$ti_sysbios_knl_Mailbox_post__E
+   1002d56d     000020e4     00001b72   CC26xx.obj (.text:main)
+ti_sysbios_knl_Semaphore_post__E  $Tramp$TT$L$PI$$ti_sysbios_knl_Semaphore_post__E
+   1002d2d5     000020ec     00001b68   CC26xx.obj (.text:main)
+ti_sysbios_knl_Semaphore_pend__E  $Tramp$TT$L$PI$$ti_sysbios_knl_Semaphore_pend__E
+   1002c805     000020f4     00001b62   CC26xx.obj (.text:main)
+ti_sysbios_knl_Event_post__E  $Tramp$TT$L$PI$$ti_sysbios_knl_Event_post__E
+   1002d5d7     000020fc     00001b58   CC26xx.obj (.text:main)
+ti_sysbios_knl_Event_pend__E  $Tramp$TT$L$PI$$ti_sysbios_knl_Event_pend__E
+   1002c8f9     00002104     00001b50   CC26xx.obj (.text:main)
+ti_sysbios_knl_Mailbox_destruct  $Tramp$TT$L$PI$$ti_sysbios_knl_Mailbox_destruct
+   1002eb85     0000210c     00001b42   CC26xx.obj (.text:main)
+ti_sysbios_knl_Swi_destruct  $Tramp$TT$L$PI$$ti_sysbios_knl_Swi_destruct
+   1002ed69     00002114     00001b3c   CC26xx.obj (.text:main)
+ti_sysbios_family_arm_m3_Hwi_destruct  $Tramp$TT$L$PI$$ti_sysbios_family_arm_m3_Hwi_destruct
+   1002e9b1     0000211c     00001b36   CC26xx.obj (.text:main)
+ti_sysbios_knl_Clock_destruct  $Tramp$TT$L$PI$$ti_sysbios_knl_Clock_destruct
+   1002eb3d     00002124     00001b30   CC26xx.obj (.text:main)
+ti_sysbios_knl_Event_destruct  $Tramp$TT$L$PI$$ti_sysbios_knl_Event_destruct
+   1002ed09     0000212c     00001b2a   CC26xx.obj (.text:main)
+ti_sysbios_knl_Semaphore_destruct  $Tramp$TT$L$PI$$ti_sysbios_knl_Semaphore_destruct
+   1002ebf1     00002134     00001b24   CC26xx.obj (.text:main)
+ti_sysbios_knl_Task_destruct  $Tramp$TT$L$PI$$ti_sysbios_knl_Task_destruct
+   1002ec81     0000213c     00001b1e   CC26xx.obj (.text:main)
+ti_sysbios_knl_Mailbox_delete  $Tramp$TT$L$PI$$ti_sysbios_knl_Mailbox_delete
+   1002f18d     00002144     00001b18   CC26xx.obj (.text:main)
+ti_sysbios_knl_Swi_delete  $Tramp$TT$L$PI$$ti_sysbios_knl_Swi_delete
+   1002f1a1     0000214c     00001b12   CC26xx.obj (.text:main)
+ti_sysbios_family_arm_m3_Hwi_delete  $Tramp$TT$L$PI$$ti_sysbios_family_arm_m3_Hwi_delete
+   1002f14d     00002154     00001b0c   CC26xx.obj (.text:main)
+ti_sysbios_knl_Clock_delete  $Tramp$TT$L$PI$$ti_sysbios_knl_Clock_delete
+   1002f17d     0000215c     00001b06   CC26xx.obj (.text:main)
+ti_sysbios_knl_Event_delete  $Tramp$TT$L$PI$$ti_sysbios_knl_Event_delete
+   1002f189     00002164     00001b00   CC26xx.obj (.text:main)
+ti_sysbios_knl_Semaphore_delete  $Tramp$TT$L$PI$$ti_sysbios_knl_Semaphore_delete
+   1002f19d     0000216c     00001afa   CC26xx.obj (.text:main)
+ti_sysbios_knl_Task_delete  $Tramp$TT$L$PI$$ti_sysbios_knl_Task_delete
+   1002f1a9     00002174     00001af4   CC26xx.obj (.text:main)
+ti_sysbios_knl_Mailbox_construct  $Tramp$TT$L$PI$$ti_sysbios_knl_Mailbox_construct
+   1002db51     0000217c     00001aee   CC26xx.obj (.text:main)
+ti_sysbios_knl_Swi_construct  $Tramp$TT$L$PI$$ti_sysbios_knl_Swi_construct
+   1002dd49     00002184     00001ae0   CC26xx.obj (.text:main)
+ti_sysbios_family_arm_m3_Hwi_construct  $Tramp$TT$L$PI$$ti_sysbios_family_arm_m3_Hwi_construct
+   1002daa1     0000218c     00001ad4   CC26xx.obj (.text:main)
+ti_sysbios_knl_Clock_construct  $Tramp$TT$L$PI$$ti_sysbios_knl_Clock_construct
+   1002e2e9     00002194     00001ac4   CC26xx.obj (.text:main)
+ti_sysbios_knl_Event_construct  $Tramp$TT$L$PI$$ti_sysbios_knl_Event_construct
+   1002e611     0000219c     00001ab8   CC26xx.obj (.text:main)
+ti_sysbios_knl_Semaphore_construct  $Tramp$TT$L$PI$$ti_sysbios_knl_Semaphore_construct
+   1002e31d     000021a4     00001ab0   CC26xx.obj (.text:main)
+ti_sysbios_knl_Task_construct  $Tramp$TT$L$PI$$ti_sysbios_knl_Task_construct
+   1002dc59     000021ac     00001aa6   CC26xx.obj (.text:main)
+ti_sysbios_knl_Mailbox_create  $Tramp$TT$L$PI$$ti_sysbios_knl_Mailbox_create
+   1002d991     000021b4     00001a9a   CC26xx.obj (.text:main)
+ti_sysbios_knl_Swi_create  $Tramp$TT$L$PI$$ti_sysbios_knl_Swi_create
+   1002dd95     000021bc     00001a8e   CC26xx.obj (.text:main)
+ti_sysbios_family_arm_m3_Hwi_create  $Tramp$TT$L$PI$$ti_sysbios_family_arm_m3_Hwi_create
+   1002d7c5     000021c4     00001a84   CC26xx.obj (.text:main)
+ti_sysbios_knl_Clock_create  $Tramp$TT$L$PI$$ti_sysbios_knl_Clock_create
+   1002e051     000021cc     00001a78   CC26xx.obj (.text:main)
+ti_sysbios_knl_Event_create  $Tramp$TT$L$PI$$ti_sysbios_knl_Event_create
+   1002e445     000021d4     00001a6c   CC26xx.obj (.text:main)
+ti_sysbios_knl_Semaphore_create  $Tramp$TT$L$PI$$ti_sysbios_knl_Semaphore_create
+   1002e175     000021dc     00001a64   CC26xx.obj (.text:main)
+ti_sysbios_knl_Task_create  $Tramp$TT$L$PI$$ti_sysbios_knl_Task_create
+   1002dba9     000021e4     00001a5a   CC26xx.obj (.text:main)
+ti_sysbios_knl_Mailbox_Params__init__S  $Tramp$TT$L$PI$$ti_sysbios_knl_Mailbox_Params__init__S
+   1002f089     000021ec     00001a4e   CC26xx.obj (.text:main)
+ti_sysbios_knl_Swi_Params__init__S  $Tramp$TT$L$PI$$ti_sysbios_knl_Swi_Params__init__S
+   1002f0b9     000021f4     00001a42   CC26xx.obj (.text:main)
+ti_sysbios_family_arm_m3_Hwi_Params__init__S  $Tramp$TT$L$PI$$ti_sysbios_family_arm_m3_Hwi_Params__init__S
+   1002f011     000021fc     00001a36   CC26xx.obj (.text:main)
+ti_sysbios_knl_Event_Params__init__S  $Tramp$TT$L$PI$$ti_sysbios_knl_Event_Params__init__S
+   1002f07d     00002204     00001a2a   CC26xx.obj (.text:main)
+ti_sysbios_knl_Semaphore_Params__init__S  $Tramp$TT$L$PI$$ti_sysbios_knl_Semaphore_Params__init__S
+   1002f0ad     0000220c     00001a1e   CC26xx.obj (.text:main)
+ti_sysbios_knl_Clock_Params__init__S  $Tramp$TT$L$PI$$ti_sysbios_knl_Clock_Params__init__S
+   1002f065     00002214     00001a12   CC26xx.obj (.text:main)
+ti_sysbios_knl_Task_Params__init__S  $Tramp$TT$L$PI$$ti_sysbios_knl_Task_Params__init__S
+   1002f0c5     0000221c     00001a06   CC26xx.obj (.text:main)
+ti_sysbios_BIOS_start__E  $Tramp$TT$L$PI$$ti_sysbios_BIOS_start__E
+   1002ef6d     00002224     000019fa   CC26xx.obj (.text:main)
+xdc_runtime_SysCallback_ready__E  $Tramp$TT$L$PI$$xdc_runtime_SysCallback_ready__E
+   1002f875     0000295c     00002952   CC26xx_pem4f.obj (.text:xdc_runtime_System_SupportProxy_ready__E)
+xdc_runtime_SysCallback_flush__E  $Tramp$TT$L$PI$$xdc_runtime_SysCallback_flush__E
+   1002f84d     00002964     0000294a   CC26xx_pem4f.obj (.text:xdc_runtime_System_SupportProxy_flush__E)
+xdc_runtime_SysCallback_Module__startupDone__S  $Tramp$TT$L$PI$$xdc_runtime_SysCallback_Module__startupDone__S
+   1002f8ef     0000296c     00002942   CC26xx_pem4f.obj (.text:xdc_runtime_System_SupportProxy_Module__startupDone__S)
+xdc_runtime_SysCallback_exit__E  $Tramp$TT$L$PI$$xdc_runtime_SysCallback_exit__E
+   1002f839     00002974     0000293a   CC26xx_pem4f.obj (.text:xdc_runtime_System_SupportProxy_exit__E)
+xdc_runtime_SysCallback_abort__E  $Tramp$TT$L$PI$$xdc_runtime_SysCallback_abort__E
+   1002f825     0000297c     0000292e   CC26xx_pem4f.obj (.text:xdc_runtime_System_SupportProxy_abort__E)
+xdc_runtime_SysCallback_putch__E  $Tramp$TT$L$PI$$xdc_runtime_SysCallback_putch__E
+   1002f861     00002984     000028a8   CC26xx_pem4f.obj (.text:xdc_runtime_System_SupportProxy_putch__E)
+xdc_runtime_System_exit__E  $Tramp$TT$L$PI$$xdc_runtime_System_exit__E
+   1002f795     0000298c     00002898   CC26xx_pem4f.obj (.text:ti_sysbios_BIOS_exitFunc__I)
+ti_sysbios_knl_Swi_post__E  $Tramp$TT$L$PI$$ti_sysbios_knl_Swi_post__E
+   1002de75     00002994     00002864   CC26xx_pem4f.obj (.text:ti_sysbios_knl_Clock_doTick__I)
+ti_sysbios_knl_Clock_logTick__E  $Tramp$TT$L$PI$$ti_sysbios_knl_Clock_logTick__E
+   1002dc57     0000299c     0000285c   CC26xx_pem4f.obj (.text:ti_sysbios_knl_Clock_doTick__I)
+ti_sysbios_BIOS_RtsGateProxy_leave__E  $Tramp$TT$L$PI$$ti_sysbios_BIOS_RtsGateProxy_leave__E
+   1002f13d     000029a4     000027c4   CC26xx_pem4f.obj (.text:ti_sysbios_BIOS_rtsUnlock__I)
+ti_sysbios_knl_Task_startup__E  $Tramp$TT$L$PI$$ti_sysbios_knl_Task_startup__E
+   1002f1ad     000029ac     000027a0   CC26xx_pem4f.obj (.text:ti_sysbios_BIOS_startFunc__I)
+ti_sysbios_knl_Swi_startup__E  $Tramp$TT$L$PI$$ti_sysbios_knl_Swi_startup__E
+   1002f12d     000029b4     0000279c   CC26xx_pem4f.obj (.text:ti_sysbios_BIOS_startFunc__I)
+ti_sysbios_hal_Hwi_startup__E  $Tramp$TT$L$PI$$ti_sysbios_hal_Hwi_startup__E
+   1002f0ed     000029bc     00002798   CC26xx_pem4f.obj (.text:ti_sysbios_BIOS_startFunc__I)
+ti_sysbios_family_arm_cc26xx_Timer_startup__E  $Tramp$TT$L$PI$$ti_sysbios_family_arm_cc26xx_Timer_startup__E
+   1002e1e5     000029c4     00002794   CC26xx_pem4f.obj (.text:ti_sysbios_BIOS_startFunc__I)
+xdc_runtime_System_atexit__E  $Tramp$TT$L$PI$$xdc_runtime_System_atexit__E
+   1002f631     000029cc     0000278c   CC26xx_pem4f.obj (.text:ti_sysbios_BIOS_startFunc__I)
+ti_sysbios_BIOS_linkedWithIncorrectBootLibrary__E  $Tramp$TT$L$PI$$ti_sysbios_BIOS_linkedWithIncorrectBootLibrary__E
+   1002d07f     000029d4     00002786   CC26xx_pem4f.obj (.text:ti_sysbios_BIOS_startFunc__I)
+xdc_runtime_Startup_rtsDone__E  $Tramp$TT$L$PI$$xdc_runtime_Startup_rtsDone__E
+   1002f8b5     000029dc     0000277e   CC26xx_pem4f.obj (.text:ti_sysbios_BIOS_startFunc__I)
+ti_sysbios_BIOS_RtsGateProxy_enter__E  $Tramp$TT$L$PI$$ti_sysbios_BIOS_RtsGateProxy_enter__E
+   1002f139     000029e4     00002752   CC26xx_pem4f.obj (.text:ti_sysbios_BIOS_rtsLock__I)
+ti_sysbios_BIOS_setThreadType__E  $Tramp$TT$L$PI$$ti_sysbios_BIOS_setThreadType__E
+   1002eed9     000029ec     0000272a   CC26xx_pem4f.obj (.text:ti_sysbios_BIOS_atExitFunc__I)
+                             00002812   CC26xx_pem4f.obj (.text:ti_sysbios_BIOS_errorRaiseHook__I)
+                             00002892   CC26xx_pem4f.obj (.text:ti_sysbios_BIOS_exitFunc__I)
+ti_sysbios_knl_Task_disable__E  $Tramp$TT$L$PI$$ti_sysbios_knl_Task_disable__E
+   1002ef15     000029f4     00002724   CC26xx_pem4f.obj (.text:ti_sysbios_BIOS_atExitFunc__I)
+ti_sysbios_knl_Swi_disable__E  $Tramp$TT$L$PI$$ti_sysbios_knl_Swi_disable__E
+   1002eeed     000029fc     00002720   CC26xx_pem4f.obj (.text:ti_sysbios_BIOS_atExitFunc__I)
+
+[66 trampolines]
+[68 trampoline calls]
+
+
+GLOBAL SYMBOLS: SORTED ALPHABETICALLY BY Name 
+
+address   name                                                              
+-------   ----                                                              
+00001ea1  C$$EXIT                                                           
+00002001  NOROM_AONEventMcuWakeUpSet                                        
+00002075  NOROM_AONRTCCurrent64BitValueGet                                  
+000020ab  NOROM_CPUcpsid                                                    
+000020b7  NOROM_CPUcpsie                                                    
+00002029  NOROM_ChipInfo_GetChipFamily                                      
+00001f41  NOROM_IntPendClear                                                
+00001dc9  NOROM_SetupStepVddrTrimTo                                         
+00001d31  NOROM_SetupTrimDevice                                             
+0000209d  NOROM_ThisLibraryIsFor_CC13x2_13x4_26x2_26x4_HaltIfViolated       
+0000222c  ROM_constStruct                                                   
+00002610  ROM_externFuncPtrs                                                
+20000f08  ROM_stateStruct                                                   
+UNDEFED   SHT$$INIT_ARRAY$$Base                                             
+UNDEFED   SHT$$INIT_ARRAY$$Limit                                            
+00000000  __ASM__                                                           
+00000076  __ISA__                                                           
+00000089  __PLAT__                                                          
+20005000  __STACK_END                                                       
+00001000  __STACK_SIZE                                                      
+20005000  __STACK_TOP                                                       
+000000b0  __TARG__                                                          
+UNDEFED   __TI_CINIT_Base                                                   
+UNDEFED   __TI_CINIT_Limit                                                  
+UNDEFED   __TI_Handler_Table_Base                                           
+UNDEFED   __TI_Handler_Table_Limit                                          
+00001c91  __TI_auto_init                                                    
+200012a0  __TI_cleanup_ptr                                                  
+200012a4  __TI_dtors_ptr                                                    
+200012a8  __TI_enable_exit_profile_output                                   
+ffffffff  __TI_pprof_out_hndl                                               
+ffffffff  __TI_prof_data_size                                               
+ffffffff  __TI_prof_data_start                                              
+00000000  __TI_static_base__                                                
+000000d6  __TRDR__                                                          
+0000205d  __aeabi_lmul                                                      
+00001801  __aeabi_uldivmod                                                  
+ffffffff  __binit__                                                         
+ffffffff  __c_args__                                                        
+0001ffa8  __ccfg                                                            
+20004000  __stack                                                           
+00002045  _args_main                                                        
+00001e49  _c_int00                                                          
+200012ac  _lock                                                             
+00002097  _nop                                                              
+0000208f  _register_lock                                                    
+00002089  _register_unlock                                                  
+200012b0  _unlock                                                           
+00001ea5  abort                                                             
+ffffffff  binit                                                             
+00001ef5  copy_in                                                           
+00001ead  exit                                                              
+000019f5  main                                                              
+2000115c  main_func_sp                                                      
+1002fd4d  memcpy                                                            
+1002fd65  memset                                                            
+000020c3  smallErrorPolicy                                                  
+20000f40  ti_sysbios_BIOS_Module__state__V                                  
+1002ea1d  ti_sysbios_BIOS_RtsGateProxy_Handle__label__S                     
+1002f041  ti_sysbios_BIOS_RtsGateProxy_Params__init__S                      
+1002f139  ti_sysbios_BIOS_RtsGateProxy_enter__E                             
+1002f13d  ti_sysbios_BIOS_RtsGateProxy_leave__E                             
+1002f15d  ti_sysbios_BIOS_RtsGateProxy_query__E                             
+0000271d  ti_sysbios_BIOS_atExitFunc__I                                     
+000027fd  ti_sysbios_BIOS_errorRaiseHook__I                                 
+00002889  ti_sysbios_BIOS_exitFunc__I                                       
+1002ef4d  ti_sysbios_BIOS_exit__E                                           
+1002eec5  ti_sysbios_BIOS_getCpuFreq__E                                     
+1002ef5d  ti_sysbios_BIOS_getThreadType__E                                  
+1002d07f  ti_sysbios_BIOS_linkedWithIncorrectBootLibrary__E                 
+000028af  ti_sysbios_BIOS_nullFunc__I                                       
+000027d9  ti_sysbios_BIOS_registerRTSLock__I                                
+0000281d  ti_sysbios_BIOS_removeRTSLock__I                                  
+0000274d  ti_sysbios_BIOS_rtsLock__I                                        
+000027ad  ti_sysbios_BIOS_rtsUnlock__I                                      
+1002eed9  ti_sysbios_BIOS_setThreadType__E                                  
+0000277d  ti_sysbios_BIOS_startFunc__I                                      
+1002ef6d  ti_sysbios_BIOS_start__E                                          
+00001d31  ti_sysbios_family_arm_cc26xx_Boot_trimDevice                      
+0000230e  ti_sysbios_family_arm_cc26xx_Timer_Module__id__C                  
+1002e695  ti_sysbios_family_arm_cc26xx_Timer_Module__startupDone__S         
+20001008  ti_sysbios_family_arm_cc26xx_Timer_Module__state__V               
+1002e535  ti_sysbios_family_arm_cc26xx_Timer_Module_startup__E              
+20001160  ti_sysbios_family_arm_cc26xx_Timer_Object__table__V               
+000028b1  ti_sysbios_family_arm_cc26xx_Timer_dynamicStub__E                 
+00002b69  ti_sysbios_family_arm_cc26xx_Timer_dynamicStub__E__mangled__      
+00002344  ti_sysbios_family_arm_cc26xx_Timer_funcHookCH1__C                 
+0000239c  ti_sysbios_family_arm_cc26xx_Timer_funcHookCH2__C                 
+000028bd  ti_sysbios_family_arm_cc26xx_Timer_getCount64__E                  
+00002bd1  ti_sysbios_family_arm_cc26xx_Timer_getCount64__E__mangled__       
+000028c9  ti_sysbios_family_arm_cc26xx_Timer_getCurrentTick__E              
+00002a7d  ti_sysbios_family_arm_cc26xx_Timer_getCurrentTick__E__mangled__   
+1002f141  ti_sysbios_family_arm_cc26xx_Timer_getExpiredTicks__E             
+000028d5  ti_sysbios_family_arm_cc26xx_Timer_getMaxTicks__E                 
+00002b8d  ti_sysbios_family_arm_cc26xx_Timer_getMaxTicks__E__mangled__      
+1002f145  ti_sysbios_family_arm_cc26xx_Timer_getPeriod__E                   
+000028e1  ti_sysbios_family_arm_cc26xx_Timer_initDevice__I                  
+00002b41  ti_sysbios_family_arm_cc26xx_Timer_initDevice__I__mangled__       
+1002cca5  ti_sysbios_family_arm_cc26xx_Timer_periodicStub__E                
+1002e561  ti_sysbios_family_arm_cc26xx_Timer_postInit__I                    
+000028ed  ti_sysbios_family_arm_cc26xx_Timer_setNextTick__E                 
+00002ac1  ti_sysbios_family_arm_cc26xx_Timer_setNextTick__E__mangled__      
+1002f149  ti_sysbios_family_arm_cc26xx_Timer_setPeriod__E                   
+000028f9  ti_sysbios_family_arm_cc26xx_Timer_setThreshold__I                
+00002b01  ti_sysbios_family_arm_cc26xx_Timer_setThreshold__I__mangled__     
+00002905  ti_sysbios_family_arm_cc26xx_Timer_start__E                       
+00002a05  ti_sysbios_family_arm_cc26xx_Timer_start__E__mangled__            
+00002378  ti_sysbios_family_arm_cc26xx_Timer_startupNeeded__C               
+1002e1e5  ti_sysbios_family_arm_cc26xx_Timer_startup__E                     
+20000f34  ti_sysbios_family_arm_cc26xx_TimestampProvider_Module__state__V   
+1002e98d  ti_sysbios_family_arm_cc26xx_TimestampProvider_Module_startup__E  
+00002911  ti_sysbios_family_arm_cc26xx_TimestampProvider_get32__E           
+00002bb1  ti_sysbios_family_arm_cc26xx_TimestampProvider_get32__E__mangled__
+1002e58d  ti_sysbios_family_arm_cc26xx_TimestampProvider_get64__E           
+1002f005  ti_sysbios_family_arm_cc26xx_TimestampProvider_getFreq__E         
+00002524  ti_sysbios_family_arm_cc26xx_TimestampProvider_useClockTimer__C   
+000024b8  ti_sysbios_family_arm_m3_Hwi_E_alreadyDefined__C                  
+00002548  ti_sysbios_family_arm_m3_Hwi_E_hwiLimitExceeded__C                
+1002d495  ti_sysbios_family_arm_m3_Hwi_Instance_finalize__E                 
+1002cd39  ti_sysbios_family_arm_m3_Hwi_Instance_init__E                     
+20001328  ti_sysbios_family_arm_m3_Hwi_Module_State_0_excActive__A          
+2000131c  ti_sysbios_family_arm_m3_Hwi_Module_State_0_excContext__A         
+20001320  ti_sysbios_family_arm_m3_Hwi_Module_State_0_excStack__A           
+0000230c  ti_sysbios_family_arm_m3_Hwi_Module__id__C                        
+200012b4  ti_sysbios_family_arm_m3_Hwi_Module__root__V                      
+1002e6bd  ti_sysbios_family_arm_m3_Hwi_Module__startupDone__S               
+20000fd0  ti_sysbios_family_arm_m3_Hwi_Module__state__V                     
+1002da49  ti_sysbios_family_arm_m3_Hwi_Module_startup__E                    
+00002360  ti_sysbios_family_arm_m3_Hwi_NUM_INTERRUPTS__C                    
+00002554  ti_sysbios_family_arm_m3_Hwi_Object__DESC__C                      
+1002fbe0  ti_sysbios_family_arm_m3_Hwi_Object__PARAMS__C                    
+00002578  ti_sysbios_family_arm_m3_Hwi_Object__count__C                     
+1002e6e5  ti_sysbios_family_arm_m3_Hwi_Object__delete__S                    
+1002e70d  ti_sysbios_family_arm_m3_Hwi_Object__get__S                       
+00002314  ti_sysbios_family_arm_m3_Hwi_Object__table__C                     
+20001270  ti_sysbios_family_arm_m3_Hwi_Object__table__V                     
+1002f011  ti_sysbios_family_arm_m3_Hwi_Params__init__S                      
+00002584  ti_sysbios_family_arm_m3_Hwi_ccr__C                               
+1002daa1  ti_sysbios_family_arm_m3_Hwi_construct                            
+1002d7c5  ti_sysbios_family_arm_m3_Hwi_create                               
+1002f14d  ti_sysbios_family_arm_m3_Hwi_delete                               
+1002e9b1  ti_sysbios_family_arm_m3_Hwi_destruct                             
+1002f01d  ti_sysbios_family_arm_m3_Hwi_disableFxn__E                        
+1002df05  ti_sysbios_family_arm_m3_Hwi_disableInterrupt__E                  
+1002d501  ti_sysbios_family_arm_m3_Hwi_dispatchC__I                         
+20000e00  ti_sysbios_family_arm_m3_Hwi_dispatchTable                        
+1002f901  ti_sysbios_family_arm_m3_Hwi_dispatch__I                          
+1002f0e5  ti_sysbios_family_arm_m3_Hwi_doSwiRestore__I                      
+1002f0fd  ti_sysbios_family_arm_m3_Hwi_doTaskRestore__I                     
+1002f029  ti_sysbios_family_arm_m3_Hwi_enableFxn__E                         
+1002df49  ti_sysbios_family_arm_m3_Hwi_enableInterrupt__E                   
+1002fb09  ti_sysbios_family_arm_m3_Hwi_excHandlerAsm__I                     
+000023d4  ti_sysbios_family_arm_m3_Hwi_excHandlerFunc__C                    
+1002e385  ti_sysbios_family_arm_m3_Hwi_excHandler__I                        
+1002df8d  ti_sysbios_family_arm_m3_Hwi_getStackInfo__E                      
+1002ce61  ti_sysbios_family_arm_m3_Hwi_initNVIC__E                          
+1002fa89  ti_sysbios_family_arm_m3_Hwi_initStacks__E                        
+1002f9e1  ti_sysbios_family_arm_m3_Hwi_interruptsAreDisabledButShouldNotBe  
+0000242c  ti_sysbios_family_arm_m3_Hwi_nullIsrFunc__C                       
+0000251c  ti_sysbios_family_arm_m3_Hwi_numSparseInterrupts__C               
+e000e000  ti_sysbios_family_arm_m3_Hwi_nvic                                 
+1002fae1  ti_sysbios_family_arm_m3_Hwi_pendSV__I                            
+1002eda9  ti_sysbios_family_arm_m3_Hwi_plug__E                              
+1002caa5  ti_sysbios_family_arm_m3_Hwi_postInit__I                          
+000024b0  ti_sysbios_family_arm_m3_Hwi_priGroup__C                          
+20000000  ti_sysbios_family_arm_m3_Hwi_ramVectors                           
+00000000  ti_sysbios_family_arm_m3_Hwi_resetVectors                         
+1002f103  ti_sysbios_family_arm_m3_Hwi_restoreFxn__E                        
+1002fb05  ti_sysbios_family_arm_m3_Hwi_return                               
+1002edc5  ti_sysbios_family_arm_m3_Hwi_setPriority__E                       
+1002f0ed  ti_sysbios_family_arm_m3_Hwi_startup__E                           
+1002ede1  ti_sysbios_family_arm_m3_Hwi_switchFromBootStack__E               
+1002f151  ti_sysbios_family_arm_m3_TaskSupport_Module__startupDone__S       
+1002f9fd  ti_sysbios_family_arm_m3_TaskSupport_buildTaskStack               
+1002ef7d  ti_sysbios_family_arm_m3_TaskSupport_getStackAlignment__E         
+1002fb5f  ti_sysbios_family_arm_m3_TaskSupport_glue                         
+0000235c  ti_sysbios_family_arm_m3_TaskSupport_stackAlignment__C            
+1002e015  ti_sysbios_family_arm_m3_TaskSupport_start__E                     
+1002fb47  ti_sysbios_family_arm_m3_TaskSupport_swap__E                      
+1002fb29  ti_sysbios_family_xxx_Hwi_switchAndRunFunc                        
+1002e9d5  ti_sysbios_gates_GateHwi_Handle__label__S                         
+1002d63f  ti_sysbios_gates_GateHwi_Instance_init__E                         
+0000246c  ti_sysbios_gates_GateHwi_Module__FXNS__C                          
+000023c4  ti_sysbios_gates_GateHwi_Module__id__C                            
+200012bc  ti_sysbios_gates_GateHwi_Module__root__V                          
+000024f4  ti_sysbios_gates_GateHwi_Object__DESC__C                          
+1002fcec  ti_sysbios_gates_GateHwi_Object__PARAMS__C                        
+1002e5b9  ti_sysbios_gates_GateHwi_Object__create__S                        
+1002e9f9  ti_sysbios_gates_GateHwi_Object__delete__S                        
+1002f035  ti_sysbios_gates_GateHwi_enter__E                                 
+1002f109  ti_sysbios_gates_GateHwi_leave__E                                 
+1002f155  ti_sysbios_gates_GateHwi_query__E                                 
+1002ea1d  ti_sysbios_gates_GateMutex_Handle__label__S                       
+00002280  ti_sysbios_gates_GateMutex_Instance_State_sem__O                  
+1002f10f  ti_sysbios_gates_GateMutex_Instance_finalize__E                   
+1002ee83  ti_sysbios_gates_GateMutex_Instance_init__E                       
+000022e4  ti_sysbios_gates_GateMutex_Module__FXNS__C                        
+00002432  ti_sysbios_gates_GateMutex_Module__id__C                          
+200012c4  ti_sysbios_gates_GateMutex_Module__root__V                        
+0000225c  ti_sysbios_gates_GateMutex_Object__DESC__C                        
+1002fd04  ti_sysbios_gates_GateMutex_Object__PARAMS__C                      
+1002e3b5  ti_sysbios_gates_GateMutex_Object__create__S                      
+1002e735  ti_sysbios_gates_GateMutex_Object__delete__S                      
+200011a8  ti_sysbios_gates_GateMutex_Object__table__V                       
+1002f041  ti_sysbios_gates_GateMutex_Params__init__S                        
+1002e5e5  ti_sysbios_gates_GateMutex_construct                              
+1002e3e5  ti_sysbios_gates_GateMutex_create                                 
+1002f159  ti_sysbios_gates_GateMutex_delete                                 
+1002ea41  ti_sysbios_gates_GateMutex_destruct                               
+1002e75d  ti_sysbios_gates_GateMutex_enter__E                               
+1002efcd  ti_sysbios_gates_GateMutex_leave__E                               
+1002f15d  ti_sysbios_gates_GateMutex_query__E                               
+1002e6bd  ti_sysbios_hal_Hwi_HwiProxy_Module__startupDone__S                
+1002f011  ti_sysbios_hal_Hwi_HwiProxy_Params__init__S                       
+1002f161  ti_sysbios_hal_Hwi_HwiProxy_create                                
+1002f165  ti_sysbios_hal_Hwi_HwiProxy_delete                                
+1002df05  ti_sysbios_hal_Hwi_HwiProxy_disableInterrupt__E                   
+1002df49  ti_sysbios_hal_Hwi_HwiProxy_enableInterrupt__E                    
+1002df8d  ti_sysbios_hal_Hwi_HwiProxy_getStackInfo__E                       
+1002f0ed  ti_sysbios_hal_Hwi_HwiProxy_startup__E                            
+1002ede1  ti_sysbios_hal_Hwi_HwiProxy_switchFromBootStack__E                
+1002f0d1  ti_sysbios_hal_Hwi_Instance_finalize__E                           
+1002ed89  ti_sysbios_hal_Hwi_Instance_init__E                               
+200012cc  ti_sysbios_hal_Hwi_Module__root__V                                
+1002ef29  ti_sysbios_hal_Hwi_Module_startup__E                              
+00002490  ti_sysbios_hal_Hwi_Object__DESC__C                                
+1002fc10  ti_sysbios_hal_Hwi_Object__PARAMS__C                              
+1002e785  ti_sysbios_hal_Hwi_Object__delete__S                              
+1002d821  ti_sysbios_hal_Hwi_create                                         
+1002f169  ti_sysbios_hal_Hwi_delete                                         
+1002df05  ti_sysbios_hal_Hwi_disableInterrupt__E                            
+1002df49  ti_sysbios_hal_Hwi_enableInterrupt__E                             
+1002df8d  ti_sysbios_hal_Hwi_getStackInfo__E                                
+1002e505  ti_sysbios_hal_Hwi_initStack                                      
+1002f0ed  ti_sysbios_hal_Hwi_startup__E                                     
+1002ede1  ti_sysbios_hal_Hwi_switchFromBootStack__E                         
+0000258c  ti_sysbios_heaps_HeapMem_E_memory__C                              
+1002ea65  ti_sysbios_heaps_HeapMem_Handle__label__S                         
+20000ec8  ti_sysbios_heaps_HeapMem_Instance_State_0_buf__A                  
+1002de2d  ti_sysbios_heaps_HeapMem_Instance_init__E                         
+1002ea1d  ti_sysbios_heaps_HeapMem_Module_GateProxy_Handle__label__S        
+1002f041  ti_sysbios_heaps_HeapMem_Module_GateProxy_Params__init__S         
+1002f16d  ti_sysbios_heaps_HeapMem_Module_GateProxy_enter__E                
+1002f171  ti_sysbios_heaps_HeapMem_Module_GateProxy_leave__E                
+1002f15d  ti_sysbios_heaps_HeapMem_Module_GateProxy_query__E                
+000023d8  ti_sysbios_heaps_HeapMem_Module__FXNS__C                          
+00002374  ti_sysbios_heaps_HeapMem_Module__gateObj__C                       
+000023d0  ti_sysbios_heaps_HeapMem_Module__id__C                            
+200012d4  ti_sysbios_heaps_HeapMem_Module__root__V                          
+00002594  ti_sysbios_heaps_HeapMem_Object__DESC__C                          
+1002fc64  ti_sysbios_heaps_HeapMem_Object__PARAMS__C                        
+00002518  ti_sysbios_heaps_HeapMem_Object__count__C                         
+1002e415  ti_sysbios_heaps_HeapMem_Object__create__S                        
+1002ea89  ti_sysbios_heaps_HeapMem_Object__delete__S                        
+1002e7ad  ti_sysbios_heaps_HeapMem_Object__get__S                           
+00002340  ti_sysbios_heaps_HeapMem_Object__table__C                         
+20001288  ti_sysbios_heaps_HeapMem_Object__table__V                         
+1002d179  ti_sysbios_heaps_HeapMem_allocUnprotected__E                      
+1002d87d  ti_sysbios_heaps_HeapMem_alloc__E                                 
+1002daf9  ti_sysbios_heaps_HeapMem_freeUnprotected__E                       
+1002e105  ti_sysbios_heaps_HeapMem_free__E                                  
+1002dcfd  ti_sysbios_heaps_HeapMem_getStats__E                              
+1002e219  ti_sysbios_heaps_HeapMem_init__I                                  
+1002f115  ti_sysbios_heaps_HeapMem_isBlocking__E                            
+000024cc  ti_sysbios_heaps_HeapMem_reqAlign__C                              
+1002efdb  ti_sysbios_heaps_HeapMem_restore__E                               
+1002eaad  ti_sysbios_heaps_HeapTrack_Handle__label__S                       
+000025bc  ti_sysbios_heaps_HeapTrack_Instance_State_trackQueue__O           
+1002f11b  ti_sysbios_heaps_HeapTrack_Instance_finalize__E                   
+1002edfd  ti_sysbios_heaps_HeapTrack_Instance_init__E                       
+00002284  ti_sysbios_heaps_HeapTrack_Module__FXNS__C                        
+00002588  ti_sysbios_heaps_HeapTrack_Module__id__C                          
+200012dc  ti_sysbios_heaps_HeapTrack_Module__root__V                        
+00002438  ti_sysbios_heaps_HeapTrack_Object__DESC__C                        
+1002fcd0  ti_sysbios_heaps_HeapTrack_Object__PARAMS__C                      
+1002e24d  ti_sysbios_heaps_HeapTrack_Object__create__S                      
+1002e7d5  ti_sysbios_heaps_HeapTrack_Object__delete__S                      
+1002f04d  ti_sysbios_heaps_HeapTrack_Params__init__S                        
+1002cffd  ti_sysbios_heaps_HeapTrack_alloc__E                               
+1002e281  ti_sysbios_heaps_HeapTrack_create                                 
+1002d8d9  ti_sysbios_heaps_HeapTrack_free__E                                
+1002ead1  ti_sysbios_heaps_HeapTrack_getStats__E                            
+1002f059  ti_sysbios_heaps_HeapTrack_isBlocking__E                          
+1002ee99  ti_sysbios_knl_Clock_Instance_finalize__E                         
+1002e2b5  ti_sysbios_knl_Clock_Instance_init__E                             
+00002538  ti_sysbios_knl_Clock_Module_State_clockQ__O                       
+200012e4  ti_sysbios_knl_Clock_Module__root__V                              
+20000f08  ti_sysbios_knl_Clock_Module__state__V                             
+1002eaf5  ti_sysbios_knl_Clock_Module_startup__E                            
+000022bc  ti_sysbios_knl_Clock_Object__DESC__C                              
+1002fc88  ti_sysbios_knl_Clock_Object__PARAMS__C                            
+1002e7fd  ti_sysbios_knl_Clock_Object__delete__S                            
+20001210  ti_sysbios_knl_Clock_Object__table__V                             
+1002f065  ti_sysbios_knl_Clock_Params__init__S                              
+1002e695  ti_sysbios_knl_Clock_TimerProxy_Module__startupDone__S            
+1002ef8d  ti_sysbios_knl_Clock_TimerProxy_getCurrentTick__E                 
+1002f175  ti_sysbios_knl_Clock_TimerProxy_getExpiredTicks__E                
+1002ef9d  ti_sysbios_knl_Clock_TimerProxy_getMaxTicks__E                    
+1002f179  ti_sysbios_knl_Clock_TimerProxy_getPeriod__E                      
+1002efad  ti_sysbios_knl_Clock_TimerProxy_setNextTick__E                    
+1002e1e5  ti_sysbios_knl_Clock_TimerProxy_startup__E                        
+1002eb19  ti_sysbios_knl_Clock_addI__E                                      
+1002e2e9  ti_sysbios_knl_Clock_construct                                    
+1002e051  ti_sysbios_knl_Clock_create                                       
+1002f17d  ti_sysbios_knl_Clock_delete                                       
+1002eb3d  ti_sysbios_knl_Clock_destruct                                     
+00002859  ti_sysbios_knl_Clock_doTick__I                                    
+1002e13d  ti_sysbios_knl_Clock_getTicks__E                                  
+1002f071  ti_sysbios_knl_Clock_getTimerHandle__E                            
+1002dc57  ti_sysbios_knl_Clock_logTick__E                                   
+1002f181  ti_sysbios_knl_Clock_removeI__E                                   
+1002ecc9  ti_sysbios_knl_Clock_scheduleNextTick__E                          
+1002f185  ti_sysbios_knl_Clock_setTimeout__E                                
+1002cef1  ti_sysbios_knl_Clock_startI__E                                    
+1002eeaf  ti_sysbios_knl_Clock_start__E                                     
+1002e825  ti_sysbios_knl_Clock_stop__E                                      
+00002430  ti_sysbios_knl_Clock_tickMode__C                                  
+00002364  ti_sysbios_knl_Clock_triggerClock__C                              
+1002e103  ti_sysbios_knl_Clock_triggerFunc__I                               
+1002d1ed  ti_sysbios_knl_Clock_walkQueueDynamic__E                          
+1002cc09  ti_sysbios_knl_Clock_workFuncDynamic__E                           
+1002d101  ti_sysbios_knl_Clock_workFunc__E                                  
+00002528  ti_sysbios_knl_Event_Instance_State_pendQ__O                      
+1002f0db  ti_sysbios_knl_Event_Instance_init__E                             
+200012ec  ti_sysbios_knl_Event_Module__root__V                              
+0000223c  ti_sysbios_knl_Event_Object__DESC__C                              
+1002fd1c  ti_sysbios_knl_Event_Object__PARAMS__C                            
+1002eb61  ti_sysbios_knl_Event_Object__delete__S                            
+1002f07d  ti_sysbios_knl_Event_Params__init__S                              
+1002ece9  ti_sysbios_knl_Event_checkEvents__I                               
+1002e611  ti_sysbios_knl_Event_construct                                    
+1002e445  ti_sysbios_knl_Event_create                                       
+1002f189  ti_sysbios_knl_Event_delete                                       
+1002ed09  ti_sysbios_knl_Event_destruct                                     
+1002e63d  ti_sysbios_knl_Event_pendTimeout__I                               
+1002c8f9  ti_sysbios_knl_Event_pend__E                                      
+1002d5d7  ti_sysbios_knl_Event_post__E                                      
+1002ef3b  ti_sysbios_knl_Event_sync__E                                      
+000022b0  ti_sysbios_knl_Idle_funcList__C                                   
+1002f0f5  ti_sysbios_knl_Idle_loop__E                                       
+1002e84d  ti_sysbios_knl_Idle_run__E                                        
+000022dc  ti_sysbios_knl_Mailbox_Instance_State_dataQue__O                  
+00002468  ti_sysbios_knl_Mailbox_Instance_State_dataSem__O                  
+000025c0  ti_sysbios_knl_Mailbox_Instance_State_freeQue__O                  
+000024bc  ti_sysbios_knl_Mailbox_Instance_State_freeSem__O                  
+1002d935  ti_sysbios_knl_Mailbox_Instance_finalize__E                       
+1002cb59  ti_sysbios_knl_Mailbox_Instance_init__E                           
+200012f4  ti_sysbios_knl_Mailbox_Module__root__V                            
+1002dfd1  ti_sysbios_knl_Mailbox_Module_startup__E                          
+0000240c  ti_sysbios_knl_Mailbox_Object__DESC__C                            
+1002fbac  ti_sysbios_knl_Mailbox_Object__PARAMS__C                          
+00002530  ti_sysbios_knl_Mailbox_Object__count__C                           
+1002e875  ti_sysbios_knl_Mailbox_Object__delete__S                          
+1002e89d  ti_sysbios_knl_Mailbox_Object__get__S                             
+00002310  ti_sysbios_knl_Mailbox_Object__table__C                           
+1002f089  ti_sysbios_knl_Mailbox_Params__init__S                            
+1002db51  ti_sysbios_knl_Mailbox_construct                                  
+1002d991  ti_sysbios_knl_Mailbox_create                                     
+1002f18d  ti_sysbios_knl_Mailbox_delete                                     
+1002eb85  ti_sysbios_knl_Mailbox_destruct                                   
+00002520  ti_sysbios_knl_Mailbox_maxTypeAlign__C                            
+1002dc01  ti_sysbios_knl_Mailbox_pend__E                                    
+1002e965  ti_sysbios_knl_Mailbox_postInit__I                                
+1002d56d  ti_sysbios_knl_Mailbox_post__E                                    
+1002f121  ti_sysbios_knl_Queue_Instance_init__E                             
+200012fc  ti_sysbios_knl_Queue_Module__root__V                              
+0000237c  ti_sysbios_knl_Queue_Object__DESC__C                              
+1002fd34  ti_sysbios_knl_Queue_Object__PARAMS__C                            
+00002404  ti_sysbios_knl_Queue_Object__count__C                             
+1002eba9  ti_sysbios_knl_Queue_Object__delete__S                            
+1002ed29  ti_sysbios_knl_Queue_Object__get__S                               
+000024c0  ti_sysbios_knl_Queue_Object__table__C                             
+1002e475  ti_sysbios_knl_Queue_construct                                    
+1002e4a5  ti_sysbios_knl_Queue_create                                       
+1002f191  ti_sysbios_knl_Queue_delete                                       
+1002f095  ti_sysbios_knl_Queue_dequeue__E                                   
+1002ed49  ti_sysbios_knl_Queue_destruct                                     
+1002f127  ti_sysbios_knl_Queue_elemClear__E                                 
+1002efe9  ti_sysbios_knl_Queue_empty__E                                     
+1002f0a1  ti_sysbios_knl_Queue_enqueue__E                                   
+1002ee19  ti_sysbios_knl_Queue_get__E                                       
+1002f195  ti_sysbios_knl_Queue_head__E                                      
+1002f199  ti_sysbios_knl_Queue_next__E                                      
+1002ee35  ti_sysbios_knl_Queue_put__E                                       
+1002eff7  ti_sysbios_knl_Queue_remove__E                                    
+00002550  ti_sysbios_knl_Semaphore_Instance_State_pendQ__O                  
+1002ebcd  ti_sysbios_knl_Semaphore_Instance_finalize__E                     
+1002d641  ti_sysbios_knl_Semaphore_Instance_init__E                         
+20001304  ti_sysbios_knl_Semaphore_Module__root__V                          
+000024d4  ti_sysbios_knl_Semaphore_Object__DESC__C                          
+1002fcac  ti_sysbios_knl_Semaphore_Object__PARAMS__C                        
+1002e8c5  ti_sysbios_knl_Semaphore_Object__delete__S                        
+1002f0ad  ti_sysbios_knl_Semaphore_Params__init__S                          
+1002e31d  ti_sysbios_knl_Semaphore_construct                                
+1002e175  ti_sysbios_knl_Semaphore_create                                   
+1002f19d  ti_sysbios_knl_Semaphore_delete                                   
+1002ebf1  ti_sysbios_knl_Semaphore_destruct                                 
+000024c4  ti_sysbios_knl_Semaphore_eventPost__C                             
+000022e0  ti_sysbios_knl_Semaphore_eventSync__C                             
+1002e669  ti_sysbios_knl_Semaphore_pendTimeout__I                           
+1002c805  ti_sysbios_knl_Semaphore_pend__E                                  
+1002d2d5  ti_sysbios_knl_Semaphore_post__E                                  
+1002e533  ti_sysbios_knl_Swi_Instance_finalize__E                           
+1002d9ed  ti_sysbios_knl_Swi_Instance_init__E                               
+20001010  ti_sysbios_knl_Swi_Module_State_0_readyQ__A                       
+2000130c  ti_sysbios_knl_Swi_Module__root__V                                
+20000f64  ti_sysbios_knl_Swi_Module__state__V                               
+1002ec15  ti_sysbios_knl_Swi_Module_startup__E                              
+00002318  ti_sysbios_knl_Swi_Object__DESC__C                                
+1002fc3c  ti_sysbios_knl_Swi_Object__PARAMS__C                              
+000022ac  ti_sysbios_knl_Swi_Object__count__C                               
+1002ec39  ti_sysbios_knl_Swi_Object__delete__S                              
+1002e8ed  ti_sysbios_knl_Swi_Object__get__S                                 
+00002368  ti_sysbios_knl_Swi_Object__table__C                               
+200011e0  ti_sysbios_knl_Swi_Object__table__V                               
+1002f0b9  ti_sysbios_knl_Swi_Params__init__S                                
+1002dd49  ti_sysbios_knl_Swi_construct                                      
+1002dd95  ti_sysbios_knl_Swi_create                                         
+1002f1a1  ti_sysbios_knl_Swi_delete                                         
+1002ed69  ti_sysbios_knl_Swi_destruct                                       
+1002eeed  ti_sysbios_knl_Swi_disable__E                                     
+1002ef01  ti_sysbios_knl_Swi_enabled__E                                     
+00002434  ti_sysbios_knl_Swi_numPriorities__C                               
+1002f1a5  ti_sysbios_knl_Swi_postInit__I                                    
+1002de75  ti_sysbios_knl_Swi_post__E                                        
+1002cf79  ti_sysbios_knl_Swi_restoreHwi__E                                  
+1002e08d  ti_sysbios_knl_Swi_restore__E                                     
+1002d6a5  ti_sysbios_knl_Swi_runLoop__I                                     
+1002d345  ti_sysbios_knl_Swi_run__I                                         
+1002d705  ti_sysbios_knl_Swi_schedule__I                                    
+1002f12d  ti_sysbios_knl_Swi_startup__E                                     
+20000600  ti_sysbios_knl_Task_Instance_State_0_stack__A                     
+1002cdcd  ti_sysbios_knl_Task_Instance_finalize__E                          
+1002c9d9  ti_sysbios_knl_Task_Instance_init__E                              
+20001324  ti_sysbios_knl_Task_Module_State_0_idleTask__A                    
+20001090  ti_sysbios_knl_Task_Module_State_0_readyQ__A                      
+00002308  ti_sysbios_knl_Task_Module_State_inactiveQ__O                     
+20001314  ti_sysbios_knl_Task_Module__root__V                               
+20000f80  ti_sysbios_knl_Task_Module__state__V                              
+1002d765  ti_sysbios_knl_Task_Module_startup__E                             
+000023a0  ti_sysbios_knl_Task_Object__DESC__C                               
+1002fb70  ti_sysbios_knl_Task_Object__PARAMS__C                             
+00002590  ti_sysbios_knl_Task_Object__count__C                              
+1002e915  ti_sysbios_knl_Task_Object__delete__S                             
+1002ec5d  ti_sysbios_knl_Task_Object__get__S                                
+00002408  ti_sysbios_knl_Task_Object__table__C                              
+20001110  ti_sysbios_knl_Task_Object__table__V                              
+1002f0c5  ti_sysbios_knl_Task_Params__init__S                               
+1002f151  ti_sysbios_knl_Task_SupportProxy_Module__startupDone__S           
+1002ef7d  ti_sysbios_knl_Task_SupportProxy_getStackAlignment__E             
+1002e015  ti_sysbios_knl_Task_SupportProxy_start__E                         
+1002fb47  ti_sysbios_knl_Task_SupportProxy_swap__E                          
+0000252c  ti_sysbios_knl_Task_allBlockedFunc__C                             
+1002dcad  ti_sysbios_knl_Task_allBlockedFunction__I                         
+1002debd  ti_sysbios_knl_Task_blockI__E                                     
+1002dc59  ti_sysbios_knl_Task_construct                                     
+1002dba9  ti_sysbios_knl_Task_create                                        
+00002580  ti_sysbios_knl_Task_defaultStackHeap__C                           
+00002540  ti_sysbios_knl_Task_defaultStackSize__C                           
+1002f1a9  ti_sysbios_knl_Task_delete                                        
+1002ec81  ti_sysbios_knl_Task_destruct                                      
+1002ef15  ti_sysbios_knl_Task_disable__E                                    
+1002f133  ti_sysbios_knl_Task_enable__E                                     
+1002eca5  ti_sysbios_knl_Task_enter__I                                      
+1002e0c9  ti_sysbios_knl_Task_exit__E                                       
+00002460  ti_sysbios_knl_Task_initStackFlag__C                              
+00002458  ti_sysbios_knl_Task_numConstructedTasks__C                        
+1002d081  ti_sysbios_knl_Task_postInit__I                                   
+1002e1ad  ti_sysbios_knl_Task_processVitalTaskFlag__I                       
+1002e93d  ti_sysbios_knl_Task_restoreHwi__E                                 
+1002e4d5  ti_sysbios_knl_Task_restore__E                                    
+1002d3b5  ti_sysbios_knl_Task_schedule__I                                   
+1002efbd  ti_sysbios_knl_Task_self__E                                       
+1002ee51  ti_sysbios_knl_Task_sleepTimeout__I                               
+1002d425  ti_sysbios_knl_Task_sleep__E                                      
+1002d261  ti_sysbios_knl_Task_startCore__E                                  
+1002f1ad  ti_sysbios_knl_Task_startup__E                                    
+1002fb53  ti_sysbios_knl_Task_swapReturn                                    
+1002e351  ti_sysbios_knl_Task_unblockI__E                                   
+1002ee6b  ti_sysbios_knl_Task_unblock__E                                    
+1002dde1  ti_sysbios_knl_Task_yield__E                                      
+1002c800  ti_sysbios_rom_cortexm_cc26xx_cc26x2r2_CC26xx_REVISION__C         
+00002959  ti_sysbios_rom_cortexm_cc26xx_cc26x2r2_CC26xx_badRomRevision__E   
+0000283d  ti_sysbios_rom_cortexm_cc26xx_cc26x2r2_CC26xx_checkRevision__E    
+20000100  xdcRomConstPtr                                                    
+20000104  xdcRomExternFuncPtr                                               
+20000108  xdcRomStatePtr                                                    
+000023c0  xdc_runtime_Assert_E_assertFailed__C                              
+1002f4b1  xdc_runtime_Assert_raise__I                                       
+1002f6b9  xdc_runtime_Core_assignLabel__I                                   
+1002f559  xdc_runtime_Core_assignParams__I                                  
+1002f5a1  xdc_runtime_Core_constructObject__I                               
+1002f3e5  xdc_runtime_Core_createObject__I                                  
+1002f453  xdc_runtime_Core_deleteObject__I                                  
+1002f7cd  xdc_runtime_Core_destructObject__I                                
+000024b4  xdc_runtime_Error_E_memory__C                                     
+20001230  xdc_runtime_Error_IgnoreBlock                                     
+20001004  xdc_runtime_Error_Module__state__V                                
+1002f75d  xdc_runtime_Error_check__E                                        
+1002f7e5  xdc_runtime_Error_init__E                                         
+00002358  xdc_runtime_Error_maxDepth__C                                     
+1002f2b9  xdc_runtime_Error_policyDefault__E                                
+00002348  xdc_runtime_Error_policyFxn__C                                    
+1002f8fb  xdc_runtime_Error_policySpin__E                                   
+0000222c  xdc_runtime_Error_policy__C                                       
+0000233c  xdc_runtime_Error_raiseHook__C                                    
+1002f73d  xdc_runtime_Error_raiseX__E                                       
+1002f5e9  xdc_runtime_Error_setX__E                                         
+1002f8eb  xdc_runtime_Gate_enterSystem__E                                   
+1002f8df  xdc_runtime_Gate_leaveSystem__E                                   
+00002544  xdc_runtime_IGateProvider_Interface__BASE__C                      
+000023c8  xdc_runtime_IHeap_Interface__BASE__C                              
+00002230  xdc_runtime_IModule_Interface__BASE__C                            
+1002ea65  xdc_runtime_Memory_HeapProxy_Handle__label__S                     
+1002f8c1  xdc_runtime_Memory_HeapProxy_alloc__E                             
+1002f8cb  xdc_runtime_Memory_HeapProxy_free__E                              
+1002f8d5  xdc_runtime_Memory_HeapProxy_getStats__E                          
+0000236c  xdc_runtime_Memory_Module__id__C                                  
+20000fc4  xdc_runtime_Memory_Module__state__V                               
+1002f375  xdc_runtime_Memory_alloc__E                                       
+1002f8a9  xdc_runtime_Memory_calloc__E                                      
+000025b8  xdc_runtime_Memory_defaultHeapInstance__C                         
+1002f7fd  xdc_runtime_Memory_free__E                                        
+1002f889  xdc_runtime_Memory_getMaxDefaultTypeAlign__E                      
+1002f811  xdc_runtime_Memory_getStats__E                                    
+1002f779  xdc_runtime_Memory_valloc__E                                      
+20000f38  xdc_runtime_Startup_Module__state__V                              
+00000001  xdc_runtime_Startup__EXECFXN__C                                   
+00000001  xdc_runtime_Startup__RESETFXN__C                                  
+0000227c  xdc_runtime_Startup_execImpl__C                                   
+1002f505  xdc_runtime_Startup_exec__E                                       
+00002871  xdc_runtime_Startup_exec__I                                       
+00002688  xdc_runtime_Startup_firstFxns__A                                  
+0000234c  xdc_runtime_Startup_firstFxns__C                                  
+00002691  xdc_runtime_Startup_getState__I                                   
+00002234  xdc_runtime_Startup_lastFxns__C                                   
+0000245c  xdc_runtime_Startup_maxPasses__C                                  
+0000291d  xdc_runtime_Startup_reset__I                                      
+1002f8b5  xdc_runtime_Startup_rtsDone__E                                    
+00002674  xdc_runtime_Startup_sfxnRts__A                                    
+000024d0  xdc_runtime_Startup_sfxnRts__C                                    
+00002650  xdc_runtime_Startup_sfxnTab__A                                    
+000025c4  xdc_runtime_Startup_sfxnTab__C                                    
+0000254c  xdc_runtime_Startup_startModsFxn__C                               
+1002f1b1  xdc_runtime_Startup_startMods__I                                  
+1002f8ef  xdc_runtime_SysCallback_Module__startupDone__S                    
+0000257c  xdc_runtime_SysCallback_abortFxn__C                               
+1002f825  xdc_runtime_SysCallback_abort__E                                  
+000023cc  xdc_runtime_SysCallback_exitFxn__C                                
+1002f839  xdc_runtime_SysCallback_exit__E                                   
+00002370  xdc_runtime_SysCallback_flushFxn__C                               
+1002f84d  xdc_runtime_SysCallback_flush__E                                  
+00002514  xdc_runtime_SysCallback_putchFxn__C                               
+1002f861  xdc_runtime_SysCallback_putch__E                                  
+0000253c  xdc_runtime_SysCallback_readyFxn__C                               
+1002f875  xdc_runtime_SysCallback_ready__E                                  
+1002e9d5  xdc_runtime_System_Module_GateProxy_Handle__label__S              
+1002f8f3  xdc_runtime_System_Module_GateProxy_enter__E                      
+1002f8f7  xdc_runtime_System_Module_GateProxy_leave__E                      
+1002f155  xdc_runtime_System_Module_GateProxy_query__E                      
+20001250  xdc_runtime_System_Module_State_0_atexitHandlers__A               
+20000fc8  xdc_runtime_System_Module__state__V                               
+1002f8e5  xdc_runtime_System_Module_startup__E                              
+00002941  xdc_runtime_System_SupportProxy_Module__startupDone__S            
+00002929  xdc_runtime_System_SupportProxy_abort__E                          
+00002935  xdc_runtime_System_SupportProxy_exit__E                           
+00002949  xdc_runtime_System_SupportProxy_flush__E                          
+0000289f  xdc_runtime_System_SupportProxy_putch__E                          
+00002951  xdc_runtime_System_SupportProxy_ready__E                          
+00002464  xdc_runtime_System_abortFxn__C                                    
+1002f8fd  xdc_runtime_System_abortSpin__E                                   
+00001ea5  xdc_runtime_System_abortStd__E                                    
+1002f715  xdc_runtime_System_abort__E                                       
+1002f631  xdc_runtime_System_atexit__E                                      
+000024c8  xdc_runtime_System_exitFxn__C                                     
+1002f8ff  xdc_runtime_System_exitSpin__E                                    
+00001ead  xdc_runtime_System_exitStd__E                                     
+1002f795  xdc_runtime_System_exit__E                                        
+00002400  xdc_runtime_System_maxAtexitHandlers__C                           
+1002f679  xdc_runtime_System_processAtExit__E                               
+00002338  xdc_runtime_Text_charCnt__C                                       
+00002686  xdc_runtime_Text_charTab__A                                       
+00002354  xdc_runtime_Text_charTab__C                                       
+1002f6e9  xdc_runtime_Text_cordText__E                                      
+000022b8  xdc_runtime_Text_isLoaded__C                                      
+00002574  xdc_runtime_Text_nameEmpty__C                                     
+00002534  xdc_runtime_Text_nameStatic__C                                    
+000025b4  xdc_runtime_Text_nameUnknown__C                                   
+1002f7b1  xdc_runtime_Text_ropeText__E                                      
+1002f899  xdc_runtime_Timestamp_SupportProxy_get32__E                       
+1002e58d  xdc_runtime_Timestamp_SupportProxy_get64__E                       
+1002f005  xdc_runtime_Timestamp_SupportProxy_getFreq__E                     
+1002f899  xdc_runtime_Timestamp_get32__E                                    
+1002e58d  xdc_runtime_Timestamp_get64__E                                    
+1002f005  xdc_runtime_Timestamp_getFreq__E                                  
+
+
+GLOBAL SYMBOLS: SORTED BY Symbol Address 
+
+address   name                                                              
+-------   ----                                                              
+00000000  __ASM__                                                           
+00000000  __TI_static_base__                                                
+00000000  ti_sysbios_family_arm_m3_Hwi_resetVectors                         
+00000001  xdc_runtime_Startup__EXECFXN__C                                   
+00000001  xdc_runtime_Startup__RESETFXN__C                                  
+00000076  __ISA__                                                           
+00000089  __PLAT__                                                          
+000000b0  __TARG__                                                          
+000000d6  __TRDR__                                                          
+00001000  __STACK_SIZE                                                      
+00001801  __aeabi_uldivmod                                                  
+000019f5  main                                                              
+00001c91  __TI_auto_init                                                    
+00001d31  NOROM_SetupTrimDevice                                             
+00001d31  ti_sysbios_family_arm_cc26xx_Boot_trimDevice                      
+00001dc9  NOROM_SetupStepVddrTrimTo                                         
+00001e49  _c_int00                                                          
+00001ea1  C$$EXIT                                                           
+00001ea5  abort                                                             
+00001ea5  xdc_runtime_System_abortStd__E                                    
+00001ead  exit                                                              
+00001ead  xdc_runtime_System_exitStd__E                                     
+00001ef5  copy_in                                                           
+00001f41  NOROM_IntPendClear                                                
+00002001  NOROM_AONEventMcuWakeUpSet                                        
+00002029  NOROM_ChipInfo_GetChipFamily                                      
+00002045  _args_main                                                        
+0000205d  __aeabi_lmul                                                      
+00002075  NOROM_AONRTCCurrent64BitValueGet                                  
+00002089  _register_unlock                                                  
+0000208f  _register_lock                                                    
+00002097  _nop                                                              
+0000209d  NOROM_ThisLibraryIsFor_CC13x2_13x4_26x2_26x4_HaltIfViolated       
+000020ab  NOROM_CPUcpsid                                                    
+000020b7  NOROM_CPUcpsie                                                    
+000020c3  smallErrorPolicy                                                  
+0000222c  ROM_constStruct                                                   
+0000222c  xdc_runtime_Error_policy__C                                       
+00002230  xdc_runtime_IModule_Interface__BASE__C                            
+00002234  xdc_runtime_Startup_lastFxns__C                                   
+0000223c  ti_sysbios_knl_Event_Object__DESC__C                              
+0000225c  ti_sysbios_gates_GateMutex_Object__DESC__C                        
+0000227c  xdc_runtime_Startup_execImpl__C                                   
+00002280  ti_sysbios_gates_GateMutex_Instance_State_sem__O                  
+00002284  ti_sysbios_heaps_HeapTrack_Module__FXNS__C                        
+000022ac  ti_sysbios_knl_Swi_Object__count__C                               
+000022b0  ti_sysbios_knl_Idle_funcList__C                                   
+000022b8  xdc_runtime_Text_isLoaded__C                                      
+000022bc  ti_sysbios_knl_Clock_Object__DESC__C                              
+000022dc  ti_sysbios_knl_Mailbox_Instance_State_dataQue__O                  
+000022e0  ti_sysbios_knl_Semaphore_eventSync__C                             
+000022e4  ti_sysbios_gates_GateMutex_Module__FXNS__C                        
+00002308  ti_sysbios_knl_Task_Module_State_inactiveQ__O                     
+0000230c  ti_sysbios_family_arm_m3_Hwi_Module__id__C                        
+0000230e  ti_sysbios_family_arm_cc26xx_Timer_Module__id__C                  
+00002310  ti_sysbios_knl_Mailbox_Object__table__C                           
+00002314  ti_sysbios_family_arm_m3_Hwi_Object__table__C                     
+00002318  ti_sysbios_knl_Swi_Object__DESC__C                                
+00002338  xdc_runtime_Text_charCnt__C                                       
+0000233c  xdc_runtime_Error_raiseHook__C                                    
+00002340  ti_sysbios_heaps_HeapMem_Object__table__C                         
+00002344  ti_sysbios_family_arm_cc26xx_Timer_funcHookCH1__C                 
+00002348  xdc_runtime_Error_policyFxn__C                                    
+0000234c  xdc_runtime_Startup_firstFxns__C                                  
+00002354  xdc_runtime_Text_charTab__C                                       
+00002358  xdc_runtime_Error_maxDepth__C                                     
+0000235c  ti_sysbios_family_arm_m3_TaskSupport_stackAlignment__C            
+00002360  ti_sysbios_family_arm_m3_Hwi_NUM_INTERRUPTS__C                    
+00002364  ti_sysbios_knl_Clock_triggerClock__C                              
+00002368  ti_sysbios_knl_Swi_Object__table__C                               
+0000236c  xdc_runtime_Memory_Module__id__C                                  
+00002370  xdc_runtime_SysCallback_flushFxn__C                               
+00002374  ti_sysbios_heaps_HeapMem_Module__gateObj__C                       
+00002378  ti_sysbios_family_arm_cc26xx_Timer_startupNeeded__C               
+0000237c  ti_sysbios_knl_Queue_Object__DESC__C                              
+0000239c  ti_sysbios_family_arm_cc26xx_Timer_funcHookCH2__C                 
+000023a0  ti_sysbios_knl_Task_Object__DESC__C                               
+000023c0  xdc_runtime_Assert_E_assertFailed__C                              
+000023c4  ti_sysbios_gates_GateHwi_Module__id__C                            
+000023c8  xdc_runtime_IHeap_Interface__BASE__C                              
+000023cc  xdc_runtime_SysCallback_exitFxn__C                                
+000023d0  ti_sysbios_heaps_HeapMem_Module__id__C                            
+000023d4  ti_sysbios_family_arm_m3_Hwi_excHandlerFunc__C                    
+000023d8  ti_sysbios_heaps_HeapMem_Module__FXNS__C                          
+00002400  xdc_runtime_System_maxAtexitHandlers__C                           
+00002404  ti_sysbios_knl_Queue_Object__count__C                             
+00002408  ti_sysbios_knl_Task_Object__table__C                              
+0000240c  ti_sysbios_knl_Mailbox_Object__DESC__C                            
+0000242c  ti_sysbios_family_arm_m3_Hwi_nullIsrFunc__C                       
+00002430  ti_sysbios_knl_Clock_tickMode__C                                  
+00002432  ti_sysbios_gates_GateMutex_Module__id__C                          
+00002434  ti_sysbios_knl_Swi_numPriorities__C                               
+00002438  ti_sysbios_heaps_HeapTrack_Object__DESC__C                        
+00002458  ti_sysbios_knl_Task_numConstructedTasks__C                        
+0000245c  xdc_runtime_Startup_maxPasses__C                                  
+00002460  ti_sysbios_knl_Task_initStackFlag__C                              
+00002464  xdc_runtime_System_abortFxn__C                                    
+00002468  ti_sysbios_knl_Mailbox_Instance_State_dataSem__O                  
+0000246c  ti_sysbios_gates_GateHwi_Module__FXNS__C                          
+00002490  ti_sysbios_hal_Hwi_Object__DESC__C                                
+000024b0  ti_sysbios_family_arm_m3_Hwi_priGroup__C                          
+000024b4  xdc_runtime_Error_E_memory__C                                     
+000024b8  ti_sysbios_family_arm_m3_Hwi_E_alreadyDefined__C                  
+000024bc  ti_sysbios_knl_Mailbox_Instance_State_freeSem__O                  
+000024c0  ti_sysbios_knl_Queue_Object__table__C                             
+000024c4  ti_sysbios_knl_Semaphore_eventPost__C                             
+000024c8  xdc_runtime_System_exitFxn__C                                     
+000024cc  ti_sysbios_heaps_HeapMem_reqAlign__C                              
+000024d0  xdc_runtime_Startup_sfxnRts__C                                    
+000024d4  ti_sysbios_knl_Semaphore_Object__DESC__C                          
+000024f4  ti_sysbios_gates_GateHwi_Object__DESC__C                          
+00002514  xdc_runtime_SysCallback_putchFxn__C                               
+00002518  ti_sysbios_heaps_HeapMem_Object__count__C                         
+0000251c  ti_sysbios_family_arm_m3_Hwi_numSparseInterrupts__C               
+00002520  ti_sysbios_knl_Mailbox_maxTypeAlign__C                            
+00002524  ti_sysbios_family_arm_cc26xx_TimestampProvider_useClockTimer__C   
+00002528  ti_sysbios_knl_Event_Instance_State_pendQ__O                      
+0000252c  ti_sysbios_knl_Task_allBlockedFunc__C                             
+00002530  ti_sysbios_knl_Mailbox_Object__count__C                           
+00002534  xdc_runtime_Text_nameStatic__C                                    
+00002538  ti_sysbios_knl_Clock_Module_State_clockQ__O                       
+0000253c  xdc_runtime_SysCallback_readyFxn__C                               
+00002540  ti_sysbios_knl_Task_defaultStackSize__C                           
+00002544  xdc_runtime_IGateProvider_Interface__BASE__C                      
+00002548  ti_sysbios_family_arm_m3_Hwi_E_hwiLimitExceeded__C                
+0000254c  xdc_runtime_Startup_startModsFxn__C                               
+00002550  ti_sysbios_knl_Semaphore_Instance_State_pendQ__O                  
+00002554  ti_sysbios_family_arm_m3_Hwi_Object__DESC__C                      
+00002574  xdc_runtime_Text_nameEmpty__C                                     
+00002578  ti_sysbios_family_arm_m3_Hwi_Object__count__C                     
+0000257c  xdc_runtime_SysCallback_abortFxn__C                               
+00002580  ti_sysbios_knl_Task_defaultStackHeap__C                           
+00002584  ti_sysbios_family_arm_m3_Hwi_ccr__C                               
+00002588  ti_sysbios_heaps_HeapTrack_Module__id__C                          
+0000258c  ti_sysbios_heaps_HeapMem_E_memory__C                              
+00002590  ti_sysbios_knl_Task_Object__count__C                              
+00002594  ti_sysbios_heaps_HeapMem_Object__DESC__C                          
+000025b4  xdc_runtime_Text_nameUnknown__C                                   
+000025b8  xdc_runtime_Memory_defaultHeapInstance__C                         
+000025bc  ti_sysbios_heaps_HeapTrack_Instance_State_trackQueue__O           
+000025c0  ti_sysbios_knl_Mailbox_Instance_State_freeQue__O                  
+000025c4  xdc_runtime_Startup_sfxnTab__C                                    
+00002610  ROM_externFuncPtrs                                                
+00002650  xdc_runtime_Startup_sfxnTab__A                                    
+00002674  xdc_runtime_Startup_sfxnRts__A                                    
+00002686  xdc_runtime_Text_charTab__A                                       
+00002688  xdc_runtime_Startup_firstFxns__A                                  
+00002691  xdc_runtime_Startup_getState__I                                   
+0000271d  ti_sysbios_BIOS_atExitFunc__I                                     
+0000274d  ti_sysbios_BIOS_rtsLock__I                                        
+0000277d  ti_sysbios_BIOS_startFunc__I                                      
+000027ad  ti_sysbios_BIOS_rtsUnlock__I                                      
+000027d9  ti_sysbios_BIOS_registerRTSLock__I                                
+000027fd  ti_sysbios_BIOS_errorRaiseHook__I                                 
+0000281d  ti_sysbios_BIOS_removeRTSLock__I                                  
+0000283d  ti_sysbios_rom_cortexm_cc26xx_cc26x2r2_CC26xx_checkRevision__E    
+00002859  ti_sysbios_knl_Clock_doTick__I                                    
+00002871  xdc_runtime_Startup_exec__I                                       
+00002889  ti_sysbios_BIOS_exitFunc__I                                       
+0000289f  xdc_runtime_System_SupportProxy_putch__E                          
+000028af  ti_sysbios_BIOS_nullFunc__I                                       
+000028b1  ti_sysbios_family_arm_cc26xx_Timer_dynamicStub__E                 
+000028bd  ti_sysbios_family_arm_cc26xx_Timer_getCount64__E                  
+000028c9  ti_sysbios_family_arm_cc26xx_Timer_getCurrentTick__E              
+000028d5  ti_sysbios_family_arm_cc26xx_Timer_getMaxTicks__E                 
+000028e1  ti_sysbios_family_arm_cc26xx_Timer_initDevice__I                  
+000028ed  ti_sysbios_family_arm_cc26xx_Timer_setNextTick__E                 
+000028f9  ti_sysbios_family_arm_cc26xx_Timer_setThreshold__I                
+00002905  ti_sysbios_family_arm_cc26xx_Timer_start__E                       
+00002911  ti_sysbios_family_arm_cc26xx_TimestampProvider_get32__E           
+0000291d  xdc_runtime_Startup_reset__I                                      
+00002929  xdc_runtime_System_SupportProxy_abort__E                          
+00002935  xdc_runtime_System_SupportProxy_exit__E                           
+00002941  xdc_runtime_System_SupportProxy_Module__startupDone__S            
+00002949  xdc_runtime_System_SupportProxy_flush__E                          
+00002951  xdc_runtime_System_SupportProxy_ready__E                          
+00002959  ti_sysbios_rom_cortexm_cc26xx_cc26x2r2_CC26xx_badRomRevision__E   
+00002a05  ti_sysbios_family_arm_cc26xx_Timer_start__E__mangled__            
+00002a7d  ti_sysbios_family_arm_cc26xx_Timer_getCurrentTick__E__mangled__   
+00002ac1  ti_sysbios_family_arm_cc26xx_Timer_setNextTick__E__mangled__      
+00002b01  ti_sysbios_family_arm_cc26xx_Timer_setThreshold__I__mangled__     
+00002b41  ti_sysbios_family_arm_cc26xx_Timer_initDevice__I__mangled__       
+00002b69  ti_sysbios_family_arm_cc26xx_Timer_dynamicStub__E__mangled__      
+00002b8d  ti_sysbios_family_arm_cc26xx_Timer_getMaxTicks__E__mangled__      
+00002bb1  ti_sysbios_family_arm_cc26xx_TimestampProvider_get32__E__mangled__
+00002bd1  ti_sysbios_family_arm_cc26xx_Timer_getCount64__E__mangled__       
+0001ffa8  __ccfg                                                            
+1002c800  ti_sysbios_rom_cortexm_cc26xx_cc26x2r2_CC26xx_REVISION__C         
+1002c805  ti_sysbios_knl_Semaphore_pend__E                                  
+1002c8f9  ti_sysbios_knl_Event_pend__E                                      
+1002c9d9  ti_sysbios_knl_Task_Instance_init__E                              
+1002caa5  ti_sysbios_family_arm_m3_Hwi_postInit__I                          
+1002cb59  ti_sysbios_knl_Mailbox_Instance_init__E                           
+1002cc09  ti_sysbios_knl_Clock_workFuncDynamic__E                           
+1002cca5  ti_sysbios_family_arm_cc26xx_Timer_periodicStub__E                
+1002cd39  ti_sysbios_family_arm_m3_Hwi_Instance_init__E                     
+1002cdcd  ti_sysbios_knl_Task_Instance_finalize__E                          
+1002ce61  ti_sysbios_family_arm_m3_Hwi_initNVIC__E                          
+1002cef1  ti_sysbios_knl_Clock_startI__E                                    
+1002cf79  ti_sysbios_knl_Swi_restoreHwi__E                                  
+1002cffd  ti_sysbios_heaps_HeapTrack_alloc__E                               
+1002d07f  ti_sysbios_BIOS_linkedWithIncorrectBootLibrary__E                 
+1002d081  ti_sysbios_knl_Task_postInit__I                                   
+1002d101  ti_sysbios_knl_Clock_workFunc__E                                  
+1002d179  ti_sysbios_heaps_HeapMem_allocUnprotected__E                      
+1002d1ed  ti_sysbios_knl_Clock_walkQueueDynamic__E                          
+1002d261  ti_sysbios_knl_Task_startCore__E                                  
+1002d2d5  ti_sysbios_knl_Semaphore_post__E                                  
+1002d345  ti_sysbios_knl_Swi_run__I                                         
+1002d3b5  ti_sysbios_knl_Task_schedule__I                                   
+1002d425  ti_sysbios_knl_Task_sleep__E                                      
+1002d495  ti_sysbios_family_arm_m3_Hwi_Instance_finalize__E                 
+1002d501  ti_sysbios_family_arm_m3_Hwi_dispatchC__I                         
+1002d56d  ti_sysbios_knl_Mailbox_post__E                                    
+1002d5d7  ti_sysbios_knl_Event_post__E                                      
+1002d63f  ti_sysbios_gates_GateHwi_Instance_init__E                         
+1002d641  ti_sysbios_knl_Semaphore_Instance_init__E                         
+1002d6a5  ti_sysbios_knl_Swi_runLoop__I                                     
+1002d705  ti_sysbios_knl_Swi_schedule__I                                    
+1002d765  ti_sysbios_knl_Task_Module_startup__E                             
+1002d7c5  ti_sysbios_family_arm_m3_Hwi_create                               
+1002d821  ti_sysbios_hal_Hwi_create                                         
+1002d87d  ti_sysbios_heaps_HeapMem_alloc__E                                 
+1002d8d9  ti_sysbios_heaps_HeapTrack_free__E                                
+1002d935  ti_sysbios_knl_Mailbox_Instance_finalize__E                       
+1002d991  ti_sysbios_knl_Mailbox_create                                     
+1002d9ed  ti_sysbios_knl_Swi_Instance_init__E                               
+1002da49  ti_sysbios_family_arm_m3_Hwi_Module_startup__E                    
+1002daa1  ti_sysbios_family_arm_m3_Hwi_construct                            
+1002daf9  ti_sysbios_heaps_HeapMem_freeUnprotected__E                       
+1002db51  ti_sysbios_knl_Mailbox_construct                                  
+1002dba9  ti_sysbios_knl_Task_create                                        
+1002dc01  ti_sysbios_knl_Mailbox_pend__E                                    
+1002dc57  ti_sysbios_knl_Clock_logTick__E                                   
+1002dc59  ti_sysbios_knl_Task_construct                                     
+1002dcad  ti_sysbios_knl_Task_allBlockedFunction__I                         
+1002dcfd  ti_sysbios_heaps_HeapMem_getStats__E                              
+1002dd49  ti_sysbios_knl_Swi_construct                                      
+1002dd95  ti_sysbios_knl_Swi_create                                         
+1002dde1  ti_sysbios_knl_Task_yield__E                                      
+1002de2d  ti_sysbios_heaps_HeapMem_Instance_init__E                         
+1002de75  ti_sysbios_knl_Swi_post__E                                        
+1002debd  ti_sysbios_knl_Task_blockI__E                                     
+1002df05  ti_sysbios_family_arm_m3_Hwi_disableInterrupt__E                  
+1002df05  ti_sysbios_hal_Hwi_HwiProxy_disableInterrupt__E                   
+1002df05  ti_sysbios_hal_Hwi_disableInterrupt__E                            
+1002df49  ti_sysbios_family_arm_m3_Hwi_enableInterrupt__E                   
+1002df49  ti_sysbios_hal_Hwi_HwiProxy_enableInterrupt__E                    
+1002df49  ti_sysbios_hal_Hwi_enableInterrupt__E                             
+1002df8d  ti_sysbios_family_arm_m3_Hwi_getStackInfo__E                      
+1002df8d  ti_sysbios_hal_Hwi_HwiProxy_getStackInfo__E                       
+1002df8d  ti_sysbios_hal_Hwi_getStackInfo__E                                
+1002dfd1  ti_sysbios_knl_Mailbox_Module_startup__E                          
+1002e015  ti_sysbios_family_arm_m3_TaskSupport_start__E                     
+1002e015  ti_sysbios_knl_Task_SupportProxy_start__E                         
+1002e051  ti_sysbios_knl_Clock_create                                       
+1002e08d  ti_sysbios_knl_Swi_restore__E                                     
+1002e0c9  ti_sysbios_knl_Task_exit__E                                       
+1002e103  ti_sysbios_knl_Clock_triggerFunc__I                               
+1002e105  ti_sysbios_heaps_HeapMem_free__E                                  
+1002e13d  ti_sysbios_knl_Clock_getTicks__E                                  
+1002e175  ti_sysbios_knl_Semaphore_create                                   
+1002e1ad  ti_sysbios_knl_Task_processVitalTaskFlag__I                       
+1002e1e5  ti_sysbios_family_arm_cc26xx_Timer_startup__E                     
+1002e1e5  ti_sysbios_knl_Clock_TimerProxy_startup__E                        
+1002e219  ti_sysbios_heaps_HeapMem_init__I                                  
+1002e24d  ti_sysbios_heaps_HeapTrack_Object__create__S                      
+1002e281  ti_sysbios_heaps_HeapTrack_create                                 
+1002e2b5  ti_sysbios_knl_Clock_Instance_init__E                             
+1002e2e9  ti_sysbios_knl_Clock_construct                                    
+1002e31d  ti_sysbios_knl_Semaphore_construct                                
+1002e351  ti_sysbios_knl_Task_unblockI__E                                   
+1002e385  ti_sysbios_family_arm_m3_Hwi_excHandler__I                        
+1002e3b5  ti_sysbios_gates_GateMutex_Object__create__S                      
+1002e3e5  ti_sysbios_gates_GateMutex_create                                 
+1002e415  ti_sysbios_heaps_HeapMem_Object__create__S                        
+1002e445  ti_sysbios_knl_Event_create                                       
+1002e475  ti_sysbios_knl_Queue_construct                                    
+1002e4a5  ti_sysbios_knl_Queue_create                                       
+1002e4d5  ti_sysbios_knl_Task_restore__E                                    
+1002e505  ti_sysbios_hal_Hwi_initStack                                      
+1002e533  ti_sysbios_knl_Swi_Instance_finalize__E                           
+1002e535  ti_sysbios_family_arm_cc26xx_Timer_Module_startup__E              
+1002e561  ti_sysbios_family_arm_cc26xx_Timer_postInit__I                    
+1002e58d  ti_sysbios_family_arm_cc26xx_TimestampProvider_get64__E           
+1002e58d  xdc_runtime_Timestamp_SupportProxy_get64__E                       
+1002e58d  xdc_runtime_Timestamp_get64__E                                    
+1002e5b9  ti_sysbios_gates_GateHwi_Object__create__S                        
+1002e5e5  ti_sysbios_gates_GateMutex_construct                              
+1002e611  ti_sysbios_knl_Event_construct                                    
+1002e63d  ti_sysbios_knl_Event_pendTimeout__I                               
+1002e669  ti_sysbios_knl_Semaphore_pendTimeout__I                           
+1002e695  ti_sysbios_family_arm_cc26xx_Timer_Module__startupDone__S         
+1002e695  ti_sysbios_knl_Clock_TimerProxy_Module__startupDone__S            
+1002e6bd  ti_sysbios_family_arm_m3_Hwi_Module__startupDone__S               
+1002e6bd  ti_sysbios_hal_Hwi_HwiProxy_Module__startupDone__S                
+1002e6e5  ti_sysbios_family_arm_m3_Hwi_Object__delete__S                    
+1002e70d  ti_sysbios_family_arm_m3_Hwi_Object__get__S                       
+1002e735  ti_sysbios_gates_GateMutex_Object__delete__S                      
+1002e75d  ti_sysbios_gates_GateMutex_enter__E                               
+1002e785  ti_sysbios_hal_Hwi_Object__delete__S                              
+1002e7ad  ti_sysbios_heaps_HeapMem_Object__get__S                           
+1002e7d5  ti_sysbios_heaps_HeapTrack_Object__delete__S                      
+1002e7fd  ti_sysbios_knl_Clock_Object__delete__S                            
+1002e825  ti_sysbios_knl_Clock_stop__E                                      
+1002e84d  ti_sysbios_knl_Idle_run__E                                        
+1002e875  ti_sysbios_knl_Mailbox_Object__delete__S                          
+1002e89d  ti_sysbios_knl_Mailbox_Object__get__S                             
+1002e8c5  ti_sysbios_knl_Semaphore_Object__delete__S                        
+1002e8ed  ti_sysbios_knl_Swi_Object__get__S                                 
+1002e915  ti_sysbios_knl_Task_Object__delete__S                             
+1002e93d  ti_sysbios_knl_Task_restoreHwi__E                                 
+1002e965  ti_sysbios_knl_Mailbox_postInit__I                                
+1002e98d  ti_sysbios_family_arm_cc26xx_TimestampProvider_Module_startup__E  
+1002e9b1  ti_sysbios_family_arm_m3_Hwi_destruct                             
+1002e9d5  ti_sysbios_gates_GateHwi_Handle__label__S                         
+1002e9d5  xdc_runtime_System_Module_GateProxy_Handle__label__S              
+1002e9f9  ti_sysbios_gates_GateHwi_Object__delete__S                        
+1002ea1d  ti_sysbios_BIOS_RtsGateProxy_Handle__label__S                     
+1002ea1d  ti_sysbios_gates_GateMutex_Handle__label__S                       
+1002ea1d  ti_sysbios_heaps_HeapMem_Module_GateProxy_Handle__label__S        
+1002ea41  ti_sysbios_gates_GateMutex_destruct                               
+1002ea65  ti_sysbios_heaps_HeapMem_Handle__label__S                         
+1002ea65  xdc_runtime_Memory_HeapProxy_Handle__label__S                     
+1002ea89  ti_sysbios_heaps_HeapMem_Object__delete__S                        
+1002eaad  ti_sysbios_heaps_HeapTrack_Handle__label__S                       
+1002ead1  ti_sysbios_heaps_HeapTrack_getStats__E                            
+1002eaf5  ti_sysbios_knl_Clock_Module_startup__E                            
+1002eb19  ti_sysbios_knl_Clock_addI__E                                      
+1002eb3d  ti_sysbios_knl_Clock_destruct                                     
+1002eb61  ti_sysbios_knl_Event_Object__delete__S                            
+1002eb85  ti_sysbios_knl_Mailbox_destruct                                   
+1002eba9  ti_sysbios_knl_Queue_Object__delete__S                            
+1002ebcd  ti_sysbios_knl_Semaphore_Instance_finalize__E                     
+1002ebf1  ti_sysbios_knl_Semaphore_destruct                                 
+1002ec15  ti_sysbios_knl_Swi_Module_startup__E                              
+1002ec39  ti_sysbios_knl_Swi_Object__delete__S                              
+1002ec5d  ti_sysbios_knl_Task_Object__get__S                                
+1002ec81  ti_sysbios_knl_Task_destruct                                      
+1002eca5  ti_sysbios_knl_Task_enter__I                                      
+1002ecc9  ti_sysbios_knl_Clock_scheduleNextTick__E                          
+1002ece9  ti_sysbios_knl_Event_checkEvents__I                               
+1002ed09  ti_sysbios_knl_Event_destruct                                     
+1002ed29  ti_sysbios_knl_Queue_Object__get__S                               
+1002ed49  ti_sysbios_knl_Queue_destruct                                     
+1002ed69  ti_sysbios_knl_Swi_destruct                                       
+1002ed89  ti_sysbios_hal_Hwi_Instance_init__E                               
+1002eda9  ti_sysbios_family_arm_m3_Hwi_plug__E                              
+1002edc5  ti_sysbios_family_arm_m3_Hwi_setPriority__E                       
+1002ede1  ti_sysbios_family_arm_m3_Hwi_switchFromBootStack__E               
+1002ede1  ti_sysbios_hal_Hwi_HwiProxy_switchFromBootStack__E                
+1002ede1  ti_sysbios_hal_Hwi_switchFromBootStack__E                         
+1002edfd  ti_sysbios_heaps_HeapTrack_Instance_init__E                       
+1002ee19  ti_sysbios_knl_Queue_get__E                                       
+1002ee35  ti_sysbios_knl_Queue_put__E                                       
+1002ee51  ti_sysbios_knl_Task_sleepTimeout__I                               
+1002ee6b  ti_sysbios_knl_Task_unblock__E                                    
+1002ee83  ti_sysbios_gates_GateMutex_Instance_init__E                       
+1002ee99  ti_sysbios_knl_Clock_Instance_finalize__E                         
+1002eeaf  ti_sysbios_knl_Clock_start__E                                     
+1002eec5  ti_sysbios_BIOS_getCpuFreq__E                                     
+1002eed9  ti_sysbios_BIOS_setThreadType__E                                  
+1002eeed  ti_sysbios_knl_Swi_disable__E                                     
+1002ef01  ti_sysbios_knl_Swi_enabled__E                                     
+1002ef15  ti_sysbios_knl_Task_disable__E                                    
+1002ef29  ti_sysbios_hal_Hwi_Module_startup__E                              
+1002ef3b  ti_sysbios_knl_Event_sync__E                                      
+1002ef4d  ti_sysbios_BIOS_exit__E                                           
+1002ef5d  ti_sysbios_BIOS_getThreadType__E                                  
+1002ef6d  ti_sysbios_BIOS_start__E                                          
+1002ef7d  ti_sysbios_family_arm_m3_TaskSupport_getStackAlignment__E         
+1002ef7d  ti_sysbios_knl_Task_SupportProxy_getStackAlignment__E             
+1002ef8d  ti_sysbios_knl_Clock_TimerProxy_getCurrentTick__E                 
+1002ef9d  ti_sysbios_knl_Clock_TimerProxy_getMaxTicks__E                    
+1002efad  ti_sysbios_knl_Clock_TimerProxy_setNextTick__E                    
+1002efbd  ti_sysbios_knl_Task_self__E                                       
+1002efcd  ti_sysbios_gates_GateMutex_leave__E                               
+1002efdb  ti_sysbios_heaps_HeapMem_restore__E                               
+1002efe9  ti_sysbios_knl_Queue_empty__E                                     
+1002eff7  ti_sysbios_knl_Queue_remove__E                                    
+1002f005  ti_sysbios_family_arm_cc26xx_TimestampProvider_getFreq__E         
+1002f005  xdc_runtime_Timestamp_SupportProxy_getFreq__E                     
+1002f005  xdc_runtime_Timestamp_getFreq__E                                  
+1002f011  ti_sysbios_family_arm_m3_Hwi_Params__init__S                      
+1002f011  ti_sysbios_hal_Hwi_HwiProxy_Params__init__S                       
+1002f01d  ti_sysbios_family_arm_m3_Hwi_disableFxn__E                        
+1002f029  ti_sysbios_family_arm_m3_Hwi_enableFxn__E                         
+1002f035  ti_sysbios_gates_GateHwi_enter__E                                 
+1002f041  ti_sysbios_BIOS_RtsGateProxy_Params__init__S                      
+1002f041  ti_sysbios_gates_GateMutex_Params__init__S                        
+1002f041  ti_sysbios_heaps_HeapMem_Module_GateProxy_Params__init__S         
+1002f04d  ti_sysbios_heaps_HeapTrack_Params__init__S                        
+1002f059  ti_sysbios_heaps_HeapTrack_isBlocking__E                          
+1002f065  ti_sysbios_knl_Clock_Params__init__S                              
+1002f071  ti_sysbios_knl_Clock_getTimerHandle__E                            
+1002f07d  ti_sysbios_knl_Event_Params__init__S                              
+1002f089  ti_sysbios_knl_Mailbox_Params__init__S                            
+1002f095  ti_sysbios_knl_Queue_dequeue__E                                   
+1002f0a1  ti_sysbios_knl_Queue_enqueue__E                                   
+1002f0ad  ti_sysbios_knl_Semaphore_Params__init__S                          
+1002f0b9  ti_sysbios_knl_Swi_Params__init__S                                
+1002f0c5  ti_sysbios_knl_Task_Params__init__S                               
+1002f0d1  ti_sysbios_hal_Hwi_Instance_finalize__E                           
+1002f0db  ti_sysbios_knl_Event_Instance_init__E                             
+1002f0e5  ti_sysbios_family_arm_m3_Hwi_doSwiRestore__I                      
+1002f0ed  ti_sysbios_family_arm_m3_Hwi_startup__E                           
+1002f0ed  ti_sysbios_hal_Hwi_HwiProxy_startup__E                            
+1002f0ed  ti_sysbios_hal_Hwi_startup__E                                     
+1002f0f5  ti_sysbios_knl_Idle_loop__E                                       
+1002f0fd  ti_sysbios_family_arm_m3_Hwi_doTaskRestore__I                     
+1002f103  ti_sysbios_family_arm_m3_Hwi_restoreFxn__E                        
+1002f109  ti_sysbios_gates_GateHwi_leave__E                                 
+1002f10f  ti_sysbios_gates_GateMutex_Instance_finalize__E                   
+1002f115  ti_sysbios_heaps_HeapMem_isBlocking__E                            
+1002f11b  ti_sysbios_heaps_HeapTrack_Instance_finalize__E                   
+1002f121  ti_sysbios_knl_Queue_Instance_init__E                             
+1002f127  ti_sysbios_knl_Queue_elemClear__E                                 
+1002f12d  ti_sysbios_knl_Swi_startup__E                                     
+1002f133  ti_sysbios_knl_Task_enable__E                                     
+1002f139  ti_sysbios_BIOS_RtsGateProxy_enter__E                             
+1002f13d  ti_sysbios_BIOS_RtsGateProxy_leave__E                             
+1002f141  ti_sysbios_family_arm_cc26xx_Timer_getExpiredTicks__E             
+1002f145  ti_sysbios_family_arm_cc26xx_Timer_getPeriod__E                   
+1002f149  ti_sysbios_family_arm_cc26xx_Timer_setPeriod__E                   
+1002f14d  ti_sysbios_family_arm_m3_Hwi_delete                               
+1002f151  ti_sysbios_family_arm_m3_TaskSupport_Module__startupDone__S       
+1002f151  ti_sysbios_knl_Task_SupportProxy_Module__startupDone__S           
+1002f155  ti_sysbios_gates_GateHwi_query__E                                 
+1002f155  xdc_runtime_System_Module_GateProxy_query__E                      
+1002f159  ti_sysbios_gates_GateMutex_delete                                 
+1002f15d  ti_sysbios_BIOS_RtsGateProxy_query__E                             
+1002f15d  ti_sysbios_gates_GateMutex_query__E                               
+1002f15d  ti_sysbios_heaps_HeapMem_Module_GateProxy_query__E                
+1002f161  ti_sysbios_hal_Hwi_HwiProxy_create                                
+1002f165  ti_sysbios_hal_Hwi_HwiProxy_delete                                
+1002f169  ti_sysbios_hal_Hwi_delete                                         
+1002f16d  ti_sysbios_heaps_HeapMem_Module_GateProxy_enter__E                
+1002f171  ti_sysbios_heaps_HeapMem_Module_GateProxy_leave__E                
+1002f175  ti_sysbios_knl_Clock_TimerProxy_getExpiredTicks__E                
+1002f179  ti_sysbios_knl_Clock_TimerProxy_getPeriod__E                      
+1002f17d  ti_sysbios_knl_Clock_delete                                       
+1002f181  ti_sysbios_knl_Clock_removeI__E                                   
+1002f185  ti_sysbios_knl_Clock_setTimeout__E                                
+1002f189  ti_sysbios_knl_Event_delete                                       
+1002f18d  ti_sysbios_knl_Mailbox_delete                                     
+1002f191  ti_sysbios_knl_Queue_delete                                       
+1002f195  ti_sysbios_knl_Queue_head__E                                      
+1002f199  ti_sysbios_knl_Queue_next__E                                      
+1002f19d  ti_sysbios_knl_Semaphore_delete                                   
+1002f1a1  ti_sysbios_knl_Swi_delete                                         
+1002f1a5  ti_sysbios_knl_Swi_postInit__I                                    
+1002f1a9  ti_sysbios_knl_Task_delete                                        
+1002f1ad  ti_sysbios_knl_Task_startup__E                                    
+1002f1b1  xdc_runtime_Startup_startMods__I                                  
+1002f2b9  xdc_runtime_Error_policyDefault__E                                
+1002f375  xdc_runtime_Memory_alloc__E                                       
+1002f3e5  xdc_runtime_Core_createObject__I                                  
+1002f453  xdc_runtime_Core_deleteObject__I                                  
+1002f4b1  xdc_runtime_Assert_raise__I                                       
+1002f505  xdc_runtime_Startup_exec__E                                       
+1002f559  xdc_runtime_Core_assignParams__I                                  
+1002f5a1  xdc_runtime_Core_constructObject__I                               
+1002f5e9  xdc_runtime_Error_setX__E                                         
+1002f631  xdc_runtime_System_atexit__E                                      
+1002f679  xdc_runtime_System_processAtExit__E                               
+1002f6b9  xdc_runtime_Core_assignLabel__I                                   
+1002f6e9  xdc_runtime_Text_cordText__E                                      
+1002f715  xdc_runtime_System_abort__E                                       
+1002f73d  xdc_runtime_Error_raiseX__E                                       
+1002f75d  xdc_runtime_Error_check__E                                        
+1002f779  xdc_runtime_Memory_valloc__E                                      
+1002f795  xdc_runtime_System_exit__E                                        
+1002f7b1  xdc_runtime_Text_ropeText__E                                      
+1002f7cd  xdc_runtime_Core_destructObject__I                                
+1002f7e5  xdc_runtime_Error_init__E                                         
+1002f7fd  xdc_runtime_Memory_free__E                                        
+1002f811  xdc_runtime_Memory_getStats__E                                    
+1002f825  xdc_runtime_SysCallback_abort__E                                  
+1002f839  xdc_runtime_SysCallback_exit__E                                   
+1002f84d  xdc_runtime_SysCallback_flush__E                                  
+1002f861  xdc_runtime_SysCallback_putch__E                                  
+1002f875  xdc_runtime_SysCallback_ready__E                                  
+1002f889  xdc_runtime_Memory_getMaxDefaultTypeAlign__E                      
+1002f899  xdc_runtime_Timestamp_SupportProxy_get32__E                       
+1002f899  xdc_runtime_Timestamp_get32__E                                    
+1002f8a9  xdc_runtime_Memory_calloc__E                                      
+1002f8b5  xdc_runtime_Startup_rtsDone__E                                    
+1002f8c1  xdc_runtime_Memory_HeapProxy_alloc__E                             
+1002f8cb  xdc_runtime_Memory_HeapProxy_free__E                              
+1002f8d5  xdc_runtime_Memory_HeapProxy_getStats__E                          
+1002f8df  xdc_runtime_Gate_leaveSystem__E                                   
+1002f8e5  xdc_runtime_System_Module_startup__E                              
+1002f8eb  xdc_runtime_Gate_enterSystem__E                                   
+1002f8ef  xdc_runtime_SysCallback_Module__startupDone__S                    
+1002f8f3  xdc_runtime_System_Module_GateProxy_enter__E                      
+1002f8f7  xdc_runtime_System_Module_GateProxy_leave__E                      
+1002f8fb  xdc_runtime_Error_policySpin__E                                   
+1002f8fd  xdc_runtime_System_abortSpin__E                                   
+1002f8ff  xdc_runtime_System_exitSpin__E                                    
+1002f901  ti_sysbios_family_arm_m3_Hwi_dispatch__I                          
+1002f9e1  ti_sysbios_family_arm_m3_Hwi_interruptsAreDisabledButShouldNotBe  
+1002f9fd  ti_sysbios_family_arm_m3_TaskSupport_buildTaskStack               
+1002fa89  ti_sysbios_family_arm_m3_Hwi_initStacks__E                        
+1002fae1  ti_sysbios_family_arm_m3_Hwi_pendSV__I                            
+1002fb05  ti_sysbios_family_arm_m3_Hwi_return                               
+1002fb09  ti_sysbios_family_arm_m3_Hwi_excHandlerAsm__I                     
+1002fb29  ti_sysbios_family_xxx_Hwi_switchAndRunFunc                        
+1002fb47  ti_sysbios_family_arm_m3_TaskSupport_swap__E                      
+1002fb47  ti_sysbios_knl_Task_SupportProxy_swap__E                          
+1002fb53  ti_sysbios_knl_Task_swapReturn                                    
+1002fb5f  ti_sysbios_family_arm_m3_TaskSupport_glue                         
+1002fb70  ti_sysbios_knl_Task_Object__PARAMS__C                             
+1002fbac  ti_sysbios_knl_Mailbox_Object__PARAMS__C                          
+1002fbe0  ti_sysbios_family_arm_m3_Hwi_Object__PARAMS__C                    
+1002fc10  ti_sysbios_hal_Hwi_Object__PARAMS__C                              
+1002fc3c  ti_sysbios_knl_Swi_Object__PARAMS__C                              
+1002fc64  ti_sysbios_heaps_HeapMem_Object__PARAMS__C                        
+1002fc88  ti_sysbios_knl_Clock_Object__PARAMS__C                            
+1002fcac  ti_sysbios_knl_Semaphore_Object__PARAMS__C                        
+1002fcd0  ti_sysbios_heaps_HeapTrack_Object__PARAMS__C                      
+1002fcec  ti_sysbios_gates_GateHwi_Object__PARAMS__C                        
+1002fd04  ti_sysbios_gates_GateMutex_Object__PARAMS__C                      
+1002fd1c  ti_sysbios_knl_Event_Object__PARAMS__C                            
+1002fd34  ti_sysbios_knl_Queue_Object__PARAMS__C                            
+1002fd4d  memcpy                                                            
+1002fd65  memset                                                            
+20000000  ti_sysbios_family_arm_m3_Hwi_ramVectors                           
+20000100  xdcRomConstPtr                                                    
+20000104  xdcRomExternFuncPtr                                               
+20000108  xdcRomStatePtr                                                    
+20000600  ti_sysbios_knl_Task_Instance_State_0_stack__A                     
+20000e00  ti_sysbios_family_arm_m3_Hwi_dispatchTable                        
+20000ec8  ti_sysbios_heaps_HeapMem_Instance_State_0_buf__A                  
+20000f08  ROM_stateStruct                                                   
+20000f08  ti_sysbios_knl_Clock_Module__state__V                             
+20000f34  ti_sysbios_family_arm_cc26xx_TimestampProvider_Module__state__V   
+20000f38  xdc_runtime_Startup_Module__state__V                              
+20000f40  ti_sysbios_BIOS_Module__state__V                                  
+20000f64  ti_sysbios_knl_Swi_Module__state__V                               
+20000f80  ti_sysbios_knl_Task_Module__state__V                              
+20000fc4  xdc_runtime_Memory_Module__state__V                               
+20000fc8  xdc_runtime_System_Module__state__V                               
+20000fd0  ti_sysbios_family_arm_m3_Hwi_Module__state__V                     
+20001004  xdc_runtime_Error_Module__state__V                                
+20001008  ti_sysbios_family_arm_cc26xx_Timer_Module__state__V               
+20001010  ti_sysbios_knl_Swi_Module_State_0_readyQ__A                       
+20001090  ti_sysbios_knl_Task_Module_State_0_readyQ__A                      
+20001110  ti_sysbios_knl_Task_Object__table__V                              
+2000115c  main_func_sp                                                      
+20001160  ti_sysbios_family_arm_cc26xx_Timer_Object__table__V               
+200011a8  ti_sysbios_gates_GateMutex_Object__table__V                       
+200011e0  ti_sysbios_knl_Swi_Object__table__V                               
+20001210  ti_sysbios_knl_Clock_Object__table__V                             
+20001230  xdc_runtime_Error_IgnoreBlock                                     
+20001250  xdc_runtime_System_Module_State_0_atexitHandlers__A               
+20001270  ti_sysbios_family_arm_m3_Hwi_Object__table__V                     
+20001288  ti_sysbios_heaps_HeapMem_Object__table__V                         
+200012a0  __TI_cleanup_ptr                                                  
+200012a4  __TI_dtors_ptr                                                    
+200012a8  __TI_enable_exit_profile_output                                   
+200012ac  _lock                                                             
+200012b0  _unlock                                                           
+200012b4  ti_sysbios_family_arm_m3_Hwi_Module__root__V                      
+200012bc  ti_sysbios_gates_GateHwi_Module__root__V                          
+200012c4  ti_sysbios_gates_GateMutex_Module__root__V                        
+200012cc  ti_sysbios_hal_Hwi_Module__root__V                                
+200012d4  ti_sysbios_heaps_HeapMem_Module__root__V                          
+200012dc  ti_sysbios_heaps_HeapTrack_Module__root__V                        
+200012e4  ti_sysbios_knl_Clock_Module__root__V                              
+200012ec  ti_sysbios_knl_Event_Module__root__V                              
+200012f4  ti_sysbios_knl_Mailbox_Module__root__V                            
+200012fc  ti_sysbios_knl_Queue_Module__root__V                              
+20001304  ti_sysbios_knl_Semaphore_Module__root__V                          
+2000130c  ti_sysbios_knl_Swi_Module__root__V                                
+20001314  ti_sysbios_knl_Task_Module__root__V                               
+2000131c  ti_sysbios_family_arm_m3_Hwi_Module_State_0_excContext__A         
+20001320  ti_sysbios_family_arm_m3_Hwi_Module_State_0_excStack__A           
+20001324  ti_sysbios_knl_Task_Module_State_0_idleTask__A                    
+20001328  ti_sysbios_family_arm_m3_Hwi_Module_State_0_excActive__A          
+20004000  __stack                                                           
+20005000  __STACK_END                                                       
+20005000  __STACK_TOP                                                       
+e000e000  ti_sysbios_family_arm_m3_Hwi_nvic                                 
+ffffffff  __TI_pprof_out_hndl                                               
+ffffffff  __TI_prof_data_size                                               
+ffffffff  __TI_prof_data_start                                              
+ffffffff  __binit__                                                         
+ffffffff  __c_args__                                                        
+ffffffff  binit                                                             
+UNDEFED   SHT$$INIT_ARRAY$$Base                                             
+UNDEFED   SHT$$INIT_ARRAY$$Limit                                            
+UNDEFED   __TI_CINIT_Base                                                   
+UNDEFED   __TI_CINIT_Limit                                                  
+UNDEFED   __TI_Handler_Table_Base                                           
+UNDEFED   __TI_Handler_Table_Limit                                          
+
+[595 symbols]

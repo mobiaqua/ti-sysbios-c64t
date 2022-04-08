@@ -53,7 +53,7 @@ int _pthread_abstime2ticks(clockid_t clockId, const struct timespec *abstime,
     long                nsecs;
     time_t              secs = 0;
 
-    if ((abstime->tv_nsec < 0) || (1000000000 < abstime->tv_nsec)) {
+    if ((abstime->tv_nsec < 0) || (1000000000 <= abstime->tv_nsec)) {
         /* EINVAL */
         return (-1);
     }

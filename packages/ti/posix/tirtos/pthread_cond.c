@@ -146,6 +146,10 @@ int pthread_cond_destroy(pthread_cond_t *cond)
 {
     pthread_cond_obj *obj = (pthread_cond_obj *)(&cond->sysbios);
 
+    if (!Queue_empty(Queue_handle(&(obj->waitList)))) {
+        return (EBUSY);
+    }
+
     Queue_destruct(&obj->waitList);
     return (0);
 }
@@ -206,6 +210,7 @@ int pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
     UInt32 timeout;
     pthread_cond_obj *obj = (pthread_cond_obj *)(&cond->sysbios);
 
+    /* must validate abstime before modifying mutex state */
     if (_pthread_abstime2ticks(obj->clockId, abstime, &timeout) != 0) {
         return (EINVAL);
     }

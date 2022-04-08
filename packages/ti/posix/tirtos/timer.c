@@ -69,8 +69,8 @@ static Void *timerThreadFxn(Void *arg);
  */
 typedef struct TimerObj {
     Clock_Struct      clock;
-    void             (*sigev_notify_function)(sigval val);
-    sigval           val;
+    void             (*sigev_notify_function)(union sigval val);
+    union sigval     val;
     pthread_t        thread;
     Semaphore_Handle sem;
     Int              notifyType;    /* e.g., SIGEV_SIGNAL */
@@ -99,8 +99,6 @@ int timer_create(clockid_t clockid, struct sigevent *evp, timer_t *timerid)
     TimerObj          *timer;
     pthread_attr_t     pDefAttrs;
     pthread_attr_t    *pAttrs;
-    struct sched_param priParam;
-    Int                priority;
     Int                retc;
 
     Assert_isTrue(evp != NULL, 0);
@@ -109,7 +107,7 @@ int timer_create(clockid_t clockid, struct sigevent *evp, timer_t *timerid)
             (evp->sigev_notify == SIGEV_SIGNAL), 0);
 
     if ((clockid != CLOCK_MONOTONIC) && (clockid != CLOCK_REALTIME)) {
-        /* EINVAL */
+        errno = EINVAL;
         return (-1);
     }
 
@@ -126,7 +124,7 @@ int timer_create(clockid_t clockid, struct sigevent *evp, timer_t *timerid)
             sizeof(TimerObj), 0, &eb);
 
     if (timer == NULL) {
-        /* ENOMEM */
+        errno = ENOMEM;
         return (-1);
     }
 
@@ -150,15 +148,9 @@ int timer_create(clockid_t clockid, struct sigevent *evp, timer_t *timerid)
 
         if (timer->sem == NULL) {
             timer_delete((timer_t)timer);
-            /* ENOMEM */
+            errno = ENOMEM;
             return (-1);
         }
-
-        /* Save the priority since we'll create the thread with priority -1 */
-        pthread_attr_getschedparam(pAttrs, &priParam);
-        priority = priParam.sched_priority;
-        priParam.sched_priority = -1;
-        pthread_attr_setschedparam(pAttrs, &priParam);
 
         /* Timer notification threads must be detached */
         pthread_attr_setdetachstate(pAttrs, PTHREAD_CREATE_DETACHED);
@@ -168,26 +160,16 @@ int timer_create(clockid_t clockid, struct sigevent *evp, timer_t *timerid)
 
         if (retc != 0) {
             timer_delete((timer_t)timer);
-            /* ENOMEM */
+            errno = ENOMEM;
             return (-1);
         }
+
+        /* help ROV display the correct thread function */
+        Task_setArg0(((pthread_Obj *)(timer->thread))->task,
+                (UArg)timer->sigev_notify_function);
     }
 
     *timerid = (timer_t)timer;
-
-    if (evp->sigev_notify == SIGEV_THREAD) {
-        Task_setArg0(((pthread_Obj *)(timer->thread))->task,
-                (UArg)timer->sigev_notify_function);
-        priParam.sched_priority = priority;
-        retc = pthread_setschedparam(timer->thread, 0, &priParam);
-
-        if (retc != 0) {
-            timer_delete((timer_t)timer);
-            /* EINVAL */
-            return (-1);
-        }
-    }
-
     return (0);
 }
 
@@ -262,13 +244,13 @@ int timer_settime(timer_t timerid, int flags,
 
     if ((value->it_interval.tv_nsec < 0) ||
             (value->it_interval.tv_nsec >= 1000000000)) {
-        /* EINVAL */
+        errno = EINVAL;
         return (-1);
     }
 
     if ((value->it_value.tv_nsec < 0) ||
             (value->it_value.tv_nsec >= 1000000000)) {
-        /* EINVAL */
+        errno = EINVAL;
         return (-1);
     }
 
