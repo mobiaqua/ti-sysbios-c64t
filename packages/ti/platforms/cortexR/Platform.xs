@@ -197,7 +197,8 @@ function instance$meta$init(name)
             this.deviceName.match(/^AWR18/) ||
             this.deviceName.match(/^IWR14/) ||
             this.deviceName.match(/^IWR16/) ||
-            this.deviceName.match(/^IWR18/)) {
+            this.deviceName.match(/^IWR18/) ||
+            this.deviceName.match(/^IWR68/)) {
             this.CPU.catalogName = "ti.catalog.arm.cortexr4";
             this.CPU.deviceName = "CortexR";
             this.CPU.clockRate = 200;

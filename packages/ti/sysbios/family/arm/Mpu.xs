@@ -84,6 +84,7 @@ if (xdc.om.$name == "cfg" || typeof(genCdoc) != "undefined") {
     /* Cortex-R devices */
     deviceTable["AWR1.*"]        = deviceTable["AWR16XX"];
     deviceTable["IWR1.*"]        = deviceTable["AWR16XX"];
+    deviceTable["IWR6.*"]        = deviceTable["AWR16XX"];
     deviceTable["RM48L.*"]       = deviceTable["AWR16XX"];
     deviceTable["RM57D8.*"]      = deviceTable["RM57D8XX"];
     deviceTable["RM57L8XX"]      = deviceTable["RM57D8XX"];

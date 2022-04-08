@@ -647,6 +647,7 @@ deviceTable["ti.catalog.arm.cortexr5"]["RM57D8.*"] = deviceTable["ti.catalog.arm
 deviceTable["ti.catalog.arm.cortexr5"]["RM57L8.*"] = deviceTable["ti.catalog.arm.cortexr5"]["RM57D8XX"];
 deviceTable["ti.catalog.arm.cortexr4"]["AWR1.*"]   = deviceTable["ti.catalog.arm.cortexr4"]["AWR14XX"];
 deviceTable["ti.catalog.arm.cortexr4"]["IWR1.*"]   = deviceTable["ti.catalog.arm.cortexr4"]["AWR14XX"];
+deviceTable["ti.catalog.arm.cortexr4"]["IWR6.*"]   = deviceTable["ti.catalog.arm.cortexr4"]["AWR14XX"];
 
 /* MSP432 devices */
 deviceTable["ti.catalog.arm.cortexm4"]["MSP432E.*"] = deviceTable["ti.catalog.arm.cortexm4"]["MSP432E401Y"];

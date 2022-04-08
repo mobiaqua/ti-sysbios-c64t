@@ -34,11 +34,11 @@ SECTIONS {
         CREATE_OBJECT_SYMBOLS
         *(.text)
         *(.text.*)
-        . = ALIGN(0x4);
+        . = ALIGN(0x8);
         KEEP (*(.ctors))
-        . = ALIGN(0x4);
+        . = ALIGN(0x8);
         KEEP (*(.dtors))
-        . = ALIGN(0x4);
+        . = ALIGN(0x8);
         __init_array_start = .;
         KEEP (*(.init_array*))
         __init_array_end = .;
@@ -55,12 +55,12 @@ SECTIONS {
         *(.rodata*)
     } > REGION_TEXT AT> REGION_TEXT
 
-    .data : ALIGN (4) {
+    .data : ALIGN (8) {
         __data_load__ = LOADADDR (.data);
         __data_start__ = .;
         *(.data)
         *(.data*)
-        . = ALIGN (4);
+        . = ALIGN (8);
         __data_end__ = .;
     } > REGION_DATA AT> REGION_TEXT
 
@@ -80,7 +80,7 @@ SECTIONS {
         *(.bss)
         *(.bss.*)
         *(COMMON)
-        . = ALIGN (4);
+        . = ALIGN (8);
         __bss_end__ = .;
     } > REGION_BSS AT> REGION_BSS
 

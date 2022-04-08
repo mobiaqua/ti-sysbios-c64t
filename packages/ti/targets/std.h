@@ -181,6 +181,13 @@ typedef uintptr_t       xdc_UArg;
 #define xdc__META(n,s)                               \
     ti_targets_mkPragma(DATA_SECTION(n, "xdc.meta")) \
     const char (n)[] = {s}
+
+#elif defined(__clang__)
+
+#define xdc__META(n,s) \
+    __attribute__ ((section ("xdc.meta"))) \
+    const char (n)[] = {(s)}
+
 #else
 
 #define xdc__META(n,s)                               \

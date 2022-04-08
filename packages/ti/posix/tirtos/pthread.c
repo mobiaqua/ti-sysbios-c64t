@@ -51,7 +51,7 @@
 
 #include "_pthread.h"
 
-void _pthread_runStub(UArg arg0, UArg arg1);
+static void _pthread_runStub(UArg arg0, UArg arg1);
 
 static void _pthread_delete(pthread_Obj *thread);
 
@@ -396,6 +396,14 @@ int pthread_equal(pthread_t pt1, pthread_t pt2)
 
 /*
  *  ======== pthread_exit ========
+ *  Terminate calling thread
+ *
+ *  This function terminates the calling thread and returns a
+ *  value via retval that (if the thread is joinable) is available
+ *  to another thread that calls pthread_join().
+ *
+ *  Any clean-up handlers that have not yet been popped, are popped
+ *  (in the reverse of the order in which they were pushed) and executed.
  */
 void pthread_exit(void *retval)
 {
@@ -403,34 +411,33 @@ void pthread_exit(void *retval)
     UInt key;
     int oldState;
 
-    /*
-     *  This function terminates the calling thread and returns
-     *  a value via retval that (if the thread is joinable) is available to
-     *  another thread that calls pthread_join().
-     *
-     *  Any clean-up handlers that have not yet been popped, are popped
-     *  (in the reverse of the order in which they were pushed) and executed.
-     */
+    /* store thread's exit status */
     thread->ret = retval;
 
     /* prevent thread cancellation while terminating myself */
     pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &oldState);
 
-    /* Pop and execute the cleanup handlers */
+    /* pop and execute the cleanup handlers */
     while (thread->cleanupList != NULL) {
         _pthread_cleanup_pop(thread->cleanupList, 1);
     }
 
-    /* Cleanup any pthread specific data */
+    /* cleanup any pthread specific data (must be done after handlers) */
     _pthread_removeThreadKeys((pthread_t)thread);
 
+    /* if this thread is not detached, rendezvous with joining thread */
     if (!thread->detached) {
         Semaphore_post(Semaphore_handle(&(thread->joinSem)));
 
-        /* pthread_join() will delete the thread */
+        /*  Don't put the thread on the terminated list because
+         *  pthread_join() will delete the thread.
+         */
     }
     else {
-        /* Put the thread on the terminated list */
+        /*  Put this thread on our private terminated list.
+         *  It will be deleted by _pthread_cleanupFxn() which
+         *  is invoked from the idle task.
+         */
         key = Task_disable();
 
         thread->qElem.next = (Queue_Elem *)terminatedList;
@@ -439,7 +446,11 @@ void pthread_exit(void *retval)
         Task_restore(key);
     }
 
-    /* Set this task's priority to -1 to stop it from running. */
+    /*  Set this task's priority to -1 to stop it from running and
+     *  to prevent it from being put on the SYS/BIOS terminated task
+     *  queue, where it would be deleted if Task.deleteTerminatedTasks
+     *  is true.
+     */
     Task_setPri(thread->task, -1);
 }
 
@@ -699,51 +710,16 @@ static void _pthread_delete(pthread_Obj *thread)
 /*
  *  ======== _pthread_runStub ========
  */
-void _pthread_runStub(UArg arg0, UArg arg1)
+static void _pthread_runStub(UArg arg0, UArg arg1)
 {
-    UInt         key;
-    Ptr          arg;
+    Ptr arg;
+    void *xstat;
     pthread_Obj *thread = (pthread_Obj *)(xdc_uargToPtr(arg1));
-    int oldState;
 
+    /* invoke thread start-routine */
     arg = Task_getEnv(thread->task);
-    thread->ret = thread->fxn(arg);
+    xstat = thread->fxn(arg);
 
-    /* prevent thread cancellation while terminating myself */
-    pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &oldState);
-
-    /* Pop and execute the cleanup handlers */
-    while (thread->cleanupList != NULL) {
-        _pthread_cleanup_pop(thread->cleanupList, 1);
-    }
-
-    /* Cleanup any pthread specific data */
-    _pthread_removeThreadKeys((pthread_t)thread);
-
-    key = Task_disable();
-
-    if (!thread->detached) {
-        Semaphore_post(Semaphore_handle(&(thread->joinSem)));
-
-        /*
-         *  Don't put the thread on the terminated list since pthread_join()
-         *  can be called after the thread terminates.
-         */
-    }
-    else {
-
-        /* Add the thread to the list of terminated threads */
-        thread->qElem.next = (Queue_Elem *)terminatedList;
-        terminatedList = thread;
-    }
-
-    Task_restore(key);
-
-    /*
-     *  Set this task's priority to -1 to prevent it from being put
-     *  on the terminated queue (and deleted if Task.deleteTerminatedTasks
-     *  is true). _pthread_cleanupFxn() will delete the pthread object in
-     *  the idle loop.
-     */
-    Task_setPri(thread->task, -1);
+    /* thread must self-terminate */
+    pthread_exit(xstat);
 }
