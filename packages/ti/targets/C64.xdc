@@ -15,6 +15,7 @@
  */
 
 /*!
+ *  @_nodoc
  *  ======== C64 ========
  *  TI C64 default runtime model (little endian)
  */

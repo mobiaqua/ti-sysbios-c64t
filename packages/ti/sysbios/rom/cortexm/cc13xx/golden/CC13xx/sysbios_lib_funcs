@@ -75,7 +75,6 @@
 00000000 g     F .text:ti_sysbios_family_arm_cc26xx_TimestampProvider_Module__startupDone__S	00000000 .hidden xdc_runtime_Timestamp_SupportProxy_Module__startupDone__S
 00000000 g     F .text:ti_sysbios_family_arm_cc26xx_TimestampProvider_Module_startup__E__mangled__	00000000 .hidden ti_sysbios_family_arm_cc26xx_TimestampProvider_Module_startup__E__mangled__
 00000000 g     F .text:ti_sysbios_family_arm_cc26xx_TimestampProvider_startTimer__E	00000000 .hidden ti_sysbios_family_arm_cc26xx_TimestampProvider_startTimer__E
-00000000 g     F .text:ti_sysbios_family_arm_m3_Hwi_cc26xxRomInitNVIC__I	00000000 .hidden ti_sysbios_family_arm_m3_Hwi_cc26xxRomInitNVIC__I
 00000000 g     F .text:ti_sysbios_family_arm_m3_Hwi_clearInterrupt__E	00000000 .hidden ti_sysbios_family_arm_m3_Hwi_clearInterrupt__E
 00000000 g     F .text:ti_sysbios_family_arm_m3_Hwi_clearInterrupt__E	00000000 .hidden ti_sysbios_hal_Hwi_clearInterrupt__E
 00000000 g     F .text:ti_sysbios_family_arm_m3_Hwi_clearInterrupt__E	00000000 .hidden ti_sysbios_hal_Hwi_HwiProxy_clearInterrupt__E
@@ -136,6 +135,7 @@
 00000000 g     F .text:ti_sysbios_family_arm_m3_Hwi_restoreInterrupt__E	00000000 .hidden ti_sysbios_family_arm_m3_Hwi_restoreInterrupt__E
 00000000 g     F .text:ti_sysbios_family_arm_m3_Hwi_restoreInterrupt__E	00000000 .hidden ti_sysbios_hal_Hwi_HwiProxy_restoreInterrupt__E
 00000000 g     F .text:ti_sysbios_family_arm_m3_Hwi_restoreInterrupt__E	00000000 .hidden ti_sysbios_hal_Hwi_restoreInterrupt__E
+00000000 g     F .text:ti_sysbios_family_arm_m3_Hwi_romInitNVIC__I	00000000 .hidden ti_sysbios_family_arm_m3_Hwi_romInitNVIC__I
 00000000 g     F .text:ti_sysbios_family_arm_m3_Hwi_setFunc__E	00000000 .hidden ti_sysbios_family_arm_m3_Hwi_setFunc__E
 00000000 g     F .text:ti_sysbios_family_arm_m3_Hwi_setHookContext__E	00000000 .hidden ti_sysbios_family_arm_m3_Hwi_setHookContext__E
 00000000 g     F .text:ti_sysbios_family_arm_m3_Hwi_setPriority__E__mangled__	00000000 .hidden ti_sysbios_family_arm_m3_Hwi_setPriority__E__mangled__

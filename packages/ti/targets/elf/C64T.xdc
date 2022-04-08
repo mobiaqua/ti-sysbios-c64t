@@ -15,6 +15,7 @@
  */
 
 /*!
+ *  @_nodoc
  *  ======== C64T ========
  *  TI C64T little endian (ELF)
  */

@@ -635,16 +635,7 @@ function module$static$init(mod, params)
     /* Initialize the NVIC early */
     if ((Hwi.resetVectorAddress != 0) && (Build.buildROMApp == true)) {
         /* Fix for SDOCM00114681: broken Hwi_initNVIC() function. */
-        var ROM = xdc.module('ti.sysbios.rom.ROM');
-        switch (ROM.romName) {
-            case ROM.CC1350:
-            case ROM.CC2650:
-                Startup.firstFxns.$add(Hwi.cc26xxRomInitNVIC);
-                break;
-
-            default:
-                Startup.firstFxns.$add(Hwi.initNVIC);
-        }
+        Startup.firstFxns.$add(Hwi.romInitNVIC);
     }
     else {
         Startup.firstFxns.$add(Hwi.initNVIC);

@@ -458,7 +458,7 @@ int pthread_mutex_timedlock(pthread_mutex_t *mutex,
         return (EINVAL);
     }
 
-    clock_gettime(0, &curtime);
+    clock_gettime(CLOCK_REALTIME, &curtime);
     secs = abstime->tv_sec - curtime.tv_sec;
 
     if ((abstime->tv_sec < curtime.tv_sec) ||

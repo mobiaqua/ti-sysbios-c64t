@@ -1322,12 +1322,12 @@ internal:   /* not for client use */
     Void dispatch();
 
     /*
-     *  ======== cc26xxRomInitNVIC ========
+     *  ======== romInitNVIC ========
      *  Fix for SDOCM00114681: broken Hwi_initNVIC() function.
-     *  Installed rather than Hwi.initNVIC for CC26xx ROM build
+     *  Installed rather than Hwi.initNVIC for ROM app build
      *  when Hwi.resetVectorAddress is not 0x00000000.
      */
-    Void cc26xxRomInitNVIC();
+    Void romInitNVIC();
 
     /*
      * "Top Half" of Interrupt Dispatcher

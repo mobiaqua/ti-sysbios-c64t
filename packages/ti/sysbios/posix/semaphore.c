@@ -108,7 +108,11 @@ int sem_timedwait(sem_t *semaphore, const struct timespec *abstime)
         return (-1);
     }
 
-    clock_gettime(0, &curtime);
+    /*
+     *  Since timers are supported, timeouts must be based on the realtime
+     *  clock.
+     */
+    clock_gettime(CLOCK_REALTIME, &curtime);
     secs = abstime->tv_sec - curtime.tv_sec;
 
     if ((abstime->tv_sec < curtime.tv_sec) ||

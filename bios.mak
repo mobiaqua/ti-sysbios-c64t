@@ -21,7 +21,6 @@ XDC_INSTALL_DIR ?= $(TREES)/xdcprod/xdcprod-t52/product/xdccore/$(BUILD_HOST_OS)
 #
 ti.targets.C28_large ?=
 ti.targets.C28_float ?=
-ti.targets.C64P ?=
 ti.targets.C674 ?=
 
 ti.targets.elf.C64P ?=
@@ -74,7 +73,6 @@ iar.targets.arm.M4F ?=
 XDCARGS= \
     ti.targets.C28_large=\"$(ti.targets.C28_large)\" \
     ti.targets.C28_float=\"$(ti.targets.C28_float)\" \
-    ti.targets.C64P=\"$(ti.targets.C64P)\" \
     ti.targets.C674=\"$(ti.targets.C674)\" \
     ti.targets.arm.elf.Arm9=\"$(ti.targets.arm.elf.Arm9)\" \
     ti.targets.arm.elf.A8Fnv=\"$(ti.targets.arm.elf.A8Fnv)\" \

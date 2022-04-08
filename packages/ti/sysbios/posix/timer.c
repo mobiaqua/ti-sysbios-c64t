@@ -72,6 +72,7 @@ typedef struct TimerObj {
     pthread_t        thread;
     Semaphore_Handle sem;
     Int              notifyType;    /* e.g., SIGEV_SIGNAL */
+    clockid_t        clockId;
 } TimerObj;
 
 /*
@@ -105,6 +106,11 @@ int timer_create(clockid_t clockid, struct sigevent *evp, timer_t *timerid)
     Assert_isTrue((evp->sigev_notify == SIGEV_THREAD) ||
             (evp->sigev_notify == SIGEV_SIGNAL), 0);
 
+    if ((clockid != CLOCK_MONOTONIC) && (clockid != CLOCK_REALTIME)) {
+        /* EINVAL */
+        return (-1);
+    }
+
     pthread_attr_init(&pDefAttrs);
 
     pAttrs = (evp->sigev_notify_attributes != NULL) ?
@@ -132,6 +138,7 @@ int timer_create(clockid_t clockid, struct sigevent *evp, timer_t *timerid)
     timer->notifyType = evp->sigev_notify;
     timer->thread = NULL;
     timer->sem = NULL;
+    timer->clockId = clockid;
 
     if (evp->sigev_notify == SIGEV_THREAD) {
         /* Create semaphore that will be posted when timer expires */
@@ -294,7 +301,7 @@ int timer_settime(timer_t timerid, int flags,
     }
 
     if (flags & TIMER_ABSTIME) {
-        clock_gettime(0, &curtime);
+        clock_gettime(timer->clockId, &curtime);
 
         if ((curtime.tv_sec > value->it_value.tv_sec) ||
                 ((curtime.tv_sec == value->it_value.tv_sec) &&

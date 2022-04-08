@@ -37,14 +37,12 @@ var family = {
     "ti.targets.C28_large" :                    "c28",
     "ti.targets.C28_float" :                    "c28",
     "ti.targets.C64" :                          "c64",
-    "ti.targets.C64P" :                         "c64p",
     "ti.targets.C674" :                         "c64p",
     "ti.targets.elf.C64P" :                     "c64p",
     "ti.targets.elf.C66" :                      "c64p",
     "ti.targets.elf.C66_big_endian" :           "c64p",
     "ti.targets.elf.C674" :                     "c64p",
     "ti.targets.elf.C67P" :                     "c67p",
-    "ti.targets.elf.C64T" :                     "c64p",
     "ti.targets.msp430.elf.MSP430X" :           "msp430",
     "iar.targets.msp430.MSP430" :               "msp430",
     "iar.targets.msp430.MSP430X_small" :        "msp430",
@@ -275,6 +273,12 @@ function unsupportedTargetCheck(mod)
     if (Program.build.target.$name == "ti.targets.arm.elf.A8F") {
         mod.$logError(Program.build.target.$name + " is no longer supported. " +
             "Please use ti.targets.arm.elf.A8Fnv instead.", mod);
+        throw Error();
+    }
+    else if ((Program.build.target.$name == "ti.targets.C64P") ||
+             (Program.build.target.name == "C64P_big_endian")) {
+        mod.$logError(Program.build.target.$name + " is no longer supported. " +
+            "Please use SYS/BIOS 6.42.03 or older.", mod);
         throw Error();
     }
     else if (Program.build.target.$name ==

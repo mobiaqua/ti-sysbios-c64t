@@ -16,6 +16,7 @@
 import xdc.bld.ITarget2;
 
 /*!
+ *  @_nodoc
  *  ======== C64T ========
  *  TI C64T default runtime model (little endian)
  */

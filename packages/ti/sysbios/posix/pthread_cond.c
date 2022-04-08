@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -164,7 +164,7 @@ int pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
         return (EINVAL);
     }
 
-    clock_gettime(0, &curtime);
+    clock_gettime(CLOCK_REALTIME, &curtime);
     secs = abstime->tv_sec - curtime.tv_sec;
 
     if ((abstime->tv_sec < curtime.tv_sec) ||

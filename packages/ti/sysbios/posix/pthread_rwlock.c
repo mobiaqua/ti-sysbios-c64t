@@ -132,7 +132,7 @@ int pthread_rwlock_timedrdlock(pthread_rwlock_t *rwlock,
         return (EINVAL);
     }
 
-    clock_gettime(0, &curtime);
+    clock_gettime(CLOCK_REALTIME, &curtime);
     secs = abstime->tv_sec - curtime.tv_sec;
 
     if ((abstime->tv_sec < curtime.tv_sec) ||
@@ -169,7 +169,7 @@ int pthread_rwlock_timedwrlock(pthread_rwlock_t *rwlock,
         return (EINVAL);
     }
 
-    clock_gettime(0, &curtime);
+    clock_gettime(CLOCK_REALTIME, &curtime);
     secs = abstime->tv_sec - curtime.tv_sec;
 
     if ((abstime->tv_sec < curtime.tv_sec) ||

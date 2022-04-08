@@ -60,7 +60,6 @@ var ccOptsList = {
     "iar.targets.msp430.MSP430"                 : customIar430xOpts,
     "iar.targets.msp430.MSP430X_small"          : customIar430xOpts,
     "iar.targets.msp430.MSP430X_large"          : customIar430xOpts,
-    "ti.targets.C64P"                           : custom6xOpts,
     "ti.targets.elf.C64P"                       : custom6xOpts,
     "ti.targets.C674"                           : custom6xOpts,
     "ti.targets.elf.C674"                       : custom6xOpts,
@@ -1105,8 +1104,11 @@ function buildLibs(objList, relList, filter, xdcArgs, incs)
                     asmopts += " -Dti_sysbios_hal_Core_numCores__D=1 " +
                         "-Dti_sysbios_family_arm_v7r_vim_Hwi_lockstepDevice__D=FALSE";
                 }
+                /* insert rts includes before "." in command line */
+                if (targ.$name.match("iar.targets.arm")) {
+                    ccopts += " -I" + targ.rootDir+"/inc/c";
+                }
             }
-
             /* confirm that this target supports this profile */
             if (targ.profiles[profiles[j]] !== undefined) {
                 var profile = profiles[j];

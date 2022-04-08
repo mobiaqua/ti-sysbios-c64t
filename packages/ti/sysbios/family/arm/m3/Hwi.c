@@ -414,12 +414,12 @@ Void Hwi_initNVIC()
 }
 
 /*
- *  ======== cc26xxRomInitNVIC ========
+ *  ======== romInitNVIC ========
  *  Fix for SDOCM00114681: broken Hwi_initNVIC() function.
- *  Installed rather than Hwi.initNVIC for CC26xx ROM build
+ *  Installed rather than Hwi.initNVIC for ROM app build
  *  when Hwi.resetVectorAddress is not 0x00000000.
  */
-Void Hwi_cc26xxRomInitNVIC()
+Void Hwi_romInitNVIC()
 {
     UInt intNum;
     UInt32 *ramVectors;

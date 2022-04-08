@@ -54,6 +54,8 @@
 
 /*
  *  ======== MQueueObj ========
+ *  The message queue object, created the first time the message queue is
+ *  opened.
  */
 typedef struct MQueueObj {
     struct MQueueObj  *next;
@@ -64,9 +66,14 @@ typedef struct MQueueObj {
     char              *name;
 } MQueueObj;
 
+/*
+ *  ======== MQueueDesc ========
+ *  Threads that call mq_open() get a descriptor handle.  This allows
+ *  passing of different flags to mq_open().
+ */
 typedef struct MQueueDesc {
-    MQueueObj         *msgQueue;
-    long               flags;
+    MQueueObj *msgQueue;  /* The actual message queue object */
+    long       flags;
 } MQueueDesc;
 
 static MQueueObj *findInList(const char *name);
@@ -354,7 +361,7 @@ long mq_timedreceive(mqd_t mqdes, char *msg_ptr, size_t msg_len,
             return (-1);
         }
 
-        clock_gettime(0, &curtime);
+        clock_gettime(CLOCK_REALTIME, &curtime);
         secs = abstime->tv_sec - curtime.tv_sec;
 
         if ((abstime->tv_sec < curtime.tv_sec) ||
@@ -403,7 +410,7 @@ int mq_timedsend(mqd_t mqdes, const char *msg_ptr, size_t msg_len,
             return (-1);
         }
 
-        clock_gettime(0, &curtime);
+        clock_gettime(CLOCK_REALTIME, &curtime);
         secs = abstime->tv_sec - curtime.tv_sec;
 
         if ((abstime->tv_sec < curtime.tv_sec) ||
