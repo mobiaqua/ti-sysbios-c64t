@@ -273,8 +273,8 @@ var targetOptions = {
                 linkerCommandFile: "",
                 compilerBuildOptions: "-mfloat-abi=hard",
                 linkerBuildOptions: "-nostartfiles -static --gc-sections -lgcc"
-                + " -lc -lm -lnosys -L${BIOS_CG_ROOT}/packages/gnu/targets/"
-                + "arm/libs/install-native/arm-none-eabi/lib/fpu",
+                + " -lc -lm -lnosys -L${xdc_find:gnu/targets/"
+                + "arm/libs/install-native/arm-none-eabi/lib/fpu:${ProjName}}",
                 productGroup: "Sitara",
                 devices: {
                     "GENERIC": {
@@ -283,8 +283,8 @@ var targetOptions = {
                         cfgPrefix: "cortexa_semihost/",
                         linkerBuildOptions: "-nostartfiles -static"
                         + " --gc-sections -lgcc -lc -lm -lrdimon"
-                        + " -L${BIOS_CG_ROOT}/packages/gnu/targets/arm/libs/"
-                        + "install-native/arm-none-eabi/lib/fpu"
+                        + " -L${xdc_find:gnu/targets/arm/libs/"
+                        + "install-native/arm-none-eabi/lib/fpu:${ProjName}}"
                     }
                 }
             },
@@ -295,8 +295,8 @@ var targetOptions = {
                 linkerCommandFile: "",
                 compilerBuildOptions: "-mfloat-abi=hard",
                 linkerBuildOptions: "-nostartfiles -static --gc-sections -lgcc"
-                + " -lc -lm -lnosys -L${BIOS_CG_ROOT}/packages/gnu/targets/arm/"
-                + "libs/install-native/arm-none-eabi/lib/fpu",
+                + " -lc -lm -lnosys -L${xdc_find:gnu/targets/arm/"
+                + "libs/install-native/arm-none-eabi/lib/fpu:${ProjName}}",
                 productGroup: "Sitara",
                 devices: {
                     "GENERIC": {
@@ -305,8 +305,8 @@ var targetOptions = {
                         cfgPrefix: "cortexa_semihost/",
                         linkerBuildOptions: "-nostartfiles -static"
                         + " --gc-sections -lgcc -lc -lm -lrdimon"
-                        + " -L${BIOS_CG_ROOT}/packages/gnu/targets/arm/libs/"
-                        + "install-native/arm-none-eabi/lib/fpu"
+                        + " -L${xdc_find:gnu/targets/arm/libs/"
+                        + "install-native/arm-none-eabi/lib/fpu:${ProjName}}"
                     }
                 }
             },
@@ -317,8 +317,8 @@ var targetOptions = {
                 linkerCommandFile: "",
                 compilerBuildOptions: "-mfloat-abi=hard",
                 linkerBuildOptions: "-nostartfiles -static --gc-sections -lgcc"
-                + " -lc -lm -lnosys -L${BIOS_CG_ROOT}/packages/gnu/targets/arm/"
-                + "libs/install-native/arm-none-eabi/lib/fpu",
+                + " -lc -lm -lnosys -L${xdc_find:gnu/targets/arm/"
+                + "libs/install-native/arm-none-eabi/lib/fpu:${ProjName}}",
                 productGroup: "Sitara",
                 devices: {
                     "GENERIC": {
@@ -327,8 +327,8 @@ var targetOptions = {
                         cfgPrefix: "cortexa_semihost/",
                         linkerBuildOptions: "-nostartfiles -static"
                         + " --gc-sections -lgcc -lc -lm -lrdimon"
-                        + " -L${BIOS_CG_ROOT}/packages/gnu/targets/arm/libs/"
-                        + "install-native/arm-none-eabi/lib/fpu"
+                        + " -L${xdc_find:gnu/targets/arm/libs/"
+                        + "install-native/arm-none-eabi/lib/fpu:${ProjName}}"
                     }
                 }
             },
@@ -339,8 +339,8 @@ var targetOptions = {
                 platform: "ti.platforms.tiva:$DeviceId$",
                 compilerBuildOptions: "-mthumb -march=armv7-m",
                 linkerBuildOptions: "-nostartfiles -static --gc-sections -lgcc"
-                + " -lc -lm -lnosys -L${BIOS_CG_ROOT}/packages/gnu/targets/arm/"
-                + "libs/install-native/arm-none-eabi/lib/armv7-m",
+                + " -lc -lm -lnosys -L${xdc_find:gnu/targets/arm/"
+                + "libs/install-native/arm-none-eabi/lib/armv7-m:${ProjName}}",
                 productGroup: "",
                 devices: {
                     "STELLARIS": {
@@ -353,8 +353,8 @@ var targetOptions = {
                                            "$DeviceId$.lds",
                         linkerBuildOptions: "-nostartfiles -static"
                         + " --gc-sections -lgcc -lc -lm -lrdimon "
-                        + "-L${BIOS_CG_ROOT}/packages/gnu/targets/arm/libs/"
-                        + "install-native/arm-none-eabi/lib/armv7-m",
+                        + "-L${xdc_find:gnu/targets/arm/libs/"
+                        + "install-native/arm-none-eabi/lib/armv7-m:${ProjName}}",
                     },
 /* exclude CC26XX because it needs driverlib ...
                     "CC26XX": {
@@ -372,8 +372,8 @@ var targetOptions = {
                                            "cc2650.lds",
                         linkerBuildOptions: "-nostartfiles -static"
                         + " --gc-sections -lgcc -lc -lm -lrdimon "
-                        + "-L${BIOS_CG_ROOT}/packages/gnu/targets/arm/libs/"
-                        + "install-native/arm-none-eabi/lib/armv7-m",
+                        + "-L${xdc_find:gnu/targets/arm/libs/"
+                        + "install-native/arm-none-eabi/lib/armv7-m:${ProjName}}",
                     },
 */
                 }
@@ -384,8 +384,8 @@ var targetOptions = {
                 platform: "",
                 compilerBuildOptions: "-mthumb -march=armv7e-m -mfloat-abi=soft",
                 linkerBuildOptions: "-nostartfiles -static --gc-sections -lgcc"
-                + " -lc -lm -lnosys -L${BIOS_CG_ROOT}/packages/gnu/targets/arm/"
-                + "libs/install-native/arm-none-eabi/lib/armv7e-m",
+                + " -lc -lm -lnosys -L${xdc_find:gnu/targets/arm/"
+                + "libs/install-native/arm-none-eabi/lib/armv7e-m:${ProjName}}",
                 productGroup: "",
                 devices: {
                     "CC32XX": {
@@ -403,8 +403,8 @@ var targetOptions = {
                 compilerBuildOptions: "-mthumb -march=armv7e-m -mfloat-abi=hard"
                 + " -mfpu=fpv4-sp-d16",
                 linkerBuildOptions: "-nostartfiles -static --gc-sections -lgcc"
-                + " -lc -lm -lnosys -L${BIOS_CG_ROOT}/packages/gnu/targets/arm/"
-                + "libs/install-native/arm-none-eabi/lib/armv7e-m/fpu",
+                + " -lc -lm -lnosys -L${xdc_find:gnu/targets/arm/"
+                + "libs/install-native/arm-none-eabi/lib/armv7e-m/fpu:${ProjName}}",
                 productGroup: "TivaC",
                 devices: {
                     "TIVA": {
@@ -421,8 +421,8 @@ var targetOptions = {
                         cfgPrefix: "cortexm_semihost/",
                         linkerBuildOptions: "-nostartfiles -static"
                         + " --gc-sections -lgcc -lc -lm -lrdimon"
-                        + " -L${BIOS_CG_ROOT}/packages/gnu/targets/arm/libs/"
-                        + "install-native/arm-none-eabi/lib/armv7e-m/fpu",
+                        + " -L${xdc_find:gnu/targets/arm/libs/install-native/"
+                        + "arm-none-eabi/lib/armv7e-m/fpu:${ProjName}}",
                     }
                 }
             },
@@ -434,8 +434,8 @@ var targetOptions = {
                 compilerBuildOptions: "-mthumb -march=armv7e-m -mfloat-abi=hard"
                 + " -mfpu=fpv4-sp-d16",
                 linkerBuildOptions: "-nostartfiles -static --gc-sections -lgcc"
-                + " -lc -lm -lnosys -L${BIOS_CG_ROOT}/packages/gnu/targets/arm/"
-                + "libs/install-native/arm-none-eabi/lib/armv7e-m/fpu",
+                + " -lc -lm -lnosys -L${xdc_find:gnu/targets/arm/libs/"
+                + "install-native/arm-none-eabi/lib/armv7e-m/fpu:${ProjName}}",
                 productGroup: "MSP430",
                 devices: {
                     "MSP432": {
@@ -454,8 +454,8 @@ var targetOptions = {
                         cfgPrefix: "cortexm_semihost/",
                         linkerBuildOptions: "-nostartfiles -static"
                         + " --gc-sections -lgcc -lc -lm -lrdimon"
-                        + " -L${BIOS_CG_ROOT}/packages/gnu/targets/arm/libs/"
-                        + "install-native/arm-none-eabi/lib/armv7e-m/fpu",
+                        + " -L${xdc_find:gnu/targets/arm/libs/install-native/"
+                        + "arm-none-eabi/lib/armv7e-m/fpu:${ProjName}}",
                     }
                 }
             }

@@ -112,7 +112,6 @@ xdc.noload
                   00000448    00000018     CC26xx_pem3.obj (.const:ti_sysbios_gates_GateMutex_Object__PARAMS__C)
                   00000460    00000018     CC26xx_pem3.obj (.const:ti_sysbios_knl_Queue_Object__PARAMS__C)
                   00000478    00000008     CC26xx_pem3.obj (.const:ti_sysbios_knl_Idle_funcList__C)
-                  00000480    00000004     CC26xx_pem3.obj (.const:ti_sysbios_family_arm_cc26xx_Boot_alternateBackdoorIOID__C)
                   00000484    00000004     CC26xx_pem3.obj (.const:ti_sysbios_family_arm_cc26xx_Timer_startupNeeded__C)
                   00000488    00000004     CC26xx_pem3.obj (.const:ti_sysbios_family_arm_m3_Hwi_E_alreadyDefined__C)
                   0000048c    00000004     CC26xx_pem3.obj (.const:ti_sysbios_family_arm_m3_Hwi_E_hwiLimitExceeded__C)
@@ -144,7 +143,6 @@ xdc.noload
                   000004f4    00000004     CC26xx_pem3.obj (.const:ti_sysbios_knl_Task_defaultStackHeap__C)
                   000004f8    00000004     CC26xx_pem3.obj (.const:ti_sysbios_knl_Task_defaultStackSize__C)
                   000004fc    00000004     CC26xx_pem3.obj (.const:ti_sysbios_knl_Task_numConstructedTasks__C)
-                  00000500    00000002     CC26xx_pem3.obj (.const:ti_sysbios_family_arm_cc26xx_Boot_overrideDefaultBackdoorIOID__C)
                   00000502    00000002     CC26xx_pem3.obj (.const:ti_sysbios_family_arm_cc26xx_Timer_Module__id__C)
                   00000504    00000002     CC26xx_pem3.obj (.const:ti_sysbios_family_arm_cc26xx_TimestampProvider_useClockTimer__C)
                   00000506    00000002     CC26xx_pem3.obj (.const:ti_sysbios_family_arm_m3_Hwi_Module__id__C)
@@ -394,7 +392,6 @@ xdc.noload
 
 .cc26xx_boot_text 
 *          0    00001c54    0000012c     
-                  00001c54    00000100     BIOS_rom.obj (.text:ti_sysbios_family_arm_cc26xx_Boot_checkBackdoor)
                   00001d54    00000028     BIOS_rom.obj (.text:ti_sysbios_family_arm_cc26xx_Boot_useLFXTAL)
                   00001d7c    00000004     BIOS_rom.obj (.text:ti_sysbios_family_arm_cc26xx_Boot_trimDevice)
 
@@ -917,10 +914,6 @@ ffffffff   binit
 1001c045   ti_sysbios_BIOS_setThreadType__E
 0000164d   ti_sysbios_BIOS_startFunc__I
 1001c055   ti_sysbios_BIOS_start__E
-00000480   ti_sysbios_family_arm_cc26xx_Boot_alternateBackdoorIOID__C
-20000e5c   ti_sysbios_family_arm_cc26xx_Boot_backdoorActivated
-00001c55   ti_sysbios_family_arm_cc26xx_Boot_checkBackdoor
-00000500   ti_sysbios_family_arm_cc26xx_Boot_overrideDefaultBackdoorIOID__C
 00001d7d   ti_sysbios_family_arm_cc26xx_Boot_trimDevice
 00001d55   ti_sysbios_family_arm_cc26xx_Boot_useLFXTAL
 00000502   ti_sysbios_family_arm_cc26xx_Timer_Module__id__C
@@ -1454,7 +1447,6 @@ address    name
 00000448   ti_sysbios_gates_GateMutex_Object__PARAMS__C
 00000460   ti_sysbios_knl_Queue_Object__PARAMS__C
 00000478   ti_sysbios_knl_Idle_funcList__C
-00000480   ti_sysbios_family_arm_cc26xx_Boot_alternateBackdoorIOID__C
 00000484   ti_sysbios_family_arm_cc26xx_Timer_startupNeeded__C
 00000488   ti_sysbios_family_arm_m3_Hwi_E_alreadyDefined__C
 0000048c   ti_sysbios_family_arm_m3_Hwi_E_hwiLimitExceeded__C
@@ -1486,7 +1478,6 @@ address    name
 000004f4   ti_sysbios_knl_Task_defaultStackHeap__C
 000004f8   ti_sysbios_knl_Task_defaultStackSize__C
 000004fc   ti_sysbios_knl_Task_numConstructedTasks__C
-00000500   ti_sysbios_family_arm_cc26xx_Boot_overrideDefaultBackdoorIOID__C
 00000502   ti_sysbios_family_arm_cc26xx_Timer_Module__id__C
 00000504   ti_sysbios_family_arm_cc26xx_TimestampProvider_useClockTimer__C
 00000506   ti_sysbios_family_arm_m3_Hwi_Module__id__C
@@ -1628,7 +1619,6 @@ address    name
 00001c14   xdc_runtime_Startup_sfxnTab__A
 00001c38   xdc_runtime_Startup_sfxnRts__A
 00001c4c   xdc_runtime_Startup_firstFxns__A
-00001c55   ti_sysbios_family_arm_cc26xx_Boot_checkBackdoor
 00001d55   ti_sysbios_family_arm_cc26xx_Boot_useLFXTAL
 00001d7d   ti_sysbios_family_arm_cc26xx_Boot_trimDevice
 0001ffb4   __ccfg
@@ -1948,7 +1938,6 @@ address    name
 20000600   ti_sysbios_knl_Task_Instance_State_0_stack__A
 20000e00   ti_sysbios_heaps_HeapMem_Instance_State_0_buf__A
 20000e40   ti_sysbios_family_arm_m3_Hwi_dispatchTable
-20000e5c   ti_sysbios_family_arm_cc26xx_Boot_backdoorActivated
 20000e60   ti_sysbios_family_arm_cc26xx_Timer_Module__root__V
 20000e68   ti_sysbios_family_arm_m3_Hwi_Module__root__V
 20000e70   ti_sysbios_family_arm_m3_Hwi_Object__table__V

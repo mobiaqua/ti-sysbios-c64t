@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -102,6 +102,15 @@ Void Hwi_post(UInt intNum)
 Bool Hwi_getStackInfo(Hwi_StackInfo *stkInfo, Bool computeStackDepth)
 {
     return(Hwi_HwiProxy_getStackInfo(stkInfo, computeStackDepth));
+}
+
+/*
+ *  ======== Hwi_getCoreStackInfo ========
+ */
+Bool Hwi_getCoreStackInfo(Hwi_StackInfo *stkInfo, Bool computeStackDepth,
+    UInt coreId)
+{
+    return(Hwi_HwiProxy_getCoreStackInfo(stkInfo, computeStackDepth, coreId));
 }
 
 /*

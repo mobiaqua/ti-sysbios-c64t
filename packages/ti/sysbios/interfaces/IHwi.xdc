@@ -414,6 +414,77 @@ interface IHwi {
     Bool getStackInfo(StackInfo *stkInfo, Bool computeStackDepth);
 
     /*!
+     *  ======== getCoreStackInfo ========
+     *  Get Hwi stack usage Info for the specified coreId.
+     *
+     *  getCoreStackInfo returns the Hwi stack usage info for the specified
+     *  coreId to its calling function by filling stack base address,
+     *  stack size and stack peak fields in the {@link #StackInfo} structure.
+     *
+     *  This function should be used only in applications built with
+     *  {@link ti.sysbios.BIOS#smpEnabled} set to true.
+     *
+     *  getCoreStackInfo accepts three arguments, a pointer to a structure
+     *  of type {@link #StackInfo}, a boolean and a coreId. If the boolean
+     *  is set to true, the function computes the stack depth and fills the
+     *  stack peak field in the StackInfo structure. If a stack overflow
+     *  is detected, the stack depth is not computed. If the boolean is
+     *  set to false, the function only checks for a stack overflow.
+     *
+     *  The isr stack is always checked for an overflow and a boolean
+     *  is returned to indicate whether an overflow occured.
+     *
+     *  Below is an example of calling getCoreStackInfo() API:
+     *
+     *  @p(code)
+     *  #include <ti/sysbios/BIOS.h>
+     *  #include <ti/sysbios/hal/Hwi.h>
+     *  #include <ti/sysbios/hal/Core.h>
+     *  #include <ti/sysbios/knl/Task.h>
+     *
+     *  ...
+     *
+     *  Void idleTask()
+     *  {
+     *      UInt idx;
+     *      Hwi_StackInfo stkInfo;
+     *      Bool stackOverflow = FALSE;
+     *
+     *      // Request stack depth for each core's Hwi stack and check for
+     *      // overflow
+     *      for (idx = 0; idx < Core_numCores; idx++) {
+     *          stackOverflow = Hwi_getCoreStackInfo(&stkInfo, TRUE, idx);
+     *
+     *          // Alternately, we can omit the request for stack depth and
+     *          // request only the stack base and stack size (the check for
+     *          // stack overflow is always performed):
+     *          //
+     *          // stackOverflow = Hwi_getCoreStackInfo(&stkInfo, FALSE, idx);
+     *
+     *          if (stackOverflow) {
+     *              // isr Stack Overflow detected
+     *          }
+     *      }
+     *  }
+     *
+     *  Int main(Int argc, char* argv[])
+     *  {
+     *      ...
+     *      BIOS_start();
+     *      return (0);
+     *  }
+     *  @p
+     *
+     *  @param(stkInfo)     pointer to structure of type {@link #StackInfo}
+     *  @param(computeStackDepth)       decides whether to compute stack depth
+     *  @param(coreId)      core whose stack info needs to be retrieved
+     *
+     *  @b(returns)         boolean to indicate a stack overflow
+     */
+    Bool getCoreStackInfo(StackInfo *stkInfo, Bool computeStackDepth,
+        UInt coreId);
+
+    /*!
      *  ======== startup ========
      *  Initially enable interrupts
      *

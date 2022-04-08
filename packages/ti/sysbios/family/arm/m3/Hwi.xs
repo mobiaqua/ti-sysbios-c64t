@@ -1032,6 +1032,9 @@ function viewGetStackInfo()
         }
         else {
             var size = Program.getSymbolValue("__STACK_SIZE");
+	    if (size == -1) {
+		size = Program.getSymbolValue("__TI_STACK_SIZE");
+	    }
             var stackBase = Program.getSymbolValue("__stack");
         }
         var stackData = Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UChar', isScalar: true}, stackBase, size);

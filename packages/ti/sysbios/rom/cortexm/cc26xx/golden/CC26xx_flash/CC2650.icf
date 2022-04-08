@@ -139,7 +139,6 @@ place at address mem:0x00001378 {readonly section .const_ti_sysbios_knl_Idle_fun
 place at address mem:0x00001070 {readonly section .const_ti_sysbios_family_arm_m3_Hwi_Object__PARAMS__C};
 place at address mem:0x0000148e {readonly section .const_xdc_runtime_Text_isLoaded__C};
 place at address mem:0x00001270 {readonly section .const_ti_sysbios_knl_Clock_Object__DESC__C};
-place at address mem:0x00001380 {readonly section .const_ti_sysbios_family_arm_cc26xx_Boot_alternateBackdoorIOID__C};
 place at address mem:0x000014d8 {readonly section .const_ti_sysbios_knl_Mailbox_Instance_State_dataQue__O};
 place at address mem:0x00001140 {readonly section .const_ti_sysbios_gates_GateMutex_Module__FXNS__C};
 place at address mem:0x000014ec {readonly section .const_ti_sysbios_knl_Task_Module_State_inactiveQ__O};
@@ -164,7 +163,6 @@ place at address mem:0x000013b0 {readonly section .const_ti_sysbios_family_arm_m
 place at address mem:0x00001390 {readonly section .const_ti_sysbios_family_arm_m3_Hwi_NUM_INTERRUPTS__C};
 place at address mem:0x00001448 {readonly section .const_xdc_runtime_Main_Module__diagsMask__C};
 place at address mem:0x000013e4 {readonly section .const_ti_sysbios_knl_Swi_Object__table__C};
-place at address mem:0x00001404 {readonly section .const_ti_sysbios_family_arm_cc26xx_Boot_overrideDefaultBackdoorIOID__C};
 place at address mem:0x0000148a {readonly section .const_xdc_runtime_Memory_Module__id__C};
 place at address mem:0x00001000 {readonly section .const_ti_sysbios_knl_Task_Object__PARAMS__C};
 place at address mem:0x00001348 {readonly section .const_ti_sysbios_gates_GateMutex_Object__PARAMS__C};

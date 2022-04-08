@@ -50,12 +50,15 @@
 #include <inc/hw_aux_tdc.h>
 #include <inc/hw_ddi_0_osc.h>
 #include <inc/hw_ddi.h>
+#include <inc/hw_ccfg.h>
 
 #define AUX_TDC_SEMAPHORE_NUMBER        1  /* semaphore 1 protects TDC */
-#define NUM_RCOSC_LF_PERIODS_TO_MEASURE 8  /* x RCOSC_LF periods vs XOSC_HF */
+#define NUM_RCOSC_LF_PERIODS_TO_MEASURE 32 /* x RCOSC_LF periods vs XOSC_HF */
 #define NUM_RCOSC_HF_PERIODS_TO_MEASURE 1  /* x RCOSC_HF periods vs XOSC_HF */
 #define ACLK_REF_SRC_RCOSC_HF           0  /* Use RCOSC_HF for ACLK REF */
 #define ACLK_REF_SRC_RCOSC_LF           2  /* Use RCOSC_LF for ACLK REF */
+
+#define SCLK_LF_OPTION_RCOSC_LF         3  /* defined in cc26_ccfg.xls */
 
 #define DDI_0_OSC_O_CTL1_LOCAL                   0x00000004     /* offset */
 #define DDI_0_OSC_CTL1_RCOSCHFCTRIMFRACT_LOCAL_M 0x007C0000     /* mask */
@@ -87,7 +90,8 @@ static Void updateSubSecInc(UInt32 tdcResult);
 
 /* static globals */
 static UInt32 calibrateStep;
-static Bool doLF;
+static Bool doLF = FALSE;
+static Bool firstLF = TRUE;
 static Int32 nDeltaFreqCurr;
 static Int32 nCtrimCurr;
 static Int32 nCtrimFractCurr;
@@ -115,6 +119,7 @@ Bool Power_initiateCalibration()
 {
     Bool status;
     Bool gotSem;
+    UInt32 ccfgLfClkSrc;
 
     /* set contraints to prohibit powering down during calibration sequence */
     Power_setConstraint(Power_SB_DISALLOW);
@@ -123,12 +128,16 @@ Bool Power_initiateCalibration()
     /* set dependency to keep XOSC_HF active during calibration sequence */
     Power_setDependency(XOSC_HF);
 
-    /* check to see if should do LF measurement */
-    if (OSCClockSourceGet(OSC_SRC_CLK_LF) == OSC_XOSC_LF) {
-        doLF = FALSE;
+    /* read the LF clock source from CCFG */
+    ccfgLfClkSrc = (HWREG(CCFG_BASE + CCFG_O_MODE_CONF) &
+        CCFG_MODE_CONF_SCLK_LF_OPTION_M) >> CCFG_MODE_CONF_SCLK_LF_OPTION_S;
+
+    /* check to see if should do RCOSC_LF calibration,  */
+    if (ccfgLfClkSrc == SCLK_LF_OPTION_RCOSC_LF) {
+        doLF = TRUE;
     }
     else {
-        doLF = TRUE;
+        doLF = FALSE;
     }
 
     /* initiate acquisition of semaphore protecting TDC */
@@ -404,17 +413,31 @@ static Void tdcPerformRcOscMeasurement(UInt32 refClkSrc, UInt32 numEdgesToCount)
  */
 static Void updateSubSecInc(UInt32 tdcResult)
 {
+    UInt32 newSubSecInc;
+    UInt32 oldSubSecInc;
+    UInt32 subSecInc;
+
     /*
      * Calculate the new SUBSECINC
-     * Here's the formula:
-     *     AON_RTC:SUBSECINC = 2^38 / (8 * 48e6 / NR)
-     *                     = 2^25 * NR / (3 * 5^6)
-     *                     = 2^25 * NR / 46875
-     *                     ~ (45813 * NR) / 64
+     * Here's the formula: AON_RTC:SUBSECINC = (45813 * NR) / 256
      */
-    UInt32 subSecInc = (45813 * tdcResult) / 64;
+    newSubSecInc = (45813 * tdcResult) / 256;
 
-    /* update SUBSECINC registers */
+    /* Apply filter, but not for first calibration */
+    if (firstLF) {
+        /* Don't apply filter first time, to converge faster */
+        subSecInc = newSubSecInc;
+        /* No longer first measurement */
+        firstLF = FALSE;
+    }
+    else {
+        /* Read old SUBSECINC value */
+        oldSubSecInc = HWREG(AON_RTC_BASE + AON_RTC_O_SUBSECINC) & 0x00FFFFFF;
+        /* Apply filter, 0.5 times old value, 0.5 times new value */
+        subSecInc = (oldSubSecInc * 1 + newSubSecInc * 1) / 2;
+    }
+
+    /* Update SUBSECINC values */
     HWREG(AUX_WUC_BASE + AUX_WUC_O_RTCSUBSECINC0) = subSecInc;
     HWREG(AUX_WUC_BASE + AUX_WUC_O_RTCSUBSECINC1) = subSecInc >> 16;
 

@@ -108,7 +108,6 @@
  *  then look at this array in CCS.  To compile the Timer code
  *  with this array, set TESTING to non-zero.
  */
-#define TESTING 0
 
 
 /*
@@ -121,9 +120,17 @@
  *  counter LSW rolls over about every 36 hours.  The values below
  *  will cut that time by a factor of (2 ** UPPERSHIFT).
  */
+#ifdef CC32XX_TIMER_TEST
+
+#define USE_LOWER_ROLLOVER 1
+#define TESTING 1
+#else
 #define USE_LOWER_ROLLOVER 0
+#define TESTING 0
+#endif
 
 #if USE_LOWER_ROLLOVER
+
 #define ROLLOVER       0x00100000
 #define LOWERMASK      0x000FFFFF
 #define UPPERSHIFT     12

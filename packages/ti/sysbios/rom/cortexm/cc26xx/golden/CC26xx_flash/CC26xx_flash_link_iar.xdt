@@ -12,7 +12,6 @@
 --keep ti_sysbios_family_arm_m3_Hwi_Object__PARAMS__C
 --keep xdc_runtime_Text_isLoaded__C
 --keep ti_sysbios_knl_Clock_Object__DESC__C
---keep ti_sysbios_family_arm_cc26xx_Boot_alternateBackdoorIOID__C
 --keep ti_sysbios_knl_Mailbox_Instance_State_dataQue__O
 --keep ti_sysbios_gates_GateMutex_Module__FXNS__C
 --keep ti_sysbios_knl_Task_Module_State_inactiveQ__O
@@ -37,7 +36,6 @@
 --keep ti_sysbios_family_arm_m3_Hwi_NUM_INTERRUPTS__C
 --keep xdc_runtime_Main_Module__diagsMask__C
 --keep ti_sysbios_knl_Swi_Object__table__C
---keep ti_sysbios_family_arm_cc26xx_Boot_overrideDefaultBackdoorIOID__C
 --keep xdc_runtime_Memory_Module__id__C
 --keep ti_sysbios_knl_Task_Object__PARAMS__C
 --keep ti_sysbios_gates_GateMutex_Object__PARAMS__C

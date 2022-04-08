@@ -32,7 +32,7 @@
 #pragma CODE_SECTION(Boot_initSharedRAMs, ".text:.bootCodeSection")
 #pragma CODE_SECTION(Boot_bootCPU2, ".text:.bootCodeSection")
 #pragma CODE_SECTION(Boot_configurePllDivs, ".text:.bootCodeSection")
-#pragma CODE_SECTION(Boot_initFlash, ".ti_catalog_c2800_initF2837x_flashfuncs")
+#pragma CODE_SECTION(Boot_initFlash, ".text:ti_catalog_c2800_initF2837x_flashfuncs")
 #endif
 
 extern Fxn Boot_limpAbort();

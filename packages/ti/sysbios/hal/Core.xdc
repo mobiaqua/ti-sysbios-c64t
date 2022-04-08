@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,12 +67,9 @@ module Core inherits ti.sysbios.interfaces.ICore
     /*!
      *  ======== lock ========
      *  acquire Inter-core lock.
-     *
-     *  @a(constraints)
-     *  This function should always be called with interrupts disabled.
      */
     @Macro
-    override Void lock();
+    override IArg lock();
 
     /*!
      *  ======== unlock ========

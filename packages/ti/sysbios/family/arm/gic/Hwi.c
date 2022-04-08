@@ -105,6 +105,15 @@ Int Hwi_Module_startup (Int startupPhase)
     Hwi_initIntControllerCore0();
 
     /*
+     * Round up Core 0's isrStackBase address to align with the cache line size
+     */
+    if (BIOS_smpEnabled) {
+        /* Cache line size on Cortex-A15 is 64 bytes */
+        Hwi_module->isrStackBase =
+            (Ptr)(((UInt32)(Hwi_module->isrStackBase) + 64) & 0xFFFFFFC0);
+    }
+
+    /*
      * Initialize the pointer to the isrStack.
      *
      * The dispatcher's SP must be aligned on a long word boundary
@@ -113,7 +122,7 @@ Int Hwi_Module_startup (Int startupPhase)
         if (i == 0) {
             Hwi_module->isrStack[i] =
                 (Char *) (((UInt32) (Hwi_module->isrStackBase) & 0xFFFFFFF8) +
-                (UInt32) (Hwi_module->isrStackSize[0]) - (2 * sizeof(Int)));
+                (UInt32) (Hwi_module->isrStackSize) - (2 * sizeof(Int)));
             /*
              * Signal that we're executing on the ISR stack.
              */
@@ -122,7 +131,7 @@ Int Hwi_Module_startup (Int startupPhase)
         else {
             Hwi_module->isrStack[i] =
                 (Char *) (((UInt32) Hwi_module->hwiStack[i] & 0xFFFFFFF8) +
-                (UInt32) (Hwi_module->isrStackSize[i]) - (2 * sizeof(Int)));
+                (UInt32) (Hwi_module->isrStackSize) - (2 * sizeof(Int)));
             Hwi_module->taskSP[i] = (Char *)0;
         }
     }
@@ -870,28 +879,49 @@ Void Hwi_switchFromBootStack()
  */
 Bool Hwi_getStackInfo(Hwi_StackInfo *stkInfo, Bool computeStackDepth)
 {
-    UInt hwiKey;
-    UInt coreId;
     Char *isrSP;
     Bool stackOverflow;
 
     /* Copy the stack base address and size */
-    if (BIOS_smpEnabled) {
-        hwiKey = Core_hwiDisable();
-        coreId = Core_getId();
-        if (coreId == 0) {
-            stkInfo->hwiStackSize = (SizeT)Hwi_module->isrStackSize[0];
-            stkInfo->hwiStackBase = Hwi_module->isrStackBase;
-        }
-        else {
-            stkInfo->hwiStackSize = (SizeT)Hwi_module->isrStackSize[coreId];
-            stkInfo->hwiStackBase = Hwi_module->hwiStack[coreId];
-        }
-        Core_hwiRestore(hwiKey);
+    stkInfo->hwiStackSize = (SizeT)Hwi_module->isrStackSize;
+    stkInfo->hwiStackBase = Hwi_module->isrStackBase;
+
+    isrSP = stkInfo->hwiStackBase;
+
+    /* Check for stack overflow */
+    stackOverflow = (*isrSP != (Char)0xbe ? TRUE : FALSE);
+
+    if (computeStackDepth && !stackOverflow) {
+        /* Compute stack depth */
+        do {
+        } while(*isrSP++ == (Char)0xbe);
+        stkInfo->hwiStackPeak = stkInfo->hwiStackSize -
+                    (SizeT)(--isrSP - (Char *)stkInfo->hwiStackBase);
     }
     else {
-        stkInfo->hwiStackSize = (SizeT)Hwi_module->isrStackSize[0];
+        stkInfo->hwiStackPeak = 0;
+    }
+
+    return stackOverflow;
+}
+
+/*
+ *  ======== Hwi_getCoreStackInfo ========
+ *  Used to get Hwi stack usage info on the specified core.
+ */
+Bool Hwi_getCoreStackInfo(Hwi_StackInfo *stkInfo, Bool computeStackDepth,
+    UInt coreId)
+{
+    Char *isrSP;
+    Bool stackOverflow;
+
+    /* Copy the stack base address and size */
+    stkInfo->hwiStackSize = (SizeT)Hwi_module->isrStackSize;
+    if (coreId == 0) {
         stkInfo->hwiStackBase = Hwi_module->isrStackBase;
+    }
+    else {
+        stkInfo->hwiStackBase = Hwi_module->hwiStack[coreId];
     }
 
     isrSP = stkInfo->hwiStackBase;
@@ -1084,14 +1114,8 @@ Void Hwi_setHookContext(Hwi_Object *hwi, Int id, Ptr hookContext)
 #if (ti_sysbios_BIOS_smpEnabled__D)
 UInt Hwi_disableFxn()
 {
-    UInt key;
-
-    key = Core_hwiDisable();
-
     /* acquire Inter-core lock */
-    Core_lock();
-
-    return (key);
+    return (Core_lock());
 }
 #else
 UInt __attribute__ ((naked)) Hwi_disableFxn()
@@ -1110,7 +1134,11 @@ UInt __attribute__ ((naked)) Hwi_disableFxn()
 #if (ti_sysbios_BIOS_smpEnabled__D)
 Void Hwi_restoreFxn(UInt key)
 {
+    /* Test IRQ bit */
     if ((key & 0x80) == 0) {
+        /* call Core_unlock() with interrupt disabled */
+        Core_hwiDisable();
+
         /* release Inter-core lock */
         Core_unlock();
     }
@@ -1137,7 +1165,12 @@ Void __attribute__ ((naked)) Hwi_restoreFxn(UInt key)
 #if (ti_sysbios_BIOS_smpEnabled__D)
 UInt Hwi_enableFxn()
 {
+    /* call Core_unlock() with interrupt disabled */
+    Core_hwiDisable();
+
+    /* release Inter-core lock */
     Core_unlock();
+
     return (Core_hwiEnable());
 }
 #else
@@ -1256,13 +1289,13 @@ Void Hwi_dispatchIRQC(Hwi_Irp irp)
          * IRQ Handler is disabled on exception entry
          * in secure state
          */
-        Hwi_enable();
+        Core_hwiEnable();
     }
 
     /* call user's ISR func */
     (hwi->fxn)(hwi->arg);
 
-    Hwi_disable();
+    Core_hwiDisable();
 
     /* Signal End of Interrupt */
     if (Hwi_enableSecureMode) {

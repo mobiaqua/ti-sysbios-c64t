@@ -1,6 +1,6 @@
 %%{
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2014-2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,16 +38,12 @@
 
 #include <inc/hw_types.h>
 
-%if (Boot.checkBackdoor == true) {
-volatile unsigned ti_sysbios_family_arm_cc26xx_Boot_backdoorActivated = 0;
-%}
-
 %if (Boot.customerConfig == true) {
 /* pull default CCFG from driverlib */
 #include "startup_files/ccfg.c"
 %}
 
-%if (Boot.trimDevice == true || Boot.checkBackdoor == true) {
+%if (Boot.trimDevice == true) {
 %   if (Program.build.target.$name.match(/ti/)) {
 extern Void _c_int00();
 

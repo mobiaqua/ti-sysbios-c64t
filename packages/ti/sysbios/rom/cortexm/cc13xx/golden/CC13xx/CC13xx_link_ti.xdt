@@ -12,7 +12,6 @@
 -u ti_sysbios_family_arm_m3_Hwi_Object__PARAMS__C
 -u xdc_runtime_Text_isLoaded__C
 -u ti_sysbios_knl_Clock_Object__DESC__C
--u ti_sysbios_family_arm_cc26xx_Boot_alternateBackdoorIOID__C
 -u ti_sysbios_knl_Mailbox_Instance_State_dataQue__O
 -u ti_sysbios_gates_GateMutex_Module__FXNS__C
 -u ti_sysbios_knl_Task_Module_State_inactiveQ__O
@@ -37,7 +36,6 @@
 -u ti_sysbios_family_arm_m3_Hwi_NUM_INTERRUPTS__C
 -u xdc_runtime_Main_Module__diagsMask__C
 -u ti_sysbios_knl_Swi_Object__table__C
--u ti_sysbios_family_arm_cc26xx_Boot_overrideDefaultBackdoorIOID__C
 -u xdc_runtime_Memory_Module__id__C
 -u ti_sysbios_knl_Task_Object__PARAMS__C
 -u ti_sysbios_gates_GateMutex_Object__PARAMS__C
@@ -448,7 +446,6 @@ SECTIONS
     .const:ti_sysbios_family_arm_m3_Hwi_Object__PARAMS__C: LOAD > 0x00001070
     .const:xdc_runtime_Text_isLoaded__C: LOAD > 0x0000148e
     .const:ti_sysbios_knl_Clock_Object__DESC__C: LOAD > 0x00001270
-    .const:ti_sysbios_family_arm_cc26xx_Boot_alternateBackdoorIOID__C: LOAD > 0x00001380
     .const:ti_sysbios_knl_Mailbox_Instance_State_dataQue__O: LOAD > 0x000014d8
     .const:ti_sysbios_gates_GateMutex_Module__FXNS__C: LOAD > 0x00001140
     .const:ti_sysbios_knl_Task_Module_State_inactiveQ__O: LOAD > 0x000014ec
@@ -473,7 +470,6 @@ SECTIONS
     .const:ti_sysbios_family_arm_m3_Hwi_NUM_INTERRUPTS__C: LOAD > 0x00001390
     .const:xdc_runtime_Main_Module__diagsMask__C: LOAD > 0x00001448
     .const:ti_sysbios_knl_Swi_Object__table__C: LOAD > 0x000013e4
-    .const:ti_sysbios_family_arm_cc26xx_Boot_overrideDefaultBackdoorIOID__C: LOAD > 0x00001404
     .const:xdc_runtime_Memory_Module__id__C: LOAD > 0x0000148a
     .const:ti_sysbios_knl_Task_Object__PARAMS__C: LOAD > 0x00001000
     .const:ti_sysbios_gates_GateMutex_Object__PARAMS__C: LOAD > 0x00001348

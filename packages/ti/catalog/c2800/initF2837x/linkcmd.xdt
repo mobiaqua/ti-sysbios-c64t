@@ -40,7 +40,7 @@
 
 
 SECTIONS {
-    .ti_catalog_c2800_initF2837x_flashfuncs : LOAD = `Boot.loadSegment`,
+    .text:ti_catalog_c2800_initF2837x_flashfuncs : LOAD = `Boot.loadSegment`,
                                               RUN = `Boot.runSegment`,
                                               table(BINIT)
 }

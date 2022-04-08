@@ -331,6 +331,7 @@ var biosPackages = [
     "ti.sysbios.io",
     "ti.sysbios.knl",
     "ti.sysbios.misc",
+    "ti.sysbios.posix",
     "ti.sysbios.rta",
     "ti.sysbios.rts",
     "ti.sysbios.rts.gnu",
@@ -374,7 +375,14 @@ function getDefaultCustomCCOpts()
         customCCOpts = customCCOpts.replace("-Wall","");
     }
     else if (Program.build.target.$name.match(/iar/)) {
-        customCCOpts += " --mfc -Ohs ";
+        var iarDevice = Program.cpu.deviceName.toUpperCase();
+        /* optimize for size with cc13xx and cc26xx devices */
+        if (iarDevice.match(/CC26/) || iarDevice.match(/CC13/)) {
+            customCCOpts += " --mfc -Ohz ";
+        }
+        else {
+            customCCOpts += " --mfc -Ohs ";
+        }
     }
     else {
         /* ti targets do program level compile */
@@ -390,6 +398,7 @@ function getDefaultCustomCCOpts()
         }
         else if (Program.build.target.$name.match(/iar/)) {
             customCCOpts = customCCOpts.replace("-Ohs","--debug");
+            customCCOpts = customCCOpts.replace("-Ohz","--debug");
         }
         else {
             customCCOpts = customCCOpts.replace(" -o3","");
@@ -522,6 +531,7 @@ function getDefs()
          */
         defs += " -Dti_sysbios_utils_Load_taskEnabled__D=" + (Load.taskEnabled ? "TRUE" : "FALSE");
         defs += " -Dti_sysbios_utils_Load_swiEnabled__D=" + (Load.swiEnabled ? "TRUE" : "FALSE");
+        defs += " -Dti_sysbios_utils_Load_hwiEnabled__D=" + (Load.hwiEnabled ? "TRUE" : "FALSE");
     }
 
     if (Hwi.dispatcherSwiSupport) {
@@ -688,6 +698,17 @@ function getCFiles(target)
             if (packageMatch && mod.common$.outPolicy == Types.SEPARATE_FILE) {
                 biosSources += cfgBase + mn + "_config.c ";
             }
+        }
+
+        /* suppress inclusion of redundant xdc.runtime library */
+        var rtsLib = xdc.loadPackage(Program.build.target.$orig.rts);
+        if ('Settings' in rtsLib) {
+            rtsLib.Settings.bootOnly = true;
+        }
+        else {
+            this.$logError(
+                    "Must use xdctools 3.26.00.19 or newer",
+                    this);
         }
     }
 

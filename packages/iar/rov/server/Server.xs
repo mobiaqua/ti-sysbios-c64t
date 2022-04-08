@@ -581,7 +581,7 @@ function retrieveModuleList()
     });
 
     /* Loop through the modules and tabs list */
-    for each(var module in moduleNames) {
+    for each (var module in moduleNames) {
         var tabs = Program.getSupportedTabs(module);
         var len = 0;
         var modflag = true;
@@ -590,9 +590,9 @@ function retrieveModuleList()
         while (len < tabs.length) {
             var tab = tabs[len];
             len++;
-	    if (tab.name == "CallStacks") {
-	        continue;
-	    }
+            if (tab.name == "CallStacks" && this.clientVers < 2) {
+                continue;
+            }
 
             /* Ugly boolean flag, should implement this logic better */
             if (modflag) {

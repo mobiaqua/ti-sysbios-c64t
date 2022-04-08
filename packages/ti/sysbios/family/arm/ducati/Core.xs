@@ -38,6 +38,8 @@ var Hwi = null;
 var Core = null;
 var BIOS = null;
 var Task = null;
+var Build = null;
+var HalHwi = null;
 var Memory = null;
 var Startup = null;
 
@@ -141,11 +143,13 @@ function module$use()
 {
     Hwi = xdc.module("ti.sysbios.family.arm.m3.Hwi");
     Task = xdc.module('ti.sysbios.knl.Task');
+    Build = xdc.module('ti.sysbios.Build');
     TaskSupport = xdc.module('ti.sysbios.family.arm.m3.TaskSupport');
     BIOS = xdc.module('ti.sysbios.BIOS');
     Memory = xdc.module('xdc.runtime.Memory');
     Power = xdc.module('ti.sysbios.family.arm.ducati.smp.Power');
     Startup = xdc.useModule('xdc.runtime.Startup');
+    HalHwi = xdc.module('ti.sysbios.hal.Hwi');
 
     Core.common$.fxntab = false;
 
@@ -219,6 +223,8 @@ function module$use()
         /* install our atexit func */
         var System = xdc.module('xdc.runtime.System');
         System.atexitMeta(Core.atexit);
+
+        Core.initStackFlag = HalHwi.initStackFlag;
     }
     else {
         Startup.lastFxns.$add(Core.startCore1);
@@ -238,5 +244,8 @@ function module$static$init(mod, params)
     mod.exitFlag = false;
     mod.gateEntered[0] = false;
     mod.gateEntered[1] = false;
-}
 
+    /* add -D to compile line to optimize exception code */
+    Build.ccArgs.$add("-Dti_sysbios_family_arm_ducati_Core_initStackFlag__D=" +
+        (Core.initStackFlag ? "TRUE" : "FALSE"));
+}

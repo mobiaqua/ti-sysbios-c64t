@@ -638,16 +638,6 @@ module Task
         msg: "A_badAffinity: Invalid affinity."
     };
 
-    /*! Asserted in Task_setAffinity */
-    config Assert.Id A_setAffinityTaskDisabled = {
-        msg: "A_setAffinityTaskDisabled: Cannot call Task_setAffinity() while the Task scheduler is disabled."
-    };
-
-    /*! Asserted in Task_setPri */
-    config Assert.Id A_setPriTaskDisabled = {
-        msg: "A_setPriTaskDisabled: Cannot call Task_setPri() while the Task scheduler is disabled."
-    };
-
     /*! Asserted in Task_sleep */
     config Assert.Id A_sleepTaskDisabled = {
         msg: "A_sleepTaskDisabled: Cannot call Task_sleep() while the Task scheduler is disabled."

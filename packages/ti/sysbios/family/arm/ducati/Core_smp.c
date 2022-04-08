@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,6 +55,8 @@
 #define INTERRUPT_CORE_0        0x40001000
 #define INTERRUPT_CORE_1        0x40001002
 #define INTER_CORE_INTNUM       19
+
+extern Void ti_sysbios_hal_Hwi_initStack(Void);
 
 /*
  *  ======== Timer_Module_startup ========
@@ -153,6 +155,11 @@ Void Core_core1Startup()
     /* split thread and handler stacks */
     Hwi_initStacks(&Core_module->core1HwiStack[Core_core1HwiStackSize - 1]);
 
+    /* Initialize this core's Hwi stack to enable stack checking */
+    if (Core_initStackFlag) {
+        ti_sysbios_hal_Hwi_initStack();
+    }
+
     /* set the priority and enable the inter-core interrupt */
     Hwi_nvic.IPR[INTER_CORE_INTNUM-16] = 0xff;
     Hwi_nvic.ISER[0] = 1 << ((INTER_CORE_INTNUM-16) & 0x1f);
@@ -187,16 +194,9 @@ Void Core_atexit(Int arg)
 /*
  *  ======== Core_lock ========
  */
-Void Core_lock()
+IArg Core_lock()
 {
-    UInt coreId;
-
-    coreId = Core_getId();
-
-    if (!(Core_module->gateEntered[coreId])) {
-        GateSmp_enter(Core_gate);
-        Core_module->gateEntered[coreId] = TRUE;
-    }
+    return (GateSmp_enter(Core_gate));
 }
 
 /*
@@ -204,24 +204,17 @@ Void Core_lock()
  */
 Void Core_unlock()
 {
-    UInt hwiKey, coreId;
-
-    /* Hwi_disable() */
-    hwiKey = _set_interrupt_priority(Hwi_disablePriority);
-
-    coreId = Core_getId();
-
     // TODO Check BIOS.swiEnabled and BIOS.taskEnabled before using
     //      Task_enabled() and Swi_enabled() APIs.
-    if (Core_module->gateEntered[coreId]) {
-        if (Task_enabled() && Swi_enabled()) {
-            GateSmp_leave(Core_gate, 0);
-            Core_module->gateEntered[coreId] = FALSE;
-        }
+    if (Task_enabled() && Swi_enabled()) {
+        GateSmp_leave(Core_gate, 0);
     }
-
-    /* Hwi_restore() */
-    _set_interrupt_priority(hwiKey);
 }
 
-
+/*
+ *  ======== Core_getCore1HwiStackBase ========
+ */
+Ptr Core_getCore1HwiStackBase()
+{
+    return ((Ptr)(Core_module->core1HwiStack));
+}

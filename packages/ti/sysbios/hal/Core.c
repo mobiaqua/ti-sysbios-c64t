@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -71,9 +71,9 @@ Void ti_sysbios_hal_Core_interruptCore__E(UInt coreId)
  *  ======== Core_lock ========
  *  provided for backward compatibility
  */
-Void ti_sysbios_hal_Core_lock__E()
+IArg ti_sysbios_hal_Core_lock__E()
 {
-    Core_CoreProxy_lock();
+    return (Core_CoreProxy_lock());
 }
 
 /*

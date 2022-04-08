@@ -59,7 +59,7 @@ function module$use()
 
     /* Add the following registers for these devices */
     if (Program.cpu.deviceName.match(/^MSP430FR57(39|37|35|33|31|29|27|25|23|21)/i) ||
-        Program.cpu.deviceName.match(/^MSP430FR5(9|8)6\d/i)) {
+        Program.cpu.deviceName.match(/^MSP430FR5(9|8)/i)) {
 
         PinMux.forceSetDefaultRegister.$add({ register : "p3out"  , regForceSet : true  });
         PinMux.forceSetDefaultRegister.$add({ register : "p3sel0" , regForceSet : false });

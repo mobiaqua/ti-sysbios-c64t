@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2014-2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,11 +53,7 @@
 
 #include "package/internal/Timer.xdc.h"
 
-#if ti_sysbios_family_arm_cc26xx_Boot_driverlibVersion == 2 
 #define COMPARE_MARGIN 4
-#else
-#define COMPARE_MARGIN 5
-#endif
 
 #define MAX_SKIP  (0x7E9000000000)    /* 32400 seconds (9 hours) */
 
@@ -473,7 +469,7 @@ UInt32 Timer_getCurrentTick(Timer_Object *obj, Bool saveFlag)
      * to avoid accumulating drift, make currCount be an integer
      * multiple of timer periods
      */
-    currCount = currCount - (currCount % obj->period64);
+    currCount = tick * obj->period64;
     
     if (saveFlag != 0) {
         obj->savedCurrCount = currCount;

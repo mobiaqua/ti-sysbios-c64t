@@ -271,13 +271,6 @@ module Power inherits ti.sysbios.interfaces.IPower
 
     /*!
      *  @_nodoc
-     *  ======== enableVCOLDOPG2 ========
-     *  Enable PG2.0 leakage reduction?
-     */
-    config Bool enableVCOLDOPG2 = false;
-
-    /*!
-     *  @_nodoc
      *   Wakeup Clock object's function.  Default is Power_defaultClockFunc.
      */
     config Clock.FuncPtr clockFunc = Power.defaultClockFunc;

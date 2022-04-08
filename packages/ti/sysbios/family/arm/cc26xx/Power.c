@@ -70,7 +70,7 @@
 #include <driverlib/cpu.h>
 #include <driverlib/vims.h>
 #include <driverlib/sys_ctrl.h>
-#include <driverlib/driverlib_ver.h>
+#include <driverlib/driverlib_release.h>
 
 #include "package/internal/Power.xdc.h"
 
@@ -80,11 +80,6 @@
 #define CLK_LF_XOSC_HF  0x000000
 
 #define SUPPORT_DELAYED_COMPLETE 0
-
-#if ti_sysbios_family_arm_cc26xx_Boot_driverlibVersion == 2
-extern void Pg2LeakageWorkaroundStage1(void);
-extern void Pg2LeakageWorkaroundStage2(bool bEnterPowerdown);
-#endif
 
 extern volatile UInt8 ti_sysbios_family_arm_cc26xx_Power_constraintCounts[
    Power_NUMCONSTRAINTS];
@@ -167,7 +162,7 @@ Void Power_LF_clockFunc(UArg arg)
  */
 Int ti_sysbios_family_arm_cc26xx_Power_Module_startup(Int status)
 {
-    DRIVERLIB_ASSERT_CURR_VERSION();
+    DRIVERLIB_ASSERT_CURR_RELEASE();
 
     /* enable cache (in case boot ROM doesn't because of HIB) */
     HWREG(VIMS_BASE + VIMS_O_CTL) = ((HWREG(VIMS_BASE + VIMS_O_CTL) &
@@ -608,20 +603,14 @@ Power_Status Power_shutdown(UArg arg)
             HWREG(AON_RTC_BASE + AON_RTC_O_SYNC);
 
             /* wait until AUX powered off */
-            while (AONWUCPowerStatus() & AONWUC_AUX_POWER_ON);
+            while (AONWUCPowerStatusGet() & AONWUC_AUX_POWER_ON);
 
             /* request to power off MCU when go to deep sleep */
             PRCMMcuPowerOff();
 
             /* turn off power domains inside MCU VD (BUS, FL_BUS, RFC, CPU) */
-#if ti_sysbios_family_arm_cc26xx_Boot_driverlibVersion == 1
-            PRCMPowerDomainOff(PRCM_DOMAIN_RFCORE | PRCM_DOMAIN_SERIAL |
-                PRCM_DOMAIN_PERIPH | PRCM_DOMAIN_CPU | PRCM_DOMAIN_VIMS |
-                PRCM_DOMAIN_SYSBUS);
-#else
             PRCMPowerDomainOff(PRCM_DOMAIN_RFCORE | PRCM_DOMAIN_SERIAL |
                 PRCM_DOMAIN_PERIPH | PRCM_DOMAIN_CPU | PRCM_DOMAIN_VIMS);
-#endif
 
             /* deep sleep to activate shutdown */
             PRCMDeepSleep();
@@ -653,9 +642,6 @@ Power_Status Power_sleep(Power_SleepState sleepState, UArg arg0, UArg arg1)
     UInt taskKey;
     UInt swiKey;
     UInt hwiKey;
-#if ti_sysbios_family_arm_cc26xx_Boot_driverlibVersion == 1
-    UInt edgeKey;
-#endif
 
     /* first validate the sleep code */
     if ( sleepState != Power_STANDBY) {
@@ -736,11 +722,6 @@ Power_Status Power_sleep(Power_SleepState sleepState, UArg arg0, UArg arg1)
                 if (Power_getDependencyCount(DOMAIN_PERIPH)) {
                     poweredDomains |= PRCM_DOMAIN_PERIPH;
                 }
-#if ti_sysbios_family_arm_cc26xx_Boot_driverlibVersion == 1
-                if (Power_getDependencyCount(DOMAIN_SYSBUS)) {
-                    poweredDomains |= PRCM_DOMAIN_SYSBUS;
-                }
-#endif
 
                 /* gate running deep sleep clocks for Crypto and DMA */
                 if (Power_getDependencyCount(PERIPH_CRYPTO)) {
@@ -759,12 +740,6 @@ Power_Status Power_sleep(Power_SleepState sleepState, UArg arg0, UArg arg1)
                 /* request power off of domains in the MCU voltage domain */
                 PRCMPowerDomainOff(poweredDomains | PRCM_DOMAIN_CPU);
 
-#if ti_sysbios_family_arm_cc26xx_Boot_driverlibVersion == 2
-                if (Power_enableVCOLDOPG2 == TRUE) {
-                    Pg2LeakageWorkaroundStage1();
-                }
-#endif
-
                 /* request uLDO during standby */
                 PRCMMcuUldoConfigure(true);
 
@@ -778,10 +753,10 @@ Power_Status Power_sleep(Power_SleepState sleepState, UArg arg0, UArg arg1)
                 if (retainCache == FALSE) {
                     modeVIMS = VIMSModeGet(VIMS_BASE);
                     /* wait if invalidate in progress... */
-                    while (modeVIMS == VIMS_MODE_INVALIDATE) {
+                    while (modeVIMS == VIMS_MODE_CHANGING) {
                         modeVIMS = VIMSModeGet(VIMS_BASE);
                     }
-                    PRCMRetentionDisable(PRCM_DOMAIN_VIMS);
+                    PRCMCacheRetentionDisable();
                     VIMSModeSet(VIMS_BASE, VIMS_MODE_OFF);
                 }
 
@@ -791,29 +766,13 @@ Power_Status Power_sleep(Power_SleepState sleepState, UArg arg0, UArg arg1)
                 /* make sure all writes have taken effect */
                 SysCtrlAonSync();
 
-#if ti_sysbios_family_arm_cc26xx_Boot_driverlibVersion == 2
-                if (Power_enableVCOLDOPG2 == TRUE) {
-                    Pg2LeakageWorkaroundStage2(true);
-
-                    /* wait to ensure RFCORE is off before deep sleep */
-                    while (PRCMPowerDomainStatus(PRCM_DOMAIN_RFCORE) !=
-                        PRCM_DOMAIN_POWER_OFF){};
-                }
-#endif
-
                 /* invoke deep sleep to go to STANDBY */
                 PRCMDeepSleep();
-
-#if ti_sysbios_family_arm_cc26xx_Boot_driverlibVersion == 2
-                if (Power_enableVCOLDOPG2 == TRUE) {
-                    Pg2LeakageWorkaroundStage1();
-                }
-#endif
 
                 /* if didn't retain cache in standby, re-enable retention now */
                 if (retainCache == FALSE) {
                     VIMSModeSet(VIMS_BASE, modeVIMS);
-                    PRCMRetentionEnable(PRCM_DOMAIN_VIMS);
+                    PRCMCacheRetentionEnable();
                 }
 
                 /* force power on of AUX to keep it on when system is not
@@ -822,33 +781,17 @@ Power_Status Power_sleep(Power_SleepState sleepState, UArg arg0, UArg arg1)
                  * force an update of all registers
                  */
                 AONWUCAuxWakeupEvent(AONWUC_AUX_WAKEUP);
-                while(!(AONWUCPowerStatus() & AONWUC_AUX_POWER_ON)) {};
+                while(!(AONWUCPowerStatusGet() & AONWUC_AUX_POWER_ON)) {};
 
                 /* if XOSC_HF was forced off above, initiate switch back */
                 if (xosc_hf_active == TRUE) {
                     ti_sysbios_family_arm_cc26xx_Power_XOSC_HF(ENABLE);
                 }
 
-#if ti_sysbios_family_arm_cc26xx_Boot_driverlibVersion == 2
-                if (Power_enableVCOLDOPG2 == TRUE) {
-                    /* restore power domain states, excluding RFCORE */
-                    PRCMPowerDomainOn(poweredDomains & (~PRCM_DOMAIN_RFCORE));
-                    while (PRCMPowerDomainStatus(poweredDomains &
-                                                 (~PRCM_DOMAIN_RFCORE)) !=
-                        PRCM_DOMAIN_POWER_ON){};
-                }
-                else {
-                    /* restore power domain states in effect before standby */
-                    PRCMPowerDomainOn(poweredDomains);
-                    while (PRCMPowerDomainStatus(poweredDomains) !=
-                        PRCM_DOMAIN_POWER_ON){};
-                }
-#else
                 /* restore power domain states in effect before standby */
                 PRCMPowerDomainOn(poweredDomains);
                 while (PRCMPowerDomainStatus(poweredDomains) !=
                     PRCM_DOMAIN_POWER_ON){};
-#endif
 
                 /* restore deep sleep clocks of Crypto and DMA */
                 if (Power_getDependencyCount(PERIPH_CRYPTO)) {
@@ -871,33 +814,6 @@ Power_Status Power_sleep(Power_SleepState sleepState, UArg arg0, UArg arg1)
             /* set transition state to EXITING_SLEEP */
             Power_module->state = Power_EXITING_SLEEP;
 
-#if ti_sysbios_family_arm_cc26xx_Boot_driverlibVersion == 1
-            /* disable edge detection interrupt since the latches will prevent
-               clearing of the event source */
-            /* NB - this is a PG1 workaround */
-            edgeKey = Hwi_disableInterrupt(INT_EDGE_DETECT);
-#endif
-
-            /* wait for power on AUX - this could be moved to after servicing
-             * interrupt if we are absolutely sure that the oscillator
-             * interface is NOT accesses in interrupt context
-             */
-            while(!(AONWUCPowerStatus() & AONWUC_AUX_POWER_ON))
-            { }
-
-#if ti_sysbios_family_arm_cc26xx_Boot_driverlibVersion == 2
-            if (Power_enableVCOLDOPG2 == TRUE) {
-                Pg2LeakageWorkaroundStage2(false);
-
-                /* if it was powered upon entry, turn back on the RF CORE */
-                if (poweredDomains & PRCM_DOMAIN_RFCORE) {
-                    PRCMPowerDomainOn(PRCM_DOMAIN_RFCORE);
-                    while (PRCMPowerDomainStatus(PRCM_DOMAIN_RFCORE) !=
-                        PRCM_DOMAIN_POWER_ON){};
-                }
-            }
-#endif
-
             /*
              * signal clients registered for early post-sleep notification;
              * this should be used to initialize any timing critical or IO
@@ -912,12 +828,6 @@ Power_Status Power_sleep(Power_SleepState sleepState, UArg arg0, UArg arg1)
             /* re-enable interrupts */
             CPUcpsie();
 
-#if ti_sysbios_family_arm_cc26xx_Boot_driverlibVersion == 1
-            /* restore edge detection interrupts - IO event flags can now be
-               cleared */
-            /* NB - this is a PG1 workaround */
-            Hwi_restoreInterrupt(INT_EDGE_DETECT, edgeKey);
-#endif
             /* signal all clients registered for late post-sleep notification */
             status = Power_notify(postEventLate);
 

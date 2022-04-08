@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,10 @@
 
 #include <xdc/std.h>
 #include <xdc/runtime/Error.h>
+
+#include <ti/sysbios/BIOS.h>
+#include <ti/sysbios/hal/Core.h>
+
 #include "package/internal/Hwi.xdc.h"
 
 extern Void ti_sysbios_hal_Hwi_initStack(Void);
@@ -75,7 +79,12 @@ Void ti_sysbios_hal_Hwi_initStack(Void)
     UArg curStack;
 
     /* Get stack base and size */
-    Hwi_getStackInfo(&stkInfo, FALSE);
+    if (BIOS_smpEnabled) {
+        Hwi_getCoreStackInfo(&stkInfo, FALSE, Core_getId());
+    }
+    else {
+        Hwi_getStackInfo(&stkInfo, FALSE);
+    }
 
 #ifdef xdc_target__isaCompatible_28
     curStack = (UArg)(stkInfo.hwiStackBase) + (SizeT)(stkInfo.hwiStackSize);
@@ -101,9 +110,17 @@ Void ti_sysbios_hal_Hwi_initStack(Void)
  */
 Void ti_sysbios_hal_Hwi_checkStack(Void)
 {
+    Bool overflow;
     Hwi_StackInfo stkInfo;
 
-    if (Hwi_getStackInfo(&stkInfo, FALSE)) {
+    if (BIOS_smpEnabled) {
+        overflow = Hwi_getCoreStackInfo(&stkInfo, FALSE, Core_getId());
+    }
+    else {
+        overflow = Hwi_getStackInfo(&stkInfo, FALSE);
+    }
+
+    if (overflow) {
         Error_raise(NULL, Hwi_E_stackOverflow, 0, 0);
     }
 }

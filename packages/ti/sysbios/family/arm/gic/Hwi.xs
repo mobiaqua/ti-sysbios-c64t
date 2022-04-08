@@ -423,14 +423,23 @@ function module$use()
 function module$static$init(mod, params)
 {
     var reg;
+    var align;
     var isrStackSize, fiqStackSize;
 
     for (reg = 0; reg < 32; reg++) {
         mod.iser[reg] = 0;
     }
 
-    /* Align to cache line size */
-    var align = 64;
+    if (BIOS.smpEnabled) {
+        /*
+         * In SMP mode align stack size to cache line size
+         * (Cache line size on Cortex-A15 is 64 bytes)
+         */
+        align = 64;
+    }
+    else {
+        align = 8;
+    }
 
     /*
      * round stackSize down to the nearest multiple of the alignment.
@@ -443,22 +452,21 @@ function module$static$init(mod, params)
     }
 
     mod.isrStackBase = $externPtr('__TI_STACK_BASE');
+    mod.isrStackSize = isrStackSize;
 
     mod.taskSP.length = Core.numCores;
     mod.isrStack.length = Core.numCores;
     mod.hwiStack.length = Core.numCores;
-    mod.isrStackSize.length = Core.numCores;
 
     for (var idx = 0; idx < Core.numCores; idx++) {
         mod.taskSP[idx] = null;
         mod.isrStack[idx] = null;
-        mod.isrStackSize[idx] = isrStackSize;
         if (idx == 0) {
             /* Use ".stack" for Core 0 */
             mod.hwiStack[0].length = 0;
         }
         else {
-            mod.hwiStack[idx].length = mod.isrStackSize[idx];
+            mod.hwiStack[idx].length = mod.isrStackSize;
             Memory.staticPlace(mod.hwiStack[idx], align,
                 params.irqStackSection);
         }

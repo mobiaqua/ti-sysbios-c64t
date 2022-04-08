@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,8 +42,9 @@
 /*
  *  ======== CoreNull_lock ========
  */
-Void CoreNull_lock()
+IArg CoreNull_lock()
 {
+    return (CoreNull_hwiDisable());
 }
 
 /*

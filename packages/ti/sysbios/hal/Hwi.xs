@@ -38,6 +38,7 @@ var Hwi = null;
 var Idle = null;
 var Startup = null;
 var BIOS = null;
+var Core = null;
 
 /*
  * ======== getCFiles ========
@@ -70,6 +71,8 @@ function module$use()
 {
     Hwi = this;
     Hwi.common$.fxntab = false;
+
+    Core = xdc.module('ti.sysbios.hal.Core');
 
     Startup = xdc.useModule('xdc.runtime.Startup');
 
@@ -196,7 +199,14 @@ function module$static$init(mod, params)
         }
 
         if ((Hwi.checkStackFlag == true) && (Hwi.initStackFlag == true)) {
-            Idle.funcList.$add("&ti_sysbios_hal_Hwi_checkStack"); 
+            if (BIOS.smpEnabled) {
+                for (var i = 0; i < Core.numCores; i++) {
+                    Idle.addCoreFunc("&ti_sysbios_hal_Hwi_checkStack", i);
+                }
+            }
+            else {
+                Idle.funcList.$add("&ti_sysbios_hal_Hwi_checkStack");
+            }
         }
     }
 }

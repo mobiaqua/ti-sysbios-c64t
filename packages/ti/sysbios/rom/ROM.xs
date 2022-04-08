@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -210,8 +210,8 @@ function _setRomName(field, val)
             RomModule = xdc.useModule('ti.sysbios.rom.cortexm.tm0sxx.TM0Sxx');
             break;
 
-        case ROM.POTENZA:
-            RomModule = xdc.useModule('ti.sysbios.rom.c28.potenza.Potenza');
+        case ROM.F28004x:
+            RomModule = xdc.useModule('ti.sysbios.rom.c28.f28004x.F28004x');
             break;
 
 	default:

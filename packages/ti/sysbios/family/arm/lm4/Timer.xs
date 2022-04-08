@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2014-2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,7 +75,8 @@ function module$use()
     BIOS = xdc.useModule('ti.sysbios.BIOS');
     Startup = xdc.useModule('xdc.runtime.Startup');
 
-    if (Program.cpu.deviceName.match(/^CC26/)) {
+    if (Program.cpu.deviceName.match(/^CC26/) ||
+        Program.cpu.deviceName.match(/^CC13/)) {
         Timer.supportsAltclk = false;
     }
 
@@ -83,7 +84,8 @@ function module$use()
         if (Program.cpu.deviceName.match(/^CC32/)) {
             Timer.enableFunc = '&ti_sysbios_family_arm_lm4_Timer_enableCC3200';
         }
-        else if (Program.cpu.deviceName.match(/^CC26/)) {
+        else if (Program.cpu.deviceName.match(/^CC26/) ||
+                 Program.cpu.deviceName.match(/^CC13/)) {
             xdc.useModule('ti.sysbios.family.arm.cc26xx.Power');
             Timer.enableFunc =
                 '&ti_sysbios_family_arm_cc26xx_TimerGPT_enable';
@@ -98,7 +100,8 @@ function module$use()
             Timer.disableFunc =
                 '&ti_sysbios_family_arm_lm4_Timer_disableCC3200';
         }
-        else if (Program.cpu.deviceName.match(/^CC26/)) {
+        else if (Program.cpu.deviceName.match(/^CC26/) ||
+                 Program.cpu.deviceName.match(/^CC13/)) {
             xdc.useModule('ti.sysbios.family.arm.cc26xx.Power');
             Timer.disableFunc =
                 '&ti_sysbios_family_arm_cc26xx_TimerGPT_disable';
@@ -190,7 +193,8 @@ function instance$static$init(obj, id, tickFxn, params)
     obj.startMode = params.startMode;
     obj.altclk = params.altclk;
 
-    if (Program.cpu.deviceName.match(/^CC26/)) {
+    if (Program.cpu.deviceName.match(/^CC26/) ||
+        Program.cpu.deviceName.match(/^CC13/)) {
         if (obj.altclk == 1) {
             Timer.$logError("Timer does not support altclk.", obj);
             return;

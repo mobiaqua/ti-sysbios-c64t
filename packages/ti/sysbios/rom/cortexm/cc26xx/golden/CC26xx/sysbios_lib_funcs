@@ -17,7 +17,6 @@
 00000000 g     F .text:ti_sysbios_BIOS_setCpuFreq__E	00000000 .hidden ti_sysbios_BIOS_setCpuFreq__E
 00000000 g     F .text:ti_sysbios_BIOS_setThreadType__E__mangled__	00000000 .hidden ti_sysbios_BIOS_setThreadType__E__mangled__
 00000000 g     F .text:ti_sysbios_BIOS_start__E__mangled__	00000000 .hidden ti_sysbios_BIOS_start__E__mangled__
-00000000 g     F .text:ti_sysbios_family_arm_cc26xx_Boot_checkBackdoor	00000000 .hidden ti_sysbios_family_arm_cc26xx_Boot_checkBackdoor
 00000000 g     F .text:ti_sysbios_family_arm_cc26xx_Boot_getBootReason__E	00000000 .hidden ti_sysbios_family_arm_cc26xx_Boot_getBootReason__E
 00000000 g     F .text:ti_sysbios_family_arm_cc26xx_Boot_trimDevice	00000000 .hidden ti_sysbios_family_arm_cc26xx_Boot_trimDevice
 00000000 g     F .text:ti_sysbios_family_arm_cc26xx_Timer_construct	00000000 .hidden ti_sysbios_family_arm_cc26xx_Timer_construct
@@ -180,6 +179,7 @@
 00000000 g     F .text:ti_sysbios_hal_Hwi_disableInterrupt__E__mangled__	00000000 .hidden ti_sysbios_hal_Hwi_disableInterrupt__E__mangled__
 00000000 g     F .text:ti_sysbios_hal_Hwi_enable__E:ti_sysbios_hal_Hwi_enable__E	00000000 .hidden ti_sysbios_hal_Hwi_enable__E
 00000000 g     F .text:ti_sysbios_hal_Hwi_enableInterrupt__E__mangled__	00000000 .hidden ti_sysbios_hal_Hwi_enableInterrupt__E__mangled__
+00000000 g     F .text:ti_sysbios_hal_Hwi_getCoreStackInfo__E	00000000 .hidden ti_sysbios_hal_Hwi_getCoreStackInfo__E
 00000000 g     F .text:ti_sysbios_hal_Hwi_getFunc__E	00000000 .hidden ti_sysbios_hal_Hwi_getFunc__E
 00000000 g     F .text:ti_sysbios_hal_Hwi_getHookContext__E	00000000 .hidden ti_sysbios_hal_Hwi_getHookContext__E
 00000000 g     F .text:ti_sysbios_hal_Hwi_getIrp__E	00000000 .hidden ti_sysbios_hal_Hwi_getIrp__E
@@ -193,6 +193,7 @@
 00000000 g     F .text:ti_sysbios_hal_Hwi_HwiProxy_disableInterrupt__E__mangled__	00000000 .hidden ti_sysbios_hal_Hwi_HwiProxy_disableInterrupt__E__mangled__
 00000000 g     F .text:ti_sysbios_hal_Hwi_HwiProxy_enable__E	00000000 .hidden ti_sysbios_hal_Hwi_HwiProxy_enable__E
 00000000 g     F .text:ti_sysbios_hal_Hwi_HwiProxy_enableInterrupt__E__mangled__	00000000 .hidden ti_sysbios_hal_Hwi_HwiProxy_enableInterrupt__E__mangled__
+00000000 g     F .text:ti_sysbios_hal_Hwi_HwiProxy_getCoreStackInfo__E	00000000 .hidden ti_sysbios_hal_Hwi_HwiProxy_getCoreStackInfo__E
 00000000 g     F .text:ti_sysbios_hal_Hwi_HwiProxy_getFunc__E	00000000 .hidden ti_sysbios_hal_Hwi_HwiProxy_getFunc__E
 00000000 g     F .text:ti_sysbios_hal_Hwi_HwiProxy_getHookContext__E	00000000 .hidden ti_sysbios_hal_Hwi_HwiProxy_getHookContext__E
 00000000 g     F .text:ti_sysbios_hal_Hwi_HwiProxy_getIrp__E	00000000 .hidden ti_sysbios_hal_Hwi_HwiProxy_getIrp__E

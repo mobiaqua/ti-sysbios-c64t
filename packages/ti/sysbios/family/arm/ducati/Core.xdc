@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -127,9 +127,17 @@ module Core inherits ti.sysbios.interfaces.ICore
      */
     UInt getIpuId();
 
+    /*!
+     *  @_nodoc
+     *  ======== getCore1HwiStackBase ========
+     */
+    Ptr getCore1HwiStackBase();
+
 internal:
 
     config GateSmp.Handle gate;
+
+    config Bool initStackFlag = true;
 
     /*
      *  ======== hwiFunc ========

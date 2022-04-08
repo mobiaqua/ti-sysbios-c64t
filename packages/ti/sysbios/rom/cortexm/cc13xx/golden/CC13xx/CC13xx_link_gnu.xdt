@@ -13,7 +13,6 @@ EXTERN(ti_sysbios_knl_Idle_funcList__C)
 EXTERN(ti_sysbios_family_arm_m3_Hwi_Object__PARAMS__C)
 EXTERN(xdc_runtime_Text_isLoaded__C)
 EXTERN(ti_sysbios_knl_Clock_Object__DESC__C)
-EXTERN(ti_sysbios_family_arm_cc26xx_Boot_alternateBackdoorIOID__C)
 EXTERN(ti_sysbios_knl_Mailbox_Instance_State_dataQue__O)
 EXTERN(ti_sysbios_gates_GateMutex_Module__FXNS__C)
 EXTERN(ti_sysbios_knl_Task_Module_State_inactiveQ__O)
@@ -38,7 +37,6 @@ EXTERN(ti_sysbios_family_arm_m3_TaskSupport_stackAlignment__C)
 EXTERN(ti_sysbios_family_arm_m3_Hwi_NUM_INTERRUPTS__C)
 EXTERN(xdc_runtime_Main_Module__diagsMask__C)
 EXTERN(ti_sysbios_knl_Swi_Object__table__C)
-EXTERN(ti_sysbios_family_arm_cc26xx_Boot_overrideDefaultBackdoorIOID__C)
 EXTERN(xdc_runtime_Memory_Module__id__C)
 EXTERN(ti_sysbios_knl_Task_Object__PARAMS__C)
 EXTERN(ti_sysbios_gates_GateMutex_Object__PARAMS__C)
@@ -449,7 +447,6 @@ SECTIONS
     .rodata_ti_sysbios_family_arm_m3_Hwi_Object__PARAMS__C 0x00001070 : AT (0x00001070) {*(.rodata_ti_sysbios_family_arm_m3_Hwi_Object__PARAMS__C)}
     .rodata_xdc_runtime_Text_isLoaded__C 0x0000148e : AT (0x0000148e) {*(.rodata_xdc_runtime_Text_isLoaded__C)}
     .rodata_ti_sysbios_knl_Clock_Object__DESC__C 0x00001270 : AT (0x00001270) {*(.rodata_ti_sysbios_knl_Clock_Object__DESC__C)}
-    .rodata_ti_sysbios_family_arm_cc26xx_Boot_alternateBackdoorIOID__C 0x00001380 : AT (0x00001380) {*(.rodata_ti_sysbios_family_arm_cc26xx_Boot_alternateBackdoorIOID__C)}
     .rodata_ti_sysbios_knl_Mailbox_Instance_State_dataQue__O 0x000014d8 : AT (0x000014d8) {*(.rodata_ti_sysbios_knl_Mailbox_Instance_State_dataQue__O)}
     .rodata_ti_sysbios_gates_GateMutex_Module__FXNS__C 0x00001140 : AT (0x00001140) {*(.rodata_ti_sysbios_gates_GateMutex_Module__FXNS__C)}
     .rodata_ti_sysbios_knl_Task_Module_State_inactiveQ__O 0x000014ec : AT (0x000014ec) {*(.rodata_ti_sysbios_knl_Task_Module_State_inactiveQ__O)}
@@ -474,7 +471,6 @@ SECTIONS
     .rodata_ti_sysbios_family_arm_m3_Hwi_NUM_INTERRUPTS__C 0x00001390 : AT (0x00001390) {*(.rodata_ti_sysbios_family_arm_m3_Hwi_NUM_INTERRUPTS__C)}
     .rodata_xdc_runtime_Main_Module__diagsMask__C 0x00001448 : AT (0x00001448) {*(.rodata_xdc_runtime_Main_Module__diagsMask__C)}
     .rodata_ti_sysbios_knl_Swi_Object__table__C 0x000013e4 : AT (0x000013e4) {*(.rodata_ti_sysbios_knl_Swi_Object__table__C)}
-    .rodata_ti_sysbios_family_arm_cc26xx_Boot_overrideDefaultBackdoorIOID__C 0x00001404 : AT (0x00001404) {*(.rodata_ti_sysbios_family_arm_cc26xx_Boot_overrideDefaultBackdoorIOID__C)}
     .rodata_xdc_runtime_Memory_Module__id__C 0x0000148a : AT (0x0000148a) {*(.rodata_xdc_runtime_Memory_Module__id__C)}
     .rodata_ti_sysbios_knl_Task_Object__PARAMS__C 0x00001000 : AT (0x00001000) {*(.rodata_ti_sysbios_knl_Task_Object__PARAMS__C)}
     .rodata_ti_sysbios_gates_GateMutex_Object__PARAMS__C 0x00001348 : AT (0x00001348) {*(.rodata_ti_sysbios_gates_GateMutex_Object__PARAMS__C)}

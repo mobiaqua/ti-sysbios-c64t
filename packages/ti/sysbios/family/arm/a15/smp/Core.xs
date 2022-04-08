@@ -37,6 +37,8 @@ var Hwi = null;
 var Core = null;
 var BIOS = null;
 var Task = null;
+var Build = null;
+var HalHwi = null;
 var Memory = null;
 var System = null;
 var Startup = null;
@@ -89,9 +91,11 @@ function module$use()
 {
     Hwi = xdc.module('ti.sysbios.family.arm.gic.Hwi');
     Task = xdc.module('ti.sysbios.knl.Task');
+    Build = xdc.module('ti.sysbios.Build');
     Memory = xdc.module('xdc.runtime.Memory');
     System = xdc.useModule('xdc.runtime.System');
     Startup = xdc.useModule('xdc.runtime.Startup');
+    HalHwi = xdc.module('ti.sysbios.hal.Hwi');
 
     Core.common$.fxntab = false;
 
@@ -126,6 +130,8 @@ function module$use()
     if (Core.resetSection == null) {
         Core.resetSection = ".text";
     }
+
+    Core.initStackFlag = HalHwi.initStackFlag;
 }
 
 /*
@@ -151,4 +157,8 @@ function module$static$init(mod, params)
     }
 
     mod.notifyLock = false;
+
+    /* add -D to compile line to optimize exception code */
+    Build.ccArgs.$add("-Dti_sysbios_family_arm_a15_smp_Core_initStackFlag__D=" +
+        (Core.initStackFlag ? "TRUE" : "FALSE"));
 }

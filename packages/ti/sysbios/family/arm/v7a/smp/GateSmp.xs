@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -72,9 +72,9 @@ function module$use()
 function instance$static$init(obj, params)
 {
     obj.gateWord = 0;
+    obj.owner = (~0);
 
     /* Init stats */
-    obj.owner = (~0);
     obj.stalls = 0;
     obj.noStalls = 0;
     obj.totalStalls = 0;

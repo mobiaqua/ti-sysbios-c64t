@@ -10,6 +10,11 @@
 #include <`ROM.otherLibIncludes[i]`>
 %   }
 
+%   if (ROM.otherLibFuncs.length != 0) {
+/*
+ *  non BIOS library functions referenced from within the ROM
+ */
+%   }
 %   for (var i = 0; i < ROM.otherLibFuncs.length; i++) {
 %       if (Program.build.target.$name.match(/iar/)) {
 #pragma location=".const_ti_sysbios_rom_ROM_`ROM.otherLibFuncs[i]`"
@@ -25,6 +30,11 @@ xdc_Void * const ti_sysbios_rom_ROM_`ROM.otherLibFuncs[i]` = (xdc_Void *)NOROM_`
 
 %       }
 %   }
+%   if (ROM.excludedFuncs.length != 0) {
+/*
+ *  functions explicitly excluded from the ROM
+ */
+%   }
 %   for (var i = 0; i < ROM.excludedFuncs.length; i++) {
 %       if (Program.build.target.$name.match(/iar/)) {
 #pragma location=".const_ti_sysbios_rom_ROM_`ROM.excludedFuncs[i]`"
@@ -33,12 +43,22 @@ xdc_Void * const ti_sysbios_rom_ROM_`ROM.otherLibFuncs[i]` = (xdc_Void *)NOROM_`
 xdc_Void * const ti_sysbios_rom_ROM_`ROM.excludedFuncs[i]` __attribute__((section (".rodata_ti_sysbios_rom_ROM_`ROM.excludedFuncs[i]`")));
 %       }
 %       else {
+%           if (Program.build.target.$name.match(/C28/)) {
+#pragma DATA_SECTION(ti_sysbios_rom_ROM_`ROM.excludedFuncs[i]`, ".econst:ti_sysbios_rom_ROM_`ROM.excludedFuncs[i]`");
+%           }
+%           else {
 #pragma DATA_SECTION(ti_sysbios_rom_ROM_`ROM.excludedFuncs[i]`, ".const:ti_sysbios_rom_ROM_`ROM.excludedFuncs[i]`");
+%           }
 %       }
 xdc_Void * const ti_sysbios_rom_ROM_`ROM.excludedFuncs[i]` = (xdc_Void *)`ROM.excludedFuncs[i]`;
 %       if (i < ROM.excludedFuncs.length) {
 
 %       }
+%   }
+%   if (ROM.generatedFuncs.length != 0) {
+/*
+ *  generated functions referenced from within the ROM
+ */
 %   }
 %   for (var i = 0; i < ROM.generatedFuncs.length; i++) {
 %       if (Program.build.target.$name.match(/iar/)) {
@@ -63,12 +83,29 @@ xdc_Void * const ti_sysbios_rom_ROM_`ROM.generatedFuncs[i]` = (xdc_Void *)`ROM.g
 %   if ((ROM.excludedFuncs.length != 0) && 
 %	(Build.buildROM == true) && 
 %	(Build.buildROMApp == false)) {
+%       if (Program.build.target.$name.match(/C28/)) {
 /*
  * The following asm functions are provided during the ROM build phase
  * so that any references to the symbols in ROM.excludedFuncs[]
  * can be resolved when linking rom.obj.
  */
-%       for (var i = 0; i < ROM.excludedFuncs.length; i++) {
+%           for (var i = 0; i < ROM.excludedFuncs.length; i++) {
+asm("\n"
+"   .sect \".text:`ROM.excludedFuncs[i]`\"\n"
+"   .clink\n"
+"   .global _`ROM.excludedFuncs[i]`\n"
+"   .global _`ROM.excludedFuncs[i]`__mangled__\n"
+"_`ROM.excludedFuncs[i]`:\n"
+"   movl    xar4, #_`ROM.excludedFuncs[i]`__mangled__\n"
+"   lcr     *xar4\n"
+"   lretr\n");
+%               if (i < ROM.excludedFuncs.length) {
+
+%               }
+%           }
+%       }
+%       else {
+%           for (var i = 0; i < ROM.excludedFuncs.length; i++) {
 asm("\n"
 "   .sect \".text:`ROM.excludedFuncs[i]`\"\n"
 "   .clink\n"
@@ -80,8 +117,9 @@ asm("\n"
 "   ldr pc, `ROM.excludedFuncs[i]`c\n"
 "`ROM.excludedFuncs[i]`c: \n"
 "   .word  `ROM.excludedFuncs[i]`__mangled__\n");
-%           if (i < ROM.excludedFuncs.length) {
+%               if (i < ROM.excludedFuncs.length) {
 
+%               }
 %           }
 %       }
 %   }

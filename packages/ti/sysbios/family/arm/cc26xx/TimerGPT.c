@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2014-2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,6 +67,9 @@ Void ti_sysbios_family_arm_cc26xx_TimerGPT_enable(Int id)
                 break;
     }
 
+    /* declare the disallow standby constraint while GP timer is in use */
+    Power_setConstraint(Power_SB_DISALLOW);
+
     Hwi_restore(key);
 }
 
@@ -95,6 +98,9 @@ Void ti_sysbios_family_arm_cc26xx_TimerGPT_disable(Int id)
         default:
                 break;
     }
+
+    /* release the disallow standby constraint when the GP timer is disabled */
+    Power_releaseConstraint(Power_SB_DISALLOW);
 
     Hwi_restore(key);
 }

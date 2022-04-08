@@ -11,7 +11,6 @@
 00000170 g     O .sysbios_rom_const	00000030 .hidden ti_sysbios_family_arm_m3_Hwi_Object__PARAMS__C
 0000058a g     O .sysbios_rom_const	00000002 .hidden xdc_runtime_Text_isLoaded__C
 00000370 g     O .sysbios_rom_const	00000020 .hidden ti_sysbios_knl_Clock_Object__DESC__C
-00000480 g     O .sysbios_rom_const	00000004 .hidden ti_sysbios_family_arm_cc26xx_Boot_alternateBackdoorIOID__C
 000005d4 g     O .sysbios_rom_const	00000004 .hidden ti_sysbios_knl_Mailbox_Instance_State_dataQue__O
 00000240 g     O .sysbios_rom_const	00000024 .hidden ti_sysbios_gates_GateMutex_Module__FXNS__C
 000005e8 g     O .sysbios_rom_const	00000004 .hidden ti_sysbios_knl_Task_Module_State_inactiveQ__O
@@ -36,7 +35,6 @@
 00000490 g     O .sysbios_rom_const	00000004 .hidden ti_sysbios_family_arm_m3_Hwi_NUM_INTERRUPTS__C
 00000544 g     O .sysbios_rom_const	00000004 .hidden xdc_runtime_Main_Module__diagsMask__C
 000004e0 g     O .sysbios_rom_const	00000004 .hidden ti_sysbios_knl_Swi_Object__table__C
-00000500 g     O .sysbios_rom_const	00000002 .hidden ti_sysbios_family_arm_cc26xx_Boot_overrideDefaultBackdoorIOID__C
 00000586 g     O .sysbios_rom_const	00000002 .hidden xdc_runtime_Memory_Module__id__C
 00000100 g     O .sysbios_rom_const	0000003c .hidden ti_sysbios_knl_Task_Object__PARAMS__C
 00000448 g     O .sysbios_rom_const	00000018 .hidden ti_sysbios_gates_GateMutex_Object__PARAMS__C

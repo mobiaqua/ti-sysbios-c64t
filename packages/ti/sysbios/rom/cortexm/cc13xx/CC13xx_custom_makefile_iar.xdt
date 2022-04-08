@@ -1,6 +1,6 @@
 %%{
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -184,6 +184,7 @@ CC_LIB = `CGEN`/bin/`TARGET.cc.cmd` `CCOPTS_LIB` -I `CGEN`/include
 
 %var CCOPTS_PP = BIOS.getCCOpts(TARGET.name).toString().replace(/\-o3/," ");
 %CCOPTS_PP = CCOPTS_PP.toString().replace("-Ohs","");
+%CCOPTS_PP = CCOPTS_PP.toString().replace("-Ohz","");
 %CCOPTS_PP = CCOPTS_PP.toString().replace("-Dti_sysbios_family_arm_m3_Hwi_enableException__D=FALSE","");
 %CCOPTS_PP = CCOPTS_PP.toString().replace("-Dti_sysbios_family_arm_m3_Hwi_disablePriority__D=32U","");
 %CCOPTS_PP = CCOPTS_PP.toString().replace("\$(rootDir)",CGEN);
@@ -265,12 +266,4 @@ mangled_`libPP`: `s`
 	@echo Library build complete.
 
 clean:
-%if (environment["os.name"].match(/Windows.*/i)) {
-	@$(DEL) ..\makefile.libs
-%}
-%else {
-	@-$(call RM, *.asm)
 	@-$(call RM, *.obj)
-	@-$(call RM, sysbios.arm3)
-	@-$(call RM, *.pp)
-%}

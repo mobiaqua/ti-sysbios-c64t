@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,15 +64,16 @@ interface ICore
     Void interruptCore(UInt coreId);
 
     /*!
+     *  @_nodoc
      *  ======== lock ========
-     *  acquire Inter-core lock.
+     *  acquire Inter-core lock and locally disable interrupts.
      *
-     *  @a(constraints)
-     *  This function should always be called with interrupts disabled.
+     *  @b(returns)     opaque key for use by Hwi_restore() or Core_hwiRestore()
      */
-    Void lock();
+    IArg lock();
 
     /*!
+     *  @_nodoc
      *  ======== unlock ========
      *  release Inter-core lock.
      */

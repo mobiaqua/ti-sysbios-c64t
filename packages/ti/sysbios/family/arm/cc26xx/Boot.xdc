@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2014-2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,43 +53,6 @@ module Boot
      *  Set to false to disable trimming of the device during boot.
      */
     metaonly config Bool trimDevice = true;
-
-    /*!
-     *  @_nodoc
-     *
-     *  Include backdoor mechanism for device recovery, default is false.
-     *
-     *  Set to true to include backdoor check.
-     */
-    metaonly config Bool checkBackdoor = false;
-
-    /*!
-     *  @_nodoc
-     *
-     *  Override the backdoor default IOID, default is false.
-     *
-     *  Set to true to override the default IOID; specify the alternate
-     *  IOID to be used with {@link #alternateBackdoorIOID
-     *  Boot_alternateBackdoorIOID}.
-     */
-    config Bool overrideDefaultBackdoorIOID = false;
-
-    /*!
-     *  @_nodoc
-     *
-     *  Alternate backdoor IOID (i.e., the alternative physical pin
-     *  to be used for activating the backdoor).
-     *
-     *  The alternate IOID is used when {@link #overrideDefaultBackdoor
-     *  Boot_overrideDefaultBackdoorIOID} is set to 'true'.  For example:
-     *
-     *  @p(code)
-     *  Boot.overrideDefaultBackdoorIOID = true;
-     *  Boot.alternateBackdoorIOID = 7;
-     *  @p
-     *
-     */
-    config UInt32 alternateBackdoorIOID = 0;
 
     /*!
      *  Include a default customer configuration (CCFG) structure, default is

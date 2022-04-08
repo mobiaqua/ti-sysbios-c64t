@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -158,9 +158,9 @@ internal:
     /* -------- Internal Structures -------- */
     struct Instance_State {
         volatile UInt32 gateWord;
+        volatile UInt   owner;
 
         /* below are for stats collection */
-        UInt            owner;
         UInt            stalls;
         UInt            noStalls;
         UInt            totalStalls;

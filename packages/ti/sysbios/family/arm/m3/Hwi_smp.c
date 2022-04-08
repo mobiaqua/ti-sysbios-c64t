@@ -45,8 +45,8 @@
 
 #include <ti/sysbios/interfaces/IHwi.h>
 
-#include <ti/sysbios/hal/Core.h>
-//#include <ti/sysbios/family/arm/ducati/Core.h>
+//#include <ti/sysbios/hal/Core.h>
+#include <ti/sysbios/family/arm/ducati/Core.h>
 #define ti_sysbios_knl_Task__internalaccess
 #include <ti/sysbios/knl/Task.h>
 #include <ti/sysbios/knl/Swi.h>
@@ -424,14 +424,8 @@ Void Hwi_startup()
  */
 UInt Hwi_disableFxn()
 {
-    UInt key;
-
-    key = Core_hwiDisable();
-
     /* acquire Inter-core lock */
-    Core_lock();
-
-    return (key);
+    return (Core_lock());
 }
 
 /*
@@ -440,9 +434,13 @@ UInt Hwi_disableFxn()
 Void Hwi_restoreFxn(UInt key)
 {
     if (key == 0) {
+        /* call Core_unlock() with interrupts disabled */
+        Core_hwiDisable();
+
         /* release Inter-core lock */
         Core_unlock();
     }
+
     Core_hwiRestore(key);
 }
 
@@ -451,7 +449,12 @@ Void Hwi_restoreFxn(UInt key)
  */
 UInt Hwi_enableFxn()
 {
+    /* call Core_unlock() with interrupts disabled */
+    Core_hwiDisable();
+
+    /* release Inter-core lock */
     Core_unlock();
+
     return (Core_hwiEnable());
 }
 
@@ -654,6 +657,44 @@ Bool Hwi_getStackInfo(Hwi_StackInfo *stkInfo, Bool computeStackDepth)
     /* Copy the stack base address and size */
     stkInfo->hwiStackSize = Hwi_module->isrStackSize;
     stkInfo->hwiStackBase = Hwi_module->isrStackBase;
+
+    isrSP = stkInfo->hwiStackBase;
+
+    /* Check for stack overflow */
+    stackOverflow = (*isrSP != (Char)0xbe ? TRUE : FALSE);
+
+    if (computeStackDepth && !stackOverflow) {
+        /* Compute stack depth */
+        do {
+        } while(*isrSP++ == (Char)0xbe);
+        stkInfo->hwiStackPeak = stkInfo->hwiStackSize - (SizeT)(--isrSP - (Char *)stkInfo->hwiStackBase);
+    }
+    else {
+        stkInfo->hwiStackPeak = 0;
+    }
+
+    return stackOverflow;
+}
+
+/*
+ *  ======== Hwi_getCoreStackInfo ========
+ *  Used to get Hwi stack usage info on the specified core
+ */
+Bool Hwi_getCoreStackInfo(Hwi_StackInfo *stkInfo, Bool computeStackDepth,
+    UInt coreId)
+{
+    Char *isrSP;
+    Bool stackOverflow;
+
+    /* Copy the stack base address and size */
+    if (coreId == 0) {
+        stkInfo->hwiStackSize = Hwi_module->isrStackSize;
+        stkInfo->hwiStackBase = Hwi_module->isrStackBase;
+    }
+    else {
+        stkInfo->hwiStackSize = Core_core1HwiStackSize;
+        stkInfo->hwiStackBase = Core_getCore1HwiStackBase();
+    }
 
     isrSP = stkInfo->hwiStackBase;
 

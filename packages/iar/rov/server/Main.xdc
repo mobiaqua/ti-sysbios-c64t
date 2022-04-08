@@ -1,5 +1,5 @@
 /* --COPYRIGHT--,EPL
- *  Copyright (c) 2012-2014 Texas Instruments Incorporated
+ *  Copyright (c) 2012-2015 Texas Instruments Incorporated
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -38,6 +38,7 @@ metaonly module Main inherits xdc.tools.ICmd {
         ' ',
         'Usage',
         '[-e executable]',
+        '[--clientVersion <N>]',
         '[-m Module Tab]',
         '[-l]',
         '[--help]',
@@ -65,4 +66,14 @@ instance:
      */
     @CommandOption('list_all')
     config Bool listAll = false;
+
+    /*!
+     *  ======== clientVersion ========
+     *  The flag that signals client's capabilities
+     *
+     *  Older DLLs weren't able to properly display Task.CallStacks view. The
+     *  clients of the version 2 and higher can display that view.
+     */
+    @CommandOption('clientVersion')
+    config UInt clientVersion = 1;
 }

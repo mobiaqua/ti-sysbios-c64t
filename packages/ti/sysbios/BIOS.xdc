@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -400,12 +400,26 @@ module BIOS
     metaonly config String customCCOpts;
 
     /*!
+     *  ======== includeXdcRuntime ========
+     *  Include xdc.runtime sources in custom built library 
+     *
+     *  By default, the xdc.runtime library sources are not included in the
+     *  custom SYS/BIOS library created for the application. Instead,
+     *  the pre-built xdc.runtime ibrary is provided by the respective target
+     *  used to build the application.
+     *
+     *  Setting this parameter to true will cause the xdc.runtime library
+     *  sources to be included in the custom SYS/BIOS library. This setting
+     *  yields the most efficient library in both code size and runtime
+     *  performance.
+     */
+    metaonly config Bool includeXdcRuntime = false;
+
+    /*!
      *  ======== smpEnabled ========
      *  Enables multi core SMP task scheduling
      *
-     *  Currently, this functionality is only supported on the dual core
-     *  Cortex M3/M4 Ducati/Benelli subsystems embedded in several TI
-     *  SOC devices.
+     *  This functionality is available on only select multi-core devices.
      *
      *  More information about SMP/BIOS is provided here:
      *  {@link http://processors.wiki.ti.com/index.php/SMP/BIOS SMP/BIOS}.
@@ -852,12 +866,6 @@ internal:
      *  false = building internal instrumented/nonInstrumented lib
      */
     metaonly config Bool buildingAppLib = true;
-
-    /*
-     *  ======== includeXdcRuntime ========
-     *  Include xdc.runtime sources in custom build
-     */
-    metaonly config Bool includeXdcRuntime = false;
 
     /*
      *  ======== libDir ========

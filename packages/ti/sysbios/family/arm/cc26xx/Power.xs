@@ -48,7 +48,7 @@ var Hwi = null;
  */
 function getCFiles(targetName)
 {
-    return (["Power.c", "Power_standbyPolicy.c", "Power_calibrateRCOSC.c", "pg2_leakage_workaround.c", "TimerGPT.c" ]);
+    return (["Power.c", "Power_standbyPolicy.c", "Power_calibrateRCOSC.c", "TimerGPT.c" ]);
 }
 
 /*

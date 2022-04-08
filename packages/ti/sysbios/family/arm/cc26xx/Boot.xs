@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2014-2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,10 +55,6 @@ function module$use()
 {
     var Reset = xdc.useModule('xdc.runtime.Reset');
     var Build = xdc.module("ti.sysbios.Build");
-
-    if (Boot.checkBackdoor == true) {
-        Reset.fxns[Reset.fxns.length++] = '&ti_sysbios_family_arm_cc26xx_Boot_checkBackdoor';
-    }
 
     if (Boot.trimDevice == true) {
         Reset.fxns[Reset.fxns.length++] = '&ti_sysbios_family_arm_cc26xx_Boot_trimDevice';

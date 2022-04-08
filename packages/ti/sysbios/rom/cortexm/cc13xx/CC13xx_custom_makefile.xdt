@@ -1,6 +1,6 @@
 %%{
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -258,12 +258,4 @@ mangled_`libPP`: `s`
 	@echo Library build complete.
 
 clean:
-%if (environment["os.name"].match(/Windows.*/i)) {
-	@$(DEL) ..\makefile.libs
-%}
-%else {
-	@-$(call RM, *.asm)
 	@-$(call RM, *.obj)
-	@-$(call RM, sysbios.aem3)
-	@-$(call RM, *.pp)
-%}        

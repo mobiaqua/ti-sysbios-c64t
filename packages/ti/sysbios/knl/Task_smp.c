@@ -68,6 +68,34 @@
 
 extern Task_Module_StateSmp ti_sysbios_knl_Task_Module__stateSmp__V;
 
+#define SORT_RUNQ(newPri, coreId) {                                     \
+    /*                                                                  \
+     * Iterate through at most Core_NUM_CORES queue elems once to       \
+     * find the right position for a queue elem with priority newPri    \
+     */                                                                 \
+    Task_RunQEntry *runQIter =                                          \
+         Queue_head(Task_moduleSmp->sortedRunQ);                        \
+                                                                        \
+    while (((Queue_Elem *)runQIter !=                                   \
+            (Queue_Elem *)(Task_moduleSmp->sortedRunQ)) &&              \
+            (runQIter->priority < newPri)){                             \
+        runQIter = Queue_next((Queue_Elem *)runQIter);                  \
+    }                                                                   \
+                                                                        \
+    if ((Queue_Elem *)runQIter !=                                       \
+        (Queue_Elem *)&(Task_moduleSmp->smpRunQ[coreId])) {             \
+        /* Remove entry from queue */                                   \
+        Queue_remove((Queue_Elem *)&(Task_moduleSmp->smpRunQ[coreId])); \
+                                                                        \
+        /* Insert entry to new position */                              \
+        Queue_insert((Queue_Elem *)runQIter,                            \
+            (Queue_Elem *)&(Task_moduleSmp->smpRunQ[coreId]));          \
+    }                                                                   \
+                                                                        \
+    /* Update priority */                                               \
+    (Task_moduleSmp->smpRunQ[coreId]).priority = newPri;                \
+}
+
 /*
  *  Task Scheduling Rules
  *  =====================
@@ -158,7 +186,6 @@ Void Task_schedule()
     UInt curSetPriX;
     UInt curPriLocal;
     UInt curSetPriLocal;
-    Task_RunQEntry *runQIter;
     Task_RunQEntry *lowestPriRunQ;
     Bool earlyExit;
 
@@ -276,28 +303,7 @@ readyTasksLoop:
 
             /* Update the Sorted RunQ */
             if ((Task_moduleSmp->smpRunQ[coreId]).priority != newPri) {
-                /*
-                 * Iterate through at most Core_NUM_CORES queue elems once to
-                 * find the right position for a queue elem with priority newPri
-                 */
-                runQIter = Queue_head(Task_moduleSmp->sortedRunQ);
-
-                while (((Queue_Elem *)runQIter != (Queue_Elem *)(Task_moduleSmp->sortedRunQ)) &&
-                    (runQIter->priority < newPri)){
-                    runQIter = Queue_next((Queue_Elem *)runQIter);
-                }
-
-                if ((Queue_Elem *)runQIter != (Queue_Elem *)&(Task_moduleSmp->smpRunQ[coreId])) {
-                    /* Remove entry from queue */
-                    Queue_remove((Queue_Elem *)&(Task_moduleSmp->smpRunQ[coreId]));
-
-                    /* Insert entry to new position */
-                    Queue_insert((Queue_Elem *)runQIter,
-                        (Queue_Elem *)&(Task_moduleSmp->smpRunQ[coreId]));
-                }
-
-                /* Update priority */
-                (Task_moduleSmp->smpRunQ[coreId]).priority = newPri;
+                SORT_RUNQ(newPri, coreId);
             }
 
             if (Task_checkStackFlag) {
@@ -369,7 +375,7 @@ readyTasksLoop:
 UInt Task_setPri(Task_Object *tsk, Int priority)
 {
     Int oldPri;
-    UInt newMask, tskKey, hwiKey;
+    UInt newMask, tskKey, hwiKey, tskAffinity;
     Queue_Handle newQ;
     UInt coreId, curCoreId, otherCoreMask;
 
@@ -382,14 +388,6 @@ UInt Task_setPri(Task_Object *tsk, Int priority)
                        (UArg)tsk->priority, (UArg)priority);
 
     tskKey = Task_disable();
-
-    /*
-     * Verify that THIS core hasn't already disabled the scheduler
-     * so that the Task_restore() call at the end of this function
-     * will invoke the scheduler.
-     */
-    Assert_isTrue((tskKey == FALSE), Task_A_setPriTaskDisabled);
-
     hwiKey = Core_hwiDisable();
 
     coreId = Core_getId();
@@ -416,21 +414,24 @@ UInt Task_setPri(Task_Object *tsk, Int priority)
 
         /* if last task in readyQ, remove corresponding bit in curSet */
         if (Queue_empty(tsk->readyQ)) {
-            Task_module->smpCurSet[tsk->affinity] &= ~tsk->mask;
+            Task_module->smpCurSet[tsk->affinity] &= ~(tsk->mask);
         }
 
         /* place task at end of its readyQ */
         Queue_enqueue(newQ, (Queue_Elem *)tsk);
 
-        Task_module->smpCurSet[tsk->affinity] |= newMask;
+        tskAffinity = tsk->affinity;
+        Task_module->smpCurSet[tskAffinity] |= newMask;
 
-        if ((tsk->affinity != Core_numCores) &&
-            (newMask > Task_module->smpCurMask[tsk->affinity])) {
-            Task_module->workFlag |= (1 << tsk->affinity);
-            Core_interruptCore(tsk->affinity);
-        }
-        else {
+        if (tskAffinity == Core_numCores) {
             Task_module->workFlag |= (1 << coreId);
+        }
+        else if (newMask > Task_module->smpCurMask[tskAffinity]) {
+            Task_module->workFlag |= (1 << tskAffinity);
+
+            if (tskAffinity != coreId) {
+                Core_interruptCore(tskAffinity);
+            }
         }
     }
 
@@ -443,7 +444,14 @@ UInt Task_setPri(Task_Object *tsk, Int priority)
      * force a scheduling re-evaluation if the task is the currently
      * running task on any core
      */
-    if (Task_module->smpCurTask[curCoreId] == tsk) {
+    if (tsk->mode == Task_Mode_RUNNING) {
+        /*
+         * Update the Sorted RunQ now as the task switch may not happen
+         * in which case this function needs to explicitly re-sort the
+         * RunQ.
+         */
+        SORT_RUNQ(priority, curCoreId);
+
         if (curCoreId == coreId) {
             Task_module->smpCurMask[coreId] = newMask; /* force a Task switch */
             Task_module->workFlag |= (1 << coreId);
@@ -527,13 +535,6 @@ UInt Task_setAffinity(Task_Object *tsk, UInt newAffinity)
 
     coreId = Core_getId();
 
-    /*
-     * Verify that THIS core hasn't already disabled the scheduler
-     * so that the Task_restore() call at the end of this function
-     * will invoke the scheduler.
-     */
-    Assert_isTrue((tskKey == FALSE), Task_A_setAffinityTaskDisabled);
-
     hwiKey = Core_hwiDisable();
 
     oldAffinity = tsk->affinity;
@@ -583,6 +584,7 @@ UInt Task_setAffinity(Task_Object *tsk, UInt newAffinity)
             if (Queue_empty(oldQ)) {
                 Task_module->smpCurSet[oldAffinity] &= ~tskMask;
             }
+
             /* place task at end of its readyQ */
             Queue_enqueue(newQ, (Queue_Elem *)tsk);
             Task_module->smpCurSet[newAffinity] |= tskMask;
@@ -593,13 +595,15 @@ UInt Task_setAffinity(Task_Object *tsk, UInt newAffinity)
              * Need to run the scheduler to check if ready task
              * is eligible to start running.
              */
-            if ((tsk->affinity == Core_numCores) ||
-                (tsk->affinity == coreId)) {
+            if (newAffinity == Core_numCores) {
                 Task_module->workFlag |= (1 << coreId);
             }
-            else if (tsk->mask > Task_module->smpCurMask[tsk->affinity]) {
-                Task_module->workFlag |= (1 << tsk->affinity);
-                Core_interruptCore(tsk->affinity);
+            else if (tsk->mask > Task_module->smpCurMask[newAffinity]) {
+                Task_module->workFlag |= (1 << newAffinity);
+
+                if (newAffinity != coreId) {
+                    Core_interruptCore(newAffinity);
+                }
             }
             break;
 
@@ -619,10 +623,12 @@ UInt Task_setAffinity(Task_Object *tsk, UInt newAffinity)
 
                 /* force a Task switch */
                 Task_module->smpCurMask[coreId] = 0;
-                if (tsk->mask > Task_module->smpCurMask[tsk->affinity]) {
+                SORT_RUNQ(0, coreId);
+
+                if (tsk->mask > Task_module->smpCurMask[newAffinity]) {
                     Task_module->workFlag |=
-                        ((1 << tsk->affinity) | (1 << coreId));
-                    Core_interruptCore(tsk->affinity);
+                        ((1 << newAffinity) | (1 << coreId));
+                    Core_interruptCore(newAffinity);
                 }
                 else {
                     Task_module->workFlag |= (1 << coreId);
@@ -683,18 +689,20 @@ UInt Task_setAffinity(Task_Object *tsk, UInt newAffinity)
  */
 Void Task_blockI(Task_Object *tsk)
 {
-    UInt idx;
+    UInt curCoreId;
 
     Log_write2(Task_LD_block, (UArg)tsk, (UArg)tsk->fxn);
 
-    /* force a task switch */
-    for (idx = 0; idx < Core_numCores; idx++) {
-        if (Task_module->smpCurTask[idx] == tsk) {
-            Task_module->smpCurMask[idx] = 0;
-            Task_module->workFlag |= (1 << idx);
-            if (idx != Core_getId()) {
-                Core_interruptCore(idx);
-            }
+    if (tsk->mode == Task_Mode_RUNNING) {
+        curCoreId = tsk->curCoreId;
+
+        /* force a task switch */
+        Task_module->smpCurMask[curCoreId] = 0;
+        SORT_RUNQ(0, curCoreId);
+        Task_module->workFlag |= (1 << curCoreId);
+
+        if (curCoreId != Core_getId()) {
+            Core_interruptCore(curCoreId);
         }
     }
 
@@ -713,7 +721,8 @@ Void Task_unblockI(Task_Object *tsk, UInt hwiKey)
 {
     Int i;
     UInt coreId;
-    volatile UInt *cursetp = &Task_module->smpCurSet[tsk->affinity];
+    UInt tskAffinity = tsk->affinity;
+    volatile UInt *cursetp = &Task_module->smpCurSet[tskAffinity];
     UInt mask = tsk->mask;
 
     Queue_enqueue(tsk->readyQ, (Queue_Elem *)tsk);
@@ -722,19 +731,19 @@ Void Task_unblockI(Task_Object *tsk, UInt hwiKey)
     tsk->mode = Task_Mode_READY;
     coreId = Core_getId();
 
-    if ((tsk->affinity == Core_numCores) ||
-        (tsk->affinity == coreId)) {
+    if (tskAffinity == Core_numCores) {
         Task_module->workFlag |= (1 << coreId);
     }
-    else {
-        Task_module->workFlag |= (1 << tsk->affinity);
+    else if (mask > Task_module->smpCurMask[tskAffinity]) {
+        Task_module->workFlag |= (1 << tskAffinity);
 
         /*
          * Do not interrupt other core if creating/constructing a task in
          * main()
          */
-        if (BIOS_getThreadType() != BIOS_ThreadType_Main) {
-            Core_interruptCore(tsk->affinity);
+        if ((BIOS_getThreadType() != BIOS_ThreadType_Main) &&
+            (tskAffinity != coreId)) {
+            Core_interruptCore(tskAffinity);
         }
     }
 
@@ -753,6 +762,44 @@ Void Task_unblockI(Task_Object *tsk, UInt hwiKey)
 
     /* Hard-disable intrs - this fxn is called with them disabled */
     Hwi_disable();
+}
+
+/*
+ *  ======== Task_yield ========
+ */
+Void Task_yield()
+{
+    UInt tskKey, hwiKey;
+    Task_Object *curTask;
+    UInt coreId;
+
+    tskKey = Task_disable();
+
+    /* Read coreId after disabling tasking */
+    coreId = Core_getId();
+
+    hwiKey = Hwi_disable();
+
+    curTask = Task_module->smpCurTask[coreId];
+
+    if (Task_module->smpCurMask[coreId]) {
+        /* Change from RUNNING to READY */
+        curTask->mode = Task_Mode_READY;
+        /* And place it at the end of its readyQ */
+        Queue_enqueue(curTask->readyQ, (Queue_Elem *)curTask);
+        Task_module->smpCurSet[curTask->affinity] |= curTask->mask;
+    }
+
+    /* force a task switch */
+    Task_module->smpCurMask[coreId] = 0;
+    SORT_RUNQ(0, coreId);
+    Task_module->workFlag |= (1 << coreId);
+
+    Hwi_restore(hwiKey);
+
+    Log_write3(Task_LM_yield, (UArg)Task_module->smpCurTask[coreId], (UArg)(Task_module->smpCurTask[coreId]->fxn), (UArg)(BIOS_getThreadType()));
+
+    Task_restore(tskKey);
 }
 
 #else /* !(ti_sysbios_hal_Core_numCores__D > 2) */
@@ -932,9 +979,6 @@ UInt Task_setPri(Task_Object *tsk, Int priority)
     Queue_Handle newQ;
     UInt coreId, otherId;
 
-    coreId = Core_getId();
-    otherId = coreId ^ 1;
-
     Assert_isTrue((((priority == -1) || (priority > 0) ||
                   ((priority == 0 && Task_module->idleTask == NULL))) &&
                    (priority < (Int)Task_numPriorities)),
@@ -945,6 +989,9 @@ UInt Task_setPri(Task_Object *tsk, Int priority)
 
     tskKey = Task_disable();
     hwiKey = Core_hwiDisable();
+
+    coreId = Core_getId();
+    otherId = coreId ^ 1;
 
     oldPri = tsk->priority;
 
@@ -1250,6 +1297,43 @@ Void Task_unblockI(Task_Object *tsk, UInt hwiKey)
     Hwi_disable();
 }
 
+/*
+ *  ======== Task_yield ========
+ */
+Void Task_yield()
+{
+    UInt tskKey, hwiKey;
+    Task_Object *curTask;
+    UInt coreId;
+
+    tskKey = Task_disable();
+
+    /* Read coreId after disabling tasking */
+    coreId = Core_getId();
+
+    hwiKey = Hwi_disable();
+
+    curTask = Task_module->smpCurTask[coreId];
+
+    if (Task_module->smpCurMask[coreId]) {
+        /* Change from RUNNING to READY */
+        curTask->mode = Task_Mode_READY;
+        /* And place it at the end of its readyQ */
+        Queue_enqueue(curTask->readyQ,
+                        (Queue_Elem *)curTask);
+        Task_module->smpCurSet[curTask->affinity] |= curTask->mask;
+    }
+
+    Task_module->smpCurMask[coreId] = 0;  /* force a Task_switch() */
+    Task_module->workFlag = 3;
+
+    Hwi_restore(hwiKey);
+
+    Log_write3(Task_LM_yield, (UArg)Task_module->smpCurTask[coreId], (UArg)(Task_module->smpCurTask[coreId]->fxn), (UArg)(BIOS_getThreadType()));
+
+    Task_restore(tskKey);
+}
+
 #endif  /* (ti_sysbios_hal_Core_numCores__D > 2) */
 
 /*
@@ -1372,9 +1456,6 @@ Void Task_startCore(UInt coreId)
     Task_Object *prevTask;
     Task_Object *curTask;
     Task_Struct dummyTask;
-#if (ti_sysbios_hal_Core_numCores__D > 2)
-    Task_RunQEntry *runQIter;
-#endif
     UInt curSetPriLocal, curSetPriX, curPriLocal;
     UInt newPri;
     Int i;
@@ -1426,29 +1507,7 @@ Void Task_startCore(UInt coreId)
 
 #if (ti_sysbios_hal_Core_numCores__D > 2)
     /* Update the Sorted RunQ */
-
-    /*
-     * Iterate through at most Core_NUM_CORES queue elems once to
-     * find the right position for a queue elem with priority newPri
-     */
-    runQIter = Queue_head(Task_moduleSmp->sortedRunQ);
-
-    while (((Queue_Elem *)runQIter != (Queue_Elem *)(Task_moduleSmp->sortedRunQ)) &&
-            (runQIter->priority < newPri)){
-        runQIter = Queue_next((Queue_Elem *)runQIter);
-    }
-
-    if ((Queue_Elem *)runQIter != (Queue_Elem *)&(Task_moduleSmp->smpRunQ[coreId])) {
-        /* Remove entry from queue */
-        Queue_remove((Queue_Elem *)&(Task_moduleSmp->smpRunQ[coreId]));
-
-        /* Insert entry to new position */
-        Queue_insert((Queue_Elem *)runQIter,
-            (Queue_Elem *)&(Task_moduleSmp->smpRunQ[coreId]));
-    }
-
-    /* Update priority */
-    (Task_moduleSmp->smpRunQ[coreId]).priority = newPri;
+    SORT_RUNQ(newPri, coreId);
 #endif
 
     if (Task_checkStackFlag) {
@@ -1827,44 +1886,6 @@ Void Task_sleepUntil(UInt32 tick)
         }
     }
 }
-
-/*
- *  ======== Task_yield ========
- */
-Void Task_yield()
-{
-    UInt tskKey, hwiKey;
-    Task_Object *curTask;
-    UInt coreId;
-
-    tskKey = Task_disable();
-
-    /* Read coreId after disabling tasking */
-    coreId = Core_getId();
-
-    hwiKey = Hwi_disable();
-
-    curTask = Task_module->smpCurTask[coreId];
-
-    if (Task_module->smpCurMask[coreId]) {
-        /* Change from RUNNING to READY */
-        curTask->mode = Task_Mode_READY;
-        /* And place it at the end of its readyQ */
-        Queue_enqueue(curTask->readyQ,
-                        (Queue_Elem *)curTask);
-        Task_module->smpCurSet[curTask->affinity] |= curTask->mask;
-    }
-
-    Task_module->smpCurMask[coreId] = 0;  /* force a Task_switch() */
-    Task_module->workFlag = 3;
-
-    Hwi_restore(hwiKey);
-
-    Log_write3(Task_LM_yield, (UArg)Task_module->smpCurTask[coreId], (UArg)(Task_module->smpCurTask[coreId]->fxn), (UArg)(BIOS_getThreadType()));
-
-    Task_restore(tskKey);
-}
-
 
 /*
  *  ======== Task_getIdleTask ========

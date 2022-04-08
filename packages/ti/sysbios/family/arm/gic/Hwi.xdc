@@ -999,6 +999,7 @@ internal:   /* not for client use */
                                       // Task's SP during ISR execution
         Char         *isrStack[];     // Points to isrStack address
         Char          hwiStack[][];   // IRQ stack for each core
+        Ptr           isrStackSize;   // = Program.stack
                                       // !!! The above three fields MUST be kept
                                       // !!! at the base of the module state
                                       // !!! GNU switchAndRunFunc and
@@ -1010,7 +1011,6 @@ internal:   /* not for client use */
         UInt          lastSpuriousInt;// Most recent spurious interrupt
         UInt          irp;            // temporary irp storage for IRQ handler
         Ptr           isrStackBase;   // = __TI_STACK_BASE
-        Ptr           isrStackSize[]; // = Program.stack
         Hwi.Object    nonPluggedHwi;  // default Hwi object
         Handle        dispatchTable[];// dispatch table
         volatile UInt curIntId;       // current Interrupt Id

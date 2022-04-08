@@ -107,8 +107,9 @@ Void Core_startCore1()
 /*
  *  ======== Core_lock ========
  */
-Void Core_lock()
+IArg Core_lock()
 {
+    return (Core_hwiDisable());
 }
 
 /*

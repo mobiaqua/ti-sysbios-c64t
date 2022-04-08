@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -108,7 +108,7 @@ metaonly module ROM
 	CC1350,         /*! Use for all CC13xx devices */
 	CC2650_FLASH,	/*! THIS OPTION IS NOT SUPPORTED! */
 	TM0SXX,		/*! THIS OPTION IS NOT SUPPORTED! */
-	POTENZA		/*! THIS OPTION IS NOT SUPPORTED! */
+	F28004x         /*! THIS OPTION IS NOT SUPPORTED! */
     };
 
     /*!

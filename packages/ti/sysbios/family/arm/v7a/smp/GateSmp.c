@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -117,18 +117,16 @@ Void GateSmp_Instance_init(GateSmp_Object *gate,
  */
 IArg GateSmp_enter(GateSmp_Object *gate)
 {
-    UInt stalls = 0;
-    UInt coreId;
+    UInt key, stalls = 0;
+    volatile UInt coreId;
 
-    /*
-     * No need to disable interrupts. Interrupts are disabled by caller.
-     */
+    key = Core_hwiDisable();
 
     coreId = Core_getId();
 
     /* If this core already owns the gate, return */
     if (gate->owner == coreId) {
-        return (0);
+        return (key);
     }
 
     /* Preload the gate word into the cache */
@@ -139,17 +137,7 @@ IArg GateSmp_enter(GateSmp_Object *gate)
     );
 
     while (TRUE) {
-        if (GateSmp_tryLock(&gate->gateWord)) {
-            __asm__ __volatile__ (
-                "wfe"
-                ::: "memory"
-            );
-
-            if (GateSmp_enableStats == TRUE) {
-                stalls += 1;
-            }
-        }
-        else {
+        if (GateSmp_tryLock(&gate->gateWord) == 0) {
             /* Add barrier to ensure lock is taken before we proceed */
             __asm__ __volatile__ (
                 "dmb"
@@ -174,7 +162,29 @@ IArg GateSmp_enter(GateSmp_Object *gate)
 
             Assert_isTrue((gate->gateWord != 0), NULL);
 
-            return (0);
+            return (key);
+        }
+        else {
+            /*
+             * SDOCM00115451: Re-enable interrupts while waiting to acquire lock
+             */
+            Core_hwiRestore(key);
+
+            __asm__ __volatile__ (
+                "wfe"
+                ::: "memory"
+            );
+
+            Core_hwiDisable();
+
+            /*
+             * Read coreId again as Task may have switched to a different core
+             */
+            coreId = Core_getId();
+
+            if (GateSmp_enableStats == TRUE) {
+                stalls += 1;
+            }
         }
     }
 }

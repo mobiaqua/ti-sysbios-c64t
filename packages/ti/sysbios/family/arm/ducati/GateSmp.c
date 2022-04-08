@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,9 +61,16 @@ Void GateSmp_Instance_init(GateSmp_Object *gate,
  */
 IArg GateSmp_enter(GateSmp_Object *gate)
 {
-    UInt stalls = 0;
-    UInt coreId = Core_getId();
+    UInt key, coreId, stalls = 0;
     volatile UInt8 *gateBytePtr;
+
+    key = Core_hwiDisable();
+
+    coreId = Core_getId();
+
+    if (gate->owner == coreId) {
+        return (key);
+    }
 
     gateBytePtr = (volatile UInt8 *)&gate->gateWord;
     gateBytePtr = &gateBytePtr[coreId];
@@ -74,6 +81,17 @@ IArg GateSmp_enter(GateSmp_Object *gate)
 
         if (gate->gateWord > 0x100) {
             *gateBytePtr = 0;
+
+            /*
+             * SDOCM00115451: Re-enable interrupts while waiting to acquire lock
+             */
+            Core_hwiRestore(key);
+            Core_hwiDisable();
+
+            /*
+             * Read coreId again as Task may have switched to a different core
+             */
+            coreId = Core_getId();
 
             /* make core 1's loop a little slower to avoid a stalemate */
             if (coreId == 1) {
@@ -86,6 +104,9 @@ IArg GateSmp_enter(GateSmp_Object *gate)
             }
         }
         else {
+            /* Store owner's core Id */
+            gate->owner = coreId;
+
             if (GateSmp_enableStats == TRUE) {
                 if (stalls) {
                     gate->stalls += 1;
@@ -99,7 +120,7 @@ IArg GateSmp_enter(GateSmp_Object *gate)
                 }
             }
             Assert_isTrue((*gateBytePtr == 1), NULL);
-            return (0);
+            return (key);
         }
     }
 }
@@ -113,9 +134,14 @@ Void GateSmp_leave(GateSmp_Object *gate, IArg key)
     volatile UInt8 *gateBytePtr;
 
     coreId = Core_getId();
-    gateBytePtr = (volatile UInt8 *)&gate->gateWord;
-    gateBytePtr = &gateBytePtr[coreId];
-    *gateBytePtr = 0;
+
+    /* Check if this core owns the lock before releasing lock */
+    if (gate->owner == coreId) {
+        gate->owner = (~0);
+        gateBytePtr = (volatile UInt8 *)&gate->gateWord;
+        gateBytePtr = &gateBytePtr[coreId];
+        *gateBytePtr = 0;
+    }
 }
 
 /*

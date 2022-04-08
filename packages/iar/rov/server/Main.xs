@@ -1,5 +1,5 @@
 /* --COPYRIGHT--,EPL
- *  Copyright (c) 2012-2014 Texas Instruments Incorporated
+ *  Copyright (c) 2012-2015 Texas Instruments Incorporated
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -34,6 +34,10 @@ function run(cmdr, args)
     /* Retrieve a list of Modules and Tabs */
     else if (listMod) {
         return (server.retrieveLimitedList());
+    }
+    else if (this.clientVersion) {
+        server.clientVers = this.clientVersion;
+        return (0);
     }
     /* Unknown command */
     else {

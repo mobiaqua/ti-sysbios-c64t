@@ -65,6 +65,7 @@
 #define K2_BOOT_MAGIC_ADDR      0x0C5AD000
 
 extern void _exit(int code);
+extern Void ti_sysbios_hal_Hwi_initStack(Void);
 
 /*
  *  ======== Core_Module_startup ========
@@ -246,7 +247,10 @@ Void Core_startCoreXOMAP5xxx()
     /* Wakeup other core */
     REG32(OMAP5_AUX_CORE_BOOT_1) = (UInt32)(&Core_smpBoot);
     REG32(OMAP5_AUX_CORE_BOOT_0) = (UInt32)(0x20);
-    __asm__ __volatile__ ("sev");
+    __asm__ __volatile__ (
+        "dsb\n\t"       /* Ensure writes are visible to other cores */
+        "sev"           /* Wake-up other cores */
+    );
 
     /* Wait for other core to run its startup sequence */
     while (!(Core_module->syncCores[0][1]));
@@ -281,8 +285,8 @@ Void Core_startCoreXKeystone2()
             REG32(K2_BOOT_MAGIC_ADDR + 0x4*idx) = (UInt32)(&Core_smpBoot);
         }
         __asm__ __volatile__ (
-            /* Wake-up other cores */
-            "sev\n\t"
+            "dsb\n\t"       /* Ensure writes are visible to other cores */
+            "sev"           /* Wake-up other cores */
         );
     }
 
@@ -357,15 +361,11 @@ Void __attribute__((naked)) Core_smpBoot()
         "blx   r0\n\t"
         "movw  r1, #:lower16:ti_sysbios_family_arm_gic_Hwi_Module__state__V\n\t"
         "movt  r1, #:upper16:ti_sysbios_family_arm_gic_Hwi_Module__state__V\n\t"
-        "ldr   r1, [r1, #8]\n\t"
-        "ldr   r0, [r1, r0, lsl #2]\n\t"
-        "mov   sp, r0\n\t"
-        "ldr   r0, =__TI_STACK_SIZE\n\t"
-        "add   sp, r0\n\t"
-        "mov   r1, sp\n\t"
-        "mov   r0, #0x07\n\t"
-        "bic   r1, r0\n\t"
-        "mov   sp, r1\n\t"
+        "ldr   r2, [r1, #8]\n\t"            /* Read hwi stack base address */
+        "ldr   r2, [r2, r0, lsl #2]\n\t"
+        "mov   sp, r2\n\t"
+        "ldr   r2, [r1, #12]\n\t"           /* Read hwi stack size */
+        "add   sp, r2\n\t"
         "movw  r0, #:lower16:ti_sysbios_family_arm_a15_smp_Core_startup__I\n\t"
         "movt  r0, #:upper16:ti_sysbios_family_arm_a15_smp_Core_startup__I\n\t"
         "blx   r0\n\t"
@@ -383,6 +383,9 @@ Void __attribute__((naked)) Core_smpBoot()
  */
 Void Core_startup()
 {
+    /* Init Cache and MMU */
+    Cache_startup();
+
     /* Install vector table */
     Hwi_init();
 
@@ -396,8 +399,10 @@ Void Core_startup()
      */
     Hwi_initIntControllerCoreX();
 
-    /* Init Cache and MMU */
-    Cache_startup();
+    /* Initialize this core's Hwi stack to enable stack checking */
+    if (Core_initStackFlag) {
+        ti_sysbios_hal_Hwi_initStack();
+    }
 
     /* Signal to core 0 that this core's startup routine is complete */
     Core_module->syncCores[0][Core_getId()] = TRUE;
@@ -442,16 +447,9 @@ Void Core_atexit(Int arg)
 /*
  *  ======== Core_lock ========
  */
-Void Core_lock()
+IArg Core_lock()
 {
-    UInt coreId;
-
-    coreId = Core_getId();
-
-    if (!(Core_module->gateEntered[coreId])) {
-        GateSmp_enter(Core_gate);
-        Core_module->gateEntered[coreId] = TRUE;
-    }
+    return (GateSmp_enter(Core_gate));
 }
 
 /*
@@ -459,21 +457,10 @@ Void Core_lock()
  */
 Void Core_unlock()
 {
-    UInt hwiKey, coreId;
-
-    hwiKey = Core_hwiDisable();
-
-    coreId = Core_getId();
-
     // TODO Check BIOS.swiEnabled and BIOS.taskEnabled before using
     //      Task_enabled() and Swi_enabled() APIs as Tasking/Swis
     //      may be disabled.
-    if (Core_module->gateEntered[coreId]) {
-        if (Task_enabled() && Swi_enabled()) {
-            GateSmp_leave(Core_gate, 0);
-            Core_module->gateEntered[coreId] = FALSE;
-        }
+    if (Task_enabled() && Swi_enabled()) {
+        GateSmp_leave(Core_gate, 0);
     }
-
-    Core_hwiRestore(hwiKey);
 }

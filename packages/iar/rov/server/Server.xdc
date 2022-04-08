@@ -1,5 +1,5 @@
 /* --COPYRIGHT--,EPL
- *  Copyright (c) 2012-2014 Texas Instruments Incorporated
+ *  Copyright (c) 2012-2015 Texas Instruments Incorporated
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -17,6 +17,16 @@ package iar.rov.server;
 metaonly module Server {
 
     config Int modelVers = 4;
+
+    /*!
+     *  ======== clientVers ========
+     *  The flag that signals client's capabilities
+     *
+     *  Currently, it's used to determine if Task.CallStacks view is supported.
+     *  If `clientVers` is 2 or higher, that view is reported in the list of
+     *  views.
+     */
+    config UInt clientVers = 1;
 
     /*
      *  ======== startModel ========

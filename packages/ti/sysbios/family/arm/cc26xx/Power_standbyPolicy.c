@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2014-2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -128,7 +128,7 @@ Void Power_standbyPolicy()
                     HWREG(PRCM_BASE + PRCM_O_PDCTL1VIMS) |= PRCM_PDCTL1VIMS_ON;
                 }
 
-                PRCMRetentionEnable(PRCM_DOMAIN_VIMS);
+                PRCMCacheRetentionEnable();
                 PRCMPowerDomainOff(PRCM_DOMAIN_CPU);
                 SysCtrlAonSync();
 
