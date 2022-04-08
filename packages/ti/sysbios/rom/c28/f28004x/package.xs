@@ -34,31 +34,6 @@ var Build = xdc.module("ti.sysbios.Build");
 var ROM = xdc.module("ti.sysbios.rom.ROM");
 
 /*
- *  ======== Package.getLibs ========
- *  This function is called when a program's configuration files are
- *  being generated and it returns the name of a library appropriate
- *  for the program's configuration.
- */
-
-function getLibs(prog)
-{
-    if (Build.buildROMApp == true) {
-	switch (BIOS.libType) {
-	    case BIOS.LibType_Instrumented:
-            case BIOS.LibType_NonInstrumented:
-            case BIOS.LibType_Custom:
-            case BIOS.LibType_Debug:
-                lib = Build.$private.outputDir + Build.$private.libraryName;
-                return ("!" + String(java.io.File(lib).getCanonicalPath()));
-                break;
-	}
-    }
-    else {
-        return (null);
-    }
-}
-
-/*
  *  ======== Package.getSects ========
  */
 function getSects()

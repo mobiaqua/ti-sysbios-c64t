@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
  *  ======== TMS320F28377S.cmd ========
  *  Define the memory block start/length for the TMS320F28377S
  */
- 
+
 MEMORY
 {
 PAGE 0 :  /* Program Memory */
@@ -58,23 +58,23 @@ PAGE 0 :  /* Program Memory */
     FLASHK  : origin = 0x0B8000, length = 0x002000  /* on-chip Flash */
     FLASHL  : origin = 0x0BA000, length = 0x002000  /* on-chip Flash */
     FLASHM  : origin = 0x0BC000, length = 0x002000  /* on-chip Flash */
-    FLASHN  : origin = 0x0BE000, length = 0x002000  /* on-chip Flash */  
+    FLASHN  : origin = 0x0BE000, length = 0x002000  /* on-chip Flash */
     FLASHO  : origin = 0x0C0000, length = 0x002000	/* on-chip Flash */
     FLASHP  : origin = 0x0C2000, length = 0x002000	/* on-chip Flash */
-    FLASHQ  : origin = 0x0C4000, length = 0x002000	/* on-chip Flash */   
+    FLASHQ  : origin = 0x0C4000, length = 0x002000	/* on-chip Flash */
     FLASHR  : origin = 0x0C6000, length = 0x002000	/* on-chip Flash */
     FLASHS  : origin = 0x0C8000, length = 0x008000	/* on-chip Flash */
-    FLASHT  : origin = 0x0D0000, length = 0x008000	/* on-chip Flash */   
-    FLASHU  : origin = 0x0D8000, length = 0x008000	/* on-chip Flash */   
-    FLASHV  : origin = 0x0E0000, length = 0x008000	/* on-chip Flash */   
-    FLASHW  : origin = 0x0E8000, length = 0x008000	/* on-chip Flash */   
+    FLASHT  : origin = 0x0D0000, length = 0x008000	/* on-chip Flash */
+    FLASHU  : origin = 0x0D8000, length = 0x008000	/* on-chip Flash */
+    FLASHV  : origin = 0x0E0000, length = 0x008000	/* on-chip Flash */
+    FLASHW  : origin = 0x0E8000, length = 0x008000	/* on-chip Flash */
     FLASHX  : origin = 0x0F0000, length = 0x008000	/* on-chip Flash */
     FLASHY  : origin = 0x0F8000, length = 0x002000	/* on-chip Flash */
     FLASHZ  : origin = 0x0FA000, length = 0x002000	/* on-chip Flash */
-    FLASHAA : origin = 0x0FC000, length = 0x002000	/* on-chip Flash */   
-    FLASHAB : origin = 0x0FE000, length = 0x002000	/* on-chip Flash */   
+    FLASHAA : origin = 0x0FC000, length = 0x002000	/* on-chip Flash */
+    FLASHAB : origin = 0x0FE000, length = 0x002000	/* on-chip Flash */
     RESET   : origin = 0x3FFFC0, length = 0x000002
-    
+
 PAGE 1 : /* Data Memory */
 
     BOOT_RSVD : origin = 0x000002, length = 0x000120 /* Part of M0, BOOT rom
@@ -146,7 +146,20 @@ SECTIONS
                           RUN_START(_RamfuncsRunStart),
                           RUN_SIZE(_RamfuncsRunSize),
                           RUN_END(_RamfuncsRunEnd)
-                         
+
+#ifdef __TI_COMPILER_VERSION
+#if __TI_COMPILER_VERSION >= 15009000
+    .TI.ramfunc : {} LOAD = FLASHA | FLASHB | FLASHC | FLASHD | FLASHE |
+                            FLASHF | FLASHG | FLASHH | FLASHI | FLASHJ |
+                            FLASHK | FLASHL | FLASHM | FLASHN | FLASHO |
+                            FLASHP | FLASHQ | FLASHR | FLASHS | FLASHT |
+                            FLASHU | FLASHV | FLASHW | FLASHX | FLASHY |
+                            FLASHZ | FLASHAA | FLASHAB PAGE = 0,
+                     RUN  = LS05SARAM PAGE = 1,
+                     table(BINIT)
+#endif
+#endif
+
     /* Allocate uninitalized data sections: */
     .stack              : > M01SARAM | LS05SARAM    PAGE = 1
     .ebss               : >> M01SARAM | LS05SARAM | RAMGS0 | RAMGS1 PAGE = 1

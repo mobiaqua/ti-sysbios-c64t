@@ -53,7 +53,6 @@ function getLibs(prog)
         default:
             if (BIOS.$used == false) return (null);
             if (Build.buildROM == true) return (null);
-            if (Build.buildROMApp == true) return (null);
             lib = Build.$private.outputDir + Build.$private.libraryName;
             return ("!" + String(java.io.File(lib).getCanonicalPath()));
             break;
@@ -82,5 +81,21 @@ function close()
             break;
         }
     }
-}
 
+    /* add default xdc.runtime.Timestamp.SupportProxy binding */
+    var Timestamp = xdc.module('xdc.runtime.Timestamp');
+
+    if (!Timestamp.$written("SupportProxy")) {
+        var Settings = xdc.module("ti.sysbios.family.Settings");
+        /* if Timestamp is used, make sure the delegate is also used */
+        if (Timestamp.$used == true) {
+            /* make sure the delegate gets used as well */
+            Timestamp.SupportProxy =
+                xdc.useModule(Settings.getDefaultTimestampDelegate());
+        }
+        else {
+            Timestamp.SupportProxy =
+                xdc.module(Settings.getDefaultTimestampDelegate());
+        }
+    }
+}

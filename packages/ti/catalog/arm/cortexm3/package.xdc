@@ -23,12 +23,6 @@ requires ti.catalog.peripherals.hdvicp2;
  */
 package ti.catalog.arm.cortexm3 [1,0,0] {
     module OMAP4430;
-    interface ILM3Sx7xx;
-    module LM3S9792, LM3S9790, LM3S5791, LM3S2793;
-    interface ILM3SxBxx;
-    module LM3S9B96, LM3S9B95, LM3S9B92, LM3S5B91, LM3S9B90, LM3S2B93;
-    interface ILM3Sx9xx;
-    module LM3S8962;
 
     interface ITI8168;
     module TMS320DM8168;
@@ -39,7 +33,7 @@ package ti.catalog.arm.cortexm3 [1,0,0] {
     module TMS320DM8148;
     module TMS320TI814X;
 
-    module CC13xx, CC26xx, F28M35x, Stellaris, Tiva;
+    module CC13xx, CC26xx, F28M35x, Tiva;
 
     module CortexM3;
 

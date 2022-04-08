@@ -911,7 +911,12 @@ public class Elf32 implements xdc.rta.IOFReader, xdc.rov.ISymbolTable
 
         /* Filter out all the non existent dwarf variables */
         for (int i = 0; i < varArr.length; i++) {
-            if (getSymbolValue(varArr[i].name) != -1) {
+            String sym = varArr[i].name;
+            if (varArr[i].name.indexOf('.') != -1) {
+                sym = varArr[i].name.substring(
+                         0, varArr[i].name.indexOf('.'));
+            }
+            if (getSymbolValue(sym) != -1) {
                 varList.add(varArr[i]);
             }
         }

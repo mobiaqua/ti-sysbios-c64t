@@ -16,8 +16,8 @@ for (var i = 0; i < Build.targets.length; i++) {
     if (targ.isa == '28' || targ.isa == '28FP') {
         Pkg.addLibrary("lib/" + Pkg.name, targ,
             {
-                profile: "whole_program",
-                copts: "--symdebug:dwarf --optimize_with_debug"
+                profile: "release",
+                copts: "--symdebug:dwarf --optimize_with_debug -mo"
             }).addObjects(cobjs);
         Pkg.addLibrary("lib/boot", targ).addObjects(["boot_cg"]);
     }

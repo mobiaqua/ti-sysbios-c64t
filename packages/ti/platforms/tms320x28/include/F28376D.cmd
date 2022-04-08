@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
  *  ======== F28376D.cmd ========
  *  Define the memory block start/length for the F28376D
  */
- 
+
 MEMORY
 {
 PAGE 0 :  /* Program Memory */
@@ -53,7 +53,7 @@ PAGE 0 :  /* Program Memory */
     FLASHF  : origin = 0x090000, length = 0x008000  /* on-chip Flash */
     FLASHG  : origin = 0x098000, length = 0x008000  /* on-chip Flash */
     RESET   : origin = 0x3FFFC0, length = 0x000002
-    
+
 PAGE 1 : /* Data Memory */
 
     BOOT_RSVD : origin = 0x000002, length = 0x000120 /* Part of M0, BOOT rom
@@ -109,7 +109,16 @@ SECTIONS
                           RUN_START(_RamfuncsRunStart),
                           RUN_SIZE(_RamfuncsRunSize),
                           RUN_END(_RamfuncsRunEnd)
-                         
+
+#ifdef __TI_COMPILER_VERSION
+#if __TI_COMPILER_VERSION >= 15009000
+    .TI.ramfunc : {} LOAD = FLASHA | FLASHB | FLASHC | FLASHD | FLASHE |
+                            FLASHF | FLASHG PAGE = 0,
+                     RUN  = LS05SARAM PAGE = 1,
+                     table(BINIT)
+#endif
+#endif
+
     /* Allocate uninitalized data sections: */
     .stack              : > M01SARAM | LS05SARAM    PAGE = 1
     .ebss               : > M01SARAM | LS05SARAM    PAGE = 1
@@ -129,18 +138,18 @@ SECTIONS
                             RAMGS10 | RAMGS11 | RAMGS12 | RAMGS13 | RAMGS14 |
                             RAMGS15 PAGE = 1
 
-    /* The following section definitions are required when using the IPC API Drivers */ 
-    GROUP : > CPU1TOCPU2RAM, PAGE = 1 
+    /* The following section definitions are required when using the IPC API Drivers */
+    GROUP : > CPU1TOCPU2RAM, PAGE = 1
     {
-        PUTBUFFER 
-        PUTWRITEIDX 
-        GETREADIDX 
+        PUTBUFFER
+        PUTWRITEIDX
+        GETREADIDX
     }
-    
+
     GROUP : > CPU2TOCPU1RAM, PAGE = 1
     {
         GETBUFFER :    TYPE = DSECT
         GETWRITEIDX :  TYPE = DSECT
         PUTREADIDX :   TYPE = DSECT
-    }  
+    }
 }

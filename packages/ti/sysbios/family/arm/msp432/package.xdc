@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,9 +31,7 @@
  */
 /*
  *  ======== package.xdc ========
- *
  *  MSP432 target-specific modules
- *
  */
 
 requires ti.sysbios.interfaces;
@@ -47,4 +45,5 @@ package ti.sysbios.family.arm.msp432 [1,0,0,0] {
     module Timer;
     module TimestampProvider;
     module ClockFreqs;
+    module Seconds;
 }

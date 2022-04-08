@@ -138,7 +138,6 @@ all:
 	    ./packages/gnu ./packages/iar \
 	    ./packages/ti/targets ./packages/ti/platforms ./packages/ti/catalog
 	@ $(XDC) XDCARGS="$(XDCARGS)" all -P \
-	    ./packages/ti/sysbios/fatfs \
 	    ./packages/ti/sysbios/family/c674/pmi \
 	    ./packages/ti/sysbios/family/c674/pscl
 

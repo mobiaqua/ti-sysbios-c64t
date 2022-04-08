@@ -31,7 +31,6 @@
  */
 /*
  *  ======== Settings.xs ========
- *
  */
 
 var family = {
@@ -39,28 +38,25 @@ var family = {
     "ti.targets.C28_float" :                    "c28",
     "ti.targets.C64" :                          "c64",
     "ti.targets.C64P" :                         "c64p",
-    "ti.targets.C64P_big_endian" :              "c64p",
     "ti.targets.C674" :                         "c64p",
     "ti.targets.elf.C64P" :                     "c64p",
-    "ti.targets.elf.C64P_big_endian" :          "c64p",
     "ti.targets.elf.C66" :                      "c64p",
     "ti.targets.elf.C66_big_endian" :           "c64p",
     "ti.targets.elf.C674" :                     "c64p",
     "ti.targets.elf.C67P" :                     "c67p",
     "ti.targets.elf.C64T" :                     "c64p",
     "ti.targets.msp430.elf.MSP430X" :           "msp430",
-    "ti.targets.msp430.elf.MSP430X_small" :     "msp430",
     "iar.targets.msp430.MSP430" :               "msp430",
     "iar.targets.msp430.MSP430X_small" :        "msp430",
     "iar.targets.msp430.MSP430X_large" :        "msp430",
     "ti.targets.arm.elf.Arm9" :                 "arm",
-    "ti.targets.arm.elf.A8F" :                  "arm",
     "ti.targets.arm.elf.A8Fnv" :                "arm",
     "ti.targets.arm.elf.M0" :                   "arm",
     "ti.targets.arm.elf.M3" :                   "arm",
     "ti.targets.arm.elf.M4" :                   "arm",
     "ti.targets.arm.elf.M4F" :                  "arm",
     "ti.targets.arm.elf.R5F" :                  "arm",
+    "ti.targets.arm.elf.R4F" :                  "arm",
     "gnu.targets.arm.M3" :                      "arm",
     "gnu.targets.arm.M4" :                      "arm",
     "gnu.targets.arm.M4F" :                     "arm",
@@ -88,6 +84,12 @@ function module$meta$init()
     if (xdc.om.$name != "cfg") {
         return;
     }
+
+    /*
+     * Check if target not supported anymore. If not, then raise an
+     * error and abort build.
+     */
+    unsupportedTargetCheck(this);
 
     this.familyName = getFamilyName();
     
@@ -266,4 +268,22 @@ function getDefaultClockTickPeriod()
 function getFamilySettingsXml()
 {
     return (familySettings.getFamilySettingsXml());
+}
+
+/*
+ *  ======== unsupportedTargetCheck ========
+ */
+function unsupportedTargetCheck(mod)
+{
+    if (Program.build.target.$name == "ti.targets.arm.elf.A8F") {
+        mod.$logError(Program.build.target.$name + " is no longer supported. " +
+            "Please use ti.targets.arm.elf.A8Fnv instead.", mod);
+        throw Error();
+    }
+    else if (Program.build.target.$name ==
+                "ti.targets.msp430.elf.MSP430X_small") {
+        mod.$logError(Program.build.target.$name + " is no longer supported. " +
+            "Please use ti.targets.msp430.elf.MSP430X instead.", mod);
+        throw Error();
+    }
 }

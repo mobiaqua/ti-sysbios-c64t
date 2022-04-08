@@ -22,12 +22,6 @@ requires ti.catalog.arm.peripherals.timers;
  *  xdc.platform.IPlatform) to obtain the memory map supported by each CPU.
  */
 package ti.catalog.arm [1,0,1] {
-    interface ILM3Sx7xx;
-    module LM3S9792, LM3S9790, LM3S5791, LM3S2793;
-    interface ILM3SxBxx;
-    module LM3S9B96, LM3S9B95, LM3S9B92, LM3S5B91, LM3S9B90, LM3S2B93;
-    interface ILM3Sx9xx;
-    module LM3S8962;
     module TMS470R10;
     module TMS320C5912;
     module TMS320C1030;

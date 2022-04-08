@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,16 @@ import xdc.runtime.Error;
  *
  *  HeapMem manager provides functions to allocate and free storage from a
  *  heap of type HeapMem which inherits from IHeap.
+ *
+ *  In addition to allowing multiple static HeapMem instances to be created
+ *  who's buffer placements and sizes are defined by their instance
+ *  configuration parameters,
+ *  HeapMem allows one Heap instance to be defined who's heap
+ *  memory is defined by buffer start and end symbols in the linker command
+ *  file. This singular Heap instance is referred to as the 'Primary Heap'.
+ *
+ *  see {@link #primaryHeapBaseAddr}, {@link #primaryHeapEndAddr},
+ *  and {@link #usePrimaryHeap}
  *
  *  @p(html)
  *  <h3> HeapMem Gate </h3>
@@ -266,6 +276,50 @@ module HeapMem inherits xdc.runtime.IHeap {
         {msg: "A_invalidFree: Invalid free"};
 
     /*!
+     *  ======== primaryHeapBaseAddr ========
+     *  Base address of the 'Primary Heap' buffer.
+     *
+     *  HeapMem allows one Heap instance to be defined who's heap
+     *  memory is defined by symbols in the linker command file.
+     *  This singular Heap instance is referred to as the 'Primary Heap'.
+     *
+     *  see {@link #primaryHeapEndAddr}
+     *  see {@link #usePrimaryHeap}
+     *
+     *  The following example will create a HeapMem instance whose
+     *  size and buffer will be determined at runtime based on the
+     *  values of the symbols `__heap_start__` and
+     *  `__heap_end__`. It is assumed the user will define these
+     *  symbols in their linker command file.
+     *
+     *  @p(code)
+     *  var HeapMem = xdc.useModule('ti.sysbios.heaps.HeapMem');
+     *
+     *  HeapMem.primaryHeapBaseAddr = "&__heap_start__";
+     *  HeapMem.primaryHeapEndAddr = "&__heap_end__";
+     *
+     *  var heapMemParams = new HeapMem.Params;
+     *  heapMemParams.usePrimaryHeap = true;
+     *
+     *  var heap0 = HeapMem.create(heapMemParams);
+     *  @p
+     */
+    config Char *primaryHeapBaseAddr = null;
+
+    /*!
+     *  ======== primaryHeapEndAddr ========
+     *  End address of the 'Primary Heap' buffer, plus one.
+     *
+     *  see {@link #primaryHeapBaseAddr}
+     *  see {@link #usePrimaryHeap}
+     *
+     *  @p(code)
+     *  HeapMem.primaryHeapEndAddr = "&__heap_end__";
+     *  @p
+     */
+    config Char *primaryHeapEndAddr = null;
+
+    /*!
      *  ======== enter ========
      *  @_nodoc
      *  Enter the module's gate. This is needed to support
@@ -284,6 +338,18 @@ module HeapMem inherits xdc.runtime.IHeap {
     Void leave(IArg key);
 
 instance:
+
+   /*!
+    *  ======== usePrimaryHeap ========
+    *  Use {@link #primaryHeapBaseAddr} and {@link #primaryHeapEndAddr}
+    *  to define the Heap buffer managed by this static instance.
+    *
+    *  @a(warning)
+    *  This instance parameter only exists for statically defined
+    *  HeapMem objects and can only be set to true in the creation
+    *  of one static HeapMem object!
+    */
+   metaonly config Bool usePrimaryHeap = false;
 
    /*!
     *  ======== align ========
@@ -463,6 +529,14 @@ internal:   /* not for client use */
      *  invokes malloc(), will be handled cleanly.
      */
     Void init();
+
+    /*! 
+     *  ======== initPrimary ========
+     *  Initialize instance at runtime
+     *
+     *  Same as 'init' but supports the use of 'HeapMem.primaryHeapBaseAddress'.
+     */
+    Void initPrimary();
 
     /* Required alignment. Must be a power of 2 */
     config SizeT reqAlign;

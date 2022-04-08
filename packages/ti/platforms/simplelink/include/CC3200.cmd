@@ -27,6 +27,11 @@ SECTIONS
 {
     .intvecs:   > 0x20004000
     .text   :   > SRAM
+#ifdef __TI_COMPILER_VERSION
+#if __TI_COMPILER_VERSION >= 15009000
+    .TI.ramfunc : > SRAM
+#endif
+#endif
     .const  :   > SRAM
     .cinit  :   > SRAM
     .pinit  :   > SRAM

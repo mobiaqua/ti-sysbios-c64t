@@ -697,6 +697,20 @@ module BIOS
     metaonly config StartupFuncPtr startupFxns[] = [];
 
     /*!
+     *  ======== version ========
+     *  SYS/BIOS version number macro
+     *
+     *  This macro has a hex value that represents the SYS/BIOS version
+     *  number. The hex value has the version format 0xMmmpp, where
+     *  M is a single digit Major number, mm is a 2 digit minor number
+     *  and pp is a 2 digit patch number.
+     *
+     *  Example: A macro hex value of 0x64501 implies that the SYS/BIOS
+     *  product version number is 6.45.01
+     */
+    const UInt32 version = 0x64500;
+
+    /*!
      *  ======== addUserStartupFunction ========
      *  @_nodoc
      *  Statically add a function to the startupFxns table.

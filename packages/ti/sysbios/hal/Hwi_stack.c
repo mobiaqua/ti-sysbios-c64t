@@ -41,9 +41,6 @@
 
 #include "package/internal/Hwi.xdc.h"
 
-extern Void ti_sysbios_hal_Hwi_initStack(Void);
-extern Void ti_sysbios_hal_Hwi_checkStack(Void);
-
 #if defined(xdc_target__isaCompatible_430)    \
     || defined(xdc_target__isaCompatible_430X)
 
@@ -99,6 +96,59 @@ Void ti_sysbios_hal_Hwi_initStack(Void)
         *((volatile UInt8 *)curStack) = 0xbe;
         curStack++;
     }
+#endif
+}
+
+#endif
+
+#if defined(xdc_target__isaCompatible_430)    \
+    || defined(xdc_target__isaCompatible_430X)
+
+/*
+ *  ======== Hwi_initStackMin ========
+ *  Initialize only the first byte/word of the Common interrupt stack
+ */
+Void ti_sysbios_hal_Hwi_initStackMin(Void)
+{
+    Hwi_StackInfo stkInfo;
+    UInt *curStack;
+
+    /* Get stack base and size */
+    Hwi_getStackInfo(&stkInfo, FALSE);
+
+    curStack = (UInt *)(stkInfo.hwiStackBase);
+    *((volatile UInt *)curStack) = 0xbebe;
+
+}
+
+#else
+
+/*
+ *  ======== Hwi_initStackMin ========
+ *  Initialize only the first byte/word of the Common interrupt stack
+ */
+Void ti_sysbios_hal_Hwi_initStackMin(Void)
+{
+    Hwi_StackInfo stkInfo;
+    UArg curStack;
+
+    /* Get stack base and size */
+    if (BIOS_smpEnabled) {
+        Hwi_getCoreStackInfo(&stkInfo, FALSE, Core_getId());
+    }
+    else {
+        Hwi_getStackInfo(&stkInfo, FALSE);
+    }
+
+
+#ifdef xdc_target__isaCompatible_28
+    curStack = (UArg)(stkInfo.hwiStackBase) + (SizeT)(stkInfo.hwiStackSize) - 1;
+    *((volatile UInt8 *)curStack) = 0xbebe;
+
+#else
+    curStack = (UArg)(stkInfo.hwiStackBase);
+    *((volatile UInt8 *)curStack) = 0xbe;
+
 #endif
 }
 

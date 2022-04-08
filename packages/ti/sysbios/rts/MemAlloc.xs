@@ -41,6 +41,8 @@ var BIOS = null;
 function module$use()
 {
     BIOS = xdc.module("ti.sysbios.BIOS");
+    var MemAlloc = xdc.module('ti.sysbios.rts.MemAlloc');
+    var HeapStd = xdc.module('xdc.runtime.HeapStd');
 
     if (Program.build.target.$name.match(/gnu/) &&
        (BIOS.taskEnabled == true) &&
@@ -54,6 +56,29 @@ function module$use()
         if (lnkOpts.match(/--threaded_lib/)) {
             var thrSup = xdc.useModule('ti.sysbios.rts.iar.MultithreadSupport');
             thrSup.enableMultithreadSupport = true;
+        }
+    }
+}
+
+/*
+ *  ======== configureProgramHeap ========
+ */
+function configureProgramHeap()
+{
+    var MemAlloc = xdc.module('ti.sysbios.rts.MemAlloc');
+    var HeapStd = xdc.module('xdc.runtime.HeapStd');
+
+    var nogenFunctions = (MemAlloc.generateFunctions == false) ||
+                     ((BIOS.heapSize != 0) &&
+                      (HeapStd.$used));
+
+    if (nogenFunctions == false) {
+        /*
+         * If we are generating malloc() and HeapStd is not in use,
+         * then there is no need for Program.heap.
+         */
+        if (HeapStd.$used == false) {
+            Program.heap = 0;
         }
     }
 }

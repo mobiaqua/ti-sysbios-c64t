@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,18 +34,18 @@
  *  Define the memory block start/length for the F28234
  */
 
-/* 
+/*
  *  PAGE 0 will be used to organize program sections
  *  PAGE 1 will be used to organize data sections
  *
- *  Notes: 
+ *  Notes:
  *        Memory blocks on F28234 are uniform (ie same
- *        physical memory) in both PAGE 0 and PAGE 1.  
+ *        physical memory) in both PAGE 0 and PAGE 1.
  *        That is the same memory region should not be
  *        defined for both PAGE 0 and PAGE 1.
- *        Doing so will result in corruption of program 
- *        and/or data. 
- *        
+ *        Doing so will result in corruption of program
+ *        and/or data.
+ *
  *        L0/L1/L2 and L3 memory blocks are mirrored - that is
  *        they can be accessed in high memory or low memory.
  *        For simplicity only one instance is used in this
@@ -64,14 +64,14 @@ PAGE 0:    /* Program Memory */
     ADC_CAL     : origin = 0x380080, length = 0x000009     /* ADC_cal function in Reserved memory */
 
     IQTABLES    : origin = 0x3FE000, length = 0x000b50     /* IQ Math Tables in Boot ROM */
-    IQTABLES2   : origin = 0x3FEB50, length = 0x00008c     /* IQ Math Tables in Boot ROM */  
+    IQTABLES2   : origin = 0x3FEB50, length = 0x00008c     /* IQ Math Tables in Boot ROM */
     FPUTABLES   : origin = 0x3FEBDC, length = 0x0006A0     /* FPU Tables in Boot ROM */
-    ROM         : origin = 0x3FF27C, length = 0x000D44     /* Boot ROM */          
+    ROM         : origin = 0x3FF27C, length = 0x000D44     /* Boot ROM */
     RESET       : origin = 0x3FFFC0, length = 0x000002     /* part of boot ROM  */
     VECTORS     : origin = 0x3FFFC2, length = 0x00003E     /* part of boot ROM  */
 
 PAGE 1 :   /* Data Memory */
-   
+
     M01SARAM    : origin = 0x000000, length = 0x000800     /* on-chip RAM block M0, M1 */
     PIEVECT     : origin = 0xD00,    length = 0x100
     L07SARAM    : origin = 0x008000, length = 0x008000     /* on-chip RAM block L0-L7 */
@@ -85,8 +85,8 @@ PAGE 1 :   /* Data Memory */
  *
  *      ramfuncs    user defined section to store functions that will be
  *                  copied from Flash into RAM
- */ 
- 
+ */
+
 SECTIONS
 {
     /* Allocate program areas: */
@@ -103,7 +103,7 @@ SECTIONS
 
     csmpasswds          : > CSM_PWL     PAGE = 0
     csm_rsvd            : > CSM_RSVD    PAGE = 0
-   
+
     /* Allocate uninitalized data sections: */
     .stack              : > M01SARAM | L07SARAM     PAGE = 1
     .ebss               : > M01SARAM | L07SARAM     PAGE = 1
@@ -113,30 +113,38 @@ SECTIONS
     /* Initalized sections go in Flash */
     /* For SDFlash to program these, they must be allocated to page 0 */
     .econst             : > FLASH       PAGE = 0
-    .switch             : > FLASH       PAGE = 0      
+    .switch             : > FLASH       PAGE = 0
     .args               : > FLASH       PAGE = 0
+
+#ifdef __TI_COMPILER_VERSION
+#if __TI_COMPILER_VERSION >= 15009000
+    .TI.ramfunc         : {} LOAD = FLASH    PAGE = 0,
+                             RUN  = L07SARAM PAGE = 1,
+                             table(BINIT)
+#endif
+#endif
 
     /* Allocate IQ math areas: */
     IQmath              : > FLASH       PAGE = 0        /* Math Code */
-    IQmathTables        : > IQTABLES    PAGE = 0, TYPE = NOLOAD 
-   
+    IQmathTables        : > IQTABLES    PAGE = 0, TYPE = NOLOAD
+
     /*
      *  Uncomment the section below if calling the IQNexp() or IQexp()
-     *  functions from the IQMath.lib library in order to utilize the 
-     *  relevant IQ Math table in Boot ROM (This saves space and Boot ROM 
+     *  functions from the IQMath.lib library in order to utilize the
+     *  relevant IQ Math table in Boot ROM (This saves space and Boot ROM
      *  is 1 wait-state). If this section is not uncommented, IQmathTables2
      *  will be loaded into other memory (SARAM, Flash, etc.) and will take
      *  up space, but 0 wait-state is possible.
      */
     /*
-    IQmathTables2       : > IQTABLES2, PAGE = 0, TYPE = NOLOAD 
+    IQmathTables2       : > IQTABLES2, PAGE = 0, TYPE = NOLOAD
     {
         IQmath.lib<IQNexpTable.obj> (IQmathTablesRam)
     }
     */
-   
-    FPUmathTables       : > FPUTABLES, PAGE = 0, TYPE = NOLOAD 
-   
+
+    FPUmathTables       : > FPUTABLES, PAGE = 0, TYPE = NOLOAD
+
     /* Allocate ADC_cal function (pre-programmed by factory into TI reserved memory) */
     .adc_cal            : load = ADC_CAL,   PAGE = 0, TYPE = NOLOAD
 }

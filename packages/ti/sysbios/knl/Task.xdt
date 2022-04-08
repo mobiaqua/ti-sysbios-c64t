@@ -40,10 +40,10 @@
 
 %var BIOS = xdc.module("ti.sysbios.BIOS");
 %var Core = xdc.module("ti.sysbios.hal.Core");
-%if (BIOS.smpEnabled && (Core.numCores > 2)) {
+%if (BIOS.smpEnabled) {
 
 #if defined(__ti__)
-#pragma DATA_SECTION(ti_sysbios_knl_Task_Module_StateSmp_sortedRunQ,
+#pragma DATA_SECTION(ti_sysbios_knl_Task_Module_StateSmp_sortedRunQ, \
     ".data:ti_sysbios_knl_Task_Module_StateSmp_sortedRunQ");
 #elif defined(__IAR_SYSTEMS_ICC__)
 #pragma location = ".data_ti_sysbios_knl_Task_Module_StateSmp_sortedRunQ"
@@ -58,7 +58,7 @@ ti_sysbios_knl_Queue_Object
 ti_sysbios_knl_Queue_Object ti_sysbios_knl_Task_Module_StateSmp_sortedRunQ;
 
 #if defined(__ti__)
-#pragma DATA_SECTION(ti_sysbios_knl_Task_Module_StateSmp_smpRunQ__A,
+#pragma DATA_SECTION(ti_sysbios_knl_Task_Module_StateSmp_smpRunQ__A, \
     ".data:ti_sysbios_knl_Task_Module_StateSmp_smpRunQ__A");
 #elif defined(__IAR_SYSTEMS_ICC__)
 #pragma location = ".data_ti_sysbios_knl_Task_Module_StateSmp_smpRunQ__A"
@@ -87,7 +87,7 @@ ti_sysbios_knl_Task_RunQEntry
 };
 
 #if defined(__ti__)
-#pragma DATA_SECTION(ti_sysbios_knl_Task_Module__stateSmp__V,
+#pragma DATA_SECTION(ti_sysbios_knl_Task_Module__stateSmp__V, \
     ".data:ti_sysbios_knl_Task_Module__stateSmp__V");
 #elif defined(__IAR_SYSTEMS_ICC__)
 #pragma location = ".data_ti_sysbios_knl_Task_Module__stateSmp__V"

@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/* RM57D8XX_Core1.cmd                                                         */
+/* RM57D8XX_CORE1.cmd                                                         */
 /*                                                                            */
 /* (c) Texas Instruments 2015, All rights reserved.                           */
 /*                                                                            */

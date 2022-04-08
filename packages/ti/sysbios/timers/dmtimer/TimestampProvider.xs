@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2014-2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@ var TimestampProvider = null;
 var Clock = null;
 var Hwi = null;
 var timerFreq = 0;
+var useClockTimerSetByUser = false;
 
 /*
  *  ======== module$meta$init ========
@@ -76,14 +77,18 @@ function module$use()
     /* if user has not specified useClockTimer or timer id ... */
     if ((TimestampProvider.useClockTimer == undefined) &&
         (TimestampProvider.$written("timerId") == false)) {
-        /* if Clock is enabled, default to share its timer */
-        if ((BIOS.clockEnabled) &&
-            (Clock.tickSource != Clock.TickSource_NULL) &&
-            (String(Clock.TimerProxy.delegate$).match(
-            /ti.sysbios.timers.dmtimer.Timer/))){
+        /*
+         *  User has specified neither useClockTimer nor timerId.  We'll
+         *  take a guess at what useClockTimer should be, since the
+         *  Clock Timer proxy may not have been set yet and we cannot set
+         *  useClockTimer later on (eg, in module$static$init())
+         */
+        if (BIOS.clockEnabled && (Clock.tickSource == Clock.TickSource_TIMER)) {
+            /* This may turn out to be incorrect */
             TimestampProvider.useClockTimer = true;
         }
         else {
+            /* This is correct */
             TimestampProvider.useClockTimer = false;
         }
     }
@@ -91,21 +96,15 @@ function module$use()
              (TimestampProvider.$written("timerId") == true)) {
         TimestampProvider.useClockTimer = false;
     }
-    else if (TimestampProvider.useClockTimer == true) {
-        if (TimestampProvider.$written("timerId") == true) {
-            this.$logWarning("Setting TimestampProvider.timerId has no" +
-                " effect since TimestampProvider.useClockTimer is true. ",
-                this);
-        }
-        if (!String(Clock.TimerProxy.delegate$).match(
-            /ti.sysbios.timers.dmtimer.Timer/)) {
-            this.$logError(
-            "TimestampProvider.useClockTimer is true but the Clock" +
-            " module does not use DMTimer as the timer proxy. In order to use" +
-            " this TimerstampProvider, please change the Clock module timer" +
-            " proxy to DMTimer and rebuild.\n\nExample *.cfg code:\nvar Clock" +
-            " = xdc.useModule\(\"ti.sysbios.knl.Clock\"\);\nClock.TimerProxy" +
-            " = xdc.useModule\(\"ti.sysbios.timers.dmtimer.Timer\"\);\n", this);
+    else {
+        /* TimestampProvider.useClockTimer was set outside this module */
+        useClockTimerSetByUser = true;
+        if (TimestampProvider.useClockTimer == true) {
+            if (TimestampProvider.$written("timerId") == true) {
+                this.$logWarning("Setting TimestampProvider.timerId has no" +
+                        " effect since TimestampProvider.useClockTimer is true. ",
+                        this);
+            }
         }
     }
 }
@@ -115,7 +114,22 @@ function module$use()
  */
 function module$static$init(mod, params)
 {
-    if (TimestampProvider.useClockTimer == false) {
+    /*
+     *  We need to create the timer for the following two cases:
+     *
+     *  1. We set useClockTimer to true in module$use(), but the Clock
+     *     Timer proxy is not the dm Timer.
+     *
+     *  2. useClockTimer is false.
+     */
+    if ((!useClockTimerSetByUser &&
+            !Clock.TimerProxy.delegate$.$name.match(
+                /ti.sysbios.timers.dmtimer.Timer/)) ||
+            (TimestampProvider.useClockTimer == false)) {
+
+        // TODO: If we set useClockTimer to true incorrectly,
+        // we should fix it so it doesn't give incorrect information.
+
         var  timerParams = new Timer.Params();
 
         timerParams.period = Timer.MAX_PERIOD;
@@ -168,6 +182,19 @@ function module$validate()
         && (this.useClockTimer == true)) {
         TimestampProvider.$logError("Clock is not enabled, cannot share its" +
                 " Timer", TimestampProvider, "useClockTimer");
+    }
+
+    if (useClockTimerSetByUser && TimestampProvider.useClockTimer) {
+        if (!String(Clock.TimerProxy.delegate$).match(
+                /ti.sysbios.timers.dmtimer.Timer/)) {
+            this.$logError(
+                "TimestampProvider.useClockTimer is true but the Clock" +
+                " module does not use DMTimer as the timer proxy. In order to use" +
+                " this TimerstampProvider, please change the Clock module timer" +
+                " proxy to DMTimer and rebuild.\n\nExample *.cfg code:\nvar Clock" +
+                " = xdc.useModule\(\"ti.sysbios.knl.Clock\"\);\nClock.TimerProxy" +
+                " = xdc.useModule\(\"ti.sysbios.timers.dmtimer.Timer\"\);\n", this);
+        }
     }
 }
 

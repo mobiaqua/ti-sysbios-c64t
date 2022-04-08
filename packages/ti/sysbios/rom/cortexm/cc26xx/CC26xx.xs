@@ -54,6 +54,10 @@ function module$meta$init()
     BIOS = xdc.useModule('ti.sysbios.BIOS');
     Build = xdc.useModule('ti.sysbios.Build');
     CC26xx = xdc.module('ti.sysbios.rom.cortexm.cc26xx.CC26xx');
+
+    /* no need for abstract interface */
+    CC26xx.common$.fxntab = false;
+
     ROM = xdc.module('ti.sysbios.rom.ROM');
 
     Program = xdc.useModule('xdc.cfg.Program');
@@ -133,15 +137,20 @@ function module$use()
         case BIOS.LibType_Custom:
 	    if (Program.build.target.$name.match(/iar/)) {
 		CC26xx.templateName = "CC26xx_custom_makefile_iar.xdt";
+                xdc.includeFile(String(CC26xx.$package.packageBase
+                     + "CC26xx_custom_outpolicies.cfg.xs"));
 	    }
 	    else if (Program.build.target.$name.match(/gnu/)) {
 		CC26xx.templateName = "CC26xx_custom_makefile_gnu.xdt";
+                xdc.includeFile(String(CC26xx.$package.packageBase
+                     + "CC26xx_custom_outpolicies_gnu.cfg.xs"));
 	    }
 	    else {
 		CC26xx.templateName = "CC26xx_custom_makefile.xdt";
+                xdc.includeFile(String(CC26xx.$package.packageBase
+                     + "CC26xx_custom_outpolicies.cfg.xs"));
 	    }
 
-            xdc.includeFile(String(CC26xx.$package.packageBase + "CC26xx_custom_outpolicies.cfg.xs"));
             Build.$private.libraryName = "/rom_sysbios.a" + Program.build.target.suffix;
             var SourceDir = xdc.useModule("xdc.cfg.SourceDir");
             /* if building a pre-built library */

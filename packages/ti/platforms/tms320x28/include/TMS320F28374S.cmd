@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
  *  ======== TMS320F28374S.cmd ========
  *  Define the memory block start/length for the TMS320F28374S
  */
- 
+
 MEMORY
 {
 PAGE 0 :  /* Program Memory */
@@ -58,9 +58,9 @@ PAGE 0 :  /* Program Memory */
     FLASHK  : origin = 0x0B8000, length = 0x002000  /* on-chip Flash */
     FLASHL  : origin = 0x0BA000, length = 0x002000  /* on-chip Flash */
     FLASHM  : origin = 0x0BC000, length = 0x002000  /* on-chip Flash */
-    FLASHN  : origin = 0x0BE000, length = 0x002000  /* on-chip Flash */  
+    FLASHN  : origin = 0x0BE000, length = 0x002000  /* on-chip Flash */
     RESET   : origin = 0x3FFFC0, length = 0x000002
-    
+
 PAGE 1 : /* Data Memory */
 
     BOOT_RSVD : origin = 0x000002, length = 0x000120 /* Part of M0, BOOT rom
@@ -113,7 +113,17 @@ SECTIONS
                           RUN_START(_RamfuncsRunStart),
                           RUN_SIZE(_RamfuncsRunSize),
                           RUN_END(_RamfuncsRunEnd)
-                         
+
+#ifdef __TI_COMPILER_VERSION
+#if __TI_COMPILER_VERSION >= 15009000
+    .TI.ramfunc : {} LOAD = FLASHA | FLASHB | FLASHC | FLASHD | FLASHE |
+                            FLASHF | FLASHG | FLASHH | FLASHI | FLASHJ |
+                            FLASHK | FLASHL | FLASHM | FLASHN PAGE = 0,
+                     RUN  = LS05SARAM PAGE = 1,
+                     table(BINIT)
+#endif
+#endif
+
     /* Allocate uninitalized data sections: */
     .stack              : > M01SARAM | LS05SARAM    PAGE = 1
     .ebss               : >> M01SARAM | LS05SARAM | RAMGS0 | RAMGS1 PAGE = 1

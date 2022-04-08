@@ -30,7 +30,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 /*
- *  ======== Mpu.c ========
+ *  ======== MPU.c ========
  */
 
 #include <xdc/std.h>
@@ -43,42 +43,63 @@
 #if (defined xdc_target__isaCompatible_v7R)
 #include <ti/sysbios/family/arm/v7r/Cache.h>
 #else
-#include <ti/sysbios/hal/CacheNull.h>
+#include <ti/sysbios/hal/Cache.h>
+/*
+ *  Cache_getEnabled() is not part of ICache. Creating a dummy macro
+ *  so compiler does not complain.
+ */
+#define Cache_getEnabled()  0
 #endif
 
-#include "package/internal/Mpu.xdc.h"
+#include "package/internal/MPU.xdc.h"
+
+#define MPU_RBAR_VALID      0x00000010UL
 
 /*
- *  ======== Mpu_startup ========
+ *  ======== MPU_startup ========
  */
-Void Mpu_startup()
+Void MPU_startup()
 {
-    Mpu_disableBR();
+    UInt i;
+
+    MPU_disableBR();
 
     /*
      * Initialize all MPU regions
      */
-    Mpu_initRegions();
-
-    if (Mpu_enableMPU) {
-        Mpu_enable();
+    for (i = 0; i < MPU_numRegions; i++) {
+        if (!MPU_isMemoryMapped) {
+            MPU_setRegionAsm(i, MPU_regionEntry[i].baseAddress,
+                MPU_regionEntry[i].sizeAndEnable,
+                MPU_regionEntry[i].regionAttrs);
+        }
+        else {
+            MPU_deviceRegs.RBAR = MPU_regionEntry[i].baseAddress |
+                                  MPU_RBAR_VALID | i;
+            MPU_deviceRegs.RASR = (MPU_regionEntry[i].regionAttrs << 16) |
+                                  (MPU_regionEntry[i].sizeAndEnable & 0xFFFF);
+        }
     }
 
-    if (Mpu_enableBackgroundRegion) {
-        Mpu_enableBR();
+    if (MPU_enableBackgroundRegion) {
+        MPU_enableBR();
+    }
+
+    if (MPU_enableMPU) {
+        MPU_enable();
     }
 }
 
 /*
- *  ======== Mpu_disable ========
+ *  ======== MPU_disable ========
  *  Function to disable the MPU.
  */
-Void Mpu_disable()
+Void MPU_disable()
 {
     UInt16 type;
     UInt   key;
 
-    if (!(Mpu_isEnabled())) {
+    if (!(MPU_isEnabled())) {
         return;
     }
 
@@ -90,8 +111,20 @@ Void Mpu_disable()
     /* disable all enabled caches */
     Cache_disable(type);
 
+    /* Ensure all memory transactions have completed */
+#if (defined(__ti__) || defined(__IAR_SYSTEMS_ICC__))
+    asm (" dsb");
+#else
+    __asm__ (" dsb");
+#endif
+
     /* disables the MPU */
-    Mpu_disableAsm();
+    if (!MPU_isMemoryMapped) {
+        MPU_disableAsm();
+    }
+    else {
+        MPU_deviceRegs.CTRL = MPU_deviceRegs.CTRL & (~0x1);
+    }
 
     /* set cache back to initial settings */
     Cache_enable(type);
@@ -100,16 +133,16 @@ Void Mpu_disable()
 }
 
 /*
- *  ======== Mpu_enable ========
+ *  ======== MPU_enable ========
  *  Function to enable the MPU.
  */
-Void Mpu_enable()
+Void MPU_enable()
 {
     UInt16 type;
     UInt   key;
 
     /* if MPU is already enabled then just return */
-    if (Mpu_isEnabled()) {
+    if (MPU_isEnabled()) {
         return;
     }
 
@@ -122,70 +155,130 @@ Void Mpu_enable()
         Cache_disable(Cache_Type_ALLP);
     }
 
-    Mpu_enableAsm();
+    if (!MPU_isMemoryMapped) {
+        MPU_enableAsm();
+    }
+    else {
+        MPU_deviceRegs.CTRL = MPU_deviceRegs.CTRL | 0x1;
+    }
 
     /* set cache back to initial settings */
     Cache_enable(type);
+
+#if (defined(__ti__) || defined(__IAR_SYSTEMS_ICC__))
+    asm (" dsb");
+    asm (" isb");
+#else
+    __asm__ (" dsb");
+    __asm__ (" isb");
+#endif
 
     Hwi_restore(key);
 }
 
 /*
- *  ======== Mpu_initRegionAttrs ========
+ *  ======== MPU_disableBR ========
  */
-Void Mpu_initRegionAttrs(Mpu_RegionAttrs *attrs)
+Void MPU_disableBR()
 {
-    Assert_isTrue(attrs != NULL, Mpu_A_nullPointer);
-
-    attrs->enable = Mpu_defaultAttrs.enable;
-    attrs->bufferable = Mpu_defaultAttrs.bufferable;
-    attrs->cacheable = Mpu_defaultAttrs.cacheable;
-    attrs->shareable = Mpu_defaultAttrs.shareable;
-    attrs->noExecute = Mpu_defaultAttrs.noExecute;
-    attrs->accPerm = Mpu_defaultAttrs.accPerm;
-    attrs->tex = Mpu_defaultAttrs.tex;
-    attrs->subregionDisableMask = Mpu_defaultAttrs.subregionDisableMask;
+    if (!MPU_isMemoryMapped) {
+        MPU_disableBRAsm();
+    }
+    else {
+        MPU_deviceRegs.CTRL = MPU_deviceRegs.CTRL & (~0x4);
+    }
 }
 
 /*
- *  ======== Mpu_setRegion ========
+ *  ======== MPU_enableBR ========
  */
-Void setRegion(UInt8 regionId, Ptr regionBaseAddr,
-    Mpu_RegionSize regionSize, Mpu_RegionAttrs *attrs)
+Void MPU_enableBR()
 {
+    if (!MPU_isMemoryMapped) {
+        MPU_enableBRAsm();
+    }
+    else {
+        MPU_deviceRegs.CTRL = MPU_deviceRegs.CTRL | 0x4;
+    }
+}
+
+/*
+ *  ======== isEnabled ========
+ */
+Bool MPU_isEnabled()
+{
+    if (!MPU_isMemoryMapped) {
+        return (MPU_isEnabledAsm());
+    }
+    else {
+        return ((MPU_deviceRegs.CTRL & 0x1) != 0);
+    }
+}
+
+/*
+ *  ======== MPU_initRegionAttrs ========
+ */
+Void MPU_initRegionAttrs(MPU_RegionAttrs *attrs)
+{
+    Assert_isTrue(attrs != NULL, MPU_A_nullPointer);
+
+    attrs->enable = MPU_defaultAttrs.enable;
+    attrs->bufferable = MPU_defaultAttrs.bufferable;
+    attrs->cacheable = MPU_defaultAttrs.cacheable;
+    attrs->shareable = MPU_defaultAttrs.shareable;
+    attrs->noExecute = MPU_defaultAttrs.noExecute;
+    attrs->accPerm = MPU_defaultAttrs.accPerm;
+    attrs->tex = MPU_defaultAttrs.tex;
+    attrs->subregionDisableMask = MPU_defaultAttrs.subregionDisableMask;
+}
+
+/*
+ *  ======== MPU_setRegion ========
+ */
+Void MPU_setRegion(UInt8 regionId, Ptr regionBaseAddr,
+    MPU_RegionSize regionSize, MPU_RegionAttrs *attrs)
+{
+    UInt32 key;
     Bool   enabled;
-    UInt32 baseAddressReg, sizeAndEnableReg, regionAttrsReg;
-    // TODO Special handling when changing shareability attrs
-    //      (see B5.3.3 of ARM ARM)
+    UInt32 sizeAndEnableReg, regionAttrsReg;
 
-    Assert_isTrue(attrs != NULL, Mpu_A_nullPointer);
-    Assert_isTrue(regionId < Mpu_numRegions, Mpu_A_invalidRegionId);
+    Assert_isTrue(attrs != NULL, MPU_A_nullPointer);
+    Assert_isTrue(regionId < MPU_numRegions, MPU_A_invalidRegionId);
+    Assert_isTrue(regionBaseAddr ==
+        (Ptr)((UInt32)regionBaseAddr & (~0 << ((regionSize >> 1) + 1))),
+        MPU_A_unalignedBaseAddr);
 
-    enabled = Mpu_isEnabled();
+    enabled = MPU_isEnabled();
 
     /* disable the MPU (if already disabled, does nothing) */
-    Mpu_disable();
-
-    /* Round down base address to a 4-byte aligned address */
-    baseAddressReg = (UInt32)regionBaseAddr & 0xFFFFFFFC;
+    MPU_disable();
 
     sizeAndEnableReg = (attrs->subregionDisableMask << 8) | regionSize |
                        (attrs->enable);
-
-    regionAttrsReg = (attrs->noExecute << 12) | (attrs->accPerm << 8) |
+    regionAttrsReg   = (attrs->noExecute << 12) | (attrs->accPerm << 8) |
         (attrs->tex << 3) | (attrs->shareable << 2) | (attrs->cacheable << 1) |
         (attrs->bufferable);
 
-    if (!Mpu_isMemoryMapped) {
-        Mpu_setRegionAsm(regionId, baseAddressReg, sizeAndEnableReg,
+    key = Hwi_disable();
+
+    if (!MPU_isMemoryMapped) {
+        MPU_setRegionAsm(regionId, (UInt32)regionBaseAddr, sizeAndEnableReg,
             regionAttrsReg);
-        /* Copy register values to module state for use by ROV */
-        (Mpu_module->regionEntry[regionId]).baseAddress = baseAddressReg;
-        (Mpu_module->regionEntry[regionId]).sizeAndEnable = sizeAndEnableReg;
-        (Mpu_module->regionEntry[regionId]).regionAttrs = regionAttrsReg;
+    }
+    else {
+        MPU_deviceRegs.RBAR = (UInt32)regionBaseAddr | MPU_RBAR_VALID | regionId;
+        MPU_deviceRegs.RASR = (regionAttrsReg << 16) |
+                              (sizeAndEnableReg & 0xFFFF);
     }
 
+    /* Copy register values to module state for use by ROV */
+    (MPU_module->regionEntry[regionId]).baseAddress = (UInt32)regionBaseAddr;
+    (MPU_module->regionEntry[regionId]).sizeAndEnable = sizeAndEnableReg;
+    (MPU_module->regionEntry[regionId]).regionAttrs = regionAttrsReg;
+
+    Hwi_restore(key);
+
     if (enabled) {
-        Mpu_enable();
+        MPU_enable();
     }
 }

@@ -63,8 +63,8 @@ BiosBuild.buildLibs(objList, undefined, trgFilter, ["profile=smp"]);
 var objList = [
     "IntrinsicsSupport.c",
     "IntrinsicsSupport_asm",
-    "Mpu",
-    "Mpu_asm",
+    "MPU",
+    "MPU_asm",
     "TaskSupport.c",
     "TaskSupport_asm"
 ];
@@ -102,9 +102,27 @@ BiosBuild.buildLibs(objList, undefined, trgFilter, arguments);
 /* generate smp makefiles */
 BiosBuild.buildLibs(objList, undefined, trgFilter, ["profile=smp"]);
 
+var objList = [
+    "MPU",
+];
+
+var trgFilter = {
+    field: "$name",
+    list: [ "ti.targets.arm.elf.M4F",
+            "gnu.targets.arm.M4F",
+            "iar.targets.arm.M4F"
+          ]
+};
+
+/* generate TI and GNU M4F target libs */
+BiosBuild.buildLibs(objList, undefined, trgFilter, arguments);
+
+/* generate smp makefiles */
+BiosBuild.buildLibs(objList, undefined, trgFilter, ["profile=smp"]);
+
 Pkg.otherFiles = ["package.bld", "linkcmd.xdt", "Hwi_link.xdt", "doc-files", 
-                  "armSettings.xs", "Settings.xml", "Mpu.xml", "genMpuHtml.xs",
-                  "custom.mak"];
+                  "armSettings.xs", "Settings.xml", "MPU.xml", "genMpuHtml.xs",
+                  "custom.mak", "MPU_link.xdt"];
 
 /* include source files in the release package */
 Pkg.attrs.exportSrc = true;

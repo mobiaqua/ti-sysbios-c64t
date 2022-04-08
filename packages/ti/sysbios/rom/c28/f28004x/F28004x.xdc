@@ -66,8 +66,7 @@ module F28004x inherits ti.sysbios.interfaces.IRomDevice
     override metaonly config String templateName = "F28004x_rom_makefile.xdt";
     
     /*
-     *  Set this constant to the NN value of the avala-xNN tree
-     *  used to create the production version of the ROM image
+     *  Set this constant to a magic value unique to the ROM.romName = ROM.F28004x.
      */
     config UInt32 REVISION = 1915367466;
 

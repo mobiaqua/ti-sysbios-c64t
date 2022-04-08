@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,21 +31,21 @@
  */
 /*
  *  ======== TMS320F2806.cmd ========
- *  Define the memory block start/length for the F2806  
+ *  Define the memory block start/length for the F2806
  */
 
-/* 
+/*
  *  PAGE 0 will be used to organize program sections
  *  PAGE 1 will be used to organize data sections
  *
- *  Notes: 
+ *  Notes:
  *      Memory blocks on F2806 are uniform (ie same
- *      physical memory) in both PAGE 0 and PAGE 1.  
+ *      physical memory) in both PAGE 0 and PAGE 1.
  *      That is the same memory region should not be
  *      defined for both PAGE 0 and PAGE 1.
- *      Doing so will result in corruption of program 
- *      and/or data. 
- *        
+ *      Doing so will result in corruption of program
+ *      and/or data.
+ *
  *      L0 and L1 memory blocks are mirrored - that is
  *      they can be accessed in high memory or low memory.
  *      For simplicity only one instance is used in this
@@ -73,7 +73,7 @@ PAGE 1 :   /* Data Memory */
     L01SARAM    : origin = 0x008000, length = 0x002000      /* on-chip RAM block L0, M1 */
 }
 
-/* 
+/*
  *  Allocate sections to memory blocks.
  *  Note:
  *      codestart   user defined section in DSP28_CodeStartBranch.asm
@@ -81,8 +81,8 @@ PAGE 1 :   /* Data Memory */
  *
  *      ramfuncs    user defined section to store functions that will be
  *                  copied from Flash into RAM
- */ 
- 
+ */
+
 SECTIONS
 {
     /* Allocate program areas: */
@@ -106,10 +106,18 @@ SECTIONS
     .esysmem        : > L01SARAM | M01SARAM     PAGE = 1
     .cio            : > L01SARAM | M01SARAM     PAGE = 1
 
+#ifdef __TI_COMPILER_VERSION
+#if __TI_COMPILER_VERSION >= 15009000
+    .TI.ramfunc         : {} LOAD = FLASH    PAGE = 0,
+                             RUN  = L01SARAM PAGE = 1,
+                             table(BINIT)
+#endif
+#endif
+
     /* Initalized sections go in Flash */
     /* For SDFlash to program these, they must be allocated to page 0 */
     .econst         : > FLASH       PAGE = 0
-    .switch         : > FLASH       PAGE = 0      
+    .switch         : > FLASH       PAGE = 0
     .args           : > FLASH       PAGE = 0
 
     /* Allocate IQ math areas: */

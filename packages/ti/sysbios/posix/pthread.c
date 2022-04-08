@@ -479,6 +479,11 @@ int pthread_join(pthread_t pthread, void **thread_return)
         return (EINVAL);
     }
 
+    if (pthread == pthread_self()) {
+        Task_restore(key);
+        return (EDEADLK);
+    }
+
     /*
      *  Allow pthread_join() to be called from a BIOS Task.  If we
      *  set joinThread to pthread_self(), we could get NULL if the

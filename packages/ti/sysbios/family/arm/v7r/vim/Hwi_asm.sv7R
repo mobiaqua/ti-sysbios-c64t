@@ -146,9 +146,9 @@ ti_sysbios_family_arm_v7r_vim_Hwi_init__I:
         orr     r12, r12, #0x12 ; to initialize zero-latency IRQ sp
         msr     cpsr_cf, r12    ;
 
-        ldr     sp, nonDispatchedIRQStackAddr
+        ldr     sp, irqStackAddr
         ldr     sp, [sp]        ; base of zero-latency IRQ stack
-        ldr     r12, nonDispatchedIRQStackSize
+        ldr     r12, irqStackSize
         ldr     r12, [r12]      ; size of zero-latency IRQ stack
         add     sp, r12, sp     ; sp = initial zero-latency IRQ stack
 
@@ -169,10 +169,10 @@ fiqStackAddr:
 fiqStackSize:
         .word   ti_sysbios_family_arm_v7r_vim_Hwi_Module__state__V.fiqStackSize
 
-nonDispatchedIRQStackAddr:
-        .word   ti_sysbios_family_arm_v7r_vim_Hwi_Module__state__V.nonDispatchedIRQStack
+irqStackAddr:
+        .word   ti_sysbios_family_arm_v7r_vim_Hwi_Module__state__V.irqStack
 
-nonDispatchedIRQStackSize:
-        .word   ti_sysbios_family_arm_v7r_vim_Hwi_Module__state__V.nonDispatchedIRQStackSize
+irqStackSize:
+        .word   ti_sysbios_family_arm_v7r_vim_Hwi_Module__state__V.irqStackSize
 
         .end

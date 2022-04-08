@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,18 +34,18 @@
  *  Define the memory block start/length for the F28044
  */
 
-/* 
+/*
  *  PAGE 0 will be used to organize program sections
  *  PAGE 1 will be used to organize data sections
  *
- *  Notes: 
+ *  Notes:
  *        Memory blocks on F28044 are uniform (ie same
- *        physical memory) in both PAGE 0 and PAGE 1.  
+ *        physical memory) in both PAGE 0 and PAGE 1.
  *        That is the same memory region should not be
  *        defined for both PAGE 0 and PAGE 1.
- *        Doing so will result in corruption of program 
- *        and/or data. 
- *        
+ *        Doing so will result in corruption of program
+ *        and/or data.
+ *
  *        L0/L1 and H0 memory blocks are mirrored - that is
  *        they can be accessed in high memory or low memory.
  *        For simplicity only one instance is used in this
@@ -81,7 +81,7 @@ PAGE 1 :   /* Data Memory */
  *
  *      ramfuncs    user defined section to store functions that will be
  *                  copied from Flash into RAM
- */ 
+ */
 
 SECTIONS
 {
@@ -111,6 +111,14 @@ SECTIONS
     .econst             : > FLASH       PAGE = 0
     .switch             : > FLASH       PAGE = 0
     .args               : > FLASH       PAGE = 0
+
+#ifdef __TI_COMPILER_VERSION
+#if __TI_COMPILER_VERSION >= 15009000
+    .TI.ramfunc         : {} LOAD = FLASH    PAGE = 0,
+                             RUN  = L01SARAM PAGE = 1,
+                             table(BINIT)
+#endif
+#endif
 
     /* Allocate IQ math areas: */
     IQmath              : > FLASH       PAGE = 0                /* Math Code */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,13 +38,13 @@
  *  PAGE 0 will be used to organize program sections
  *  PAGE 1 will be used to organize data sections
  *
- *  Notes: 
+ *  Notes:
  *      Memory blocks on C2810 are uniform (ie same
- *      physical memory) in both PAGE 0 and PAGE 1.  
+ *      physical memory) in both PAGE 0 and PAGE 1.
  *      That is the same memory region should not be
  *      defined for both PAGE 0 and PAGE 1.
- *      Doing so will result in corruption of program 
- *      and/or data. 
+ *      Doing so will result in corruption of program
+ *      and/or data.
  */
 
 MEMORY
@@ -69,7 +69,7 @@ PAGE 1 :   /* Data Memory */
     L01SARAM    : origin = 0x008000, length = 0x002000     /* on-chip RAM block L0, L1 */
 }
 
-/* 
+/*
  *  Allocate sections to memory blocks.
  *  Note:
  *      codestart   user defined section in DSP28_CodeStartBranch.asm used
@@ -96,8 +96,14 @@ SECTIONS
     /* Initalized sections */
     /* For SDFlash to program these, they must be allocated to page 0 */
     .econst             : > H0SARAM     PAGE = 0
-    .switch             : > H0SARAM     PAGE = 0    
+    .switch             : > H0SARAM     PAGE = 0
     .args               : > H0SARAM     PAGE = 0
+
+#ifdef __TI_COMPILER_VERSION
+#if __TI_COMPILER_VERSION >= 15009000
+    .TI.ramfunc         : {} > H0SARAM  PAGE = 0
+#endif
+#endif
 
     /* Allocate IQ math areas: */
     IQmath              : > H0SARAM     PAGE = 0                  /* Math Code */

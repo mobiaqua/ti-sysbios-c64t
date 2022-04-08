@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,6 @@
  */
 /*
  *  ======== Settings.xs ========
- *
  */
 
 var settings = {
@@ -47,8 +46,9 @@ var settings = {
             powerDelegate : "ti.sysbios.family.msp430.Power",
             coreDelegate : null,
             clockTickPeriod : 1000,
-            targets : [ "ti.targets.msp430.MSP430", "ti.targets.msp430.MSP430X", "ti.targets.msp430.MSP430X_small",
-                        "ti.targets.msp430.elf.MSP430", "ti.targets.msp430.elf.MSP430X", "ti.targets.msp430.elf.MSP430X_small" ]
+            targets : [ "ti.targets.msp430.MSP430", "ti.targets.msp430.MSP430X",
+                        "ti.targets.msp430.elf.MSP430",
+                        "ti.targets.msp430.elf.MSP430X" ]
         },
 /*
         "MSP430F2274": {

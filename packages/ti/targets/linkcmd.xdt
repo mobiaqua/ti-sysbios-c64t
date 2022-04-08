@@ -49,12 +49,7 @@
 %}
 
 
-%/* aliases interfere with whole_program and are unnecessary in this case.
-% */
-%if (prog.build.profile.match(/whole_program/) == null
-%    && prog.build.profile.match(/blas/) == null) {
 `_utils.genAliases(prog)`
-%}
 
 %/* The symbols on the left exist when linking for ELF, but they need to
 % * be referenced in both ELF and COFF builds, so we need to create them here

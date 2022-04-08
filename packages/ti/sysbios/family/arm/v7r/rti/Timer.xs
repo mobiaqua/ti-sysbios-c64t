@@ -47,10 +47,17 @@ if (xdc.om.$name == "cfg" || typeof(genCdoc) != "undefined") {
             "Core1": {
                 rtiBaseAddress  : 0xFFFFEE00
             }
+        },
+        "RM57L8xx": {
+            "Core0": {
+                rtiBaseAddress  : 0xFFFFFC00
+            }
         }
     };
 
     deviceTable["RM57D8[a-zA-Z0-9]+"] = deviceTable["RM57D8xx"];
+    deviceTable["RM57L8[a-zA-Z0-9]+"] = deviceTable["RM57L8xx"];
+    deviceTable["RM48L.*"] = deviceTable["RM57L8xx"];
 }
 
 /*
@@ -110,8 +117,10 @@ function module$use()
     device = deviceSupportCheck();
 
     if (device == null) {
-        print("The " + Program.cpu.deviceName + " device is not currently supported.");
-        print("The following devices are supported for the " + Program.build.target.name + " target:");
+        print("The " + Program.cpu.deviceName +
+            " device is not currently supported.");
+        print("The following devices are supported for the " +
+            Program.build.target.name + " target:");
         for (device in deviceTable) {
                 print("\t" + device);
         }
@@ -141,6 +150,7 @@ function module$static$init(mod, params)
             + "). Should be <= " + mod.availMask + ".", Timer, "anyMask");
     }
 
+    mod.handles.length = Timer.NUM_TIMER_DEVICES;
     for (var i = 0; i < Timer.NUM_TIMER_DEVICES; i++) {
         mod.handles[i] = null;
     }
@@ -198,12 +208,7 @@ function instance$static$init(obj, id, tickFxn, params)
     obj.prescale = params.prescale;
     obj.period = params.period;
     obj.periodType = params.periodType;
-    if (params.intNum == -1) {
-        obj.intNum = Timer.intNumDef[obj.id];
-    }
-    else {
-        obj.intNum = params.intNum;
-    }
+    obj.intNum = Timer.intNumDef[obj.id];
     obj.arg = params.arg;
     obj.tickFxn = tickFxn;
     obj.extFreq.lo = params.extFreq.lo;
@@ -233,7 +238,6 @@ function instance$static$init(obj, id, tickFxn, params)
             }
         }
         else {
-            //TODO Do we want to support FIQs ???
             /* FIQ interrupts go straight to ISR, no stub */
             obj.hwi = Hwi.create(obj.intNum, obj.tickFxn , hwiParams);
         }
@@ -270,29 +274,89 @@ function getEnumString(enumProperty)
 
 /*
  *  ======== viewInitBasic ========
- *  Initialize the 'Basic' Timer instance view.
+ *  Initialize the 'Basic' Timer view.
  */
-function viewInitBasic(view, obj)
+function viewInitBasic(view)
 {
     var Program = xdc.useModule('xdc.rov.Program');
     var halTimer = xdc.useModule('ti.sysbios.hal.Timer');
+    var Timer = xdc.useModule('ti.sysbios.family.arm.v7r.rti.Timer');
 
-    view.halTimerHandle = halTimer.viewGetHandle(obj.$addr);
-    view.label          = Program.getShortName(obj.$label);
-    view.id             = obj.id;
+    /* Scan the raw view in order to obtain the module state. */
+    var biosRawView;
 
-    view.startMode      = getEnumString(obj.startMode);
-    view.runMode        = getEnumString(obj.runMode);
-    view.period         = obj.period;
-    view.periodType     = getEnumString(obj.periodType);
-    view.intNum         = obj.intNum;
+    try {
+        biosRawView = Program.scanRawView('ti.sysbios.BIOS');
+    }
+    catch (e) {
+        this.$logWarning("Caught exception while retrieving raw view: " + e,
+                this);
+    }
 
-    view.tickFxn        = Program.lookupFuncName(Number(obj.tickFxn));
-    view.arg            = obj.arg;
+    /* Get the module state */
+    var biosMod = biosRawView.modState;
 
-    view.extFreq        = Number(obj.extFreq.lo +
-                                (obj.extFreq.hi << 32)).toString(10);
-    view.hwiHandle      = "0x" + Number(obj.hwi).toString(16);
+    /* Get the Timer module config to get the number of timer devices. */
+    var modCfg = Program.getModuleConfig('ti.sysbios.family.arm.v7r.rti.Timer');
+
+    var numTimers = modCfg.NUM_TIMER_DEVICES;
+
+    /*
+     * Retrieve the raw view to get at the module state.
+     * This should just return, we don't need to catch exceptions.
+     */
+    var rawView = Program.scanRawView('ti.sysbios.family.arm.v7r.rti.Timer');
+
+    var timerHandlesAddr = rawView.modState.handles;
+
+    var ScalarStructs = xdc.useModule('xdc.rov.support.ScalarStructs');
+
+    /* Retrieve the array of timer handles */
+    var timerHandles = Program.fetchArray(ScalarStructs.S_Ptr$fetchDesc,
+                                          timerHandlesAddr, numTimers);
+
+    /*
+     * Scan the timerHandles array for non-zero Timer handles
+     */
+    for (var i = 0; i < numTimers; i++) {
+        var timerHandle = timerHandles[i];
+        if (Number(timerHandle.elem) != 0) {
+            /* Retrieve the embedded instance */
+            var obj = Program.fetchStruct(Timer.Instance_State$fetchDesc,
+                                          timerHandle.elem);
+            var elem = Program.newViewStruct(
+                            'ti.sysbios.family.arm.v7r.rti.Timer',
+                            'Basic');
+
+            if ((obj.__name != undefined) && obj.__name) {
+                elem.label      = Program.fetchString(obj.__name, true);
+            }
+
+            var freqKHz =
+                ((biosMod.cpuFreq.lo / 2) / (obj.prescale + 1)) / 1000;
+            if (obj.periodType == Timer.PeriodType_COUNTS) {
+                elem.periodInCounts = obj.period;
+                elem.periodInMicroSecs = (obj.period * 1000) / (freqKHz);
+            }
+            else {
+                elem.periodInMicroSecs = obj.period;
+                elem.periodInCounts = (freqKHz * obj.period) / 1000;
+            }
+
+            elem.halTimerHandle = halTimer.viewGetHandle(obj.$addr);
+            elem.id             = obj.id;
+            elem.startMode      = getEnumString(obj.startMode);
+            elem.runMode        = getEnumString(obj.runMode);
+            elem.intNum         = obj.intNum;
+            elem.tickFxn        = Program.lookupFuncName(Number(obj.tickFxn));
+            elem.arg            = obj.arg;
+            elem.extFreq        = Number(obj.extFreq.lo).toString(10);
+            elem.hwiHandle      = "0x" + Number(obj.hwi).toString(16);
+
+            /* Add the element to the list. */
+            view.elements.$add(elem);
+        }
+    }
 }
 
 /*

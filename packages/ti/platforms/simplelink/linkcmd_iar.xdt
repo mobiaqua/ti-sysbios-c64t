@@ -56,9 +56,9 @@
 %}
 
 %if (prog.platform.$orig.includeLinkCmdFile) {
-%var linkFile = prog.build.target.rootDir
-%    + '/config/linker/TexasInstruments/' + prog.cpu.deviceName.toUpperCase() 
-%    + '.icf';
+%    var linkFile;
+%    linkFile = prog.platform.$package.packageBase + '/include_iar/'
+%        + prog.cpu.deviceName.toUpperCase() + '.icf';
 --config "`linkFile`"
 %}
 

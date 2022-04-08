@@ -13,7 +13,6 @@
 /*
  *  ======== Platform.xdc ========
  *  Platform support for evmAM3359
- *
  */
 
 package ti.platforms.evmAM3359;
@@ -57,7 +56,7 @@ instance:
                 comment: "DDR3 Memory",
                 name: "DDR3",
                 base: 0x80000000,
-                len:  0x04000000    /* 64 MB */
+                len:  0x20000000    /* 512 MB */
             }],
         ];
 };

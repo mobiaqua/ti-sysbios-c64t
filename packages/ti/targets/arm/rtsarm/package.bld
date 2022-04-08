@@ -11,8 +11,8 @@ Pkg.otherFiles = ['boot.asm', 'auto_init.asm'];
 Pkg.otherSrcs = Pkg.otherFiles;
 
 var attrs = {
-    profile: Pkg.attrs.profile == "debug" ? "debug" : "whole_program",
-    copts: "--symdebug:dwarf --optimize_with_debug"
+    profile: Pkg.attrs.profile == "debug" ? "debug" : "release",
+    copts: "--symdebug:dwarf --optimize_with_debug -ms"
 };
 
 var cobjs = RtsBuild.c_objs.concat(KnlBuild.c_objs);

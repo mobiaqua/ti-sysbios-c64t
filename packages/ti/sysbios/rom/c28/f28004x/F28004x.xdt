@@ -54,14 +54,12 @@ tplt.genFile(outputDir + "/makefile", this, [Program.build.target]);
 %for each (var mod in Program.targetModules()) {
 %    if ("$object" in mod) {
 %          var mn = mod.$name.replace(/\./g, "_");
-/* #pragma DATA_SECTION(`mn`_Module__state__V, ".data:_`mn`_Module__state__V"); */
 #pragma CLINK(`mn`_Module__state__V);
 %        }
 %    }
 %}
 
 /* tag __xdc__ini_addr to be removed if not referenced */
-#pragma DATA_SECTION(__xdc__init__addr, ".data:__xdc__init__addr");
 #pragma CLINK(__xdc__init__addr)
 
 %if (Program.build.target.$name.match(/gnu/)) {

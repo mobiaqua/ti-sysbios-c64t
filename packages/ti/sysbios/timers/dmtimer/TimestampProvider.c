@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Texas Instruments Incorporated
+ * Copyright (c) 2012-2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,7 +55,7 @@ Int TimestampProvider_Module_startup( Int phase )
 {
     Clock_TimerProxy_Handle clockTimer;
 
-    if (BIOS_clockEnabled && TimestampProvider_useClockTimer) {
+    if (BIOS_clockEnabled && (MOD->timer == NULL)) {
         /* get Clock's timer handle */
         clockTimer = Clock_getTimerHandle();
         Assert_isTrue((clockTimer != NULL), NULL);

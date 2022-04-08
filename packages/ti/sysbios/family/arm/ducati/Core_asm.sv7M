@@ -1,5 +1,5 @@
 ;
-;  Copyright (c) 2012, Texas Instruments Incorporated
+;  Copyright (c) 2015, Texas Instruments Incorporated
 ;  All rights reserved.
 ; 
 ;  Redistribution and use in source and binary forms, with or without
@@ -36,9 +36,6 @@
 
         .cdecls C,NOLIST,"package/internal/Core.xdc.h" 
 
-    .if ti_sysbios_BIOS_smpEnabled__D
-        .include "Core_smp_asm.sv7M"
-    .else
         .thumb
 
         .global ti_sysbios_family_arm_ducati_Core_reset
@@ -110,8 +107,6 @@ reset0: .word   0x00000404      ; reset vector addr for core 0
 reset1: .word   0x00000804      ; reset vector addr for core 1
 
         .endasmfunc
-
-    .endif
 
         .end
 

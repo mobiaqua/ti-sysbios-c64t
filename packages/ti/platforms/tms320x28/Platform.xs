@@ -1,5 +1,5 @@
-/* 
- *  Copyright (c) 2010 Texas Instruments and others.
+/*
+ *  Copyright (c) 2015 by Texas Instruments and others.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -9,6 +9,39 @@
  *      Texas Instruments - initial implementation
  *
  * */
+
+/*
+ * Copyright (c) 2010-2015, Texas Instruments Incorporated
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * *  Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * *  Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * *  Neither the name of Texas Instruments Incorporated nor the names of
+ *    its contributors may be used to endorse or promote products derived
+ *    from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 /*
  *  ======== Platform.xs ========
  *  Generic platform support for any TMS320x28 devices.
@@ -22,8 +55,8 @@ var Utils = xdc.useModule('xdc.platform.Utils');
 function module$meta$init()
 {
     if (xdc.om.$name != "cfg") {
-        return;                                                
-    }                                                                           
+        return;
+    }
 }
 
 /*
@@ -55,7 +88,7 @@ function getExeContext(prog)
 {
     /* create a default ExeContext execution context */
     var ExeContext = xdc.useModule('xdc.platform.ExeContext');
-    
+
     var cpu = ExeContext.create(this.CPU, this.$module.BOARD);
     cpu.memoryMap = Utils.assembleMemoryMap(cpu, this);
     cpu.deviceName = this.deviceName;
@@ -107,18 +140,18 @@ function getLinkTemplate(prog)
  *
  *  Platform instances may also be created in the build domain.
  *
- *  @param(name)        the name used to identify this instance (without
- *                      the package name prefix)
+ *  @param(name)    the name used to identify this instance (without
+ *              the package name prefix)
  *
- *  For this platform, 'name' must identify a catalog module. Besides the 
- *  catalog module, this parameter may encode values for other configuration 
+ *  For this platform, 'name' must identify a catalog module. Besides the
+ *  catalog module, this parameter may encode values for other configuration
  *  parameters, as defined by `nameFormat`. The values are separated by ':'.
  */
 function instance$meta$init(name)
 {
     var maxParamsLength = this.$module.nameFormat.split(":").length;
     var nameParams = name.split(":");
-    
+
     if (nameParams.length > maxParamsLength) {
         this.$module.$logWarning("The platform ti.platforms.tms320x28 accepts "
             + "only " + maxParamsLength + " instance parameters in its name. "
@@ -165,13 +198,13 @@ function instance$meta$init(name)
      */
     var dev = this.deviceName.match(/TMS320([CFR])(\d+)/);
     if (dev == null || dev.length != 3) {
-        dev = this.deviceName.match(/([F])(\d+)/);
-        if (dev == null) {
+    dev = this.deviceName.match(/([F])(\d+)/);
+    if (dev == null) {
             this.$module.$logFatal("Device " + this.deviceName
                 + " is not supported.", this.$module);
         }
     }
-    
+
     if (this.includeLinkCmdFile) {
         var deviceType = dev[1];
         var deviceNumber = dev[2];
@@ -193,7 +226,8 @@ function instance$meta$init(name)
             dn = "283" + deviceNumber.substring(3);
         }
 
-        if (this.deviceName.match(/2837/) || this.deviceName.match(/2807/)) {
+        if (this.deviceName.match(/2837/) || this.deviceName.match(/2807/) ||
+        this.deviceName.match(/28004/)) {
             this.$private.linkerFile = xdc.findFile("ti/platforms/tms320x28/"
                 + "include/" + this.deviceName + ".cmd");
         }
@@ -239,7 +273,8 @@ function instance$meta$init(name)
         this.CPU.deviceName = "TMS320C2812";
     }
 
-    if (this.deviceName.match(/2837/) || this.deviceName.match(/2807/)) {
+    if (this.deviceName.match(/2837/) || this.deviceName.match(/2807/) ||
+        this.deviceName.match(/28004/)) {
         var Boot = xdc.useModule('ti.catalog.c2800.initF2837x.Boot');
 
         Boot.configureClocks = true;
@@ -252,7 +287,7 @@ function instance$meta$init(name)
         Boot.pllcrDIV = 10;
         Boot.pllstsDIVSEL = 2;
 
-    
+
         /*
          * Set the Boot.pllType based on device name.  We set pllType
          * to undefined for the devices that we don't support.
@@ -270,7 +305,7 @@ function instance$meta$init(name)
         else if (this.deviceName.match(/2834[0-9]/)) {
             Boot.pllType = Boot.Type_2834x;
         }
-        else { 
+        else {
             Boot.configurePll = false;    /* do not set up PLL */
             Boot.pllType = undefined;     /* unknown device */
 

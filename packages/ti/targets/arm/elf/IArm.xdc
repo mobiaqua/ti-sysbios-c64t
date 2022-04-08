@@ -1,13 +1,13 @@
 /* 
- *  Copyright (c) 2008 Texas Instruments and others.
+ *  Copyright (c) 2008-2015 Texas Instruments Incorporated
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *  Contributors:
  *      Texas Instruments - initial implementation
- * 
+ *
  * */
 
 /*!
@@ -38,8 +38,8 @@ metaonly interface IArm inherits ti.targets.ITarget {
     };
 
     override readonly config xdc.bld.ITarget2.Command lnk = {
-        cmd:  "armlnk",
-        opts: ""
+        cmd:  "armcl",
+        opts: "-z"
     };
 
     /*!
@@ -110,16 +110,6 @@ metaonly interface IArm inherits ti.targets.ITarget {
         ["coverage", {
             compileOpts: {
                 copts: "--symdebug:dwarf",
-            },
-        }],
-        ["whole_program", {
-            compileOpts: {
-                copts: "-oe -O2 -ms",
-            },
-        }],
-        ["whole_program_debug", {
-            compileOpts: {
-                copts: "-oe --symdebug:dwarf -ms",
             },
         }],
     ];

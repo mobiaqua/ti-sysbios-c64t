@@ -1,6 +1,6 @@
 %%{
 /*
- * Copyright (c) 2012, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,5 +31,9 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 %%}
-%var Temp = xdc.loadTemplate("Core_link.xdt");
+%var Temp;
+%Temp = xdc.loadTemplate("Core_link.xdt");
+%Temp.genStream($out, this, $args);
+%
+%Temp = xdc.loadTemplate("CTM_link.xdt");
 %Temp.genStream($out, this, $args);

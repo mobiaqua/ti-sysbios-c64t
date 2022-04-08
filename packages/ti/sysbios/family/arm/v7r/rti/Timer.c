@@ -108,6 +108,14 @@ UInt32 Timer_getMaxTicks(Timer_Object *obj)
 }
 
 /*
+ *  ======== Timer_getCurrentTick ========
+ */
+UInt32 Timer_getCurrentTick(Timer_Object *obj, Bool saveFlag)
+{
+    return (0);
+}
+
+/*
  *  ======== Timer_setNextTick ========
  */
 Void Timer_setNextTick(Timer_Object *obj, UInt32 ticks){
@@ -160,7 +168,7 @@ Void Timer_startup()
             /* if timer was statically created/constructed */
             if ((obj != NULL) && (obj->staticInst)) {
                 if (obj->startMode == Timer_StartMode_AUTO) {
-                        Timer_start(obj);
+                    Timer_start(obj);
                 }
             }
         }
@@ -197,8 +205,8 @@ Int Timer_Instance_init(Timer_Object *obj, Int id, Timer_FuncPtr tickFxn, const 
 
     if (id >= Timer_NUM_TIMER_DEVICES) {
         if (id != Timer_ANY) {
-        Error_raise(eb, Timer_E_invalidTimer, id, 0);
-        return (1);
+            Error_raise(eb, Timer_E_invalidTimer, id, 0);
+            return (1);
         }
     }
 
@@ -237,12 +245,7 @@ Int Timer_Instance_init(Timer_Object *obj, Int id, Timer_FuncPtr tickFxn, const 
     obj->period = params->period;
     obj->periodType = params->periodType;
     obj->arg = params->arg;
-    if (params->intNum == -1) {
-        obj->intNum = Timer_intNumDef[obj->id];
-    }
-    else {
-        obj->intNum = params->intNum;
-    }
+    obj->intNum = Timer_intNumDef[obj->id];
     obj->tickFxn = tickFxn;
 
     /* extFreq.hi is ignored */
@@ -374,7 +377,6 @@ Int Timer_postInit (Timer_Object *obj, Error_Block *eb)
 
     /* Set prescaler, enable interrupt and select counter for comparator */
     if (obj->id == 0) {
-        // TODO init rtitbctrl ?
         /* Use internal up-counter to clock free-running counter 0 */
         Timer_deviceRegs.RTITBCTRL &= TIMER_TBCTRL_TBEXT;
         Timer_deviceRegs.RTICPUC0 = obj->prescale;
@@ -676,7 +678,6 @@ Void Timer_getFreq(Timer_Object *obj, Types_FreqHz *freq)
         freq->hi = 0;
     }
     else {
-        // TODO Account for prescaler ???
         Assert_isTrue((Timer_intFreq.hi == 0), NULL);
         freq->lo = Timer_intFreq.lo;
         freq->hi = 0;

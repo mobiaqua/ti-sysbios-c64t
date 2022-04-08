@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, Texas Instruments Incorporated
+ * Copyright (c) 2013-2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,6 @@
  */
 /*
  *  ======== Cache.xs ========
- *
  */
 
 var Cache;
@@ -45,72 +44,6 @@ var origSizes = {
 /*  This information should be placed and obtained from catalog files */
 if (xdc.om.$name == "cfg") {
     var deviceTable = {
-        "TMS320CDM6446": {
-            emifACfg: $addr(0x01e00000),
-            emifABase:   0x02000000,
-            emifALength: 0x08000000,
-            emifBCfg: $addr(0x20000000),
-            emifBBase:   0x80000000,
-            emifBLength: 0x10000000,
-            emifCCfg: $addr(0x01e00000),
-            emifCBase:   0x42000000,
-            emifCLength: 0x08000000,
-        },
-        "TMS320CDM6437": {
-            emifACfg: $addr(0x01e00000),
-            emifABase:   0x02000000,
-            emifALength: 0x08000000,
-            emifBCfg: $addr(0x20000000),
-            emifBBase:   0x80000000,
-            emifBLength: 0x10000000,
-            emifCCfg: $addr(0x01e00000),
-            emifCBase:   0x42000000,
-            emifCLength: 0x08000000,
-        },
-        "TMS320CDM6467": {
-            emifACfg: $addr(0x01e00000),
-            emifABase:   0x02000000,
-            emifALength: 0x08000000,
-            emifBCfg: $addr(0x20000000),
-            emifBBase:   0x80000000,
-            emifBLength: 0x10000000,
-            emifCCfg: $addr(0x01e00000),
-            emifCBase:   0x42000000,
-            emifCLength: 0x08000000,
-        },
-        "TMS320CTCI6482": {
-            emifACfg: $addr(0x70000000),
-            emifABase:   0x80000000,
-            emifALength: 0x60000000,
-            emifBCfg: $addr(0x78000000),
-            emifBBase:   0xe0000000,
-            emifBLength: 0x10000000,
-            emifCCfg:  null,
-            emifCBase:   null,
-            emifCLength: null,
-        },
-        "TMS320CTCI6484": {
-            emifACfg: $addr(0x70000000),
-            emifABase:   0x80000000,
-            emifALength: 0x60000000,
-            emifBCfg: $addr(0x78000000),
-            emifBBase:   0xe0000000,
-            emifBLength: 0x20000000,
-            emifCCfg:  null,
-            emifCBase:   null,
-            emifCLength: null,
-        },
-        "TMS320CDM648": {
-            emifACfg: $addr(0x70000000),
-            emifABase:   0x80000000,
-            emifALength: 0x60000000,
-            emifBCfg: $addr(0x78000000),
-            emifBBase:   0xe0000000,
-            emifBLength: 0x10000000,
-            emifCCfg:  null,
-            emifCBase:   null,
-            emifCLength: null,
-        },
         "TMS320TI816X": {
             emifACfg: $addr(0x4c000000),
             emifABase:   0x80000000,
@@ -118,28 +51,6 @@ if (xdc.om.$name == "cfg") {
             emifBCfg: $addr(0x4d000000),
             emifBBase:   0xc0000000,
             emifBLength: 0x40000000,
-            emifCCfg:  null,
-            emifCBase:   null,
-            emifCLength: null,
-        },
-        "TMS320CTCI6486": {
-            emifACfg: $addr(0x78000000),
-            emifABase:   0xe0000000,
-            emifALength: 0x20000000,
-            emifBCfg:  null,
-            emifBBase:   null,
-            emifBLength: null,
-            emifCCfg:  null,
-            emifCBase:   null,
-            emifCLength: null,
-        },
-        "TMS320CTCI6488": {
-            emifACfg: $addr(0x70000000),
-            emifABase:   0x80000000,
-            emifALength: 0x20000000,
-            emifBCfg:  null,
-            emifBBase:   null,
-            emifBLength: null,
             emifCCfg:  null,
             emifCBase:   null,
             emifCLength: null,
@@ -178,35 +89,6 @@ if (xdc.om.$name == "cfg") {
             emifCLength: 0x0,
         },
     };
-
-    deviceTable["TMS320CDM415"]  = deviceTable["TMS320CDM6446"];
-    deviceTable["TMS320CDM420"]  = deviceTable["TMS320CDM6446"];
-    deviceTable["TMS320CDM421"]  = deviceTable["TMS320CDM6446"];
-    deviceTable["TMS320CDM425"]  = deviceTable["TMS320CDM6446"];
-    deviceTable["TMS320CDM426"]  = deviceTable["TMS320CDM6446"];
-    deviceTable["TMS320CDM6441"]  = deviceTable["TMS320CDM6446"];
-    deviceTable["TMS320CDM6443"]  = deviceTable["TMS320CDM6446"];
-
-    deviceTable["TMS320C6421"]   = deviceTable["TMS320CDM6437"];
-    deviceTable["TMS320C6424"]   = deviceTable["TMS320CDM6437"];
-    deviceTable["TMS320CDM6431"]   = deviceTable["TMS320CDM6437"];
-    deviceTable["TMS320CDM6433"]   = deviceTable["TMS320CDM6437"];
-    deviceTable["TMS320CDM6435"]   = deviceTable["TMS320CDM6437"];
-
-    deviceTable["TMS320C6452"]   = deviceTable["TMS320CTCI6482"];
-    deviceTable["TMS320C6454"]   = deviceTable["TMS320CTCI6482"];
-    deviceTable["TMS320C6455"]   = deviceTable["TMS320CTCI6482"];
-    deviceTable["TMS320CDM647"]  = deviceTable["TMS320CTCI6482"];
-    deviceTable["TMS320CDM648"]  = deviceTable["TMS320CTCI6482"];
-
-    deviceTable["TMS320C6457"]  = deviceTable["TMS320CTCI6484"];
-
-    deviceTable["TMS320C6472"]     = deviceTable["TMS320CTCI6486"];
-
-    deviceTable["TMS320C6474"]     = deviceTable["TMS320CTCI6488"];
-    deviceTable["TMS320CTCI6487"]  = deviceTable["TMS320CTCI6488"];
-    deviceTable["TMS320TCI6485"]  = deviceTable["TMS320CTCI6488"];
-    deviceTable["TMS320TCI6489"]  = deviceTable["TMS320CTCI6488"];
 
     deviceTable["TMS320C2430"]   = deviceTable["TMS320C3430"];
     deviceTable["OMAP2431"]      = deviceTable["TMS320C3430"];

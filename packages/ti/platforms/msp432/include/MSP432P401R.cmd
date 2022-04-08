@@ -66,6 +66,11 @@ SECTIONS
 {
     .intvecs:   > 0x00000000
     .text   :   > MAIN
+#ifdef __TI_COMPILER_VERSION
+#if __TI_COMPILER_VERSION >= 15009000
+    .TI.ramfunc : {} load=MAIN, run=SRAM_CODE, table(BINIT)
+#endif
+#endif
     .const  :   > MAIN
     .cinit  :   > MAIN
     .pinit  :   > MAIN

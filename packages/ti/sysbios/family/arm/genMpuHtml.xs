@@ -105,120 +105,131 @@ function createTable(deviceTable, fileBase)
                 deviceTitle = device;
             }
 
-            // This is the beginning of the HTML table. Write this out *once*
-            // for each device
-            var tableStart =
-              "\"<h5>" + deviceTitle + "</h5>\",\n" +
-              "\"<table border=1 cellpadding=3>\",\n" +
-              " \"<colgroup span=1></colgroup> <colgroup span=5 align=center></colgroup>\",\n" +
-              "   \"<tr><th> Mpu Region Id </th>" +
-              "<th> Base Address </th><th> Region Size </th>" +
-              "<th> Region Enabled </th><th> Bufferable </th>" +
-              "<th> Cacheable </th><th> Shareable </th><th> Tex </th>" +
-              "<th> NoExecute </th><th> AccessPermission </th>" +
-              "<th> SubregionDisableMask </th></tr>\",\n";
-            fos.write(tableStart);
-
             // get the current device's MPU region settings array
             var regionArray = deviceTable[device][coreId].regionSettings;
 
-        // cycle thru all regions
-        for (var i = 0; i < regionArray.length; i++){
-
-            var regionId = regionArray[i].regionId;
-            var baseAddress = "0x" + regionArray[i].baseAddress.toString(16);
-            var enable = regionArray[i].enable;
-            var bufferable = regionArray[i].bufferable;
-            var cacheable = regionArray[i].cacheable;
-            var shareable = regionArray[i].shareable;
-            var noExecute = regionArray[i].noExecute;
-            var tex = regionArray[i].tex;
-            var subregionDisableMask = "0x" +
-                regionArray[i].subregionDisableMask.toString(16);
-
-            var regionSize;
-            var sizeIdx = (regionArray[i].regionSize >>> 1) + 1;
-
-            if (sizeIdx < 32) {
-                regionSize = 1 << sizeIdx;
-                if ((regionSize / 1024) < 1) {
-                    regionSize = Number(regionSize).toString(10) + " Bytes";
-                }
-                else if ((regionSize / (1024*1024)) < 1) {
-                    regionSize = Number(regionSize / 1024).toString(10) + " KBytes";
-                }
-                else if ((regionSize / (1024*1024*1024)) < 1) {
-                    regionSize = Number(regionSize / (1024*1024)).toString(10) +
-                        " MBytes";
-                }
-                else {
-                    regionSize =
-                        Number(regionSize / (1024*1024*1024)).toString(10) + " GBytes";
-                }
+            var tableStart;
+            if (regionArray.length == 0) {
+                tableStart = "\"<h5>" + deviceTitle + "</h5>\",\n" +
+                    "\"No MPU region entries are programmed/enabled by " +
+                    "default. The background region is used as the default " +
+                    "memory map when the MPU is enabled.\",\n";
             }
             else {
-                regionSize = "4 GBytes";
+                // This is the beginning of the HTML table. Write this out *once*
+                // for each device
+                var tableStart =
+                  "\"<h5>" + deviceTitle + "</h5>\",\n" +
+                  "\"<table border=1 cellpadding=3>\",\n" +
+                  " \"<colgroup span=1></colgroup> <colgroup span=5 align=center></colgroup>\",\n" +
+                  "   \"<tr><th> Mpu Region Id </th>" +
+                  "<th> Base Address </th><th> Region Size </th>" +
+                  "<th> Region Enabled </th><th> Bufferable </th>" +
+                  "<th> Cacheable </th><th> Shareable </th><th> Tex </th>" +
+                  "<th> NoExecute </th><th> AccessPermission </th>" +
+                  "<th> SubregionDisableMask </th></tr>\",\n";
+            }
+            fos.write(tableStart);
+
+            // cycle thru all regions
+            for (var i = 0; i < regionArray.length; i++) {
+
+                var regionId = regionArray[i].regionId;
+                var baseAddress = "0x" + regionArray[i].baseAddress.toString(16);
+                var enable = regionArray[i].enable;
+                var bufferable = regionArray[i].bufferable;
+                var cacheable = regionArray[i].cacheable;
+                var shareable = regionArray[i].shareable;
+                var noExecute = regionArray[i].noExecute;
+                var tex = regionArray[i].tex;
+                var subregionDisableMask = "0x" +
+                    regionArray[i].subregionDisableMask.toString(16);
+
+                var regionSize;
+                var sizeIdx = (regionArray[i].regionSize >>> 1) + 1;
+
+                if (sizeIdx < 32) {
+                    regionSize = 1 << sizeIdx;
+                    if ((regionSize / 1024) < 1) {
+                        regionSize = Number(regionSize).toString(10) + " Bytes";
+                    }
+                    else if ((regionSize / (1024*1024)) < 1) {
+                        regionSize = Number(regionSize / 1024).toString(10) + " KBytes";
+                    }
+                    else if ((regionSize / (1024*1024*1024)) < 1) {
+                        regionSize = Number(regionSize / (1024*1024)).toString(10) +
+                            " MBytes";
+                    }
+                    else {
+                        regionSize =
+                            Number(regionSize / (1024*1024*1024)).toString(10) + " GBytes";
+                    }
+                }
+                else {
+                    regionSize = "4 GBytes";
+                }
+
+                var accPerm;
+                switch (regionArray[i].accPerm) {
+                    case 0: accPerm = "No Access at any Privilege Level";
+                            break;
+                    case 1: accPerm = "Supervisor RW access";
+                            break;
+                    case 2: accPerm = "Supervisor RW and User R-only access";
+                            break;
+                    case 3: accPerm = "Supervisor and User RW access";
+                            break;
+                    case 4: accPerm = "Unpredictable";
+                            break;
+                    case 5: accPerm = "Supervisor R-only";
+                            break;
+                    case 6: accPerm = "Supervisor and User R-only access";
+                            break;
+                    case 7: accPerm = "Unpredictable";
+                            break;
+                    default:
+                        accPerm = "Unpredictable";
+                }
+
+                // write out a row for each MPU region
+                tableRows += "   \"<tr><td> " + regionId +
+                    "        </td><td> " +
+                    baseAddress +
+                    "   </td><td> " +
+                    // print address in hex
+                    regionSize +
+                    "         </td><td> " +
+                    enable +
+                    "         </td><td> " +
+                    bufferable +
+                    "         </td><td> " +
+                    cacheable +
+                    "         </td><td> " +
+                    shareable +
+                    "         </td><td> " +
+                    tex +
+                    "         </td><td> " +
+                    noExecute +
+                    "         </td><td> " +
+                    accPerm +
+                    "         </td><td> " +
+                    subregionDisableMask +
+                    "         </td></tr>\",\n";
             }
 
-            var accPerm;
-            switch (regionArray[i].accPerm) {
-                case 0: accPerm = "No Access at any Privilege Level";
-                        break;
-                case 1: accPerm = "Supervisor RW access";
-                        break;
-                case 2: accPerm = "Supervisor RW and User R-only access";
-                        break;
-                case 3: accPerm = "Supervisor and User RW access";
-                        break;
-                case 4: accPerm = "Unpredictable";
-                        break;
-                case 5: accPerm = "Supervisor R-only";
-                        break;
-                case 6: accPerm = "Supervisor and User R-only access";
-                        break;
-                case 7: accPerm = "Unpredictable";
-                        break;
-                default:
-                    accPerm = "Unpredictable";
+            // write out all of the rows we just generated for this device
+            fos.write(tableRows);
+
+            // reset the rows for the next device
+            tableRows = "";
+
+            if (regionArray.length != 0) {
+                // This is the end of the HTML table. Write this out *once* for each
+                // device
+                var tableEnd = " \"</table>\",\n";
+                // write out this device's table to the script file
+                fos.write(tableEnd);
             }
-
-            // write out a row for each MPU region
-            tableRows += "   \"<tr><td> " + regionId +
-                "        </td><td> " +
-                baseAddress +
-                "   </td><td> " +
-                // print address in hex
-                regionSize +
-                "         </td><td> " +
-                enable +
-                "         </td><td> " +
-                bufferable +
-                "         </td><td> " +
-                cacheable +
-                "         </td><td> " +
-                shareable +
-                "         </td><td> " +
-                tex +
-                "         </td><td> " +
-                noExecute +
-                "         </td><td> " +
-                accPerm +
-                "         </td><td> " +
-                subregionDisableMask +
-                "         </td></tr>\",\n";
-        }
-
-        // write out all of the rows we just generated for this device
-        fos.write(tableRows);
-
-        // reset the rows for the next device
-        tableRows = "";
-
-        // This is the end of the HTML table. Write this out *once* for each
-        // device
-        var tableEnd = " \"</table>\",\n";
-        // write out this device's table to the script file
-        fos.write(tableEnd);
 
         } // for (var coreId in deviceTable[device]) ...
 
@@ -247,11 +258,11 @@ function createTable(deviceTable, fileBase)
 var path = arguments[0];
 path = String(java.io.File(path).getCanonicalPath());
 
-/* this flag is needed in order to access Mpu.xs deviceTable */
+/* this flag is needed in order to access MPU.xs deviceTable */
 var genCdoc = true;
 
 /*
- * This variable must be defined or else the processing of Mpu.xs will fail.
+ * This variable must be defined or else the processing of MPU.xs will fail.
  */
 var Program = {};
 var cpu = {};
@@ -259,7 +270,7 @@ Program.cpu = cpu;
 
 // load the Mpu.xs file.  All of the MPU region info comes from the
 // deviceTable structure that's defined in this file:
-var MpuXs = xdc.loadCapsule(path + "/Mpu.xs");
+var MpuXs = xdc.loadCapsule(path + "/MPU.xs");
 
 // generate the HTML and javascript code based on region settings in deviceTable
 createTable(MpuXs.deviceTable, path);

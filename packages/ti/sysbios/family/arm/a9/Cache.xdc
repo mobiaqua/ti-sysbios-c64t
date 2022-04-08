@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -955,6 +955,12 @@ internal:
      *  Enable L2 Unified Cache
      */
     Void enableL2();
+
+    /*!
+     *  ======== initL2Sram ========
+     *  Configure L2 as SRAM
+     */
+    Void initL2Sram();
 
     /*!
      *  ======== sync ========

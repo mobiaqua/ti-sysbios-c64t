@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -160,6 +160,7 @@ Int Timer_Instance_init(Timer_Object *obj, Int id, Timer_FuncPtr tickFxn,
     UInt key;
     Int status;
     UInt tempId = 0xFFFF;
+    Hwi_Params hwiParams;
 
     if (id >= Timer_NUM_TIMER_DEVICES) {
         if (id != Timer_ANY) {
@@ -199,12 +200,34 @@ Int Timer_Instance_init(Timer_Object *obj, Int id, Timer_FuncPtr tickFxn,
     obj->tickFxn       = tickFxn;
     obj->period        = params->period;
 
-    if ((obj->runMode == Timer_RunMode_CONTINUOUS) ||
-        (obj->runMode == Timer_RunMode_DYNAMIC)) {
-        Pmu_setInterruptFunc(&Timer_periodicStub);
+    /* Create the Hwi object */
+    if(obj->tickFxn != NULL) {
+        if (params->hwiParams) {
+            Hwi_Params_copy(&hwiParams, params->hwiParams);
+        }
+        else {
+            Hwi_Params_init(&hwiParams);
+        }
+
+        hwiParams.arg = (UArg)obj;
+        /* Periodic/Dynamic Timer operation not tested */
+        if ((obj->runMode == Timer_RunMode_CONTINUOUS) ||
+            (obj->runMode == Timer_RunMode_DYNAMIC)) {
+
+            obj->hwi = Hwi_create(Pmu_intNum, Timer_periodicStub,
+                                  &hwiParams, eb);
+        }
+        else {
+            obj->hwi = Hwi_create(Pmu_intNum, Timer_oneShotStub,
+                                  &hwiParams, eb);
+        }
     }
     else {
-        Pmu_setInterruptFunc(&Timer_oneShotStub);
+        obj->hwi = NULL;
+    }
+
+    if(obj->hwi == NULL) {
+        return (4);
     }
 
     status = Timer_postInit(obj, eb);
@@ -268,7 +291,9 @@ Void Timer_Instance_finalize(Timer_Object *obj, Int status)
 
         /* Timer_delete() */
         case 0:
-
+            if(obj->hwi) {
+                Hwi_delete(&obj->hwi);
+            }
         /* setPeriodMicroSecs failed */
         case 3:
             Timer_initDevice(obj);

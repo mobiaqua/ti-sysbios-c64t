@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/* RM57D843ZWTT_Core1.cmd                                                         */
+/* RM57D843ZWTT_CORE1.cmd                                                     */
 /*                                                                            */
 /* (c) Texas Instruments 2015, All rights reserved.                           */
 /*                                                                            */

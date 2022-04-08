@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,7 +52,7 @@ extern Ptr TaskSupport_buildTaskStack(Ptr stack, Task_FuncPtr fxn, TaskSupport_F
 /*
  *
  * Here is a pseudo image of the initial C28 task stack:
- * 
+ *
  *  saved-by-callee registers
  *  Task enter()
  *  Task glue()
@@ -60,36 +60,36 @@ extern Ptr TaskSupport_buildTaskStack(Ptr stack, Task_FuncPtr fxn, TaskSupport_F
  *  arg1
  *  User's task func()
  *  Task_exit()
- * 
- * The initial stack consists of the registers that are preserved by a 
- * called C function as defined by the C compiler. These are the registers 
- * pushed and popped by TaskSupport_swap. 
- * 
- * Below (or above, depending on your view of the stack) those registers 
- * are the Task enter() function which sets up the first invocation of the 
- * task in the same manner as if it had been "returned" to from Task_restore() 
+ *
+ * The initial stack consists of the registers that are preserved by a
+ * called C function as defined by the C compiler. These are the registers
+ * pushed and popped by TaskSupport_swap.
+ *
+ * Below (or above, depending on your view of the stack) those registers
+ * are the Task enter() function which sets up the first invocation of the
+ * task in the same manner as if it had been "returned" to from Task_restore()
  * which is the normal path back to an unblocked task.
- * 
- * Below the Task enter() function address on the initial task stack is the 
- * address of the Glue function. This address is popped by the return from 
- * Task enter(). Glue pops the 2 UArgs below it on the stack into the 
- * appropriate registers for a fxn(arg0, arg1) call, and then "returns" 
- * into the user's task function, which is the next to last address on 
+ *
+ * Below the Task enter() function address on the initial task stack is the
+ * address of the Glue function. This address is popped by the return from
+ * Task enter(). Glue pops the 2 UArgs below it on the stack into the
+ * appropriate registers for a fxn(arg0, arg1) call, and then "returns"
+ * into the user's task function, which is the next to last address on
  * the stack.
- * 
- * Below the Task's function address on the stack is the Task_exit() 
- * function address which is returned into if the task function falls 
+ *
+ * Below the Task's function address on the stack is the Task_exit()
+ * function address which is returned into if the task function falls
  * out the bottom.
- * 
- * The TaskSupport_swap() function pushes all the saved-by-callee 
- * registers onto the task stack, then saves the updated SP into 
- * the "old" task object's context (SP) address passed to it. Then it 
- * loads the "new" task object's context (SP) (the second arg passed 
- * to swap) into the SP, unrolls the saved registers and returns into 
+ *
+ * The TaskSupport_swap() function pushes all the saved-by-callee
+ * registers onto the task stack, then saves the updated SP into
+ * the "old" task object's context (SP) address passed to it. Then it
+ * loads the "new" task object's context (SP) (the second arg passed
+ * to swap) into the SP, unrolls the saved registers and returns into
  * the new task.
  *
  * The pointer returned by the buildTaskStack function is the task's initial
- * stack pointer. This address is stored into the task object's context 
+ * stack pointer. This address is stored into the task object's context
  * field and is passed to the TaskSupport_swap() function later.
  *
  */
@@ -106,9 +106,9 @@ Ptr TaskSupport_start(Ptr currTsk, ITaskSupport_FuncPtr enter,
     Char *sptr;
     Task_Object *tsk = (Task_Object *)(currTsk);
 
-    /* 
-     *  The SP register is only 16 bits on 28x. Ensure that the last address 
-     *  in the new stack is less than 0xffff 
+    /*
+     *  The SP register is only 16 bits on 28x. Ensure that the last address
+     *  in the new stack is less than 0xffff
      */
     if (((ULong)tsk->stack) + (tsk->stackSize) >= MAX_SP_ADDR) {
         Error_raise(eb, TaskSupport_E_invalidStack, tsk->stack, 0);
@@ -117,20 +117,27 @@ Ptr TaskSupport_start(Ptr currTsk, ITaskSupport_FuncPtr enter,
 
     /* Initialize every word in the stack to STACK_INIT_VAL */
     if (Task_initStackFlag) {
-        size = tsk->stackSize;
         sptr = (Char *)tsk->stack;
+        size = tsk->stackSize;
         while (size--) {
             *sptr++ = STACK_INIT_VAL;
         }
     }
+    /* Still allow for stack overflow checking */
+    else if (Task_checkStackFlag) {
+        sptr = (Char *)tsk->stack;
+        size = tsk->stackSize;
+
+        *(sptr+size-1) = STACK_INIT_VAL;
+    }
 
     sp = TaskSupport_buildTaskStack((Ptr)tsk->stack,
-                                    tsk->fxn, 
-                                    exit, 
-                                    enter, 
-                                    tsk->arg0, 
+                                    tsk->fxn,
+                                    exit,
+                                    enter,
+                                    tsk->arg0,
                                     tsk->arg1);
-    
+
     return (sp);
 }
 
@@ -163,8 +170,8 @@ SizeT TaskSupport_stackUsed(Char *stack, SizeT size)
     sp = stack + size;
 
     do {
-    } 
-    while(*--sp == (Char)STACK_INIT_VAL);       
+    }
+    while(*--sp == (Char)STACK_INIT_VAL);
 
     return (sp + 1 - stack);
 }

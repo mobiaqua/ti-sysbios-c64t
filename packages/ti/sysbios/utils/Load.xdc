@@ -107,7 +107,7 @@ import xdc.runtime.Error;
  *  @p
  *
  *  The first method of calculating CPU load is used when
- *  Task load logging is disabled, ie, {@link #taskEnable}
+ *  Task load logging is disabled, ie, {@link #taskEnabled}
  *  is false, and Power management is not used. The CPU load is computed as
  *  the percentage of time in the benchmark window which was NOT spent in the
  *  idle loop. More specifically, the load is computed as follows:
@@ -131,7 +131,7 @@ import xdc.runtime.Error;
  *  @p
  *
  *  The second method of calculating CPU load is used when Task load logging
- *  is enabled ({@link #taskEnable} = true) and Power management is not used.
+ *  is enabled ({@link #taskEnabled} = true) and Power management is not used.
  *  In this case the CPU load is calculted as
  *
  *      global CPU load = 100 - (Idle task load)
@@ -146,6 +146,10 @@ import xdc.runtime.Error;
  *  @p(html)
  *  <B>Power Management Enabled</B>
  *  @p
+ *
+ *  This method applies to targets that have a SYS/BIOS Power
+ *  module, for example, MSP430.  It does not apply to targets
+ *  where Power management is part of TI-RTOS (e.g., CC3200).
  *
  *  The third method of calculating CPU load is used when Power
  *  management is enabled.  In this case, the idle loop has a
@@ -169,6 +173,19 @@ import xdc.runtime.Error;
  *  is calculated as the percentage of time that the processor is not
  *  powered down, while the idle task load includes powered down time
  *  plus time executing idle functions.
+ *
+ *  @p(html)
+ *  <B>Power Management Enabled outside of SYS/BIOS</B>
+ *  @p
+ *
+ *  Some targets have Power management support outside of SYS/BIOS.  For
+ *  example, CC3200 and CC26XX devices have Power management in TI-RTOS.
+ *  In these cases, the best way to get CPU load is to make sure that
+ *  {@link #taskEnabled} is set to true.  Then the CPU load will be
+ *  calculated as 100 - the idle task load.  However, for BIOS in ROM builds,
+ *  this method will not work, as Task hooks are not allowed.  So to
+ *  use Load for any devices that support BIOS in ROM builds, make
+ *  sure the ROM build is disabled.
  *
  *  @a(Examples)
  *  Configuration example: The following statements configure the Load module

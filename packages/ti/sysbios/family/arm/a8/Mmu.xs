@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,6 @@ var Cache = null;
 function getAsmFiles(targetName)
 {
     switch(targetName) {
-        case "ti.targets.arm.elf.A8F":
         case "ti.targets.arm.elf.A8Fnv":
             return (["Mmu_asm.asm"]);
             break;

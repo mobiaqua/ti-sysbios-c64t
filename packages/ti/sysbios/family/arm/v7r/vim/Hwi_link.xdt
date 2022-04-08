@@ -35,7 +35,7 @@
 %var Core = xdc.module('ti.sysbios.family.arm.v7r.tms570.Core');
 %var Hwi = xdc.module('ti.sysbios.family.arm.v7r.vim.Hwi');
 %if (Program.build.target.$name.match(/elf/) &&
-%    (Core.id == 0)) {
+%   (Core.id == 0) && (!Hwi.lockstepDevice)) {
 --retain '*(.resetVecs)'
 -u ti_sysbios_family_arm_v7r_vim_Hwi_resetVectors
 %}

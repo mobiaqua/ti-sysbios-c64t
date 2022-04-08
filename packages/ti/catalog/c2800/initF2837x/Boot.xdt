@@ -24,7 +24,7 @@
 %var Boot = xdc.module("ti.catalog.c2800.initF2837x.Boot");
     extern ti_catalog_c2800_initF2837x_Boot_disableWatchdog(xdc_Void);
     extern ti_catalog_c2800_initF2837x_Boot_initSharedRAMs(xdc_UInt sharedRamMask);
-    extern ti_catalog_c2800_initF2837x_Boot_configurePllDivs(xdc_UInt iMult, xdc_UInt fMult, xdc_UInt sysDiv);
+    extern ti_catalog_c2800_initF2837x_Boot_configurePllDivs(xdc_UInt iMult, xdc_UInt fMult, xdc_UInt sysDiv, xdc_UInt oscClkSrcVal);
     extern ti_catalog_c2800_initF2837x_Boot_bootCPU2(xdc_Void);
     extern ti_catalog_c2800_initF2837x_Boot_initFlash(xdc_Bool configWaitStates, xdc_UInt waitStates, xdc_Bool enableProgramCache, xdc_Bool enableDataCache);
 
@@ -44,7 +44,7 @@ xdc_Void ti_catalog_c2800_initF2837x_Boot_init(xdc_Void)
     ti_catalog_c2800_initF2837x_Boot_disableWatchdog();
 %}
 %if (Boot.configureClocks == true) {
-    ti_catalog_c2800_initF2837x_Boot_configurePllDivs(`Boot.SPLLIMULT`, `Boot.SPLLFMULT`, `Boot.SYSCLKDIVSEL`);
+    ti_catalog_c2800_initF2837x_Boot_configurePllDivs(`Boot.SPLLIMULT`, `Boot.SPLLFMULT`, `Boot.SYSCLKDIVSEL`, `Boot.OSCCLKSRCSEL`);
 %}
 %if (Boot.configSharedRAMs == true) {
 

@@ -165,6 +165,12 @@ function instance$meta$init(name)
             this.CPU.clockRate = 300;
         }
 
+        if (this.deviceName.match(/^RM48/)) {
+            this.CPU.catalogName = "ti.catalog.arm.cortexr4";
+            this.CPU.deviceName = "CortexR";
+            this.CPU.clockRate = 300;
+        }
+
         //TODO Add boot module
     }
 }

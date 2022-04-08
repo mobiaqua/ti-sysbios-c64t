@@ -135,8 +135,10 @@ Void ti_sysbios_BIOS_rtsLock()
  */
 Void ti_sysbios_BIOS_rtsUnlock()
 {
+%if (BIOS.assertsEnabled == true) {
     xdc_runtime_Assert_isTrue((`BIOS_module`->rtsGateCount), NULL);
 
+%}
     `BIOS_module`->rtsGateCount--;
 
     if (`BIOS_module`->rtsGateCount == 0) {

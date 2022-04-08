@@ -42,8 +42,7 @@ var objList = [
 
 var trgFilter = {
     field: "$name",
-    list: [ "ti.targets.arm.elf.A8F",
-            "ti.targets.arm.elf.A8Fnv",
+    list: [ "ti.targets.arm.elf.A8Fnv",
             "ti.targets.arm.elf.R5F",
             "gnu.targets.arm.A8F",
             "gnu.targets.arm.A9F",

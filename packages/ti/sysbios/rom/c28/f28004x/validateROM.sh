@@ -16,7 +16,7 @@ ROMDIR=$TMPDIR/$DEVICE
 mkdir $ROMDIR
 
 #  Compare new sysbios.lib and golden sysbios.lib's function list
-$NM2000 -t  golden/$DEVICE/sysbios.a28FP | grep " .text" | sort > golden/$DEVICE/sysbios_lib_funcs
+#$NM2000 -t  golden/$DEVICE/sysbios.a28FP | grep " .text" | sort > golden/$DEVICE/sysbios_lib_funcs
 $NM2000 -t  $DEVICE/sysbios.a28FP | grep " .text" | sort > $DEVICE/sysbios_lib_funcs
 diff golden/$DEVICE/sysbios_lib_funcs $DEVICE/sysbios_lib_funcs > $ROMDIR/libDiff
 
@@ -37,7 +37,7 @@ fi
 echo $DEVICE ROM VALIDATION PASSED
 
 # copy newly validated sysbios.a28FP library to golden dir
-cp $DEVICE/sysbios.a28FP golden/$DEVICE/sysbios.a28FP
+# cp $DEVICE/sysbios.a28FP golden/$DEVICE/sysbios.a28FP
 
 # commit new validated golden library
 if [[ $USER == "xlibrary" ]]
@@ -49,10 +49,10 @@ then
         do
             sleep 1
         done
-        git ls-files -m | grep golden/$DEVICE/sysbios.a28FP
+        git ls-files -m | grep golden/$DEVICE/sysbios_lib_funcs
         if [ $? -eq 0 ]
         then
-            git commit golden/$DEVICE/sysbios.a28FP -m "Latest $DEVICE sysbios.a28FP library"
+            git commit golden/$DEVICE/sysbios_lib_funcs -m "Latest $DEVICE sysbios_lib_funcs file"
             if [ $? -eq 0 ]
             then
                 lockFlag=0;

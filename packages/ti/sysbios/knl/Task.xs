@@ -287,9 +287,6 @@ function module$static$init(mod, params)
             tskParams.instance.name = "ti.sysbios.knl.Task.IdleTask";
             mod.idleTask[0] = Task.create(Idle.loop, tskParams);
         }
-
-        /* This is creating the symbol 'TSK_idle' for legacy purpose */
-        Program.symbol["TSK_idle"] = mod.idleTask[0];
     }
     else {
         if (BIOS.smpEnabled == true) {
@@ -482,12 +479,6 @@ function module$validate()
     /* validate all "constructed" instances */
     for(var i = 0; i < Task.$objects.length; i++) {
         instance_validate(Task.$objects[i]);
-    }
-    
-    if (Task.checkStackFlag && !Task.initStackFlag) {
-        Task.$logError("Task.initStackFlag must be true for Task " +
-			"stack checking to work.",
-                        Task, "initStackFlag");
     }
 }
 
@@ -699,20 +690,6 @@ function viewInitBasic(view, obj)
      * name has to be an array.
      */
     view.fxn = Program.lookupFuncName(Number(obj.fxn));
-
-    try {
-        /*
-         * Special trap for legacy TSKs prior to first time running
-         * arg1 contains fxn
-         */
-        if (view.fxn[0] == "_TSK_staticGlue" || view.fxn[0] == "dynamicGlue") {
-            view.fxn = Program.lookupFuncName(Number(obj.arg1));
-        }
-    } catch (e) {
-        view.fxn.length = 1;
-        /* Since we cant get label, get function address instead */
-        view.fxn[0] = "0x" + Number(obj.fxn).toString(16);
-    }
 
     try {
         /*
@@ -1473,14 +1450,6 @@ function viewInitCallStack()
 
     var Support = Program.$modules['ti.sysbios.knl.Task'].SupportProxy;
     var Delegate = xdc.useModule(Support.$name, true);
-
-    /*
-     * Temporary fix for SDOCM00119663, IAR 7.40.3+ does
-     * not support Callstackview.
-     */
-    if (Program.build.target.$name.match(/iar/)) {
-        return;
-    }
 
     try {
         var taskRawView = Program.scanRawView('ti.sysbios.knl.Task');

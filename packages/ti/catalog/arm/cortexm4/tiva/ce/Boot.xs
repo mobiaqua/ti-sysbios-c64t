@@ -37,6 +37,21 @@ var Boot = null;
 var Program = null;
 
 /*
+ * ======== getCFiles ========
+ * return the array of C language files associated
+ * with targetName (ie Program.build.target.$name)
+ */
+function getCFiles(targetName)
+{
+    Boot.$private.cFilesProvided = true;
+
+    var boot = Boot.$package.packageBase + "Boot.c";
+    var boot_sysctl = Boot.$package.packageBase + "Boot_sysctl.c";
+
+    return ([boot, boot_sysctl]);
+}
+
+/*
  *  ======== module$meta$init ========
  */
 function module$meta$init()
@@ -45,6 +60,11 @@ function module$meta$init()
     if (xdc.om.$name != "cfg") {
         return;
     }
+
+    /* provide getCFiles() for Build.getCFiles() */
+    this.$private.getCFiles = getCFiles;
+    this.$private.cFilesProvided = false;
+
     Boot = this;
 
     /* Assign setters to the Clock configs. */

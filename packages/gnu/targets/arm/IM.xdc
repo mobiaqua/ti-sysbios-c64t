@@ -1,5 +1,5 @@
 /* 
- *  Copyright (c) 2008 Texas Instruments and others.
+ *  Copyright (c) 2008-2015 Texas Instruments and others.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -27,7 +27,7 @@ metaonly interface IM inherits gnu.targets.arm.ITarget {
 
     override readonly config Bool alignDirectiveSupported = true;
     override readonly config string rts = "gnu.targets.arm.rtsv7M";
-    override config string platform     = "ti.platforms.tiva:LM4F232H5QD";
+    override config string platform     = "ti.platforms.tiva:TM4C1294NCPDT";
 
     override config string GCCTARG = "arm-none-eabi";
 

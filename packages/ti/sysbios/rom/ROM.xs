@@ -193,6 +193,7 @@ function getExterns()
 function _setRomName(field, val)
 {
     var RomModule = null;
+
     switch (ROM.romName) {
         case ROM.NO_ROM:
 	    RomModule = null; 
@@ -210,10 +211,6 @@ function _setRomName(field, val)
 
         case ROM.CC1350:
             RomModule = xdc.useModule('ti.sysbios.rom.cortexm.cc13xx.CC13xx');
-            break;
-
-        case ROM.RF432S0XX:
-            RomModule = xdc.useModule('ti.sysbios.rom.cortexm.rf432s0xx.RF432S0xx');
             break;
 
         case ROM.F28004x:

@@ -22,10 +22,14 @@ requires ti.catalog.peripherals.hdvicp2;
  *  xdc.platform.IPlatform) to obtain the memory map supported by each CPU.
  */
 package ti.catalog.arm.cortexa15 [1,0,0] {
+    interface ITCI663X;
     module OMAP5430;
     module Vayu;
     module DRA7XX;
+    module C66AK2E05;
+    module TCI6630K2L;
     module TCI6636K2H;
+    module TCI6638K2K;
     module TCI66AK2G02;
 }
 /*

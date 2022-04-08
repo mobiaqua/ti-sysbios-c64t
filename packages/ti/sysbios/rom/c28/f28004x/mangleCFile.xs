@@ -100,8 +100,8 @@ function main(args)
             linesProcessed++;
             result = funcsRegEx.exec(srcLine);
             if (result != null) {
-		/* mangle the function name so it won't be found in the sysbios lib */
-		srcLine = srcLine.replace(result[0], result[0]+"__mangled__");
+                /* mangle the function name so it won't be found in the sysbios lib */
+                srcLine = srcLine.replace(result[0], result[0]+"__mangled__");
 	    }
         }
         dstFile.write(srcLine + "\n");

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,6 @@
  */
 /*
  *  ======== test.bld ========
- *
  */
 
 /* 
@@ -92,17 +91,6 @@ function buildTests(testArray, xdcArgs)
     var profiles = getProfiles(xdcArgs);
     var platform = getPlatform(xdcArgs);
 
-    /*
-     *  'PackageContents.uses' allows us to provide legacy include path
-     *  for the compiler.  This adds '-I<elem>/ti/bios/include' for 
-     *  each <elem> in XDCPATH.  This is more portable than using 
-     *  copts and $(PKGROOT) which only works if test cases are in same
-     *  repository as BIOS itself (as is the case for avala tree, but not
-     *  for TII/Wipro testing and also for ndk and cudatest trees).
-     */
-    var PackageContents = xdc.useModule('xdc.bld.PackageContents');
-    PackageContents.uses = ["ti/bios/include"];
-    
     /*  ==== LOOP OVER TESTS ==== */
     for (var i = 0; i < testArray.length; i++) {
         var test = testArray[i];
@@ -255,8 +243,6 @@ function getProfiles(xdcArgs)
     if (profiles.length == 0) {
         profiles[0] = "debug";
         profiles[1] = "release";
-        profiles[2] = "whole_program";
-        profiles[3] = "whole_program_debug";
     }
     
     return (profiles);

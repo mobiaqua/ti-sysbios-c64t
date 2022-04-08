@@ -11,8 +11,6 @@
  * */
 
 requires xdc.platform [1,0,1];
-requires ti.catalog.arm.cortexm3;
-requires ti.catalog.arm.cortexm4;
 
 /*!
  *  ======== ti.platforms.stellaris ========
@@ -21,7 +19,6 @@ requires ti.catalog.arm.cortexm4;
 package ti.platforms.stellaris [1,0,0] {
     module Platform;
 }
-
 /*
  */
 

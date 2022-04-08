@@ -42,12 +42,6 @@ extern "C" {
 
 #include <stdint.h>
 
-#if defined(__GNUC__) && !defined(__ti__)
-
-#include <time.h>
-
-#else
-
 /*
  *  Include definitions of timespec and clockid_t that would
  *  be in sys/types.h.  TI and IAR tool chains do not have a
@@ -55,8 +49,6 @@ extern "C" {
  *  GNU, sys/types.h is included in time.h.
  */
 #include <ti/sysbios/posix/_time.h>
-
-#endif
 
 #include <ti/sysbios/knl/Semaphore.h>
 

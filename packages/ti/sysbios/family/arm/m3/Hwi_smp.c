@@ -272,7 +272,11 @@ Int Hwi_postInit (Hwi_Object *hwi, Error_Block *eb)
             }
             else {
                 Error_raise(eb, Hwi_E_hwiLimitExceeded, 0, 0);
+#ifndef ti_sysbios_hal_Hwi_DISABLE_ALL_HOOKS
                 return (Hwi_hooks.length); /* unwind all Hwi_hooks */
+#else
+                return (0);
+#endif
             }
         }
         else {
@@ -626,7 +630,10 @@ Void Hwi_plug(UInt intNum, Void *fxn)
 
     func = (UInt32 *)Hwi_module->vectorTableBase + intNum;
 
-    *func = (UInt32)fxn;
+    /* guard against writing to static const vector table in flash */
+    if (*func !=  (UInt32)fxn) {
+        *func = (UInt32)fxn;
+    }
 }
 
 /*

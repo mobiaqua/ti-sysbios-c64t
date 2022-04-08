@@ -101,7 +101,9 @@ import ti.sysbios.interfaces.IHwi;
  *  The NVIC interrupt controller is designed for priority based
  *  interrupts.
  *
- *  No support is provided for anything but {@link #MaskingOption_LOWER}.
+ *  In this Hwi module, the {@link #maskSetting} instance configuration
+ *  parameter is ignored.
+ *  Effectively, only the {@link #MaskingOption_LOWER} is supported.
  *
  *  @a(Interrupt Priorities)
  *

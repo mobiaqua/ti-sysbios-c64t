@@ -30,15 +30,15 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 /*
- *  ======== Mpu.xs ========
+ *  ======== MPU.xs ========
  */
 
-var Mpu = null;
 var BIOS = null;
+var Build = null;
 var Core = null;
 var Cache = null;
 var device = null;
-var Memory = null;
+var MPU = null;
 
 /*
  * ======== getAsmFiles ========
@@ -48,8 +48,9 @@ var Memory = null;
 function getAsmFiles(targetName)
 {
     switch(targetName) {
+        case "ti.targets.arm.elf.R4F":
         case "ti.targets.arm.elf.R5F":
-            return (["Mpu_asm.sv7R"]);
+            return (["MPU_asm.sv7R"]);
             break;
 
         default:
@@ -75,20 +76,21 @@ if (xdc.om.$name == "cfg" || typeof(genCdoc) != "undefined") {
                     {
                         regionId             : 0,
                         baseAddress          : 0x00000000,
-                        regionSize           : 0x3E, /* Mpu.RegionSize_4G */
+                        regionSize           : 0x3E, /* MPU.RegionSize_4G */
                         enable               : true,
                         bufferable           : false,
                         cacheable            : false,
                         shareable            : false,
                         noExecute            : false,
-                        accPerm              : 0,    /* No access at PL1 and PL0 */
+                        accPerm              : 0,    /* No access at PL1 and
+                                                        PL0 */
                         tex                  : 1,
                         subregionDisableMask : 0xFF
                     },
                     {
                         regionId             : 1,
                         baseAddress          : 0x00000000,
-                        regionSize           : 0x2A, /* Mpu.RegionSize_4M */
+                        regionSize           : 0x2A, /* MPU.RegionSize_4M */
                         enable               : true,
                         bufferable           : true,
                         cacheable            : true,
@@ -102,150 +104,157 @@ if (xdc.om.$name == "cfg" || typeof(genCdoc) != "undefined") {
                     {
                         regionId             : 2,
                         baseAddress          : 0x08000000,
-                        regionSize           : 0x22, /* Mpu.RegionSize_256K */
+                        regionSize           : 0x22, /* MPU.RegionSize_256K */
                         enable               : true,
                         bufferable           : true,
                         cacheable            : true,
                         shareable            : false,
                         noExecute            : true,
-                        accPerm              : 3,    /* RW access at PL1 and PL0 */
+                        accPerm              : 3,    /* RW access at PL1 and
+                                                        PL0 */
                         tex                  : 1,
                         subregionDisableMask : 0
                     },
                     {
                         regionId             : 3,
                         baseAddress          : 0x08040000,
-                        regionSize           : 0x22, /* Mpu.RegionSize_256K */
+                        regionSize           : 0x22, /* MPU.RegionSize_256K */
                         enable               : true,
                         bufferable           : true,
                         cacheable            : true,
                         shareable            : false,
                         noExecute            : true,
-                        accPerm              : 0,    /* No acces at PL1 and PL0 */
+                        accPerm              : 0,    /* No acces at PL1 and
+                                                        PL0 */
                         tex                  : 1,
                         subregionDisableMask : 0xC0
                     },
                     {
                         regionId             : 4,
                         baseAddress          : 0x08040000,
-                        regionSize           : 0x22, /* Mpu.RegionSize_256K */
+                        regionSize           : 0x22, /* MPU.RegionSize_256K */
                         enable               : true,
                         bufferable           : false,
                         cacheable            : false,
                         shareable            : true,
                         noExecute            : true,
-                        accPerm              : 3,    /* RW access at PL1 and PL0 */
+                        accPerm              : 3,    /* RW access at PL1 and
+                                                        PL0 */
                         tex                  : 1,
                         subregionDisableMask : 0x3F
                     },
                     {
                         regionId             : 5,
                         baseAddress          : 0x60000000,
-                        regionSize           : 0x36, /* Mpu.RegionSize_256M */
+                        regionSize           : 0x36, /* MPU.RegionSize_256M */
                         enable               : true,
                         bufferable           : false,
                         cacheable            : false,
                         shareable            : true,
                         noExecute            : false,
-                        accPerm              : 3,    /* RW access at PL1 and PL0 */
+                        accPerm              : 3,    /* RW access at PL1 and
+                                                        PL0 */
                         tex                  : 0,
                         subregionDisableMask : 0
                     },
                     {
                         regionId             : 6,
                         baseAddress          : 0x80000000,
-                        regionSize           : 0x38, /* Mpu.RegionSize_512M */
+                        regionSize           : 0x38, /* MPU.RegionSize_512M */
                         enable               : true,
                         bufferable           : false,
                         cacheable            : false,
                         shareable            : false,
                         noExecute            : false,
-                        accPerm              : 3,    /* RW access at PL1 and PL0 */
+                        accPerm              : 3,    /* RW access at PL1 and
+                                                        PL0 */
                         tex                  : 1,
                         subregionDisableMask : 0
                     },
                     {
                         regionId             : 7,
                         baseAddress          : 0xF0000000,
-                        regionSize           : 0x2A, /* Mpu.RegionSize_4M */
+                        regionSize           : 0x2A, /* MPU.RegionSize_4M */
                         enable               : true,
                         bufferable           : false,
                         cacheable            : false,
                         shareable            : false,
                         noExecute            : true,
-                        accPerm              : 2,    /* RW access at PL1 and R-only
-                                                        at PL0 */
+                        accPerm              : 2,    /* RW access at PL1 and
+                                                        R-only at PL0 */
                         tex                  : 1,
                         subregionDisableMask : 0
                     },
                     {
                         regionId             : 8,
                         baseAddress          : 0xFB000000,
-                        regionSize           : 0x2E, /* Mpu.RegionSize_16M */
+                        regionSize           : 0x2E, /* MPU.RegionSize_16M */
                         enable               : true,
                         bufferable           : false,
                         cacheable            : false,
                         shareable            : false,
                         noExecute            : true,
-                        accPerm              : 3,    /* RW access at PL1 and PL0 */
+                        accPerm              : 3,    /* RW access at PL1 and
+                                                        PL0 */
                         tex                  : 2,
                         subregionDisableMask : 0
                     },
                     {
                         regionId             : 9,
                         baseAddress          : 0xFC000000,
-                        regionSize           : 0x2E, /* Mpu.RegionSize_16M */
+                        regionSize           : 0x2E, /* MPU.RegionSize_16M */
                         enable               : true,
                         bufferable           : false,
                         cacheable            : false,
                         shareable            : false,
                         noExecute            : true,
-                        accPerm              : 2,    /* RW access at PL1 and R-only
-                                                        at PL0 */
+                        accPerm              : 2,    /* RW access at PL1 and
+                                                        R-only at PL0 */
                         tex                  : 2,
                         subregionDisableMask : 0
                     },
                     {
                         regionId             : 10,
                         baseAddress          : 0xFE000000,
-                        regionSize           : 0x2E, /* Mpu.RegionSize_16M */
+                        regionSize           : 0x2E, /* MPU.RegionSize_16M */
                         enable               : true,
                         bufferable           : false,
                         cacheable            : false,
                         shareable            : false,
                         noExecute            : true,
-                        accPerm              : 3,    /* RW access at PL1 and PL0 */
+                        accPerm              : 3,    /* RW access at PL1 and
+                                                        PL0 */
                         tex                  : 2,
                         subregionDisableMask : 0xE0
                     },
                     {
                         regionId             : 11,
                         baseAddress          : 0xFF000000,
-                        regionSize           : 0x2E, /* Mpu.RegionSize_16M */
+                        regionSize           : 0x2E, /* MPU.RegionSize_16M */
                         enable               : true,
                         bufferable           : false,
                         cacheable            : false,
                         shareable            : false,
                         noExecute            : true,
-                        accPerm              : 2,    /* RW access at PL1 and R-only
-                                                        at PL0 */
+                        accPerm              : 2,    /* RW access at PL1 and
+                                                        R-only at PL0 */
                         tex                  : 2,
                         subregionDisableMask : 0xC0
                     },
                     {
                         regionId             : 15,
                         baseAddress          : 0xFFF80000,
-                        regionSize           : 0x24, /* Mpu.RegionSize_512K */
+                        regionSize           : 0x24, /* MPU.RegionSize_512K */
                         enable               : true,
                         bufferable           : false,
                         cacheable            : false,
                         shareable            : false,
                         noExecute            : true,
-                        accPerm              : 2,    /* RW access at PL1 and R-only
-                                                        at PL0 */
+                        accPerm              : 2,    /* RW access at PL1 and
+                                                        R-only at PL0 */
                         tex                  : 2,
                         subregionDisableMask : 0
-                    },
+                    }
                 ]
             },
             "Core1": {
@@ -255,20 +264,21 @@ if (xdc.om.$name == "cfg" || typeof(genCdoc) != "undefined") {
                     {
                         regionId             : 0,
                         baseAddress          : 0x00000000,
-                        regionSize           : 0x3E, /* Mpu.RegionSize_4G */
+                        regionSize           : 0x3E, /* MPU.RegionSize_4G */
                         enable               : true,
                         bufferable           : false,
                         cacheable            : false,
                         shareable            : false,
                         noExecute            : false,
-                        accPerm              : 0,    /* No access at PL1 and PL0 */
+                        accPerm              : 0,    /* No access at PL1 and
+                                                        PL0 */
                         tex                  : 1,
                         subregionDisableMask : 0xFF
                     },
                     {
                         regionId             : 1,
                         baseAddress          : 0x00000000,
-                        regionSize           : 0x2A, /* Mpu.RegionSize_4M */
+                        regionSize           : 0x2A, /* MPU.RegionSize_4M */
                         enable               : true,
                         bufferable           : true,
                         cacheable            : true,
@@ -282,46 +292,211 @@ if (xdc.om.$name == "cfg" || typeof(genCdoc) != "undefined") {
                     {
                         regionId             : 2,
                         baseAddress          : 0x08000000,
-                        regionSize           : 0x22, /* Mpu.RegionSize_256K */
+                        regionSize           : 0x22, /* MPU.RegionSize_256K */
                         enable               : true,
                         bufferable           : true,
                         cacheable            : true,
                         shareable            : false,
                         noExecute            : true,
-                        accPerm              : 0,    /* No access at PL1 and PL0 */
+                        accPerm              : 0,    /* No access at PL1 and
+                                                        PL0 */
                         tex                  : 1,
                         subregionDisableMask : 0
                     },
                     {
                         regionId             : 3,
                         baseAddress          : 0x08040000,
-                        regionSize           : 0x22, /* Mpu.RegionSize_256K */
+                        regionSize           : 0x22, /* MPU.RegionSize_256K */
                         enable               : true,
                         bufferable           : true,
                         cacheable            : true,
                         shareable            : false,
                         noExecute            : true,
-                        accPerm              : 3,    /* RW access at PL1 and PL0 */
+                        accPerm              : 3,    /* RW access at PL1 and
+                                                        PL0 */
                         tex                  : 1,
                         subregionDisableMask : 0xC0
                     },
                     {
                         regionId             : 4,
                         baseAddress          : 0x08040000,
-                        regionSize           : 0x22, /* Mpu.RegionSize_256K */
+                        regionSize           : 0x22, /* MPU.RegionSize_256K */
                         enable               : true,
                         bufferable           : false,
                         cacheable            : false,
                         shareable            : true,
                         noExecute            : true,
-                        accPerm              : 3,    /* RW access at PL1 and PL0 */
+                        accPerm              : 3,    /* RW access at PL1 and
+                                                        PL0 */
                         tex                  : 1,
                         subregionDisableMask : 0x3F
                     },
                     {
                         regionId             : 5,
                         baseAddress          : 0x60000000,
-                        regionSize           : 0x36, /* Mpu.RegionSize_256M */
+                        regionSize           : 0x36, /* MPU.RegionSize_256M */
+                        enable               : true,
+                        bufferable           : false,
+                        cacheable            : false,
+                        shareable            : true,
+                        noExecute            : false,
+                        accPerm              : 3,    /* RW access at PL1 and
+                                                        PL0 */
+                        tex                  : 0,
+                        subregionDisableMask : 0
+                    },
+                    {
+                        regionId             : 6,
+                        baseAddress          : 0x80000000,
+                        regionSize           : 0x38, /* MPU.RegionSize_512M */
+                        enable               : true,
+                        bufferable           : false,
+                        cacheable            : false,
+                        shareable            : false,
+                        noExecute            : false,
+                        accPerm              : 3,    /* RW access at PL1 and
+                                                        PL0 */
+                        tex                  : 1,
+                        subregionDisableMask : 0
+                    },
+                    {
+                        regionId             : 7,
+                        baseAddress          : 0xF0000000,
+                        regionSize           : 0x2A, /* MPU.RegionSize_4M */
+                        enable               : true,
+                        bufferable           : false,
+                        cacheable            : false,
+                        shareable            : false,
+                        noExecute            : true,
+                        accPerm              : 2,    /* RW access at PL1 and
+                                                        R-only at PL0 */
+                        tex                  : 1,
+                        subregionDisableMask : 0
+                    },
+                    {
+                        regionId             : 8,
+                        baseAddress          : 0xFB000000,
+                        regionSize           : 0x2E, /* MPU.RegionSize_16M */
+                        enable               : true,
+                        bufferable           : false,
+                        cacheable            : false,
+                        shareable            : false,
+                        noExecute            : true,
+                        accPerm              : 3,    /* RW access at PL1 and
+                                                        PL0 */
+                        tex                  : 2,
+                        subregionDisableMask : 0
+                    },
+                    {
+                        regionId             : 9,
+                        baseAddress          : 0xFC000000,
+                        regionSize           : 0x2E, /* MPU.RegionSize_16M */
+                        enable               : true,
+                        bufferable           : false,
+                        cacheable            : false,
+                        shareable            : false,
+                        noExecute            : true,
+                        accPerm              : 2,    /* RW access at PL1 and
+                                                        R-only at PL0 */
+                        tex                  : 2,
+                        subregionDisableMask : 0
+                    },
+                    {
+                        regionId             : 10,
+                        baseAddress          : 0xFE000000,
+                        regionSize           : 0x2E, /* MPU.RegionSize_16M */
+                        enable               : true,
+                        bufferable           : false,
+                        cacheable            : false,
+                        shareable            : false,
+                        noExecute            : true,
+                        accPerm              : 3,    /* RW access at PL1 and
+                                                        PL0 */
+                        tex                  : 2,
+                        subregionDisableMask : 0xE0
+                    },
+                    {
+                        regionId             : 11,
+                        baseAddress          : 0xFF000000,
+                        regionSize           : 0x2E, /* MPU.RegionSize_16M */
+                        enable               : true,
+                        bufferable           : false,
+                        cacheable            : false,
+                        shareable            : false,
+                        noExecute            : true,
+                        accPerm              : 2,    /* RW access at PL1 and
+                                                        R-only at PL0 */
+                        tex                  : 2,
+                        subregionDisableMask : 0xC0
+                    },
+                    {
+                        regionId             : 15,
+                        baseAddress          : 0xFFF80000,
+                        regionSize           : 0x24, /* MPU.RegionSize_512K */
+                        enable               : true,
+                        bufferable           : false,
+                        cacheable            : false,
+                        shareable            : false,
+                        noExecute            : true,
+                        accPerm              : 2,    /* RW access at PL1 and
+                                                        R-only at PL0 */
+                        tex                  : 2,
+                        subregionDisableMask : 0
+                    }
+                ]
+            }
+        },
+        "RM57L8xx": {
+            "Core0": {
+                isMemoryMapped  : false,
+                numRegions      : 16,
+                regionSettings  : [
+                    {
+                        regionId             : 0,
+                        baseAddress          : 0x00000000,
+                        regionSize           : 0x3E, /* MPU.RegionSize_4G */
+                        enable               : true,
+                        bufferable           : false,
+                        cacheable            : false,
+                        shareable            : false,
+                        noExecute            : false,
+                        accPerm              : 0,    /* No access at PL1 and
+                                                        PL0 */
+                        tex                  : 1,
+                        subregionDisableMask : 0xFF
+                    },
+                    {
+                        regionId             : 1,
+                        baseAddress          : 0x00000000,
+                        regionSize           : 0x2A, /* MPU.RegionSize_4M */
+                        enable               : true,
+                        bufferable           : true,
+                        cacheable            : true,
+                        shareable            : true,
+                        noExecute            : false,
+                        accPerm              : 6,    /* R-only access at PL1 and
+                                                        PL0 */
+                        tex                  : 1,
+                        subregionDisableMask : 0
+                    },
+                    {
+                        regionId             : 2,
+                        baseAddress          : 0x08000000,
+                        regionSize           : 0x24, /* MPU.RegionSize_512K */
+                        enable               : true,
+                        bufferable           : true,
+                        cacheable            : true,
+                        shareable            : false,
+                        noExecute            : true,
+                        accPerm              : 3,    /* RW access at PL1 and
+                                                        PL0 */
+                        tex                  : 1,
+                        subregionDisableMask : 0
+                    },
+                    {
+                        regionId             : 3,
+                        baseAddress          : 0x60000000,
+                        regionSize           : 0x36, /* MPU.RegionSize_256M */
                         enable               : true,
                         bufferable           : false,
                         cacheable            : false,
@@ -332,9 +507,9 @@ if (xdc.om.$name == "cfg" || typeof(genCdoc) != "undefined") {
                         subregionDisableMask : 0
                     },
                     {
-                        regionId             : 6,
+                        regionId             : 4,
                         baseAddress          : 0x80000000,
-                        regionSize           : 0x38, /* Mpu.RegionSize_512M */
+                        regionSize           : 0x38, /* MPU.RegionSize_512M */
                         enable               : true,
                         bufferable           : false,
                         cacheable            : false,
@@ -345,9 +520,9 @@ if (xdc.om.$name == "cfg" || typeof(genCdoc) != "undefined") {
                         subregionDisableMask : 0
                     },
                     {
-                        regionId             : 7,
+                        regionId             : 5,
                         baseAddress          : 0xF0000000,
-                        regionSize           : 0x2A, /* Mpu.RegionSize_4M */
+                        regionSize           : 0x2A, /* MPU.RegionSize_4M */
                         enable               : true,
                         bufferable           : false,
                         cacheable            : false,
@@ -359,9 +534,9 @@ if (xdc.om.$name == "cfg" || typeof(genCdoc) != "undefined") {
                         subregionDisableMask : 0
                     },
                     {
-                        regionId             : 8,
+                        regionId             : 6,
                         baseAddress          : 0xFB000000,
-                        regionSize           : 0x2E, /* Mpu.RegionSize_16M */
+                        regionSize           : 0x2E, /* MPU.RegionSize_16M */
                         enable               : true,
                         bufferable           : false,
                         cacheable            : false,
@@ -372,9 +547,9 @@ if (xdc.om.$name == "cfg" || typeof(genCdoc) != "undefined") {
                         subregionDisableMask : 0
                     },
                     {
-                        regionId             : 9,
+                        regionId             : 7,
                         baseAddress          : 0xFC000000,
-                        regionSize           : 0x2E, /* Mpu.RegionSize_16M */
+                        regionSize           : 0x2E, /* MPU.RegionSize_16M */
                         enable               : true,
                         bufferable           : false,
                         cacheable            : false,
@@ -386,9 +561,9 @@ if (xdc.om.$name == "cfg" || typeof(genCdoc) != "undefined") {
                         subregionDisableMask : 0
                     },
                     {
-                        regionId             : 10,
+                        regionId             : 8,
                         baseAddress          : 0xFE000000,
-                        regionSize           : 0x2E, /* Mpu.RegionSize_16M */
+                        regionSize           : 0x2E, /* MPU.RegionSize_16M */
                         enable               : true,
                         bufferable           : false,
                         cacheable            : false,
@@ -399,9 +574,9 @@ if (xdc.om.$name == "cfg" || typeof(genCdoc) != "undefined") {
                         subregionDisableMask : 0xE0
                     },
                     {
-                        regionId             : 11,
+                        regionId             : 9,
                         baseAddress          : 0xFF000000,
-                        regionSize           : 0x2E, /* Mpu.RegionSize_16M */
+                        regionSize           : 0x2E, /* MPU.RegionSize_16M */
                         enable               : true,
                         bufferable           : false,
                         cacheable            : false,
@@ -415,7 +590,7 @@ if (xdc.om.$name == "cfg" || typeof(genCdoc) != "undefined") {
                     {
                         regionId             : 15,
                         baseAddress          : 0xFFF80000,
-                        regionSize           : 0x24, /* Mpu.RegionSize_512K */
+                        regionSize           : 0x24, /* MPU.RegionSize_512K */
                         enable               : true,
                         bufferable           : false,
                         cacheable            : false,
@@ -425,13 +600,38 @@ if (xdc.om.$name == "cfg" || typeof(genCdoc) != "undefined") {
                                                         at PL0 */
                         tex                  : 2,
                         subregionDisableMask : 0
-                    },
+                    }
                 ]
             }
-        }
+        },
+        "MSP432P401R": {
+            "Core0": {
+                isMemoryMapped  : true,
+                numRegions      : 8,
+                regionSettings  : [
+                ]
+            },
+        },
+        "TM4C129CNCPDT": {
+            "Core0": {
+                isMemoryMapped  : true,
+                numRegions      : 8,
+                regionSettings  : [
+                ]
+            },
+        },
     };
 
+    /* Cortex-R devices */
     deviceTable["RM57D8.*"] = deviceTable["RM57D8xx"];
+    deviceTable["RM57L8.*"] = deviceTable["RM57L8xx"];
+    deviceTable["RM48L.*"]  = deviceTable["RM57L8xx"];
+
+    /* MSP432 devices */
+    deviceTable["MSP432.*"] = deviceTable["MSP432P401R"];
+
+    /* Tiva devices */
+    deviceTable["TM4.*"]    = deviceTable["TM4C129CNCPDT"];
 }
 
 /*
@@ -469,33 +669,33 @@ function module$meta$init()
 
     this.$private.getAsmFiles = getAsmFiles;
 
-    Mpu = this;
+    MPU = this;
 
     /* set fxntab default */
-    Mpu.common$.fxntab = false;
+    MPU.common$.fxntab = false;
 
     device = deviceSupportCheck();
 
     if (device != null) {
-        Mpu.isMemoryMapped = deviceTable[device]["Core0"].isMemoryMapped;
-        Mpu.numRegions = deviceTable[device]["Core0"].numRegions;
-        Mpu.regionEntryMeta.length = Mpu.numRegions;
-        for (var i = 0; i < Mpu.numRegions; i++) {
+        MPU.isMemoryMapped = deviceTable[device]["Core0"].isMemoryMapped;
+        MPU.numRegions = deviceTable[device]["Core0"].numRegions;
+        MPU.regionEntry.length = MPU.numRegions;
+        for (var i = 0; i < MPU.numRegions; i++) {
             /*
              *  Initialize baseAddress to 0xFFFFFFFF so we can check
              *  if baseAddress is still 0xFFFFFFFF in module$use.
              *  This would serve as a way to determine if the application
              *  set a particular memory region.
              */
-            Mpu.regionEntryMeta[i].baseAddress = 0xFFFFFFFF;
-            Mpu.regionEntryMeta[i].sizeAndEnable = 0;
-            Mpu.regionEntryMeta[i].regionAttrs = 0;
+            MPU.regionEntry[i].baseAddress = 0xFFFFFFFF;
+            MPU.regionEntry[i].sizeAndEnable = 0;
+            MPU.regionEntry[i].regionAttrs = 0;
         }
     }
     else {
-        Mpu.numRegions = 0;
-        Mpu.isMemoryMapped = true;
-        Mpu.regionEntryMeta.length = 0;
+        MPU.numRegions = 0;
+        MPU.isMemoryMapped = true;
+        MPU.regionEntry.length = 0;
     }
 }
 
@@ -505,29 +705,43 @@ function module$meta$init()
 function module$use()
 {
     BIOS = xdc.module('ti.sysbios.BIOS');
-    Memory = xdc.useModule('xdc.runtime.Memory');
+    Build = xdc.useModule('ti.sysbios.Build');
 
     if (Program.build.target.name == "R5F") {
         Cache  = xdc.useModule('ti.sysbios.family.arm.v7r.Cache');
     }
+    else {
+        Cache  = xdc.useModule('ti.sysbios.hal.Cache');
+        Cache.CacheProxy = xdc.useModule('ti.sysbios.hal.CacheNull');
+
+        Startup = xdc.useModule('xdc.runtime.Startup');
+        Startup.firstFxns.$add(MPU.startup);
+    }
 
     if (device != null) {
-        var regionArray;
-        var settings = xdc.module('ti.sysbios.family.Settings');
-        Core = xdc.useModule(settings.getDefaultCoreDelegate());
-        if (Core.id == 0) {
+        var coreId, regionArray, coreDelegate, settings;
+        settings = xdc.module('ti.sysbios.family.Settings');
+        coreDelegate = settings.getDefaultCoreDelegate();
+        if ((coreDelegate === undefined) || (coreDelegate == null)) {
+            coreId = 0;
+        }
+        else {
+            Core = xdc.useModule(coreDelegate);
+            coreId = Core.id;
+        }
+        if (coreId == 0) {
             regionArray = deviceTable[device]["Core0"].regionSettings;
         }
         else {
             regionArray = deviceTable[device]["Core1"].regionSettings;
         }
 
-        var attrs = new Mpu.RegionAttrs();
+        var attrs = new MPU.RegionAttrs();
         initRegionAttrsMeta(attrs);
         for (var i = 0; i < regionArray.length; i++) {
             /*  Init any region not initialized by the application. */
             var regionId = regionArray[i].regionId;
-            if (Mpu.regionEntryMeta[regionId].baseAddress == 0xFFFFFFFF) {
+            if (MPU.regionEntry[regionId].baseAddress == 0xFFFFFFFF) {
                 attrs.enable = regionArray[i].enable;
                 attrs.bufferable = regionArray[i].bufferable;
                 attrs.cacheable = regionArray[i].cacheable;
@@ -540,6 +754,16 @@ function module$use()
                 setRegionMeta(regionArray[i].regionId,
                     regionArray[i].baseAddress,
                     regionArray[i].regionSize, attrs);
+            }
+        }
+
+        for (var i = 0; i < MPU.numRegions; i++) {
+            /*
+             *  Clear base address for any entry not set by user or the
+             *  device table.
+             */
+            if (MPU.regionEntry[i].baseAddress == 0xFFFFFFFF) {
+                MPU.regionEntry[i].baseAddress = 0;
             }
         }
     }
@@ -585,6 +809,10 @@ function module$use()
 
         throw new Error ("Unsupported device!");
     }
+
+    /* add -D to compile line to optimize MPU_isMemoryMapped check */
+    Build.ccArgs.$add("-Dti_sysbios_family_arm_MPU_isMemoryMapped__D=" +
+        (MPU.isMemoryMapped ? "TRUE" : "FALSE"));
 }
 
 /*
@@ -592,20 +820,15 @@ function module$use()
  */
 function module$static$init(mod, params)
 {
-    if (!Mpu.isMemoryMapped) {
-        mod.regionEntry.length = Mpu.numRegions;
+    mod.regionEntry.length = MPU.numRegions;
 
-        for (var i = 0; i < Mpu.numRegions; i++) {
-            mod.regionEntry[i].baseAddress =
-                Mpu.regionEntryMeta[i].baseAddress;
-            mod.regionEntry[i].sizeAndEnable =
-                Mpu.regionEntryMeta[i].sizeAndEnable;
-            mod.regionEntry[i].regionAttrs =
-                Mpu.regionEntryMeta[i].regionAttrs;
-        }
-    }
-    else {
-        mod.regionEntry.length = 0;
+    for (var i = 0; i < MPU.numRegions; i++) {
+        mod.regionEntry[i].baseAddress =
+            MPU.regionEntry[i].baseAddress;
+        mod.regionEntry[i].sizeAndEnable =
+            MPU.regionEntry[i].sizeAndEnable;
+        mod.regionEntry[i].regionAttrs =
+            MPU.regionEntry[i].regionAttrs;
     }
 }
 
@@ -615,14 +838,14 @@ function module$static$init(mod, params)
 function initRegionAttrsMeta(attrs)
 {
     /* Set all fields to their default value */
-    attrs.enable = Mpu.defaultAttrs.enable;
-    attrs.bufferable = Mpu.defaultAttrs.bufferable;
-    attrs.cacheable = Mpu.defaultAttrs.cacheable;
-    attrs.shareable = Mpu.defaultAttrs.shareable;
-    attrs.noExecute = Mpu.defaultAttrs.noExecute;
-    attrs.accPerm = Mpu.defaultAttrs.accPerm;
-    attrs.tex = Mpu.defaultAttrs.tex;
-    attrs.subregionDisableMask = Mpu.defaultAttrs.subregionDisableMask;
+    attrs.enable = MPU.defaultAttrs.enable;
+    attrs.bufferable = MPU.defaultAttrs.bufferable;
+    attrs.cacheable = MPU.defaultAttrs.cacheable;
+    attrs.shareable = MPU.defaultAttrs.shareable;
+    attrs.noExecute = MPU.defaultAttrs.noExecute;
+    attrs.accPerm = MPU.defaultAttrs.accPerm;
+    attrs.tex = MPU.defaultAttrs.tex;
+    attrs.subregionDisableMask = MPU.defaultAttrs.subregionDisableMask;
 }
 
 /*
@@ -632,71 +855,79 @@ function setRegionMeta(regionId, regionBaseAddr, regionSize, attrs)
 {
     var index;
 
-    if (Mpu.numRegions == 0) {
-        Mpu.$logError("Mpu_setRegionMeta: Number of MPU regions " +
-              "(Mpu.numRegions) is set to 0. The number of regions must be " +
-              "non-zero.", Mpu);
+    if (MPU.numRegions == 0) {
+        MPU.$logError("MPU_setRegionMeta: Number of MPU regions " +
+              "(MPU.numRegions) is set to 0. The number of regions must be " +
+              "non-zero.", MPU);
     }
 
     /* Set enable field to default if undefined */
     if (attrs.enable === undefined) {
-        attrs.enable = Mpu.defaultAttrs.enable;
+        attrs.enable = MPU.defaultAttrs.enable;
     }
 
     /* Set bufferable field to default if undefined */
     if (attrs.bufferable === undefined) {
-        attrs.bufferable = Mpu.defaultAttrs.bufferable;
+        attrs.bufferable = MPU.defaultAttrs.bufferable;
     }
 
     /* Set cacheable field to default if undefined */
     if (attrs.cacheable === undefined) {
-        attrs.cacheable = Mpu.defaultAttrs.cacheable;
+        attrs.cacheable = MPU.defaultAttrs.cacheable;
     }
 
     /* Set shareable field to default if undefined */
     if (attrs.shareable === undefined) {
-        attrs.shareable = Mpu.defaultAttrs.shareable;
+        attrs.shareable = MPU.defaultAttrs.shareable;
     }
 
     /* Set noExecute field to default if undefined */
     if (attrs.noExecute === undefined) {
-        attrs.noExecute = Mpu.defaultAttrs.noExecute;
+        attrs.noExecute = MPU.defaultAttrs.noExecute;
     }
 
     /* Set accPerm field to default if undefined */
     if (attrs.accPerm === undefined) {
-        attrs.accPerm = Mpu.defaultAttrs.accPerm;
+        attrs.accPerm = MPU.defaultAttrs.accPerm;
     }
 
     /* Set tex field to default if undefined */
     if (attrs.tex === undefined) {
-        attrs.tex = Mpu.defaultAttrs.tex;
+        attrs.tex = MPU.defaultAttrs.tex;
     }
 
     /* Set subregionDisableMask to default if undefined */
     if (attrs.subregionDisableMask === undefined) {
-        attrs.subregionDisableMask = Mpu.defaultAttrs.subregionDisableMask;
+        attrs.subregionDisableMask = MPU.defaultAttrs.subregionDisableMask;
     }
 
-    if ((regionId >= 0) && (regionId < Mpu.numRegions)) {
-        if (regionBaseAddr & 0x3) {
-            Mpu.$logWarning("Region base address not 4-byte aligned", Mpu);
+    if ((regionId >= 0) && (regionId < MPU.numRegions)) {
+        var alignMask;
+        if (regionSize == MPU.RegionSize_4G) {
+            alignMask = 0x0;
+        }
+        else {
+            alignMask = convertToUInt32(~0 << ((regionSize >>> 1) + 1));
         }
 
-        Mpu.regionEntryMeta[regionId].baseAddress =
-            convertToUInt32(regionBaseAddr & 0xFFFFFFFC);
+        if (regionBaseAddr != (regionBaseAddr & alignMask)) {
+            MPU.$logWarning("Region base address not aligned to region size",
+                MPU);
+        }
 
-        Mpu.regionEntryMeta[regionId].sizeAndEnable =
+        MPU.regionEntry[regionId].baseAddress = regionBaseAddr;
+
+        MPU.regionEntry[regionId].sizeAndEnable =
             ((attrs.subregionDisableMask << 8) | regionSize | attrs.enable);
 
-        Mpu.regionEntryMeta[regionId].regionAttrs =
+        MPU.regionEntry[regionId].regionAttrs =
             convertToUInt32((attrs.noExecute << 12) | (attrs.accPerm << 8) |
             (attrs.tex << 3) | (attrs.shareable << 2) | (attrs.cacheable << 1) |
             (attrs.bufferable));
     }
     else {
-        Mpu.$logError("MPU Region number (" + regionId + ") passed is " +
-            "invalid.", Mpu);
+        MPU.$logError("MPU Region number (" + regionId + ") passed is " +
+            "invalid.", MPU);
     }
 }
 
@@ -718,9 +949,10 @@ function convertToUInt32(value)
 }
 
 /*
- *  ======== populateRegionAttrs ========
+ *  ======== viewPopulateRegionAttrs ========
  */
-function populateRegionAttrs(regionIdx, elem, baseAddress, sizeAndEnable, regionAttrs)
+function viewPopulateRegionAttrs(regionIdx, elem, baseAddress, sizeAndEnable,
+    regionAttrs)
 {
     elem.RegionIdx = regionIdx;
     elem.Enabled = sizeAndEnable & 0x1;
@@ -803,15 +1035,15 @@ function populateRegionAttrs(regionIdx, elem, baseAddress, sizeAndEnable, region
  */
 function viewMpuRegionAttrs(view)
 {
-    var MpuRegionEntry;
+    var mpuRegionEntry;
     var Program = xdc.useModule('xdc.rov.Program');
-    var Mpu = xdc.useModule('ti.sysbios.family.arm.Mpu');
-    var MpuCfg = Program.getModuleConfig(Mpu.$name);
+    var MPU = xdc.useModule('ti.sysbios.family.arm.MPU');
+    var MPUCfg = Program.getModuleConfig(MPU.$name);
 
     /* Scan the raw view in order to obtain the module state. */
     var rawView;
     try {
-        rawView = Program.scanRawView('ti.sysbios.family.arm.Mpu');
+        rawView = Program.scanRawView('ti.sysbios.family.arm.MPU');
     }
     catch (e) {
         this.$logWarning("Caught exception while retrieving raw view: " + e,
@@ -821,31 +1053,29 @@ function viewMpuRegionAttrs(view)
     /* Get the module state */
     var mod = rawView.modState;
 
-    if (!MpuCfg.isMemoryMapped) {
-        /* Retrieve the MMU descriptor table */
-        try {
-            mpuRegionEntry = Program.fetchArray(
-                {
-                    type: 'xdc.rov.support.ScalarStructs.S_UInt32',
-                    isScalar: true
-                },
-                mod.regionEntry,
-                (MpuCfg.numRegions * 3),
-                false);
-        }
-        catch (e) {
-            this.$logWarning(
-                "Caught exception while trying to retrieve descriptor table: " +
-                e, this);
-        }
+    /* Retrieve the MMU descriptor table */
+    try {
+        mpuRegionEntry = Program.fetchArray(
+            {
+                type: 'xdc.rov.support.ScalarStructs.S_UInt32',
+                isScalar: true
+            },
+            mod.regionEntry,
+            (MPUCfg.numRegions * 3),
+            false);
+    }
+    catch (e) {
+        this.$logWarning(
+            "Caught exception while trying to retrieve descriptor table: " +
+            e, this);
     }
 
     /* Walk through the level 1 descriptor table */
-    for (var i = 0; i < MpuCfg.numRegions; i++) {
-        var elem = Program.newViewStruct('ti.sysbios.family.arm.Mpu',
+    for (var i = 0; i < MPUCfg.numRegions; i++) {
+        var elem = Program.newViewStruct('ti.sysbios.family.arm.MPU',
                 'MpuRegionAttrsView');
 
-        populateRegionAttrs(i, elem, mpuRegionEntry[i*3],
+        viewPopulateRegionAttrs(i, elem, mpuRegionEntry[i*3],
             mpuRegionEntry[i*3 + 1], mpuRegionEntry[i*3 + 2]);
 
         /* Add the element to the list. */

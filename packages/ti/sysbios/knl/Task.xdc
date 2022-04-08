@@ -94,7 +94,7 @@ import ti.sysbios.knl.Queue;
  *
  *  Certain system configuration settings will result in
  *  task stacks needing to be large enough to absorb two interrupt
- *  contexts rather than just one. 
+ *  contexts rather than just one.
  *  Setting {@link ti.sysbios.BIOS#logsEnabled BIOS.logsEnabled} to 'true'
  *  or installing any Task hooks will have the side effect of allowing
  *  up to two interrupt contexts to be placed on a task stack. Also
@@ -172,7 +172,7 @@ import ti.sysbios.knl.Queue;
  *  @a(Hook Functions)
  *
  *  Sets of hook functions can be specified for the Task module.  Each
- *  set can contains these hook functions:
+ *  set can contain these hook functions:
  *  @p(blist)
  *  -Register: A function called before any statically created tasks
  *      are initialized at runtime.  The register hook is called at boot time
@@ -180,23 +180,36 @@ import ti.sysbios.knl.Queue;
  *  -Create: A function that is called when a task is created.
  *      This includes tasks that are created statically and those
  *      created dynamically using {@link #create} or {@link #construct}.
- *      The create hook is called outside of a Task_disable/enable block and
- *   before the task has been added to the ready list.
+ *      For statically created tasks, create hook is called before main()
+ *      and before interrupts are enabled. For dynamically created or
+ *      constructed tasks, create hook is called in the same context the
+ *      task is created or constructed in i.e. if a task is created in
+ *      main(), the create hook is called in main context and if the task
+ *      is created within another task, it is called in task context. The
+ *      create hook is called outside of a Task_disable/enable block and
+ *      before the task has been added to the ready list.
  *  -Ready: A function that is called when a task becomes ready to run.
- *   The ready hook is called from within a Task_disable/enable block with
- *   interrupts enabled.
+ *      The ready hook is called in the context of the thread unblocking
+ *      a task and therefore it can be called in Hwi, Swi or Task context.
+ *      If a Swi or Hwi posts a semaphore that unblocks a task, the ready
+ *      hook would be called in the Swi or Hwi's context. The ready hook is
+ *      called from within a Task_disable/enable block with interrupts enabled.
  *  -Switch: A function that is called just before a task switch
- *      occurs. The 'prev' and 'next' task handles are passed to the Switch
+ *      occurs. The 'prev' and 'next' task handles are passed to the switch
  *      hook. 'prev' is set to NULL for the initial task switch that occurs
- *      during SYS/BIOS startup.  The Switch hook is called from within a
- *      Task_disable/enable block with interrupts enabled.
- *  -Exit:      A function that is called when a task exits using
- *      {@link #exit}.  The exit hook is passed the handle of the exiting
- *      task.  The exit hook is called outside of a Task_disable/enable block
- *      and before the task has been removed from the kernel lists.
+ *      during SYS/BIOS startup.  The switch hook is called from within a
+ *      Task_disable/enable block with interrupts enabled, in the
+ *      context of the task being switched from (ie: the `prev` task).
+ *  -Exit: A function that is called when a task exits using {@link #exit}.
+ *      It is called in the exiting task's context. The exit hook is passed
+ *      the handle of the exiting task. The exit hook is called outside of a
+ *      Task_disable/enable block and before the task has been removed from
+ *      the kernel lists.
  *  -Delete: A function that is called when any task is deleted at
- *      run-time with {@link #delete}.  The delete hook is called outside
- *      of a Task_disable/enable block.
+ *      run-time with {@link #delete}. The delete hook is called in idle task
+ *      context if {@link #deleteTerminatedTasks} is set to true. Otherwise,
+ *      it is called in the context of the task that is deleting another task.
+ *      The delete hook is called outside of a Task_disable/enable block.
  *  @p
  *  Hook functions can only be configured statically.
  *
@@ -870,6 +883,9 @@ module Task
     /*!
      *  Initialize stack with known value for stack checking at runtime
      *  (see {@link #checkStackFlag}).
+     *  If this flag is set to false, while the
+     *  {@link ti.sysbios.hal.Hwi#checkStackFlag} is set to true, only the
+     *  first byte of the stack is initialized.
      *
      *  This is also useful for inspection of stack in debugger or core
      *  dump utilities.
@@ -885,9 +901,6 @@ module Task
      *  longer at this value, the assumption is that the task has
      *  overrun its stack. If the test fails, then the
      *  {@link #E_stackOverflow} error is raised.
-     *
-     *  Runtime stack checking is only performed if {@link #initStackFlag} is
-     *  also true.
      *
      *  Default is true.
      *
@@ -1439,13 +1452,11 @@ instance:
      *
      *  Null indicates that the stack is to be allocated by create().
      *
-     *  Example: To statically initialize "tsk0"'s stack to a literal
-     *  address, use the following syntax:
+     *  @a(Static Configuration Usage Warning)
+     *  This parameter can only be assigned a non-null value
+     *  during runtime Task creates or constructs.
      *
-     *  @p(code)
-     *      Program.global.tsk0.stack = $addr(literal);
-     *  @p
-     *
+     *  Static configuration of the 'stack' parameter is not supported.
      */
     config Ptr stack = null;
 

@@ -35,6 +35,6 @@ release: .genhtml
 .release: .genhtml
 
 .genhtml:
-	echo "generating HTML tables for Mpu.xdc cdoc ..."
+	echo "generating HTML tables for MPU.xdc cdoc ..."
 	@rm -f doc-files/MpuRegions.js
 	@$(XDCROOT)/xs -f ti/sysbios/family/arm/genMpuHtml.xs .

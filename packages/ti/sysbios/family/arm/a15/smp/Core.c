@@ -62,8 +62,6 @@
 #define OMAP5_AUX_CORE_BOOT_0   (OMAP5_WUGEN_BASE_ADDR + 0x800)
 #define OMAP5_AUX_CORE_BOOT_1   (OMAP5_WUGEN_BASE_ADDR + 0x804)
 
-#define K2_BOOT_MAGIC_ADDR      0x0C5AD000
-
 extern void _exit(int code);
 extern Void ti_sysbios_hal_Hwi_initStack(Void);
 
@@ -282,7 +280,7 @@ Void Core_startCoreXKeystone2()
     }
     else {
         for (idx = 1; idx < Core_numCores; idx++) {
-            REG32(K2_BOOT_MAGIC_ADDR + 0x4*idx) = (UInt32)(&Core_smpBoot);
+            REG32(Core_bootMagicBase + 0x4*idx) = (UInt32)(&Core_smpBoot);
         }
         __asm__ __volatile__ (
             "dsb\n\t"       /* Ensure writes are visible to other cores */

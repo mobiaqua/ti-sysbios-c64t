@@ -11,12 +11,12 @@ mkdir $TMPDIR
 
 DEVICE=CC13xx
 ROMDIR=$TMPDIR/$DEVICE
-
+OBJDUMP=/db/vendors/linaro/gcc-arm-none-eabi-4_8-2014q3/bin/arm-none-eabi-objdump
 mkdir $ROMDIR
 
 #  Compare new sysbios.lib and golden sysbios.lib's function list
-objdump -t  golden/$DEVICE/sysbios.aem3 | grep "g     F .text" | sort > golden/$DEVICE/sysbios_lib_funcs
-objdump -t  $DEVICE/sysbios.aem3 | grep "g     F .text" | sort > $DEVICE/sysbios_lib_funcs
+#$OBJDUMP -t  golden/$DEVICE/sysbios.aem3 | grep "g     F .text" | sort > golden/$DEVICE/sysbios_lib_funcs
+$OBJDUMP -t  $DEVICE/sysbios.aem3 | grep "g     F .text" | sort > $DEVICE/sysbios_lib_funcs
 diff golden/$DEVICE/sysbios_lib_funcs $DEVICE/sysbios_lib_funcs > $ROMDIR/libDiff
 
 read line <$ROMDIR/libDiff
@@ -27,7 +27,7 @@ if [ -n "$line" ]; then
     echo
     cat $ROMDIR/libDiff
     echo 
-    echo If new $DEVICE/sysbios.aem3 library is ok, copy it to golden/$DEVICE
+    echo If new $DEVICE/sysbios.aem3 library is ok, copy $DEVICE/sysbios_lib_funcs to  golden/$DEVICE
     rm -rf $TMPDIR
     exit 1
 fi
@@ -35,7 +35,7 @@ fi
 echo $DEVICE ROM VALIDATION PASSED
 
 # copy newly validated sysbios.aem3 library to golden dir
-cp $DEVICE/sysbios.aem3 golden/$DEVICE/sysbios.aem3
+# cp $DEVICE/sysbios.aem3 golden/$DEVICE/sysbios.aem3
 
 # commit new validated golden library
 if [[ $USER == "xlibrary" ]]
@@ -47,10 +47,10 @@ then
         do
             sleep 1
         done
-        git ls-files -m | grep golden/$DEVICE/sysbios.aem3
+        git ls-files -m | grep golden/$DEVICE/sysbios_lib_funcs
         if [ $? -eq 0 ]
         then
-            git commit golden/$DEVICE/sysbios.aem3 -m "Latest $DEVICE sysbios.aem3 library"
+            git commit golden/$DEVICE/sysbios_lib_funcs -m "Latest $DEVICE sysbios_lib_funcs file"
             if [ $? -eq 0 ]
             then
                 lockFlag=0;

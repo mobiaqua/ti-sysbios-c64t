@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -302,6 +302,9 @@ module Cache inherits ti.sysbios.interfaces.ICache
      *  in the device platform.  Only set the fields of the Mar structure
      *  which need to be modified.  Any field not set retains its reset value.
      *
+     *  All MAR registers that corresponds within the specified base address
+     *  and base address + size are set to the specified value.
+     *
      *  @a(Note)
      *  The 'wte' (Bit 1) and 'pcx' (Bit 2) MAR bits are reserved on
      *  C66x CorePac devices.
@@ -371,6 +374,9 @@ module Cache inherits ti.sysbios.interfaces.ICache
      *  Set MAR register(s) that corresponds to the specified address range.
      *
      *  All cached entries in L1 and L2 are written back and invalidated.
+     *
+     *  All MAR registers that corresponds within the specified base address
+     *  and base address + size are set to the specified value.
      *
      *  @a(Note)
      *  The 'wte' (Bit 1) and 'pcx' (Bit 2) MAR bits are reserved on

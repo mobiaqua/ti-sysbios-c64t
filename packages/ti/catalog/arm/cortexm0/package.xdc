@@ -22,7 +22,7 @@ requires ti.catalog.peripherals.hdvicp2;
  *  xdc.platform.IPlatform) to obtain the memory map supported by each CPU.
  */
 package ti.catalog.arm.cortexm0 [1,0,0] {
-    module TM0Sxx;
+    module RF432S0xx;
 }
 /*
  */

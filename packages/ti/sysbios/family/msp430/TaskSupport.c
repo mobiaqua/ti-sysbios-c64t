@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,7 @@ extern Ptr TaskSupport_buildTaskStack(Ptr stack, Task_FuncPtr fxn, TaskSupport_F
 /*
  *
  * Here is a pseudo image of the initial MSP430 task stack:
- * 
+ *
  *    R4
  *    R5
  *    R6
@@ -63,35 +63,35 @@ extern Ptr TaskSupport_buildTaskStack(Ptr stack, Task_FuncPtr fxn, TaskSupport_F
  *    fxn
  *    exit
  *    enter
- * 
- * The top of the initial stack consists of the registers that are preserved 
- * by a called C function as defined by the C compiler. These are the 
- * registers pushed and popped by TaskSupport_swap. 
+ *
+ * The top of the initial stack consists of the registers that are preserved
+ * by a called C function as defined by the C compiler. These are the
+ * registers pushed and popped by TaskSupport_swap.
  *
  * Just below these registers is the status register (SR), and the address of
  * the 'glue' function (more on this in a moment).
  *
- * The Task enter() function (held at the bottom of stack) sets up the 
+ * The Task enter() function (held at the bottom of stack) sets up the
  * first invocation of the task in the same manner as if it had been "returned"
  * to from Task_restore(), which is the normal path back to an unblocked task.
- * When Task enter() is returned from, the address of the 'glue' function is 
+ * When Task enter() is returned from, the address of the 'glue' function is
  * popped; this function will pop the two UArgs below it on the stack into
  * the appropriate registers for a "fxn(arg0, arg1)" call, and then return
  * into the task's function (fxn) below it on the stack.
- * 
- * The TaskSupport_swap() function pushes all the saved-by-callee 
- * registers onto the task stack, then saves the updated SP into 
- * the "old" task object's context (SP) address passed to it. Then it 
- * loads the "new" task object's context (SP) (the second arg passed 
- * to swap) into the SP, unrolls the saved registers and returns into 
+ *
+ * The TaskSupport_swap() function pushes all the saved-by-callee
+ * registers onto the task stack, then saves the updated SP into
+ * the "old" task object's context (SP) address passed to it. Then it
+ * loads the "new" task object's context (SP) (the second arg passed
+ * to swap) into the SP, unrolls the saved registers and returns into
  * the new task.
  *
- * Below the Task's function address on the stack is the Task_exit() 
- * function address which is returned into if the task function falls 
+ * Below the Task's function address on the stack is the Task_exit()
+ * function address which is returned into if the task function falls
  * out the bottom.
  *
  * The pointer returned by the buildTaskStack function is the task's initial
- * stack pointer. This address is stored into the task object's context 
+ * stack pointer. This address is stored into the task object's context
  * field and is passed to the TaskSupport_swap() function later.
  *
  */
@@ -115,9 +115,13 @@ Ptr TaskSupport_start(Ptr currTsk, ITaskSupport_FuncPtr enter,
             *sptr++ = 0xbe;
         }
     }
-
+    /* Still allow for stack overflow checking */
+    else if (Task_checkStackFlag) {
+        sptr = (Char *)tsk->stack;
+        *sptr = 0xbe;
+    }
     sp = TaskSupport_buildTaskStack(xdc_uargToPtr((UArg)((tsk->stack) + tsk->stackSize-4) ), tsk->fxn, exit, enter, tsk->arg0, tsk->arg1);
-    
+
     return (sp);
 }
 
@@ -148,7 +152,7 @@ SizeT TaskSupport_stackUsed(Char *stack, SizeT size)
     sp = stack;
 
     do {
-    } while(*sp++ == (Char)0xbe);       
+    } while(*sp++ == (Char)0xbe);
 
     return (size - (--sp - stack));
 }

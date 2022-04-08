@@ -31,7 +31,6 @@
  */
 /*
  *  ======== package.bld ========
- *
  */
 
 var BiosBuild = xdc.loadCapsule("ti/sysbios/Build.xs");
@@ -40,6 +39,7 @@ var objList = [
     "Timer.c",
     "TimestampProvider.c",
     "ClockFreqs.c",
+    "Seconds.c"
 ];
 
 var trgFilter = {

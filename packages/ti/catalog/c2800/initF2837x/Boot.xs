@@ -32,17 +32,9 @@ function module$meta$init()
 
     Boot = this;
     Program = xdc.module('xdc.cfg.Program');
-    
+
     /* set default loadSegment */
-    if (Program.platformName.match(/ti\.platforms\.tms320x28:F2807/) ||
-        Program.platformName.match(/ti\.platforms\.tms320x28:F2837/) ||
-        Program.platformName.match(/ti\.platforms\.tms320x28:TMS320F2807/) ||
-        Program.platformName.match(/ti\.platforms\.tms320x28:TMS320F2837/)) {
-        Boot.loadSegment = "FLASHA | FLASHB | FLASHC | FLASHD | FLASHE | FLASHF | FLASHG | FLASHH | FLASHI | FLASHJ | FLASHK | FLASHL | FLASHM | FLASHN PAGE = 0";
-    }
-    else {
-        Boot.loadSegment = "FLASHA | FLASHB | FLASHC | FLASHD | FLASHE | FLASHF | FLASHG PAGE = 0";
-    }
+    Boot.loadSegment = "FLASHA PAGE = 0";
 
     /* default runSegment */
     Boot.runSegment = "D01SARAM PAGE = 0";
@@ -213,21 +205,66 @@ function viewInitModule(view, obj)
  */
 function updateFlashWaitState(freq)
 {
-    /*
-     * Compute wait states.  These threshold values are from datasheet
-     * (RWAIT = [(SYSCLK/50)-1] round up to next integer)
-     */
-    if (freq <= 50000000) {
-        Boot.flashWaitStates = 0;
-    }
-    else if (freq <= 100000000) {
-        Boot.flashWaitStates = 1;
-    }
-    else if (freq <= 150000000) {
-        Boot.flashWaitStates = 2;
-    }
-    else {
-        Boot.flashWaitStates = 3;
+    if (Program.cpu != undefined) {
+        if (Program.cpu.deviceName.match(/F28004/)) {
+            /* external oscillator case */
+            if (Boot.OSCCLKSRCSEL == Boot.OscClk_XTAL) {
+                if (freq <= 20000000) {
+                    Boot.flashWaitStates = 0;
+                }
+                else if (freq <= 40000000) {
+                    Boot.flashWaitStates = 1;
+                }
+                else if (freq <= 60000000) {
+                    Boot.flashWaitStates = 2;
+                }
+                else if (freq <= 80000000) {
+                    Boot.flashWaitStates = 3;
+                }
+                else {
+                    Boot.flashWaitStates = 4;
+                }
+            }
+            else { /* internal oscillator case */
+                if (freq <= 19000000) {
+                    Boot.flashWaitStates = 0;
+                }
+                else if (freq <= 38000000) {
+                    Boot.flashWaitStates = 1;
+                }
+                else if (freq <= 58000000) {
+                    Boot.flashWaitStates = 2;
+                }
+                else if (freq <= 77000000) {
+                    Boot.flashWaitStates = 3;
+                }
+                else if (freq <= 97000000) {
+                    Boot.flashWaitStates = 4;
+                }
+                else {
+                    Boot.flashWaitStates = 5;
+                }
+            }
+        }
+        else {
+            /*
+             *  For F2837x devices
+             *  Compute wait states.  These threshold values are from datasheet
+             *  (RWAIT = [(SYSCLK/50)-1] round up to next integer)
+             */
+            if (freq <= 50000000) {
+                Boot.flashWaitStates = 0;
+            }
+            else if (freq <= 100000000) {
+                Boot.flashWaitStates = 1;
+            }
+            else if (freq <= 150000000) {
+                Boot.flashWaitStates = 2;
+            }
+            else {
+                Boot.flashWaitStates = 3;
+            }
+        }
     }
 }
 
@@ -251,7 +288,7 @@ function getFrequency()
             fractMult = 0.75;
         }
 
-        if (Boot.SPLLIMULT == 0) {      /* multiplier bypasses PLL ? */
+        if (Boot.SPLLIMULT == 0) {  /* multiplier bypasses PLL ? */
             frequency = Boot.OSCCLK;
         }
         else {

@@ -19,7 +19,6 @@
  *  xdc.platform.IPlatform) to obtain the memory map supported by each CPU.
  */
 package ti.catalog.arm.cortexm4 [1,0,0] {
-    module Stellaris;
     module Tiva;
     module OMAP5430;
     module Vayu;

@@ -54,6 +54,10 @@ ti_sysbios_family_arm_v7r_vim_Hwi_resetVectors:
         ldr     pc, [pc, #-0x1B0]       ; FIQ
         ldr     pc, [pc, #-0x1B0]       ; IRQ
 
+; The IRQ and FIQ offset register is placed at an offset of #-0x1B0 w.r.t.
+; the FIQ and IRQ vector table entry such that the vector table entry can
+; directly reference it
+
 resetHandler:
         mrc     p15, #0, r0, c0, c0, #5 ; read core Id
         ands    r0, r0, #0xFF

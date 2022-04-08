@@ -44,6 +44,7 @@ var objList = [
     "pthread_rwlock.c",
     "clock.c",
     "semaphore.c",
+    "sleep.c",
     "timer.c",
 ];
 
@@ -64,6 +65,7 @@ Pkg.otherFiles = [
     "pthread_mutex.c",
     "pthread_rwlock.c",
     "clock.c",
+    "sleep.c",
     "semaphore.c",
     "timer.c",
     "pthread.h",
@@ -72,6 +74,7 @@ Pkg.otherFiles = [
     "_time.h",
     "semaphore.h",
     "types.h",
+    "unistd.h",
     "Settings.xdc",
     "Settings.xs",
     "Settings.h"

@@ -1,13 +1,13 @@
 /* --COPYRIGHT--,EPL
- *  Copyright (c) 2008 Texas Instruments and others.
+ *  Copyright (c) 2008-2015 Texas Instruments Incorporated
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *  Contributors:
  *      Texas Instruments - initial implementation
- * 
+ *
  * --/COPYRIGHT--*/
 /*
  *  ======== ITarget.xs ========
@@ -192,63 +192,6 @@ function genConstCustom(names, types)
 }
 
 /*
- *  ======== ITarget.genVisibleFxns ========
- */
-function genVisibleFxns(types, names, args)
-{
-    /* We need FUNC_EXT_CALLED pragmas only when building whole_profile
-     * partial links. That's when we throw in -O3 -op2 flags to the compiler,
-     * which compiles i-code supplied to the linker, and can eliminate
-     * functions unless they are protected by pragmas.
-     * When these flags are thrown in to the final link, the optimizer seems
-     * to have the information which symbols are needed by the object code not
-     * involved in whole program optimization, and we don't need pragmas.
-     * $$isasm == 0 means that the big C file is not involved in a partial
-     * link, $$isasm == 1 means it is.
-     */
-    if (xdc.om.$name != 'cfg' || Program.$$isasm != 1
-        || !Program.build.profile.match(/whole_program/)) {
-        return (null);
-    }
-
-    var sb = new java.lang.StringBuilder();
-    for (var i = 0; i < names.length; i++) {
-        sb.append("#pragma FUNC_EXT_CALLED(" + names[i] + ");\n");
-    }
-    return (sb.toString() + "");
-}
-
-/*
- *  ======== ITarget.genVisibleLibFxns ========
- */
-function genVisibleLibFxns(types, names, args)
-{
-    /* The same logic used for 'genVisibleFxns' holds here too. The only
-     * exception is that we can't use pragmas because these functions are
-     * defined in libraries, not in the big C file. That's why we have to use
-     * constants that point to functions that need to be saved. It seems that
-     * -O3 -op2 flags do not eliminate data, so even though no one is
-     * referencing the ED constant, they are not eliminated.
-     */
-    if (xdc.om.$name != 'cfg' || Program.$$isasm != 1
-        || !Program.build.profile.match(/whole_program/)) {
-        return (null);
-    }
-
-    var sb = new java.lang.StringBuilder();
-    for (var i = 0; i < names.length; i++) {
-        sb.append("\nconst xdc_IArg " + names[i] + "D = (xdc_IArg)&"
-                  + names[i] + ";\n");
-        var nArray = [];
-        nArray[0] = names[i] + "D";
-        var tArray = [];
-        tArray[0] = types[i];
-        sb.append(this.genConstCustom(nArray, tArray));
-    }
-    return (sb.toString() + "");
-}
-
-/*
  *  ======== ITarget.getVersion ========
  */
 function getVersion()
@@ -343,10 +286,10 @@ function getVersion()
                     suffix = va[3];
                 }
                 suffix = suffix == null ? "" : (',' + suffix);
-    
+
                 key = "1,0," + radius + "," + patch + suffix;
             }
-    
+
             /* create target compatibility string */
             result += key;
         }
@@ -394,7 +337,7 @@ function getRawVersion()
         if ((tmp = _rawVersionCache[verKey]) != null) {
             return (result + tmp);
         }
-    
+
         /* otherwise, run compiler to get version string output */
         var path = "PATH=" + envs.path.join(";");
         path = path.replace("$(" + target.$name + ".rootDir)",
@@ -403,7 +346,7 @@ function getRawVersion()
             path = path.replace(/;/g, ":");
         }
         var attrs = {envs: [path]};
-    
+
         var status = {};
         if (xdc.exec(cmd, attrs, status) >= 0) {
            result += status.output.replace("\n", "");
@@ -443,88 +386,27 @@ function link(goal)
 
         var cmd = tool2cmd["link"];
         var pre = target.lnkOpts == null ? "" :
-            (goal.dllMode ? "" : target.lnkOpts.prefix);
+            (goal.dllMode ? "-q" : target.lnkOpts.prefix);
+        var suf = "";
 
         var compString = this.getVersion().split('{')[1];
         var compVersion = compString.split(',');
 
-        if (goal.profile.match(/whole_program/)) {
-
-            if (!_newLinker(this)) {
-                cmd += "-$(MV) $(notdir $(basename $@)).asm"
-                    + " $(XDCCFGDIR)$(dir $@)/lto_$(notdir $(basename $@)).opt"
-                    + this.suffix + "\n";
-            }
-            /* If the linkOpts are set for the 'whole_program' profile or the
-             * 'whole_progam_debug' profile, and these options set compile
-             * options, then an additional set of the compile options should
-             * not be added. This is intended for the internal use only.
-             */
-            if (this.profiles[goal.profile].linkOpts == undefined ||
-                !this.profiles[goal.profile].linkOpts.match(/--opt/)) {
-                var allOpts = target.cc.opts + " " + target.ccOpts.prefix
-                    + " " + target.ccOpts.suffix
-		    + " " + "--diag_suppress=23000"
-                    + " " + this.profiles[goal.profile].compileOpts.copts
-                    + " -op2 -O3 -k -os";
-                 if (_newLinker(this)) {
-                     allOpts += " -ea.opt" + this.suffix;
-                 }
-
-                /* The profile "whole_program" compiles with '-O2' because we
-                 * want the standard object code to be optimized at O2 level in
-                 * case it is linked without invoking the optimizer from the
-                 * linker. However, we already added '-O3' for the case when
-                 * the linker invokes the optimizer, so we need to remove '-O2'
-                 * to avoid confusion.
-                 */
-                allOpts = allOpts.replace(" -O2", " ");
-                if (goal.profile == "whole_program_debug") {
-                    allOpts += " --optimize_with_debug";
-                }
-
-                if (target.isa.substring(0, 2) == "28") {
-                    /* the newest 5.0.0 compiler is crashing with '-op2' */
-                    allOpts = allOpts.replace("-op2", "-op3");
-                }
-
-                /* some older compiler did not have -mt and inline_limit,
-                 * and don't support --no_compress.
-                 */
-                if (target.name in _noCompressTargets && goal.dllMode) {
-                    allOpts += " --no_compress";    
-                }
-
-                pre += " --opt='" + allOpts + " --inline_recursion_limit=20'";
-
-                /* When linking assemblies for Arm with 4.5 compiler, the link
-                 * lasts for minutes, so we have to add another switch to skip
-                 * placement optimization, until the bug is fixed.  Same issue
-                 * and workaround also applies to 28x 5.1 compiler.
-                 */
-                if ( ((target.isa[0] == 'v' || target.isa == "470") &&
-                        goal.dllMode && compVersion[2] == "4.5") || 
-                     ((target.isa.substring(0, 2) == "28") &&
-                        goal.dllMode && compVersion[2] == "5.1") )  {
-                    pre += " --no_placement_optimization";
-                }
-            }
-        }
-
         if (_newLinker(target)) {
-            pre += " -fs $(XDCCFGDIR)$(dir $@)";
+            var fsopt = "-fs $(XDCCFGDIR)$(dir $@)";
             if (Build.hostOSName == "Windows") {
                 /* This is a workaround for a CodeGen bug when '/' is the
                  * last character in a directory name.
                  */
-                pre += ".";
+                fsopt += ".";
             }
+            pre = fsopt + " " + pre;
         }
 
         result.cmds = _bldUtils.expandString(cmd, {
             LOPTS_P: pre,
-            LOPTS_S: target.lnkOpts == null ? "" :
-                (goal.dllMode ? "-r -m $(XDCCFGDIR)/$@.map" :
+            LOPTS_S: target.lnkOpts == null ? suf :
+                suf + " " + (goal.dllMode ? "-r -m $(XDCCFGDIR)/$@.map" :
                                 target.lnkOpts.suffix + lib),
             lopts:   goal.opts,
             files:   goal.files
@@ -533,67 +415,6 @@ function link(goal)
         if (goal.dllMode) {
             result.cmds += "$(MV) $@ $(XDCCFGDIR)/$@.obj\n";
             result.cmds += "$(TOUCH) $@\n";
-
-            /* If we are linking an assembly in the 'whole_program' profile, we
-             * need to compile the optimized 'asm/opt' file to get a
-             * relocatable 'lib' file. The existing 'lib' file is a partially
-             * linked file, which has trampolines and is not relocatable.
-             */
-            if (goal.profile.match(/whole_program/)) {
-                /* first we need to remove [d] from section names in the opt
-                 * files
-                 */
-                var asmSuffix = ".s" + target.suffix;
-                result.cmds += "$(MV) $(XDCCFGDIR)$@.obj $(XDCCFGDIR)$@.pobj\n";
-                result.cmds +=
-                    "$(SED) -r -e 's/sect[ 	]\"\[[0-9]+\]/sect      \"/g' "
-                    + "-e 's/.symdepend(.+)\"\[[0-9]+\](.+)\"/.symdepend\\1\"\\2\"/g'"
-                    + "<$(XDCCFGDIR)$(dir $@)/lto_$(notdir $(basename $@)).opt"
-                    + target.suffix + ">$(XDCCFGDIR)$@" + asmSuffix + "\n";
-
-                var newGoal = new xdc.om['xdc.bld.ITarget.CompileGoal'];
-                newGoal.base = "$@";
-                newGoal.srcPrefix = "$(XDCCFGDIR)/";
-                newGoal.srcSuffix = asmSuffix;
-                newGoal.dstPrefix = "$(XDCCFGDIR)/";
-                newGoal.dstSuffix = ".obj";
-                newGoal.opts = new xdc.om['xdc.bld.ITarget'].CompileOptions();
-                newGoal.profile = goal.profile;
-
-                /* In the profile 'whole_program_debug', we have 
-                 * --symdebug:dwarf option supplied in the --opt link option.
-                 * Therefore, the generated assembly file has that option
-                 * embedded instead of the default --symdebug:skeletal. We
-                 * have to pass --symdebug:dwarf on the command line, so the
-                 * option inside the assembly file and the option on the
-                 * command line will match. There is also possibility that
-                 * the user passed --opt through profile's linkOpts or 
-                 * through ccOpts or through cc.opts, so we have to examine
-                 * the link command line and extract --symdebug option or -g
-                 * option, if it was passed. 
-                 */
-                var linkLine = result.cmds.match
-                    (/.*--opt=["'](?:.*\s)?(--symdebug:\w+)(?:\s.*)?["'].*\n/);
-                if (linkLine == null) {
-                    linkLine = result.cmds.match
-                        (/.*--opt=["'](?:.*\s+)?-g(?:\s+.*)?["'].*\n/);
-                    if (linkLine != null) {
-                        newGoal.opts.aopts = "--symdebug:dwarf";
-                    }
-                }
-                else if (linkLine != null) {
-                    newGoal.opts.aopts = linkLine[1];
-                }
-
-                var ret = _compile(target, newGoal, false);
-                ret.cmds = ret.cmds.replace(/\$</, "$(XDCCFGDIR)$@" 
-                    + asmSuffix);
-                ret.cmds = ret.cmds.replace(/-eo.\w+/, "-eo.obj");
-
-                /* remove MKDEP part */
-                ret.cmds = ret.cmds.substring(0, ret.cmds.indexOf('\n'));
-                result.cmds += ret.cmds;
-            }
         }
     }
 
@@ -670,14 +491,6 @@ function _compile(target, goal, asm)
                     {"ccOpts.prefix": target.ccOpts.prefix});
                 ccoptsSuf = _bldUtils.expandString(target.ccConfigOpts.suffix,
                     {"ccOpts.suffix": target.ccOpts.suffix});
-            }
-
-            /* For newer linkers and compilers, we are adding
-             * '--embed_inline_assembly' to enable the config C file to
-             * participate in whole_program optimization
-             */
-            if (goal.configOpts && _newLinker(target)) {
-                ccoptsSuf += " --embed_inline_assembly";
             }
 
             _setEnv(target, result);
@@ -804,8 +617,8 @@ function _mkCmds(target)
 
     /* define the link command template */
     cmd = "$(RM) $(XDCCFGDIR)/$@.map\n" + cmdPrefix + target.lnk.cmd
-              + " $(LOPTS_P) $(lopts) -q -o $@ $(files) " + target.lnk.opts
-              + " $(LOPTS_S)\n";
+              + " $(LOPTS_P) " + target.lnk.opts
+              + " $(lopts) -o $@ $(files) $(LOPTS_S)\n";
     tool2cmd["link"] = cmd;
 
     /* define the ar command template */
@@ -861,11 +674,9 @@ function _newLinker(target)
     if ((target.isa[0] == "6" && compVersion[2] >= "7.1")
         || (target.isa.substring(0, 3) == "430" && compVersion[2] >= "3.3")
         || (target.isa.substring(0, 2) == "28" && compVersion[2] >= "6.0")
-        || ((target.isa[0] == 'v' || target.isa == "470")
-            && compVersion[2] >= "4.7")
+        || (target.isa[0] == 'v')  // old Arm compilers are detected elsewhere
         || (target.isa == "arp32")) {
         return (true);
     }
     return (false);
 }
-

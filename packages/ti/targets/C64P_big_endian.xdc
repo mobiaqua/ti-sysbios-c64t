@@ -1,5 +1,5 @@
 /* 
- *  Copyright (c) 2008 Texas Instruments and others.
+ *  Copyright (c) 2008-2015 Texas Instruments Incorporated
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -12,12 +12,12 @@
 
 /*
  *  ======== C64P_big_endian.xdc ========
- *
  */
 
 /*!
+ *  @_nodoc
  *  ======== C64P_big_endian ========
- *  TI C64P big endian 
+ *  TI C64P big endian
  */
 metaonly module C64P_big_endian inherits ti.targets.ITarget {
     override readonly config string name                 = "C64P_big_endian";
@@ -57,8 +57,8 @@ metaonly module C64P_big_endian inherits ti.targets.ITarget {
     };
 
     override readonly config xdc.bld.ITarget2.Command lnk = {
-        cmd: "lnk6x",
-        opts: ""
+        cmd: "cl6x",
+        opts: "-z"
     };
 
     /*!

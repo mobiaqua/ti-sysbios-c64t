@@ -12,7 +12,6 @@
 
 /*
  *  ======== Platform.xdc ========
- *
  */
 
 /*!
@@ -27,7 +26,8 @@ metaonly module Platform inherits xdc.platform.IPlatform
         boardFamily:    "evmTCIK2X",
         boardRevision:  null,
     };
-        
+
+    /* DSP */
     readonly config xdc.platform.IExeContext.Cpu CPU = {        
         id:             "0",
         clockRate:      1220,
@@ -35,17 +35,22 @@ metaonly module Platform inherits xdc.platform.IPlatform
         deviceName:     "TMS320TCI6638",
         revision:       "1.0",
     };
-    
+
+    /* GPP */
+    readonly config xdc.platform.IExeContext.Cpu GPP = {
+        id:             "1",
+        clockRate:      125.0,  /* Typically set by the HLOS */
+        catalogName:    "ti.catalog.arm.cortexa15",
+        deviceName:     "TCI6638K2K",
+        revision:       "1.0"
+    };
+
 instance:
 
     override readonly config xdc.platform.IPlatform.Memory
         externalMemoryMap[string] = [
             ["DDR3", {name: "DDR3", base: 0x80000000, len: 0x80000000}],
     ];
-
-    override config string codeMemory  = "L2SRAM";
-    override config string dataMemory  = "L2SRAM";
-    override config string stackMemory = "L2SRAM";
 
     /*
      *  ======== l1PMode ========

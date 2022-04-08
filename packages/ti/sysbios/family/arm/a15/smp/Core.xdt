@@ -1,6 +1,6 @@
 %%{
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -84,7 +84,8 @@ Void __attribute__((section("`Core.resetSection`"))) __attribute__((naked))
     );
 }
 %}
-%else if (Program.cpu.deviceName == "TCI6636K2H") {
+%else if (Program.cpu.deviceName.match(/TCI663/) ||
+%         Program.cpu.deviceName.match(/C66AK2E/)) {
 %   if (Core.initBootRegs) {
 %var regName = "ti_sysbios_family_arm_a15_smp_Core_keystone2BootMagic";
 static const UInt32 `regName`[`Core.numCores`]
@@ -119,8 +120,9 @@ Void __attribute__((section("`Core.resetSection`"))) __attribute__((naked))
         "blx r0\n\t"                        /* If on core0, Jump to _c_int00 */
         "1:\n\t"
         "wfe\n\t"                           /* Wait for core0 */
-        "movw r2, #0xd000\n\t"
-        "movt r2, #0x0c5a\n\t"              /* Load boot magic address */
+        "movw r2, #0x`(Core.bootMagicBase & 0xFFFF).toString(16)`\n\t"
+        "movt r2, #0x`(Core.bootMagicBase >>> 16).toString(16)`\n\t"
+                                            /* Load boot magic address */
         "ldr r1, [r2, r0, lsl #2]\n\t"
         "cmp r1, #0\n\t"
         "beq 1b\n\t"

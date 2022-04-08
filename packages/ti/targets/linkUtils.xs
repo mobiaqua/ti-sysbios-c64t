@@ -41,7 +41,7 @@ function genAliases(prog)
         }
 
         case "v": { /* ARM */
-            newLinker = targetVers >= 4.5 ? true : false;
+            newLinker = true;
             newLinkDiags =
                 "/* ignore error about def and ref in the same file */\n"
                 + "--diag_remark=10268";
@@ -132,7 +132,7 @@ function genElfSymbols(prog)
         }
 
         case "v": { /* ARM */
-            newLinker = targetVers >= 4.5 ? true : false;
+            newLinker = true;
             break;
         }
 

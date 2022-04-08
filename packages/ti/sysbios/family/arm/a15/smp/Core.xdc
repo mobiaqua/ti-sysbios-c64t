@@ -189,6 +189,12 @@ internal:
 
     config GateSmp.Handle gate;
 
+    /*
+     *  ======== bootMagicBase ========
+     *  Base address for the boot magic registers (Used only for K2 devices)
+     */
+    config UInt32 bootMagicBase;
+
     config Bool initStackFlag = true;
 
     /*

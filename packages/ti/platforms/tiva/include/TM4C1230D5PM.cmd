@@ -30,6 +30,11 @@ SECTIONS
 {
     .intvecs:   > 0x00000000
     .text   :   > FLASH
+#ifdef __TI_COMPILER_VERSION
+#if __TI_COMPILER_VERSION >= 15009000
+    .TI.ramfunc : {} load=FLASH, run=SRAM, table(BINIT)
+#endif
+#endif
     .const  :   > FLASH
     .cinit  :   > FLASH
     .pinit  :   > FLASH

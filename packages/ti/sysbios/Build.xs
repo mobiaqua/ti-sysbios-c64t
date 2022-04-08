@@ -62,8 +62,6 @@ var ccOptsList = {
     "iar.targets.msp430.MSP430X_large"          : customIar430xOpts,
     "ti.targets.C64P"                           : custom6xOpts,
     "ti.targets.elf.C64P"                       : custom6xOpts,
-    "ti.targets.C64P_big_endian"                : custom6xOpts,
-    "ti.targets.elf.C64P_big_endian"            : custom6xOpts,
     "ti.targets.C674"                           : custom6xOpts,
     "ti.targets.elf.C674"                       : custom6xOpts,
     "ti.targets.elf.C67P"                       : custom6xOpts,
@@ -136,21 +134,16 @@ function module$use()
     }
 
     /*
-     * Gracefully handle non-supported whole_program profiles
+     * Handle non-supported whole_program profiles
      */
-    if (profile.match(/whole_program/)
-        && (BIOS.libType != BIOS.LibType_Debug)) {
-        /* allow build to proceed */
-        BIOS.libType = BIOS.LibType_Debug;
-        /* but warning the user */
-        BIOS.$logWarning("The '" + profile +
-            "' build profile will not be supported " +
-            "in future releases of SYS/BIOS.  " +
+    if (profile.match(/whole_program/)) {
+        BIOS.$logError("The '" + profile +
+            "' build profile is no longer supported in SYS/BIOS. " +
             "Use 'release' or 'debug' profiles together with the " +
             "'BIOS.libType' configuration parameter to specify your " +
             "preferred library.  See the compatibility section of " +
             "your SYS/BIOS release notes for more information.",
-            "Profile Deprecation Warning", BIOS);
+            "Profile Unsupported Error", BIOS);
     }
 
     /* 
@@ -285,7 +278,6 @@ var biosPackages = [
     "ti.sysbios.family.arm.cc26xx",
     "ti.sysbios.family.arm.cc32xx",
     "ti.sysbios.family.arm.da830",
-    "ti.sysbios.family.arm.dm6446",
     "ti.sysbios.family.arm.ducati",
     "ti.sysbios.family.arm.ducati.dm8148",
     "ti.sysbios.family.arm.ducati.omap4430",
@@ -299,12 +291,10 @@ var biosPackages = [
     "ti.sysbios.family.arm.m3",
     "ti.sysbios.family.arm.msp432",
     "ti.sysbios.family.arm.msp432.init",
-    "ti.sysbios.family.arm.omap1030",
     "ti.sysbios.family.arm.v7r",
     "ti.sysbios.family.arm.v7r.tms570",
     "ti.sysbios.family.arm.v7r.rti",
     "ti.sysbios.family.arm.v7r.vim",
-    "ti.sysbios.family.arm.sim1030",
     "ti.sysbios.family.arm.tms570",
     "ti.sysbios.family.arm.v7a",
     "ti.sysbios.family.arm.v7a.smp",
@@ -314,11 +304,8 @@ var biosPackages = [
     "ti.sysbios.family.c62",
     "ti.sysbios.family.c64",
     "ti.sysbios.family.c64p",
-    "ti.sysbios.family.c64p.dm6437",
-    "ti.sysbios.family.c64p.dm6446",
     "ti.sysbios.family.c64p.omap3430",
     "ti.sysbios.family.c64p.primus",
-    "ti.sysbios.family.c64p.tci6482",
     "ti.sysbios.family.c64p.tci6488",
     "ti.sysbios.family.c64p.tesla",
     "ti.sysbios.family.c64p.ti81xx",
@@ -339,7 +326,6 @@ var biosPackages = [
     "ti.sysbios.knl",
     "ti.sysbios.misc",
     "ti.sysbios.posix",
-    "ti.sysbios.rta",
     "ti.sysbios.rts",
     "ti.sysbios.rts.gnu",
     "ti.sysbios.rts.iar",
@@ -373,7 +359,15 @@ function getDefaultCustomCCOpts()
 
     /* Gnu targets need to pick up ccOpts.prefix and suffix */
     if (Program.build.target.$name.match(/gnu/)) {
-        customCCOpts += " -O3 -I" + Program.build.target.targetPkgPath +
+        var gnuDevice = Program.cpu.deviceName.toUpperCase();
+        /* optimize for size with cc13xx and cc26xx devices */
+        if (gnuDevice.match(/CC26/) || gnuDevice.match(/CC13/)) {
+            customCCOpts += " -Os ";
+        }
+        else {
+            customCCOpts += " -O3 ";
+        }
+        customCCOpts += " -I" + Program.build.target.targetPkgPath +
             "/libs/install-native/$(GCCTARG)/include ";
         customCCOpts = Program.build.target.ccOpts.prefix + " " + customCCOpts;
         customCCOpts += Program.build.target.ccOpts.suffix + " ";
@@ -456,10 +450,6 @@ function getDefs()
         defs += " -Dti_sysbios_knl_Swi_DISABLE_ALL_HOOKS";
     }
 
-    if (Task.hooks.length == 0) {
-        defs += " -Dti_sysbios_knl_Task_DISABLE_ALL_HOOKS";
-    }
-
     defs += " -Dti_sysbios_BIOS_smpEnabled__D="
             + (BIOS.smpEnabled ? "TRUE" : "FALSE");
 
@@ -472,9 +462,14 @@ function getDefs()
         defs += " -Dti_sysbios_knl_Task_deleteTerminatedTasks__D=" + (Task.deleteTerminatedTasks ? "TRUE" : "FALSE");
         defs += " -Dti_sysbios_knl_Task_numPriorities__D=" + Task.numPriorities;
         defs += " -Dti_sysbios_knl_Task_checkStackFlag__D=" + (Task.checkStackFlag ? "TRUE" : "FALSE");
+        defs += " -Dti_sysbios_knl_Task_initStackFlag__D=" + (Task.initStackFlag ? "TRUE" : "FALSE");
 
         if (BIOS.useSK) {
             defs += " -Dti_sysbios_BIOS_useSK__D=1";
+        }
+
+        if (Task.hooks.length == 0) {
+            defs += " -Dti_sysbios_knl_Task_DISABLE_ALL_HOOKS";
         }
 
         /*
@@ -610,13 +605,27 @@ function getCFiles(target)
     var xdcSources = "";
     var cfgBase = "";
     var File = xdc.module("xdc.services.io.File");
+
+    /*
+     * determine if mod_config.c files are pre-pended with app name.
+     * xdc-A tools do not prepend the app name
+     */
+    var xdcPkg = xdc.loadPackage("xdc");
+    xdcVer = Packages.xdc.services.global.Vers.getXdcString(xdcPkg.packageBase + "/package/package.defs.h");
+    if (xdcVer.match("xdc-A")) {
+        var longConfigNames = false;
+    }
+    else {
+        var longConfigNames = true;
+    }
+
     
     cfgBase = String(java.io.File(Program.cfgBase + ".c").getCanonicalPath());
     cfgBase = File.getDOSPath(cfgBase);
     cfgBase = cfgBase.replace(/\\/g, "/");
     cfgBase = cfgBase.substring(0, cfgBase.lastIndexOf('/') + 1);
-    var appName = Program.name.substring(0, Program.name.lastIndexOf('.'));
-    appName = appName + "_p" + Program.build.target.suffix + "_config.c";
+    var appName = Program.name.substring(Program.name.lastIndexOf('/')+1, Program.name.lastIndexOf('.'));
+    appName = appName + "_p" + Program.build.target.suffix + "_";
 
     /*
      * logic to trim the C files down to just what the application needs
@@ -665,7 +674,12 @@ function getCFiles(target)
 
         var Types = xdc.module('xdc.runtime.Types');
         if (packageMatch && mod.common$.outPolicy == Types.SEPARATE_FILE) {
-            biosSources += cfgBase + mn + "_config.c ";
+            if (longConfigNames == true) {
+                biosSources += cfgBase + appName + mn.replace(/\./g,"_") + "_config.c ";
+            }
+            else {
+                biosSources += cfgBase + mn + "_config.c ";
+            }
         }
     }
     
@@ -706,9 +720,29 @@ function getCFiles(target)
                 }
             }
 
+            /*
+             * pull in file contributions from non ti.sysbios
+             * and non xdc.runtime packages
+             * if mod.$private.getCFiles() exists
+             */
+            if ((packageMatch == false) && (mod.$private.getCFiles !== undefined)) {
+                /* pull in file contributions from non ti.sysbios and non xdc.runtime packages */
+                if (!pn.match(/sysbios/)) {
+                    var modCFiles = mod.$private.getCFiles(target);
+                    for (var j in modCFiles) {
+                        biosSources += modCFiles[j] + " ";
+                    }
+                }
+            }
+
             var Types = xdc.module('xdc.runtime.Types');
             if (packageMatch && mod.common$.outPolicy == Types.SEPARATE_FILE) {
-                biosSources += cfgBase + mn + "_config.c ";
+                if (longConfigNames == true) {
+                    biosSources += cfgBase + appName + mn.replace(/\./g,"_") + "_config.c ";
+                }
+                else {
+                    biosSources += cfgBase + mn + "_config.c ";
+                }
             }
         }
 

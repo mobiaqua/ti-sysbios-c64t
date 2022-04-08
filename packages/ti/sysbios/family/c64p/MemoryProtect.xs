@@ -47,10 +47,8 @@ function getAsmFiles(targetName)
 {
     switch(targetName) {
         case "ti.targets.C64P":
-        case "ti.targets.C64P_big_endian":
         case "ti.targets.C674":
         case "ti.targets.elf.C64P":
-        case "ti.targets.elf.C64P_big_endian":
         case "ti.targets.elf.C674":
         case "ti.targets.elf.C66":
         case "ti.targets.elf.C66_big_endian":
@@ -114,135 +112,6 @@ var UMC_R1_PS;
 /*  This information should be placed and obtained from catalog files */
 if (xdc.om.$name == "cfg") {
     var deviceTable = {
-        "TMS320CDM6446": {
-            PMC_R0_SIZE:    0x3,    // 32KB ROM
-            PMC_R1_SIZE:    0x3,    // 32KB
-            PMC_R0_ADJ:     0x1,    // 16KB hole at 0x00E04000
-            PMC_R1_ADJ:     0x0,
-            DMC_R0_SIZE:    0x4,    // 64KB
-            DMC_R1_SIZE:    0x3,    // 32KB
-            DMC_R0_ADJ:     0x0,
-            DMC_R1_ADJ:     0x0,
-            UMC_P0_SIZE:    0x6,    // 64KB
-            UMC_P1_SIZE:    0x7,    // 128KB
-            UMC_P0_ADJ:     0x0,
-            UMC_P1_ADJ:     0x0,
-        },
-        "TMS320CDM6437": {
-            PMC_R0_SIZE:    0x0,
-            PMC_R1_SIZE:    0x3,    // 32KB
-            PMC_R0_ADJ:     0x0,
-            PMC_R1_ADJ:     0x0,
-            DMC_R0_SIZE:    0x4,    // 64KB
-            DMC_R1_SIZE:    0x3,    // 32KB
-            DMC_R0_ADJ:     0x0,
-            DMC_R1_ADJ:     0x0,
-            UMC_P0_SIZE:    0x7,    // 128KB
-            UMC_P1_SIZE:    0x6,    // 64KB ROM
-            UMC_P0_ADJ:     0x0,
-            UMC_P1_ADJ:     0x0,
-        },
-        "TMS320CDM6467": {
-            PMC_R0_SIZE:    0x0,
-            PMC_R1_SIZE:    0x3,    // 32KB
-            PMC_R0_ADJ:     0x0,
-            PMC_R1_ADJ:     0x0,
-            DMC_R0_SIZE:    0x0,
-            DMC_R1_SIZE:    0x3,    // 32KB
-            DMC_R0_ADJ:     0x0,
-            DMC_R1_ADJ:     0x0,
-            UMC_P0_SIZE:    0x8,    // 256KB
-            UMC_P1_SIZE:    0xC,    // 4096KB
-            UMC_P0_ADJ:     0x3,    // 32KB hole
-            UMC_P1_ADJ:     0x0,
-        },
-        "TMS320CTCI6482": {
-            PMC_R0_SIZE:    0x0,
-            PMC_R1_SIZE:    0x3,    // 32KB
-            PMC_R0_ADJ:     0x0,
-            PMC_R1_ADJ:     0x0,
-            DMC_R0_SIZE:    0x0,
-            DMC_R1_SIZE:    0x3,    // 32KB
-            DMC_R0_ADJ:     0x0,
-            DMC_R1_ADJ:     0x0,
-            UMC_P0_SIZE:    0xB,    // 2048KB
-            UMC_P1_SIZE:    0x6,    // 16KB ROM (but 64KB is minimum)
-            UMC_P0_ADJ:     0x0,
-            UMC_P1_ADJ:     0x0,
-        },
-        "TMS320C6452": {
-            PMC_R0_SIZE:    0x0,
-            PMC_R1_SIZE:    0x3,    // 32KB
-            PMC_R0_ADJ:     0x0,
-            PMC_R1_ADJ:     0x0,
-            DMC_R0_SIZE:    0x0,
-            DMC_R1_SIZE:    0x3,    // 32KB
-            DMC_R0_ADJ:     0x0,
-            DMC_R1_ADJ:     0x0,
-            UMC_P0_SIZE:    0xB,    // 2048KB
-            UMC_P1_SIZE:    0x6,    // 16KB ROM (but 64KB is minimum)
-            UMC_P0_ADJ:     0x0,
-            UMC_P1_ADJ:     0x0,
-            UMC_P0_BADDR:   0x0000000A,
-        },
-        "TMS320CDM647": {
-            PMC_R0_SIZE:    0x0,
-            PMC_R1_SIZE:    0x3,    // 32KB
-            PMC_R0_ADJ:     0x0,
-            PMC_R1_ADJ:     0x0,
-            DMC_R0_SIZE:    0x0,
-            DMC_R1_SIZE:    0x3,    // 32KB
-            DMC_R0_ADJ:     0x0,
-            DMC_R1_ADJ:     0x0,
-            UMC_P0_SIZE:    0x8,    // 256KB
-            UMC_P1_SIZE:    0x6,    // 64KB ROM
-            UMC_P0_ADJ:     0x0,
-            UMC_P1_ADJ:     0x0,
-            UMC_P0_BADDR:   0x0000000A,
-        },
-        "TMS320CDM648": {
-            PMC_R0_SIZE:    0x0,
-            PMC_R1_SIZE:    0x3,    // 32KB
-            PMC_R0_ADJ:     0x0,
-            PMC_R1_ADJ:     0x0,
-            DMC_R0_SIZE:    0x0,
-            DMC_R1_SIZE:    0x3,    // 32KB
-            DMC_R0_ADJ:     0x0,
-            DMC_R1_ADJ:     0x0,
-            UMC_P0_SIZE:    0x9,    // 512KB
-            UMC_P1_SIZE:    0x6,    // 64KB ROM
-            UMC_P0_ADJ:     0x0,
-            UMC_P1_ADJ:     0x0,
-            UMC_P0_BADDR:   0x0000000A,
-        },
-        "TMS320CTCI6486": {
-            PMC_R0_SIZE:    0x0,
-            PMC_R1_SIZE:    0x3,    // 32KB
-            PMC_R0_ADJ:     0x0,
-            PMC_R1_ADJ:     0x0,
-            DMC_R0_SIZE:    0x0,
-            DMC_R1_SIZE:    0x3,    // 32KB
-            DMC_R0_ADJ:     0x0,
-            DMC_R1_ADJ:     0x0,
-            UMC_P0_SIZE:    0xA,    // 1024KB
-            UMC_P1_SIZE:    0xB,    // 2048KB
-            UMC_P0_ADJ:     0x1A,   // 16KB * 26
-            UMC_P1_ADJ:     0x0,
-        },
-        "TMS320CTCI6488": {
-            PMC_R0_SIZE:    0x0,
-            PMC_R1_SIZE:    0x3,    // 32KB
-            PMC_R0_ADJ:     0x0,
-            PMC_R1_ADJ:     0x0,
-            DMC_R0_SIZE:    0x0,
-            DMC_R1_SIZE:    0x3,    // 32KB
-            DMC_R0_ADJ:     0x0,
-            DMC_R1_ADJ:     0x0,
-            UMC_P0_SIZE:    0xA,    // 1024KB
-            UMC_P1_SIZE:    0x6,    // 0KB but minimum is 64KB
-            UMC_P0_ADJ:     0x0,
-            UMC_P1_ADJ:     0x0,
-        },
         "TMS320C6670": {
             PMC_R0_SIZE:    0x0,
             PMC_R1_SIZE:    0x3,    // 32KB
@@ -342,32 +211,6 @@ if (xdc.om.$name == "cfg") {
             UMC_P1_ADJ:     0x0,
         },
     };
-
-    deviceTable["TMS320CDM415"]  = deviceTable["TMS320CDM6446"];
-    deviceTable["TMS320CDM420"]  = deviceTable["TMS320CDM6446"];
-    deviceTable["TMS320CDM421"]  = deviceTable["TMS320CDM6446"];
-    deviceTable["TMS320CDM425"]  = deviceTable["TMS320CDM6446"];
-    deviceTable["TMS320CDM426"]  = deviceTable["TMS320CDM6446"];
-    deviceTable["TMS320CDM6441"]  = deviceTable["TMS320CDM6446"];
-    deviceTable["TMS320CDM6443"]  = deviceTable["TMS320CDM6446"];
-
-    deviceTable["TMS320C6421"]   = deviceTable["TMS320CDM6437"];
-    deviceTable["TMS320C6424"]   = deviceTable["TMS320CDM6437"];
-    deviceTable["TMS320CDM6431"]   = deviceTable["TMS320CDM6437"];
-    deviceTable["TMS320CDM6433"]   = deviceTable["TMS320CDM6437"];
-    deviceTable["TMS320CDM6435"]   = deviceTable["TMS320CDM6437"];
-
-    deviceTable["TMS320C6454"]   = deviceTable["TMS320C6452"];
-    deviceTable["TMS320C6455"]   = deviceTable["TMS320C6452"];
-    deviceTable["TMS320C6457"]   = deviceTable["TMS320C6452"];
-    deviceTable["TMS320CTCI6484"]  = deviceTable["TMS320CTCI6482"];
-
-    deviceTable["TMS320C6472"]     = deviceTable["TMS320CTCI6486"];
-
-    deviceTable["TMS320C6474"]     = deviceTable["TMS320CTCI6488"];
-    deviceTable["TMS320CTCI6487"]  = deviceTable["TMS320CTCI6488"];
-    deviceTable["TMS320TCI6485"]  = deviceTable["TMS320CTCI6488"];
-    deviceTable["TMS320TCI6489"]  = deviceTable["TMS320CTCI6488"];
 
     deviceTable["Kepler"]          = deviceTable["TMS320C6670"];
     deviceTable["TMS320TCI6634"]   = deviceTable["TMS320C6670"];

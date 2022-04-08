@@ -73,15 +73,6 @@ function module$use()
     xdc.useModule('xdc.runtime.Log');
     xdc.useModule('xdc.runtime.Assert');
 
-    if ((Clock.TimerProxy === undefined) || Clock.TimerProxy == null) {
-        var Settings = xdc.module("ti.sysbios.family.Settings");
-        TimerProxy = Settings.getDefaultClockTimerDelegate();
-        if (TimerProxy == null) {
-            TimerProxy = "ti.sysbios.hal.TimerNull";
-        }
-        Clock.TimerProxy = xdc.module(TimerProxy);
-    }
-
     if (BIOS.swiEnabled) {
         Swi = xdc.useModule('ti.sysbios.knl.Swi');
         if (Clock.swiPriority === undefined) {
@@ -112,16 +103,6 @@ function module$use()
         Clock.tickSource = Clock.TickSource_NULL;
     }
 
-    /* if user has not defined the TickMode ... */
-    if (Clock.tickMode == undefined) {
-        if (Clock.TimerProxy.defaultDynamic == true) {
-            Clock.tickMode = Clock.TickMode_DYNAMIC;
-        }
-        else {
-            Clock.tickMode = Clock.TickMode_PERIODIC;
-        }
-    }
-
     /* if app hasn't declared Clock_stop() behavior, choose a default */
     if (!Clock.$written("stopCheckNext")) {
 
@@ -133,33 +114,6 @@ function module$use()
         else {
             Clock.stopCheckNext = false;
         }
-    }
-
-    /*
-     * if Clock.stopCheckNext is true, and BIOS.clockEnabled, and tick mode
-     * is TickMode_DYNAMIC ... create the trigger clock object
-     */
-    if (BIOS.clockEnabled && (Clock.tickMode == Clock.TickMode_DYNAMIC) &&
-        (Clock.stopCheckNext == true)) {
-        var clockParams = new Clock.Params();
-        clockParams.period = 0;
-        clockParams.startFlag = false;
-        Clock.triggerClock = Clock.create(Clock.triggerFunc, 1, clockParams);
-    }
-    else {
-        Clock.stopCheckNext = false;
-        Clock.triggerClock = null;
-    }
-
-    /* add -D to compile line with definition for Clock.stopCheckNext */
-    Build.ccArgs.$add("-Dti_sysbios_knl_Clock_stopCheckNext__D=" +
-        (Clock.stopCheckNext ? "TRUE" : "FALSE"));
-
-    /* Make sure that the delegate module gets 'used' */    
-    if (BIOS.clockEnabled && Clock.tickSource == Clock.TickSource_TIMER) {
-        xdc.useModule(Clock.TimerProxy.$name);
-	/* Inform xgconf regarding timer delegate's 'supportsDynamic' value */
-	Clock.timerSupportsDynamic = Clock.TimerProxy.supportsDynamic;
     }
 }
 
@@ -275,16 +229,12 @@ function instance$static$init(obj, func, timeout, params)
 function module$validate()
 {
     /* check constraints for using TickMode_DYNAMIC */
-    if (Clock.tickMode == Clock.TickMode_DYNAMIC) {
+    if ((Clock.tickMode == Clock.TickMode_DYNAMIC) &&
+        (Clock.tickSource == Clock.TickSource_TIMER)) {
 
         /* verify that the bound Timer supports RunMode_DYNAMIC */
         if (Clock.TimerProxy.supportsDynamic == false) {
             Clock.$logError("Clock tick suppression (TickMode_DYNAMIC) not supported on this device", Clock, "tickMode");
-        }
-
-        /* ensure TickSource_USER is NOT specified */
-        if (Clock.tickSource == Clock.TickSource_USER) {
-            Clock.$logError("Clock tick suppression requires the tick source to be TickSource_TIMER", Clock, "tickSource");
         }
     }
 

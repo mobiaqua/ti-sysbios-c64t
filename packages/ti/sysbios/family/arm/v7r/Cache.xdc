@@ -41,7 +41,7 @@ import xdc.runtime.Assert;
 
 /*!
  *  ======== Cache ========
- *  ARM Cache Module
+ *  ARMv7-R Cache Module
  *
  *  This module manages the data and instruction caches on Cortex-R5
  *  processors. It provides a list of functions that perform cache operations.
@@ -175,10 +175,28 @@ module Cache inherits ti.sysbios.interfaces.ICache
      *  enabled or disabled during system startup.
      *
      *  @a(NOTE)
-     *  Upon reset, the A15's Program Flow Prediction (Branch Prediction)
+     *  Upon reset, Cortex-R core's Program Flow Prediction (Branch Prediction)
      *  feature is disabled.
      */
     config Bool branchPredictionEnabled = true;
+
+    /*!
+     *  ======== disable ========
+     *  Disables the 'type' cache(s)
+     *
+     *  This function internally disables interrupts to ensure the cache
+     *  operations performed before disabling the cache are not interrupted.
+     *  Since cache maintenance operations can take a long time, this
+     *  function may disable interrupts for a long period of time.
+     *
+     *  On certain Cortex-R devices, the FIQ interrupt cannot be disabled
+     *  by software. Therefore, this function only disables IRQ interrupts
+     *  on such devices. If this function needs to be called to disable
+     *  interrupts, then care must be take that the FIQ ISR does not
+     *  interfere with the cache flush maintenance operations performed
+     *  by this function before disabling the cache.
+     */
+    override Void disable(Bits16 type);
 
     /*! @_nodoc
      *  ======== getEnabled ========
@@ -250,7 +268,8 @@ internal:
 
     /*
      *  ======== startup ========
-     *  startup function to enable cache early during climb-up
+     *  startup function to enable cache early during climb-up (run as a reset
+     *  function)
      */
     Void startup();
 

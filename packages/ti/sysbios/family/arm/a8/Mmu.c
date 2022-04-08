@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,7 @@
 #include <xdc/runtime/Startup.h>
 #include <ti/sysbios/hal/Hwi.h>
 
-#if defined(ti_targets_arm_elf_A8F) || \
-    defined(ti_targets_arm_elf_A8Fnv) || \
+#if defined(ti_targets_arm_elf_A8Fnv) || \
     defined(gnu_targets_arm_A8F)
 
 #include <ti/sysbios/family/arm/a8/Cache.h>

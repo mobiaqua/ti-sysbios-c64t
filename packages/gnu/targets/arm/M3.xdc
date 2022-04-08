@@ -1,5 +1,5 @@
 /* 
- *  Copyright (c) 2008 Texas Instruments and others.
+ *  Copyright (c) 2008-2015 Texas Instruments and others.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -24,7 +24,7 @@ metaonly module M3 inherits IM {
     override readonly config string suffix              = "m3g";
     override readonly config string isa                 = "v7M";
 
-    override config string platform     = "ti.platforms.tiva:LM3S9B90";
+    override config string platform     = "ti.platforms.tiva:TM4C1294NCPDT";
 
     override readonly config ITarget2.Command cc = {
         cmd: "$(rootDir)/bin/$(GCCTARG)-gcc -c -MD -MF $@.dep",

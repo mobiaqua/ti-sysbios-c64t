@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -110,33 +110,39 @@ Void Cache_startup()
  *  ======== Cache_disable ========
  *  Disable the cache(s) specified by the 'type' paramter.
  */
-Void Cache_disable(Bits16 type )
+Void Cache_disable(Bits16 type)
 {
     UInt enabled;
+    UInt32 key;
 
-    /* only disable caches that are currently enabled */
+    /* Only disable caches that are currently enabled */
     enabled = Cache_getEnabled();
 
     if (enabled & (type & Cache_Type_L2)) {
-        Cache_disableL1d();             /* Disable DCache */
         Cache_disableL1p();             /* Disable ICache */
+
+        key = Hwi_disable();
+        Cache_disableL1d();             /* Disable DCache */
         Cache_disableL2();              /* Disable L2 */
-        if (!(type & Cache_Type_L1D)) {
+        Hwi_restore(key);
+
+        if (!(type & Cache_Type_L1D) && (enabled & Cache_Type_L1D)) {
             Cache_enableL1d();          /* Re-enable DCache */
         }
-        if (!(type & Cache_Type_L1P)) {
+        if (!(type & Cache_Type_L1P) && (enabled & Cache_Type_L1P)) {
             Cache_enableL1p();          /* Re-enable ICache */
         }
     }
     else {
         if (enabled & (type & Cache_Type_L1D)) {
+            key = Hwi_disable();
             Cache_disableL1d();         /* Disable DCache */
+            Hwi_restore(key);
         }
         if (enabled & (type & Cache_Type_L1P)) {
             Cache_disableL1p();         /* Disable ICache */
         }
     }
-
 }
 
 /*

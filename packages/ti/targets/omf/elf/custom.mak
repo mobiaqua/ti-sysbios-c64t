@@ -26,7 +26,7 @@ java.test: java/package.jar
 .regress:
 	./test.ksh
 #
-#  @(#) ti.targets.omf.elf; 1,0,0,0; 7-10-2015 13:56:51; /db/ztree/library/trees/xdctargets/xdctargets-j04/src/ xlibrary
+#  @(#) ti.targets.omf.elf; 1,0,0,0; 12-11-2015 16:44:46; /db/ztree/library/trees/xdctargets/xdctargets-k07/src/ xlibrary
 
 #
 

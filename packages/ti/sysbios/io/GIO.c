@@ -185,12 +185,15 @@ Int GIO_Instance_init(GIO_Object *obj, String name, UInt mode,
     
     obj->name = name;
     obj->numPackets = params->numPackets;
+    obj->packets = params->packets;
     obj->doneCount = 0;
     obj->freeCount = 0;
     obj->submitCount = 0;
     obj->mode = mode;
     obj->model = params->model;
     obj->timeout = params->timeout;
+
+    obj->userPackets = (params->packets != NULL) ? TRUE : FALSE;
 
     if (params->sync == NULL) {       
         obj->userSync = FALSE;
@@ -209,20 +212,23 @@ Int GIO_Instance_init(GIO_Object *obj, String name, UInt mode,
     
     freeList = GIO_Instance_State_freeList(obj);
     Queue_construct(Queue_struct(freeList), NULL);
-    
-    /* allocate packets */
-    packets = Memory_alloc(NULL, sizeof(IOM_Packet) * (obj->numPackets), 0, eb);
 
-    if (packets == NULL) {
+    if (obj->packets == NULL) {
+        /* allocate packets */
+        obj->packets = Memory_alloc(NULL,
+                sizeof(IOM_Packet) * (obj->numPackets), 0, eb);
+    }
+
+    if (obj->packets == NULL) {
         return (2);
     }
 
-    obj->packets = packets;
     obj->freeCount = obj->numPackets;
    
     /* 
      * Split the buffer into packets and add to freeList
      */
+    packets = obj->packets;
     for (i = 0; i < obj->numPackets; i++) {
         Queue_enqueue(freeList, (Queue_Elem *)&packets[i]);
     }
@@ -280,8 +286,10 @@ Void GIO_Instance_finalize(GIO_Object *obj, Int status)
 
         case 3:
             /* name not found */
-            Memory_free(NULL, obj->packets, 
-                sizeof(IOM_Packet) * obj->numPackets);
+            if (!obj->userPackets) {
+                Memory_free(NULL, obj->packets,
+                        sizeof(IOM_Packet) * obj->numPackets);
+            }
 
             /* OK to fall through */                 
         

@@ -105,7 +105,7 @@
     var ROMASMOBJS = [];
     var ROMPPS = [];
     var LIBASMOBJS = [];
-    var LIBOBJS = [];
+    var LIBCFGPPS = [];
     var LIBPPS = [];
 
     var TestName = xdc.module("xdc.cfg.Program").name.substring(0, Program.name.lastIndexOf('.'));
@@ -150,7 +150,7 @@ vpath %.c `XDCROOT`
 
 CCOPTS    = `BIOS.getCCOpts(TARGET.name)`
 
-LNKOPTS   =
+LNKOPTS   = -z
 
 XDC_ROOT  = `XDCROOT`
 
@@ -209,7 +209,9 @@ define ASSEMBLE
 	@$(ASM) $(BIOS_DEFS) $(XOPTS) $(INCS) $<
 endef
 %var LIB = "sysbios.a" + TARGET.suffix;
+%var CFG_OBJ = "rom_sysbios_config.obj";
 %var ROM_EXEC = "rtos_rom.x" + TARGET.suffix;
+%var SYMBOL_MAP_FILE = "symbolMapFile.mak";
 
 all: `ROM_EXEC` `LIB`
 
@@ -241,40 +243,12 @@ all: `ROM_EXEC` `LIB`
 
 %}
 
-%
-%/* 
-% * build all the xxx_Mod_config.c files used in BIOS.obj 
-% * and mangle the names of the ROM'd APIs in the non-ROM lib.
-% */
-%for each (var s in sourcesROM) {
-%   if (!(s.match(/_config.c/))) {
-%	sDiscard = true;
-%   }
-%   if (sDiscard == true) {
-%	sDiscard = false;
-%	continue;
-%   }
-%   var libPP = baseName(s) + "_lib.pp";
-%   LIBPPS.push("mangled_" + libPP);
-mangled_`libPP`: `s` romInternFuncs.txt
-	@echo pp`TARGET.suffix` `s` ...
-	@-$(call RM, `libPP`)
-	@$(CC) -ppl --output_file=`libPP` $(BIOS_DEFS) $(XOPTS) $(INCS) \
-	`srcName(s)`
-	@$(XDC_ROOT)/../xs -c `RomModule.libDir`../mangleCFile.xs `libPP` mangled_`libPP` romInternFuncs.txt "$(INTERN_FUNCS)"
-
-%}
-%
 %/* 
 % * build ALL C files for sysbios.lib
 % * and mangle the names of the ROM'd APIs in the non-ROM lib.
 % */
 %for each (var s in sourcesLIB) {
 %   if ((s.match(/_config.c/))) {
-%	sDiscard = true;
-%   }
-%   if (sDiscard == true) {
-%	sDiscard = false;
 %	continue;
 %   }
 %   var libPP = packageName(s) + "_" + baseName(s) + "_lib.pp";
@@ -284,7 +258,28 @@ mangled_`libPP`: `s` romInternFuncs.txt
 	@-$(call RM, `libPP`)
 	@$(CC) -ppl --output_file=`libPP` $(BIOS_DEFS) $(XOPTS) $(INCS) \
 	`srcName(s)`
-	@$(XDC_ROOT)/../xs -c `RomModule.libDir`../mangleCFile.xs `libPP` mangled_`libPP` romInternFuncs.txt "$(INTERN_FUNCS)"
+	@$(XDC_ROOT)/../xs -c `RomModule.libDir`../mangleCFile.xs `libPP` mangled_`libPP` romInternFuncs.txt "$(INTERN_FUNCS)" `SYMBOL_MAP_FILE`
+
+
+%}
+%
+%/* 
+% * build all the xxx_Mod_config.c files used in BIOS.obj 
+% * and mangle the names of the ROM'd APIs in the non-ROM lib.
+% */
+%for each (var s in sourcesROM) {
+%   if (!(s.match(/_config.c/))) {
+%	continue;
+%   }
+%   var libPP = baseName(s) + "_lib.pp";
+%   LIBCFGPPS.push("mangled_" + libPP);
+%   LIBPPS.push("mangled_" + libPP);
+mangled_`libPP`: `s` romInternFuncs.txt
+	@echo pp`TARGET.suffix` `s` ...
+	@-$(call RM, `libPP`)
+	@$(CC) -ppl --output_file=`libPP` $(BIOS_DEFS) $(XOPTS) $(INCS) \
+	`srcName(s)`
+	@$(XDC_ROOT)/../xs -c `RomModule.libDir`../mangleCFile.xs `libPP` mangled_`libPP` romInternFuncs.txt "$(INTERN_FUNCS)" `SYMBOL_MAP_FILE`
 
 %}
 %
@@ -331,7 +326,19 @@ mangled_BIOS_rom.obj: `ROMPPS.join(" ")`
 	@$(CC) --output_file=`TestName`.obj $(BIOS_DEFS) $(XOPTS) $(INCS) \
 	`RomModule.libDir`../`TestName`.c
 
+`CFG_OBJ` : `LIBCFGPPS.join(" ")`
+	@$(CC_LIB) $(BIOS_DEFS) $(XOPTS) $(INCS) --output_file=`CFG_OBJ` \
+%for (var i = 0; i < LIBCFGPPS.length-1; i++) {
+	`LIBCFGPPS[i]` \
+%}
+	`LIBCFGPPS[i]`
+	@echo Create the SYS/BIOS configuration library that contains the generated configuration APIs not included in the ROM.
+	@echo cp `CFG_OBJ`
+	@-$(call RM, "`RomModule.libDir``CFG_OBJ`")
+	@$(CP) `CFG_OBJ` "`RomModule.libDir``CFG_OBJ`"
+
 %var BIOS_lib_obj = LIBPPS[0].substring(0, LIBPPS[0].lastIndexOf('.')) + ".obj";
+`BIOS_lib_obj`: `CFG_OBJ`
 `BIOS_lib_obj`: `LIBPPS.join(" ")`
 	@$(CC_LIB) $(BIOS_DEFS) $(XOPTS) $(INCS) \
 %for each (var s in LIBPPS) {
@@ -345,8 +352,9 @@ mangled_BIOS_rom.obj: `ROMPPS.join(" ")`
 	@echo ar`TARGET.suffix` $^ ...
 	@$(AR) $@ $(filter-out romInternFuncs.txt,$^)
 	@echo cp `LIB`
-	@-$(call RM, "`RomModule.libDir``LIB`")
 	@$(CP) `LIB` "`RomModule.libDir``LIB`"
+	@echo cp `SYMBOL_MAP_FILE`
+	@$(CP) `SYMBOL_MAP_FILE` "`RomModule.libDir``SYMBOL_MAP_FILE`"
 
 `ROM_EXEC`: mangled_BIOS_rom.obj `ROMASMOBJS.join(" ")` `TestName`_p`TARGET.suffix`.obj `TestName`.obj
 	@echo ROM Build Stage 1: Partially link the component library OBJ files.

@@ -10,7 +10,7 @@
  *
  * */
 
-Pkg.otherFiles = ["linkcmd.xdt", "include", "linkcmd_iar.xdt"];
+Pkg.otherFiles = [];
 /*
  */
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,7 +49,6 @@ var device = null;
 function getAsmFiles(targetName)
 {
     switch(targetName) {
-        case "ti.targets.arm.elf.A8F":
         case "ti.targets.arm.elf.A8Fnv":
             return (["Hwi_asm.s470", "Hwi_asm_switch.s470"]);
             break;

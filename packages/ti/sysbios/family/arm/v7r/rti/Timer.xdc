@@ -47,6 +47,66 @@ import ti.sysbios.family.arm.v7r.vim.Hwi;
  *  ======== Timer ========
  *  Cortex-R5 RTI Timer Peripheral Manager.
  *
+ *  @a(Note)
+ *  If creating a timer and passing custom Hwi params that set the
+ *  Hwi type to FIQ, the 'interrupt' keyword must be added to the
+ *  timer function declaration and the timer function must also ack
+ *  the timer.
+ *
+ *  Here's an example showing how to create a timer and set the Hwi
+ *  type of the Timer ISR to FIQ:
+ *
+ *  @p(code)
+ *  *.cfg:
+ *  xdc.useModule('ti.sysbios.family.arm.v7r.rti.Timer');
+ *
+ *  *.c:
+ *  #include <xdc/std.h>
+ *  #include <xdc/runtime/Error.h>
+ *
+ *  #include <ti/sysbios/family/arm/v7r/rti/Timer.h>
+ *  #include <ti/sysbios/family/arm/v7r/vim/Hwi.h>
+ *  ...
+ *
+ *  Timer_Struct timer0;
+ *  Timer_Handle handle0;
+ *
+ *  interrupt Void myIsr()
+ *  {
+ *      // Timer needs to be stopped only if run mode is One shot.
+ *      // For periodic run mode, this function needs to only ack
+ *      // the timer interrupt.
+ *      Timer_stop(handle0);
+ *      Timer_ackInterrupt(handle0);
+ *      ...
+ *  }
+ *
+ *  Int main(Int argc, char* argv[])
+ *  {
+ *      Error_Block eb;
+ *      Hwi_Params hwiParams;
+ *      Timer_Params timerParams;
+ *
+ *      Error_init(&eb);
+ *
+ *      Hwi_Params_init(&hwiParams);
+ *      hwiParams.type = Hwi_Type_FIQ;
+ *
+ *      Timer_Params_init(&timerParams);
+ *      timerParams.period = 60000;
+ *      timerParams.runMode = Timer_RunMode_ONESHOT;
+ *      timerParams.periodType = Timer_PeriodType_MICROSECS;
+ *      timerParams.hwiParams = &hwiParams;
+ *      Timer_construct(&timer0, -1, (Timer_FuncPtr)&myIsr, &timerParams, &eb);
+ *
+ *      handle0 = Timer_handle(&timer0);
+ *      ...
+ *
+ *      BIOS_start();
+ *      return(0);
+ *  }
+ *  @p
+ *
  *  @p(html)
  *  <h3> Calling Context </h3>
  *  <table border="1" cellpadding="3">
@@ -116,8 +176,8 @@ module Timer inherits ti.sysbios.interfaces.ITimer
         UInt        id;
         String      startMode;
         String      runMode;
-        UInt        period;
-        String      periodType;
+        UInt        periodInCounts;
+        UInt        periodInMicroSecs;
         UInt        intNum;
         String      tickFxn[];
         UArg        arg;
@@ -151,7 +211,7 @@ module Timer inherits ti.sysbios.interfaces.ITimer
             [
                 'Basic',
                 {
-                    type: ViewInfo.INSTANCE,
+                    type: ViewInfo.MODULE_DATA,
                     viewInitFxn: 'viewInitBasic',
                     structName: 'BasicView'
                 }
@@ -343,12 +403,6 @@ instance:
     config Hwi.Params *hwiParams = null;
 
     /*!
-     *  ======== intNum ========
-     *  Hwi intNum to be used by Timer.
-     */
-    config Int intNum = -1;
-
-    /*!
      *  ======== prescale ========
      *  Prescale factor. Default is 1 (0 is not recommended).
      *
@@ -421,7 +475,6 @@ internal:   /* not for client use */
 
     struct Module_State {
         UInt            availMask;      /* available peripherals */
-        Handle          handles[NUM_TIMER_DEVICES];
-                                        /* array of handles based on id */
+        Handle          handles[];      /* array of handles based on id */
     }
 }

@@ -49,6 +49,14 @@ module Boot
         Fract_75 = 0x300        /*! Fractional multiplier is 0.75 */
     }
 
+    /*! Oscillator Clock Source Select Bit for OSCCLK */
+    metaonly enum OscClk {
+        OscClk_INTOSC2  = 0x0, /*! internal oscillator 2 (default on reset) */
+        OscClk_XTAL     = 0x1, /*! external oscillator */
+        OscClk_INTOSC1  = 0x2, /*! internal oscillator 1 */
+        OscClk_RESERVED = 0x3  /*! reserved (default to INTOSC1) */
+    }
+
     metaonly struct ModuleView {
         Bool configureClocks;
         UInt OSCCLK;
@@ -82,6 +90,13 @@ module Boot
     config Bool configureClocks = false;
 
     /*!
+     *  Oscillator Clock source select bit for OSCCLK
+     *
+     *  The default on reset is INTOSC2
+     */
+    metaonly config OscClk OSCCLKSRCSEL = OscClk_INTOSC2;
+
+    /*!
      *  Watchdog disable flag, default is false.
      *
      *  Set to true to disable the watchdog timer.
@@ -89,12 +104,12 @@ module Boot
     metaonly config Bool disableWatchdog = false;
 
     /*!
-     *  OSCCLK input frequency to PLL, in MHz. Default is 10 MHz.
+     *  OSCCLK input frequency to PLL, in MHz.
      *
      *  This is the frequency of the oscillator clock (OSCCLK) input to the
-     *  PLL.
+     *  PLL.  The default internal oscillator is 10 Mhz.
      */
-    metaonly config UInt OSCCLK = 20;
+    metaonly config UInt OSCCLK = 10;
 
     /*! System PLL Integer Multiplier (SPLLIMULT) value */
     metaonly config UInt SPLLIMULT = 1;

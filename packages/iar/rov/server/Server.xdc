@@ -39,8 +39,11 @@ metaonly module Server {
      *    - Locates and loads the ROV recap file.
      *    - Passes all of these to xdc.rov.Model.start so that ROV is ready
      *      to be polled.
+     *
+     *  The returned string is empty or undefined, if there is no error to
+     *  report.
      */
-    Void startModel(String executable);
+    String startModel(String executable);
 
     /*
      *  ======== retrieveData ========

@@ -154,11 +154,18 @@ static inline UInt ti_sysbios_knl_Intrinsics_maxbit(UInt bits)
 }
 
 #else
+#if defined(xdc_target__isaCompatible_v6M)
+extern UInt ti_sysbios_family_arm_v6m_IntrinsicsSupport_maxbit__E(UInt bits);
 
+#define ti_sysbios_knl_Intrinsics_maxbit(bits) ti_sysbios_family_arm_v6m_IntrinsicsSupport_maxbit__E(bits)
+
+#else
 /*
  *  ======== Intrinsics_maxbit ========
  */
 #define ti_sysbios_knl_Intrinsics_maxbit(bits) ti_sysbios_knl_Intrinsics_SupportProxy_maxbit(bits)
+
+#endif
 
 #endif
 

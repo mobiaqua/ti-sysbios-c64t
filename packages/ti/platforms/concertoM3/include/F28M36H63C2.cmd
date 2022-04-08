@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,11 @@ SECTIONS
 {
     /* Allocate program areas: */
     .text       : > FLASH
+#ifdef __TI_COMPILER_VERSION
+#if __TI_COMPILER_VERSION >= 15009000
+    .TI.ramfunc : {} > load=FLASH, run=C03SRAM | C415SRAM, table(BINIT)
+#endif
+#endif
     .cinit      : > FLASH
     .pinit      : > FLASH
     .binit      : > FLASH

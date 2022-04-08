@@ -12,7 +12,7 @@ MEMORY
      * flash, 40 bytes
      */
     FLASH_CCFG (RX) : ORIGIN = 0x0001ffa8, LENGTH = 0x00000058
-    SRAM (WX)       : ORIGIN = 0x20000000, LENGTH = 0x00004000
+    SRAM (RWX)      : ORIGIN = 0x20000000, LENGTH = 0x00004000
 }
 
 REGION_ALIAS("REGION_TEXT", FLASH);
@@ -39,14 +39,41 @@ SECTIONS {
         KEEP (*(.vtable))
     } > REGION_DATA
 
+    /* if a ROM-only symbol is present, then ROM is being used.
+     * Reserve memory for surgically placed module states.
+     */
+    _rom_data_start = 0x20000100;
+    _rom_data_size = DEFINED(ti_sysbios_rom_ROM_ti_sysbios_family_arm_cc26xx_Timer_getCount64__E) ? 0x104 : 0;
+
+    .rom_data_reserve (_rom_data_start): {
+        . += _rom_data_size;
+    } > REGION_DATA
+
     /* these hard-coded addrs are needed by the TI-RTOS SPICC26XXDMA driver
      * and must match appropriate offsets from UDMACC26XX_CONFIG_BASE defined
      * by ti/drivers/dma/UDMACC26XX.h
      */
+    UDMACC26XX_dmaRxControlTableEntry0_is_placed = 0;
     .dmaRxControlTableEntry0 0x20000430 : AT (0x20000430) {*(.dmaRxControlTableEntry0)} > REGION_DATA
+
+    UDMACC26XX_dmaTxControlTableEntry0_is_placed = 0;
     .dmaTxControlTableEntry0 0x20000440 : AT (0x20000440) {*(.dmaTxControlTableEntry0)} > REGION_DATA
+
+    UDMACC26XX_dmaRxControlTableEntry1_is_placed = 0;
     .dmaRxControlTableEntry1 0x20000500 : AT (0x20000500) {*(.dmaRxControlTableEntry1)} > REGION_DATA
+
+    UDMACC26XX_dmaTxControlTableEntry1_is_placed = 0;
     .dmaTxControlTableEntry1 0x20000510 : AT (0x20000510) {*(.dmaTxControlTableEntry1)} > REGION_DATA
+
+    /* if a ROM-only symbol is present, then ROM is being used.
+     * Reserve memory for surgically placed config constants.
+     */
+    _rom_rodata_start = 0x1000;
+    _rom_rodata_size = DEFINED(ti_sysbios_rom_ROM_ti_sysbios_family_arm_cc26xx_Timer_getCount64__E) ? 0x500 : 0;
+
+    .rom_rodata_reserve (_rom_rodata_start): {
+        . += _rom_rodata_size;
+    } > REGION_TEXT AT> REGION_TEXT
 
     .text : {
         CREATE_OBJECT_SYMBOLS
@@ -70,14 +97,14 @@ SECTIONS {
 
     .rodata : {
         *(.rodata)
-        *(.rodata*)
+        *(.rodata.*)
     } > REGION_TEXT AT> REGION_TEXT
 
     .data : ALIGN(4) {
         __data_load__ = LOADADDR (.data);
         __data_start__ = .;
         *(.data)
-        *(.data*)
+        *(.data.*)
         . = ALIGN (4);
         __data_end__ = .;
     } > REGION_DATA AT> REGION_TEXT
@@ -94,7 +121,7 @@ SECTIONS {
 
     .ccfg : {
         KEEP (*(.ccfg))
-    } > FLASH_CCFG
+    } > FLASH_CCFG AT> FLASH_CCFG
 
     .bss : {
         __bss_start__ = .;

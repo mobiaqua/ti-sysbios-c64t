@@ -95,9 +95,6 @@ Task.checkStackFlag = false; /* avoids pulling in Task_checkStacks() */
 
 /* don't check for interrupt stack overflow during Idle loop */
 var halHwi = xdc.useModule('ti.sysbios.hal.Hwi');
-if (halHwi.$written("checkStackFlag") && halHwi.checkStackFlag == true) {
-    F28004x.$logWarning("Hwi.checkStackFlag must be set to false for ROM applications.", halHwi, "checkStackFlag");
-}
 halHwi.checkStackFlag = false; /* avoids pulling in hal Hwi_checkStack() */
 
 xdc.loadCapsule("ti/sysbios/rom/c28/f28004x/F28004x_externs.xs");

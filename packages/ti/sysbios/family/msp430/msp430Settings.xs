@@ -171,6 +171,6 @@ for each (device in devices) {
         timestampDelegate : "ti.sysbios.family.msp430.TimestampProvider",
         taskSupportDelegate : "ti.sysbios.family.msp430.TaskSupport",
         intrinsicsSupportDelegate : "ti.sysbios.family.msp430.IntrinsicsSupport",
-        targets : [ "ti.targets.msp430.elf.MSP430X", "ti.targets.msp430.elf.MSP430X_small" ]
+        targets : [ "ti.targets.msp430.elf.MSP430X" ]
     }
 }

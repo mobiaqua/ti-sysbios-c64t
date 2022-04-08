@@ -1,5 +1,5 @@
 /* 
- *  Copyright (c) 2015 Texas Instruments and others.
+ *  Copyright (c) 2015 Texas Instruments Incorporated
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -20,8 +20,8 @@ metaonly interface IR5 inherits ti.targets.arm.elf.IArm {
     override config string platform   = "ti.platforms.tms570xx";
 
     override readonly config xdc.bld.ITarget2.Command lnk = {
-        cmd:  "armlnk",
-        opts: "--abi=eabi -mv7R5 --strict_compatibility=on"
+        cmd:  "armcl",
+        opts: "--abi=eabi -mv7R5 -z --strict_compatibility=on"
     };
 }
 /*

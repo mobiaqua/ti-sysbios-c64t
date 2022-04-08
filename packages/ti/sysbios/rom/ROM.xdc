@@ -104,12 +104,11 @@ package ti.sysbios.rom;
 metaonly module ROM
 {
     enum RomName {
-	NO_ROM,		/*! Default for NOT building against a ROM */
+        NO_ROM,         /*! Default for NOT building against a ROM */
         CC2650,         /*! Use for all CC26xx devices */
-	CC1350,         /*! Use for all CC13xx devices */
-	CC2650_FLASH,	/*! THIS OPTION IS NOT SUPPORTED! */
-	RF432S0XX,		/*! THIS OPTION IS NOT SUPPORTED! */
-	F28004x         /*! THIS OPTION IS NOT SUPPORTED! */
+        CC1350,         /*! Use for all CC13xx devices */
+        F28004x,        /*! Use for all F28004x class devices */
+        CC2650_FLASH    /*! THIS OPTION IS NOT SUPPORTED! */
     };
 
     /*!

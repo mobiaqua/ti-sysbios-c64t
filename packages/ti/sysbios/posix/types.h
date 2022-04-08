@@ -110,6 +110,7 @@ typedef unsigned long timer_t;
 #endif
 
 typedef uint32_t clockid_t;
+typedef unsigned long useconds_t;
 
 /*
  *************************************************************************

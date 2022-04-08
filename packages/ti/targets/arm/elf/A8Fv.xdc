@@ -10,6 +10,7 @@
  * 
  * */
 /*!
+ *  @_nodoc
  *  ======== A8Fv.xdc ========
  *  Cortex A8 little endian with vector floating point support 
  *  (VFPV3) (ELF)

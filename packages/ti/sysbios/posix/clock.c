@@ -36,7 +36,10 @@
 #include <xdc/std.h>
 
 #include <ti/sysbios/hal/Seconds.h>
+#include <ti/sysbios/knl/Clock.h>
+
 #include <ti/sysbios/posix/_time.h>
+#include <ti/sysbios/posix/_pthread_error.h>
 
 /*
  *  ======== clock_gettime ========
@@ -44,11 +47,23 @@
 int clock_gettime(clockid_t clockId, struct timespec *ts)
 {
     Seconds_Time t;
+    unsigned long secs;
+    UInt32 ticks;
 
-    Seconds_getTime(&t);
+    if (clockId == CLOCK_REALTIME) {
+        Seconds_getTime(&t);
 
-    ts->tv_sec = t.secs;
-    ts->tv_nsec = t.nsecs;
+        ts->tv_sec = t.secs;
+        ts->tv_nsec = t.nsecs;
+    }
+    else {
+        /* CLOCK_MONOTONIC */
+        ticks = Clock_getTicks();
+        secs = ((unsigned long)ticks * Clock_tickPeriod) / 1000000;
+        ts->tv_sec = secs;
+        ts->tv_nsec = ((unsigned long)ticks * Clock_tickPeriod -
+                secs * 1000000) * 1000;
+    }
 
     return (0);
 }
@@ -58,6 +73,10 @@ int clock_gettime(clockid_t clockId, struct timespec *ts)
  */
 int clock_settime(clockid_t clock_id, const struct timespec *ts)
 {
+    if (clock_id == CLOCK_MONOTONIC) {
+        return (EINVAL);
+    }
+
     Seconds_set(ts->tv_sec);
 
     return (0);

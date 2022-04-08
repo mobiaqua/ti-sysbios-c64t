@@ -101,7 +101,7 @@ Int Hwi_Module_startup (Int startupPhase)
     }
 #endif
 
-    /* set up FIQ stack pointer & switch to SYSTEM mode */
+    /* set up FIQ stack pointer */
     Hwi_init();
 
     Hwi_initIntController();
@@ -160,6 +160,18 @@ Int Hwi_Instance_init(Hwi_Object *hwi, Int intNum,
     Hwi_module->dispatchTable[intNum] = hwi;
 
     hwi->intNum = intNum;
+
+    switch (params->maskSetting) {
+        case Hwi_MaskingOption_LOWER:
+        case Hwi_MaskingOption_ALL:
+        case Hwi_MaskingOption_SELF:
+            break;
+        case Hwi_MaskingOption_NONE:
+        case Hwi_MaskingOption_BITMASK:
+        default:
+            Error_raise(eb, Hwi_E_unsupportedMaskingOption, 0, 0);
+            break;
+    }
 
     Hwi_reconfig(hwi, fxn, params);
 
@@ -370,7 +382,10 @@ Void Hwi_initIntController()
  */
 Void Hwi_startup()
 {
-    /* Enable FIQs. Once enabled, FIQs cannot be disabled again. */
+    /*
+     * Enable FIQs. Once enabled, the HW ignores all calls to disable the FIQs.
+     * Therefore, FIQs cannot be disabled again.
+     */
     _enable_FIQ();
 
     /* Enable IRQs */
@@ -533,10 +548,12 @@ Bool Hwi_getStackInfo(Hwi_StackInfo *stkInfo, Bool computeStackDepth)
  */
 Void Hwi_setType(UInt intNum, Hwi_Type type)
 {
-    UInt index, mask;
+    UInt index, key, mask;
 
     index = intNum / 32;
     mask = 1 << (intNum & 0x1f);
+
+    key = Hwi_disable();
 
     if (type == Hwi_Type_FIQ) {
         Hwi_vim.FIRQPR[index] |= mask;
@@ -544,6 +561,8 @@ Void Hwi_setType(UInt intNum, Hwi_Type type)
     else {
         Hwi_vim.FIRQPR[index] &= ~mask;
     }
+
+    Hwi_restore(key);
 }
 
 /*
@@ -602,9 +621,9 @@ Void Hwi_reconfig(Hwi_Object *hwi, Hwi_FuncPtr fxn, const Hwi_Params *params)
                 }
             }
             break;
-        default:
         case Hwi_MaskingOption_NONE:
         case Hwi_MaskingOption_BITMASK:
+        default:
             Error_raise(0, Hwi_E_unsupportedMaskingOption, 0, 0);
             break;
     }

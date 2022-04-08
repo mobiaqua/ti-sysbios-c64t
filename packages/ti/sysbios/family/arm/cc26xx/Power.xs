@@ -35,22 +35,6 @@
  */
 
 var Power = null;
-var Queue = null;
-var Clock = null;
-var Intrinsics = null;
-var Idle = null;
-var Hwi = null;
-var Build = null;
-
-/*
- * ======== getCFiles ========
- * return the array of C language files associated
- * with targetName (ie Program.build.target.$name)
- */
-function getCFiles(targetName)
-{
-    return (["Power.c", "Power_standbyPolicy.c", "Power_calibrateRCOSC.c" ]);
-}
 
 /*
  *  ======== module$meta$init ========
@@ -62,13 +46,7 @@ function module$meta$init()
         return;
     }
 
-    /* provide getCFiles() for Build.getCFiles() */
-    this.$private.getCFiles = getCFiles;
-
     Power = this;
-
-    /* set fxntab default */
-    Power.common$.fxntab = false;
 }
 
 /*
@@ -76,147 +54,5 @@ function module$meta$init()
  */
 function module$use()
 {
-    Queue = xdc.useModule("ti.sysbios.knl.Queue");
-    Clock = xdc.useModule("ti.sysbios.knl.Clock");
-    Intrinsics = xdc.useModule("ti.sysbios.knl.Intrinsics");
-    Hwi = xdc.useModule("ti.sysbios.family.arm.m3.Hwi");
-    Build = xdc.module("ti.sysbios.Build");
-
-    if (Power.idle == true) {
-        Idle = xdc.useModule('ti.sysbios.knl.Idle');
-
-        Idle.addFunc(Power.policyFunc);
-    }
-
-    if (Power.calibrateRCOSC == true) {
-        Hwi.create(44, Power.auxISR);
-    }
-
-    Power.resumeTicksSTANDBY = Power.resumeSTANDBY / Clock.tickPeriod;
-    Power.totalTicksSTANDBY = Power.totalSTANDBY / Clock.tickPeriod;
-}
-
-/*
- *  ======== module$static$init ========
- */
-function module$static$init(mod, params)
-{
-    /* init module state */
-    mod.constraintsMask = 0;
-    mod.state = Power.ACTIVE;
-    mod.xoscPending = false;
-    mod.calLF = false;
-    mod.hwiState = 0;
-    mod.nDeltaFreqCurr = 0;
-    mod.nCtrimCurr = 0;
-    mod.nCtrimFractCurr = 0;
-    mod.nCtrimNew = 0;
-    mod.nCtrimFractNew = 0;
-    mod.busyCal = false;
-    mod.calStep = 1;
-    mod.firstLF = true;
-    mod.constraintCounts =
-        '&ti_sysbios_family_arm_cc26xx_Power_constraintCounts';
-    mod.resourceCounts =
-        '&ti_sysbios_family_arm_cc26xx_Power_refCount';
-    mod.resourceDB =
-        '&ti_sysbios_family_arm_cc26xx_Power_db';
-    mod.resourceHandlers =
-        '&ti_sysbios_family_arm_cc26xx_Power_resourceHandlers';
-
-    /* construct notification queues */
-    Queue.construct(mod.notifyQ);
-
-    /* construct the Clock object for scheduling of wakeups */
-    /* initiated and started by the power policy */
-    var clockParams = new Clock.Params();
-    clockParams.period = 0;
-    clockParams.startFlag = false;
-    clockParams.arg = 0;
-    Clock.construct(mod.clockObj, Power.clockFunc, 0, clockParams);
-
-    /* construct the Clock object for XOSC_HF switching */
-    /* initiated and started by Power module when activating XOSC_HF */
-    clockParams.period = 0;
-    clockParams.startFlag = false;
-    clockParams.arg = 0;
-    Clock.construct(mod.xoscClockObj, Power.XOSC_HF_clockFunc, 0, clockParams);
-
-    /* if RCOSC calibration enabled construct a Clock object for delays */
-    if (Power.calibrateRCOSC == true) {
-        /* set timeout to '1' Clock tick period for the minimal delay */
-        /* object will explicitly started by Power module when appropriate */
-        clockParams.period = 0;
-        clockParams.startFlag = false;
-        clockParams.arg = 0;
-        mod.calClockHandle = Clock.create(Power.RCOSC_clockFunc,
-            1, clockParams);
-    }
-    else {
-        mod.calClockHandle = null;
-    }
-
-    /* construct the Clock object for disabling LF clock quailifiers */
-    /* one shot, no auto start, timeout set at runtime once detect source */
-    clockParams.period = 0;
-    clockParams.startFlag = false;
-    clockParams.arg = 0;
-    Clock.construct(mod.lfClockObj, Power.LF_clockFunc, 1, clockParams);
-
-    /* generate defines for some simple configs (for more efficient runtime) */
-    Build.ccArgs.$add(
-        "-Dti_sysbios_family_arm_cc26xx_Power_calibrateRCOSC__D=" +
-            (Power.calibrateRCOSC ? "TRUE" : "FALSE"));
-    Build.ccArgs.$add(
-        "-Dti_sysbios_family_arm_cc26xx_Power_calibrateRCOSC_LF__D=" +
-            (Power.calibrateRCOSC_LF ? "TRUE" : "FALSE"));
-    Build.ccArgs.$add(
-        "-Dti_sysbios_family_arm_cc26xx_Power_calibrateRCOSC_HF__D=" +
-            (Power.calibrateRCOSC_HF ? "TRUE" : "FALSE"));
-    Build.ccArgs.$add(
-        "-Dti_sysbios_family_arm_cc26xx_Power_totalTicksSTANDBY__D=" +
-            Power.totalTicksSTANDBY);
-    Build.ccArgs.$add(
-        "-Dti_sysbios_family_arm_cc26xx_Power_wakeDelaySTANDBY__D=" +
-            Power.wakeDelaySTANDBY);
-    Build.ccArgs.$add(
-        "-Dti_sysbios_family_arm_cc26xx_Power_initialWaitRCOSC_LF__D=" +
-            Power.initialWaitRCOSC_LF);
-    Build.ccArgs.$add(
-        "-Dti_sysbios_family_arm_cc26xx_Power_retryWaitRCOSC_LF__D=" +
-            Power.retryWaitRCOSC_LF);
-    Build.ccArgs.$add(
-        "-Dti_sysbios_family_arm_cc26xx_Power_initialWaitXOSC_HF__D=" +
-            Power.initialWaitXOSC_HF);
-    Build.ccArgs.$add(
-        "-Dti_sysbios_family_arm_cc26xx_Power_retryWaitXOSC_HF__D=" +
-            Power.retryWaitXOSC_HF);
-    Build.ccArgs.$add(
-        "-Dti_sysbios_family_arm_cc26xx_Power_initialWaitXOSC_LF__D=" +
-            Power.initialWaitXOSC_LF);
-    Build.ccArgs.$add(
-        "-Dti_sysbios_family_arm_cc26xx_Power_retryWaitXOSC_LF__D=" +
-            Power.retryWaitXOSC_LF);
-}
-
-/*
- *  ======== module$validate ========
- */
-function module$validate()
-{
-    /* warn if RCOSC calibration is enabled and Clock.tickPeriod is not 10 us */
-    if (Power.calibrateRCOSC && (Clock.tickPeriod != 10)) {
-        Power.$logWarning("RCOSC calibration uses the Clock module for generating delays.  Clock.tickPeriod is not configured with the expected value of 10 microseconds.  RCOSC calibration latency will therefore increase accordingly.", Power, "calibrateRCOSC");
-    }
-}
-
-/*
- *  ======== viewInitModule ========
- *  Initialize the Power 'Module' view.
- */
-function viewInitModule(view, obj)
-{
-    var Program = xdc.useModule('xdc.rov.Program');
-    var modRaw = Program.scanRawView("ti.sysbios.family.arm.cc26xx.Power");
-    view.ConstraintsMask = "0x" + modRaw.modState.constraintsMask.toString(16);
+    Power.$logError("The Power module as been moved to 'ti/drivers/Power'. Configuration is now done through 'Board.c'.", Power);
 }

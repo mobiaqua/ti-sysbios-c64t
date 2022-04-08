@@ -47,6 +47,7 @@ extern Fxn Boot_limpAbort();
 #define NOPS             8
 
 /* clock control registers */
+#define CLKSRCCTL1_REG   0x05D208
 #define SYSPLLCTL1_REG   0x05D20E
 #define SYSPLLMULT_REG   0x05D214
 #define SYSPLLSTS_REG    0x05D216
@@ -54,6 +55,7 @@ extern Fxn Boot_limpAbort();
 #define MCDCR_REG        0x05D22E
 
 /* bit masks */
+#define CLKSRCCTL1_OSCCLKSRCSEL_M    0x3
 #define SYSPLLCTL1_PLLEN_M           0x1
 #define SYSPLLCTL1_PLLCLKEN_M        0x2
 #define SYSPLLMULT_IMULT_M           0x7F
@@ -153,7 +155,8 @@ Void Boot_bootCPU2(Void)
  *  ======== Boot_configurePllDivs ========
  *
  */
-Void Boot_configurePllDivs(UInt16 pllIMULT, UInt16 pllFMULT, UInt16 sysClkDiv)
+Void Boot_configurePllDivs(UInt16 pllIMULT, UInt16 pllFMULT, UInt16 sysClkDiv,
+    UInt16 oscClkSrcVal)
 {
     /* check if running in Limp mode; if yes, call abort function */
     if (REG(MCDCR_REG) & MCDCR_MCLKSTS_M) {
@@ -161,6 +164,10 @@ Void Boot_configurePllDivs(UInt16 pllIMULT, UInt16 pllFMULT, UInt16 sysClkDiv)
     }
 
     EALLOW;
+
+    /* set the OSCCLK source select bit */
+    REG(CLKSRCCTL1_REG) = (REG(CLKSRCCTL1_REG) & ~CLKSRCCTL1_OSCCLKSRCSEL_M) |
+                           oscClkSrcVal;
 
     /* disable and bypass the PLL */
     REG(SYSPLLCTL1_REG) &= ~(SYSPLLCTL1_PLLEN_M | SYSPLLCTL1_PLLCLKEN_M);

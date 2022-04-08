@@ -160,13 +160,6 @@ var targetOptions = {
                     " --warn_sections --display_error_number --diag_wrap=off" +
                     " --rom_model",
                 devices: {
-                    "STELLARIS": {
-                        deviceId: ".*LM3.*",
-                        platform: "ti.platforms.stellaris:$DeviceId$",
-                        linkerCommandFile: "ti/platforms/stellaris/include/" +
-                            "$DeviceId$.cmd",
-                        productGroup: "",
-                    },
                     /* exclude CC26XX because it needs driverlib ...
                     "CC26XX": {
                         cfgPrefix: "cc26xx/",
@@ -218,7 +211,7 @@ var targetOptions = {
                     " --rom_model",
                 devices: {
                     "TIVA": {
-                        deviceId: ".*(LM4|TM4C|TM4E|P401R).*",
+                        deviceId: ".*(TM4C|TM4E|P401R).*",
                         platform: "ti.platforms.tiva:$DeviceId$",
                         linkerCommandFile: "ti/platforms/tiva/include/" +
                             "$DeviceId$.cmd",
@@ -412,7 +405,6 @@ var targetOptions = {
                 }
             },
             "M3": {
-                deviceId: ".*LM3.*",
                 cfgPrefix: "cortexm/",
                 target: "gnu.targets.arm.M3",
                 compilerBuildOptions:
@@ -420,28 +412,12 @@ var targetOptions = {
                     " -mfloat-abi=soft -ffunction-sections -fdata-sections" +
                     " -g -gstrict-dwarf -Wall",
                 linkerBuildOptions:
-                    " -march=armv7e-m -mthumb -nostartfiles -static" +
+                    " -march=armv7-m -mthumb -nostartfiles -static" +
                     " -Wl,--gc-sections -L${xdc_find:gnu/targets/arm/libs" +
-                    "/install-native/arm-none-eabi/lib/armv7e-m:${ProjName}}" +
+                    "/install-native/arm-none-eabi/lib/armv7-m:${ProjName}}" +
                     " -lgcc -lc -lm -lnosys",
                 productGroup: "",
                 devices: {
-                    "STELLARIS": {
-                        platform: "ti.platforms.tiva:$DeviceId$",
-                        linkerCommandFile: "ti/platforms/tiva/include_gnu/" +
-                            "$DeviceId$.lds",
-                    },
-                    "SEMIHOST": {
-                        cfgPrefix: "cortexm_semihost/",
-                        platform: "ti.platforms.tiva:$DeviceId$",
-                        linkerCommandFile: "ti/platforms/tiva/include_gnu/" +
-                            "$DeviceId$.lds",
-                        linkerBuildOptions:
-                            " -mthumb -march=armv7e-m -nostartfiles -static" +
-                            " -Wl,--gc-sections -L${xdc_find:gnu/targets/arm" +
-                            "/libs/install-native/arm-none-eabi/lib" +
-                            "/armv7-m:${ProjName}} -lgcc -lc -lm -lrdimon",
-                    },
                     /* exclude CC26XX because it needs driverlib ...
                     "CC26XX": {
                         cfgPrefix: "cc26xx/",
@@ -515,14 +491,14 @@ var targetOptions = {
                 productGroup: "TivaC",
                 devices: {
                     "TIVA": {
-                        deviceId: ".*(LM4|TM4C|TM4E|P401R).*",
+                        deviceId: ".*(TM4C|TM4E|P401R).*",
                         platform: "ti.platforms.tiva:$DeviceId$",
                         linkerCommandFile: "ti/platforms/tiva/include_gnu/" +
                             "$DeviceId$.lds",
                     },
                     "SEMIHOST": {
                         cfgPrefix: "cortexm_semihost/",
-                        deviceId: ".*(LM4|TM4C|TM4E|P401R).*",
+                        deviceId: ".*(TM4C|TM4E|P401R).*",
                         platform: "ti.platforms.tiva:$DeviceId$",
                         linkerCommandFile: "ti/platforms/tiva/include_gnu/" +
                             "$DeviceId$.lds",

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,13 +68,15 @@ function getAsmFiles(targetName)
 
 if (xdc.om.$name == "cfg") {
     var deviceTable = {
-        "TM0S.*": {
+        "RF432S0.*": {
             numInterrupts : 16 + 32,
             numPriorities : 4,
             resetVectorAddress : 0,
             vectorTableAddress : 0,
         },
     }
+
+    deviceTable["TM0S.*"]        = deviceTable["RF432S0.*"];
 }
 
 /*

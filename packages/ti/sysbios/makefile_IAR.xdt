@@ -104,8 +104,8 @@ AR = `CMDPREFIX` `CGEN`/bin/`TARGET.ar.cmd` `TARGET.ar.opts`
 %if (BIOS.buildingAppLib == false) {
 %    Build.$private.libDir = Build.$private.libDir.replace(/\//g,'\\');
 %}
-DEL = cmd.exe /q /c del /q /f
-CP = cmd.exe /q /c copy /Y
+DEL = `XDCROOT`../bin/rm -f
+CP = `XDCROOT`../bin/cp -f
 %}
 %else {
 DEL = rm -f
@@ -148,6 +148,10 @@ BIOS.o: `Build.getCFiles(TARGET.$name)` makefile
 	$(XDC_ROOT)`s` \
 %    } else if (s.substring(0,2) == "./") {
 	`s` \
+%    } else if (s.substring(0,1) == "/") { /* full unix path provided */
+	`s` \
+%    } else if (s.match(":/") != null) { /* full windows path provided */
+	`s` \
 %    } else {
 	$(BIOS_ROOT)`s` \
 %    }
@@ -172,7 +176,6 @@ clean:
 %else {
 	@$(DEL) ../makefile.libs
 %}
-	@-$(call RM, `LIB`)
 %if (BIOS.buildingAppLib == false) {
 	@-$(call RM, "`Build.$private.libDir``LIB`")
 %}

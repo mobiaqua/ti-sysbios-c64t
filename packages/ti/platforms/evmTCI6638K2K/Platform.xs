@@ -12,7 +12,6 @@
 
 /*
  *  ======== Platform.xs ========
- *
  */
 
 /*
@@ -25,7 +24,17 @@
 function getCpuDataSheet(cpuId)
 {
     var Utils = xdc.useModule('xdc.platform.Utils');
-    return (Utils.getCpuDataSheet(this.$module.CPU));
+
+    if (cpuId == "0") {
+        return (Utils.getCpuDataSheet(this.$module.CPU));
+    }
+    else if (cpuId == "1") {
+        return (Utils.getCpuDataSheet(this.$module.GPP));
+    }
+    else {
+        this.$module.$logError("The platform " + this.$module.$name +
+            " does not contain cpu with cpuId: " + cpuId, this.$module, null);
+    }
 }
 
 /*
@@ -50,7 +59,10 @@ function getExeContext(prog)
     var ExeContext = xdc.useModule('xdc.platform.ExeContext');
 
     /* create a default ExeContext execution context */
-    var cpu = ExeContext.create(this.$module.CPU, this.$module.BOARD);
+    var cpu;
+    var core = this.$private.core;
+
+    cpu = ExeContext.create(this.$module[core], this.$module.BOARD);
 
     /* Set the initial memory map from the cpu datasheet. Check if the user
      * tried to set cpuArgs, and if it's the case print a deprecation
@@ -76,6 +88,39 @@ function getExeContext(prog)
     if (overlap != null) {
         this.$module.$logError("Memory objects " + overlap + " overlap", this,
             overlap);
+    }
+
+    if (this.codeMemory == undefined) {
+        switch(core) {
+            case "CPU":
+                this.codeMemory = "L2SRAM";
+                break;
+            case "GPP":
+                this.codeMemory = "DDR3";
+                break;
+        }
+    }
+
+    if (this.dataMemory == undefined) {
+        switch(core) {
+            case "CPU":
+                this.dataMemory = "L2SRAM";
+                break;
+            case "GPP":
+                this.dataMemory = "DDR3";
+                break;
+        }
+    }
+
+    if (this.stackMemory == undefined) {
+        switch(core) {
+            case "CPU":
+                this.stackMemory = "L2SRAM";
+                break;
+            case "GPP":
+                this.stackMemory = "DDR3";
+                break;
+        }
     }
 
     Utils.checkDefaults(this, cpu.memoryMap);
@@ -111,7 +156,14 @@ function getLinkTemplate(prog)
      */
     var tname = prog.build.target.$name;
     var tpkg = tname.substring(0, tname.lastIndexOf('.'));
-    var templateName = tpkg.replace(/\./g, "/") + "/linkcmd.xdt"; 
+    var tmplName = "/linkcmd.xdt";
+
+    /* Use bare metal linker command file if appropriate */
+    if (Program.build.target.$name.match(/gnu.targets.arm.A/)) {
+        tmplName = "/linkcmd_bm_v7a.xdt";
+    }
+
+    var templateName = tpkg.replace(/\./g, "/") + tmplName;
 
     if (xdc.findFile(templateName) != null) {
         return (templateName);
@@ -191,6 +243,33 @@ function instance$meta$init(name, args)
             this.stackMemory = args.stackMemory;
         }
     }
+
+    var thisMod = this.$module;
+    var modArgs = {};
+
+    if (name in thisMod) {
+        modArgs = thisMod[name];
+    }
+
+    var dspChain = ["62", "64", "64P", "674", "66"];
+    var gppChain = ["v7A15"];
+
+    for (var i = 0; i < dspChain.length; i++) {
+        if (dspChain[i] == Program.build.target.isa) {
+            modArgs.core = "CPU";
+            xdc.loadPackage(this.$module.CPU.catalogName);
+        }
+    }
+
+    for (var i = 0; i < gppChain.length; i++) {
+        if (gppChain[i] == Program.build.target.isa) {
+            modArgs.core = "GPP";
+            xdc.loadPackage(this.$module.GPP.catalogName);
+        }
+    }
+
+    /* Save 'core' to avoid computing it again */
+    this.$private.core = modArgs.core;
 };
 /*
  */

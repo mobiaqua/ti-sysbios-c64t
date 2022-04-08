@@ -66,6 +66,7 @@
 #define TIMER_IRQSTATUS_MAT_IT_FLAG     0x1
 #define TIMER_TIOCP_CFG_SOFTRESET_FLAG  0x1
 #define TIMER_TSICR_POSTED              0x4
+#define TIMER_TSICR_READMODE            0x8
 
 typedef volatile struct TimerRegs {
     UInt tidr;
@@ -129,7 +130,8 @@ Void Timer_initObj(Timer_Object *obj, Timer_FuncPtr tickFxn,
                 (params->tclr.gpocfg << 14);
     
     obj->tsicr = (params->tsicr.sft << 1) |
-                 (params->tsicr.posted << 2);
+                 (params->tsicr.posted << 2) |
+                 (params->tsicr.readmode << 3);
 
     obj->runMode = params->runMode;
     obj->startMode = params->startMode;
@@ -221,6 +223,20 @@ Int Timer_deviceConfig(Timer_Object *obj, Error_Block *eb)
     else {
         if ((tsicr & TIMER_TSICR_POSTED) != 0) {
             timer->tsicr = (tsicr & ~TIMER_TSICR_POSTED);
+        }
+    }
+
+    /* xfer 'readmode' setting if not current */
+    tsicr = timer->tsicr;
+
+    if (obj->tsicr & TIMER_TSICR_READMODE) {
+        if ((tsicr & TIMER_TSICR_READMODE) == 0) {
+            timer->tsicr = (tsicr | TIMER_TSICR_READMODE);
+        }
+    }
+    else {
+        if ((tsicr & TIMER_TSICR_READMODE) != 0) {
+            timer->tsicr = (tsicr & ~TIMER_TSICR_READMODE);
         }
     }
 

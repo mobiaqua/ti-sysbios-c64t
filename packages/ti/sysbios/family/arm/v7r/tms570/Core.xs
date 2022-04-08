@@ -39,7 +39,7 @@ var Boot = null;
 var Core = null;
 var Build = null;
 var halCore = null;
-var Startup = null;
+var Reset = null;
 
 /*
  * ======== getAsmFiles ========
@@ -49,6 +49,7 @@ var Startup = null;
 function getAsmFiles(targetName)
 {
     switch(targetName) {
+        case "ti.targets.arm.elf.R4F":
         case "ti.targets.arm.elf.R5F":
             return (["Core_asm.sv7R"]);
             break;
@@ -63,10 +64,15 @@ if (xdc.om.$name == "cfg" || typeof(genCdoc) != "undefined") {
     var deviceTable = {
         "RM57D8xx": {
             numCores  : 2
+        },
+        "RM57L8xx": {
+            numCores  : 1
         }
     };
 
     deviceTable["RM57D8[a-zA-Z0-9]+"] = deviceTable["RM57D8xx"];
+    deviceTable["RM57L8[a-zA-Z0-9]+"] = deviceTable["RM57L8xx"];
+    deviceTable["RM48L.*"] = deviceTable["RM57L8xx"];
 }
 
 /*
@@ -136,7 +142,7 @@ function module$meta$init()
  */
 function module$use()
 {
-    Startup = xdc.useModule('xdc.runtime.Startup');
+    Reset = xdc.useModule('xdc.runtime.Reset');
 
     Core.common$.fxntab = false;
 
@@ -146,10 +152,12 @@ function module$use()
     }
 
     Hwi = xdc.useModule('ti.sysbios.family.arm.v7r.vim.Hwi');
-    if (!Hwi.$written("resetFunc")) {
+    if (!Hwi.$written("resetFunc") &&
+       ((Core.numCores != 1) || (Core.resetFunc != null))) {
         Hwi.resetFunc = '&ti_sysbios_family_arm_v7r_tms570_Core_reset';
+        Core.overrideHwiResetFunc = true;
     }
-    else {
+    else if (Hwi.$written("resetFunc")) {
         /* Warn the user if the reset function is overridden */
         Core.$logWarning("Reset function has been changed in the cfg script" +
             " and SYS/BIOS's reset function has been overriden.", this,
@@ -159,7 +167,7 @@ function module$use()
     if ((Core.numCores == 1) && (Core.id == 0)) {
         return;
     }
-    else {
-        Startup.lastFxns.$add(Core.syncStartup);
+    else if (Core.id == 0) {
+        Reset.fxns[Reset.fxns.length++] = Core.startCore1;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,13 @@
 
 #ifdef xdc_target__isa_64P
 #define _mfence()
+#else
+/* This is for mfence trace workaround - see SDOCM00118415 */
+#define _mfence() {     \
+    asm("    mfence \n" \
+        "    nop \n"    \
+        "    mark 0");  \
+}
 #endif
 
 #define L2CFG    (volatile UInt32 *)0x01840000

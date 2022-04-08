@@ -97,7 +97,8 @@ function module$meta$init()
         }
     }
     else if (Program.cpu.deviceName.match(/F2807/) ||
-             Program.cpu.deviceName.match(/F2837/)) {
+             Program.cpu.deviceName.match(/F2837/) ||
+             Program.cpu.deviceName.match(/F28004/)) {
         var Boot = xdc.module('ti.catalog.c2800.initF2837x.Boot');
 
         if ('registerFreqListener' in Boot) {
@@ -116,7 +117,7 @@ function module$meta$init()
         }
     }
     /* register frequency listener for MSP432 */
-    else if (Program.cpu.deviceName.match(/432/)) {
+    else if (Program.cpu.deviceName.match(/MSP432/)) {
         var Boot = xdc.module('ti.sysbios.family.arm.msp432.init.Boot');
         if ('registerFreqListener' in Boot) {
             Boot.registerFreqListener(this);
@@ -369,35 +370,13 @@ function module$use()
         }
     }
 
-    /*
-     * If HeapStd is not in use, then BIOS will override malloc(), free(), etc.
-     * so there is no need for Program.heap.
-     */
-    if (xdc.module("xdc.runtime.HeapStd").$used == false) {
-        Program.heap = 0;
-    }
+    /* Set Program.heap accordingly */
+    MemAlloc.configureProgramHeap();
 
     /* Hijack Error.raiseHook and insert ours in before it */
     var Error = xdc.module('xdc.runtime.Error');
     BIOS.installedErrorHook = Error.raiseHook;
     Error.raiseHook = BIOS.errorRaiseHook;
-
-    /* add default xdc.runtime.Timestamp.SupportProxy binding */
-    Timestamp = xdc.module('xdc.runtime.Timestamp');
-
-    if (!Timestamp.$written("SupportProxy")) {
-        var Settings = xdc.module("ti.sysbios.family.Settings");
-        /* if Timestamp is used, make sure the delegate is also used */
-        if (Timestamp.$used == true) {
-	    /* make sure the delegate gets used as well */
-            Timestamp.SupportProxy = 
-                xdc.useModule(Settings.getDefaultTimestampDelegate());
-        }
-        else {
-            Timestamp.SupportProxy = 
-                xdc.module(Settings.getDefaultTimestampDelegate());
-        }
-    }
 
     if (xdc.module('ti.sysbios.family.Settings').bootModule == 
 	    "ti.sysbios.family.arm.cc26xx.Boot") {
@@ -990,7 +969,7 @@ function _setLibType(field, val)
 
 /*
  *  ======== _setMemoryPolicy ========
- *  Set The "real-time" setter setLibType function
+ *  The "real-time" memoryPolicy setter function
  *
  *  This function is called whenever runtimeCreatesEnabled changes.
  */

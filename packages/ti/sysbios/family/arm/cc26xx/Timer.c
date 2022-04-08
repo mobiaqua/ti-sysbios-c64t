@@ -240,7 +240,7 @@ Void Timer_start(Timer_Object *obj)
     /* reset timer */
     AONRTCReset();
     AONRTCEventClear(AON_RTC_CH0);
-    IntPendClear(INT_AON_RTC);
+    IntPendClear(INT_AON_RTC_COMB);
 
     /* 
      * set the compare register to the counter start value plus one period.
@@ -517,7 +517,7 @@ Void Timer_initDevice(Timer_Object *obj)
     HWREG(AON_RTC_BASE + AON_RTC_O_SYNC);
 
     AONRTCEventClear(AON_RTC_CH0);
-    IntPendClear(INT_AON_RTC);
+    IntPendClear(INT_AON_RTC_COMB);
 
     HWREG(AON_RTC_BASE + AON_RTC_O_SYNC);
 

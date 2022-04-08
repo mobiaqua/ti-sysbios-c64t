@@ -198,6 +198,96 @@ static inline Void ti_sysbios_hal_Hwi_restore(UInt key)
 #endif /* ti_sysbios_Build_useHwiMacros */
 
 #else
+
+#if defined(xdc_target__isaCompatible_v6M)
+
+#ifndef ti_sysbios_Build_useHwiMacros
+
+/* Use function call implementations */
+
+/*
+ *  ======== Hwi_disable ========
+ */
+#define ti_sysbios_hal_Hwi_disable() ti_sysbios_family_arm_v6m_Hwi_disableFxn()
+
+/*
+ *  ======== Hwi_enable ========
+ */
+#define ti_sysbios_hal_family_arm_v6m_Hwi_enable() ti_sysbios_family_arm_v6m_Hwi_enableFxn()
+
+/*
+ *  ======== Hwi_restore ========
+ */
+#define ti_sysbios_hal_family_arm_v6m_Hwi_restore(key) ti_sysbios_family_arm_v6m_Hwi_restoreFxn(key)
+
+#else /* ti_sysbios_Build_useHwiMacros */
+
+/* Use macro/inline implementations if possible */
+
+#if defined(__ti__)
+
+/*
+ *  ======== Hwi_disable ========
+ */
+#define ti_sysbios_hal_Hwi_disable() __set_PRIMASK(1)
+
+/*
+ *  ======== Hwi_enable ========
+ */
+#define ti_sysbios_hal_Hwi_enable() __set_PRIMASK(0)
+
+/*
+ *  ======== Hwi_restore ========
+ */
+#define ti_sysbios_hal_Hwi_restore(key) __set_PRIMASK(key)
+
+#else /* defined(__ti__) */
+
+/*
+ *  ======== Hwi_disable ========
+ */
+static inline UInt ti_sysbios_hal_Hwi_disable()
+{
+    UInt key;
+    asm volatile (
+            "mrs %0,primask\n\t"
+            "cpsid i"
+            : "=&r" (key)
+            );
+    return key;
+}
+
+/*
+ *  ======== Hwi_enable ========
+ */
+static inline UInt ti_sysbios_hal_Hwi_enable()
+{
+    UInt key;
+    asm volatile (
+            "mrs %0, primask\n\t"
+            "cpsie i"
+            : "=r" (key)
+            );
+    return key;
+}
+
+/*
+ *  ======== Hwi_restore ========
+ */
+static inline Void ti_sysbios_hal_Hwi_restore(UInt key)
+{
+    asm volatile (
+            "msr primask, %0"
+            :: "r" (key)
+            );
+}
+
+#endif /* defined(__ti__) */
+
+#endif /* ti_sysbios_Build_useHwiMacros */
+
+#else
+
 #if defined(xdc_target__isaCompatible_430) \
     || defined(xdc_target__isaCompatible_430X)
 
@@ -492,6 +582,8 @@ static inline Void ti_sysbios_hal_Hwi_restore(UInt key)
  *  ======== Hwi_restore ========
  */
 #define ti_sysbios_hal_Hwi_restore(key) ti_sysbios_hal_Hwi_HwiProxy_restore(key)
+
+#endif
 
 #endif
 

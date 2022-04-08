@@ -616,7 +616,7 @@ function module$static$init(mod, params)
     /* Initialize the NVIC early */
     if ((Hwi.resetVectorAddress != 0) && (Build.buildROMApp == true)) {
         /* Fix for SDOCM00114681: broken Hwi_initNVIC() function. */
-    var ROM = xdc.module('ti.sysbios.rom.ROM');
+        var ROM = xdc.module('ti.sysbios.rom.ROM');
         switch (ROM.romName) {
             case ROM.CC1350:
             case ROM.CC2650:
@@ -736,11 +736,13 @@ function instance$static$init(obj, intNum, fxn, params)
         Hwi.interrupt[intNum].hwi = this;
     }
 
-    if ((params.maskSetting != Hwi.MaskingOption_LOWER)
-        && (params.maskSetting != Hwi.MaskingOption_SELF)) {
-        Hwi.$logWarning("M3 BIOS only supports Hwi.MaskingOption_LOWER",
-                        this);
-    }
+    /* Quietly allow any maskSetting to go through */
+//    if (params.maskSetting != Hwi.MaskingOption_LOWER) {
+//        Hwi.$logWarning("For all Cortex M devices, BIOS only supports "
+//                         + "Hwi.MaskingOption_LOWER. All other maskSettings "
+//                         + "are ignored.",
+//                        this);
+//    }
 
     obj.hookEnv.length = Hwi.hooks.length;
 }

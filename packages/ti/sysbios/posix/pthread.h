@@ -132,7 +132,7 @@ extern int pthread_create(pthread_t *newthread, const pthread_attr_t *attr,
             void *(*startroutine)(void *), void *arg);
 extern int pthread_detach(pthread_t pthread);
 
-static int inline pthread_equal(pthread_t pt1, pthread_t pt2)
+static inline int pthread_equal(pthread_t pt1, pthread_t pt2)
 {
     return (pt1 == pt2);
 }

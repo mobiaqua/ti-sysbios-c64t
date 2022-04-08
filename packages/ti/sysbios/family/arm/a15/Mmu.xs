@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -81,6 +81,18 @@ if (xdc.om.$name == "cfg") {
             prcmBaseAddr   : 0x4A009000,
             wugenBaseAddr  : 0x48281000,
         },
+        "C66AK2E05": {
+            intcBaseAddr   : 0x02560000,
+            timerBaseAddr  : 0x02200000,
+            cpIntcBaseAddr : 0x02608000,
+            bootRamBaseAddr: 0x0C1AD000
+        },
+        "TCI6630K2L": {
+            intcBaseAddr   : 0x02560000,
+            timerBaseAddr  : 0x02200000,
+            cpIntcBaseAddr : 0x02608000,
+            bootRamBaseAddr: 0x0C1D2500
+        },
         "TCI6636K2H": {
             intcBaseAddr   : 0x02560000,
             timerBaseAddr  : 0x02200000,
@@ -95,6 +107,7 @@ if (xdc.om.$name == "cfg") {
     };
 
     deviceTable["DRA7XX"] = deviceTable["Vayu"];
+    deviceTable["TCI6638K2K"] = deviceTable["TCI6636K2H"];
 }
     
 /*

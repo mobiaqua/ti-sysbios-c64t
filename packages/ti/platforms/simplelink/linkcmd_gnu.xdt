@@ -57,15 +57,8 @@ INPUT(
 
 %if (prog.platform.$orig.includeLinkCmdFile) {
 %    var linkFile;
-%    var platform = xdc.module('ti.platforms.simplelink.Platform');
-%    if (platform.useGnuRomLinkCmd) {
-%        linkFile = prog.platform.$package.packageBase + '/include_gnu/'
-%        + prog.cpu.deviceName.toUpperCase() + '_ROM.lds';
-%    }
-%    else {
-%        linkFile = prog.platform.$package.packageBase + '/include_gnu/'
+%    linkFile = prog.platform.$package.packageBase + '/include_gnu/'
 %        + prog.cpu.deviceName.toUpperCase() + '.lds';
-%    }
 INCLUDE "`linkFile`"
 %}
 
@@ -73,6 +66,15 @@ SECTIONS {
 
 %    var _utils = xdc.loadCapsule("gnu/targets/linkUtils.xs");
     `_utils.genSections(prog)`
+
+%var platform = xdc.module('ti.platforms.simplelink.Platform');
+%if (!platform.useGnuRomLinkCmd) {
+    .data : {
+        *(.data*)
+    } > REGION_DATA AT> REGION_TEXT
+    __data_end__ = __data_start__ + SIZEOF(.data);
+
+%}
 
     /*
      * Linker command file contributions from all loaded packages:

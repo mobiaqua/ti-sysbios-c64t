@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
  *  Define the memory block start/length for the F28069
  */
 
-/* 
+/*
  *  PAGE 0 will be used to organize program sections
  *  PAGE 1 will be used to organize data sections
  *
@@ -72,7 +72,7 @@ PAGE 1 :   /* Data Memory */
     M01SARAM    : origin = 0x000000, length = 0x000800     /* on-chip RAM block M0, M1 */
     PIEVECT     : origin = 0xD00,    length = 0x100
     L46SARAM    : origin = 0x00A000, length = 0x006000     /* on-chip RAM block L4-L6 */
-    L78SARAM    : origin = 0x010000, length = 0x004000     /* on-chip RAM block L7, L8 */  
+    L78SARAM    : origin = 0x010000, length = 0x004000     /* on-chip RAM block L7, L8 */
 }
 
 /*
@@ -83,8 +83,8 @@ PAGE 1 :   /* Data Memory */
  *
  *      ramfuncs    user defined section to store functions that will be
  *                  copied from Flash into RAM
- */ 
- 
+ */
+
 SECTIONS
 {
     /* Allocate program areas: */
@@ -114,6 +114,14 @@ SECTIONS
     .switch             : > FLASH       PAGE = 0
     .args               : > FLASH       PAGE = 0
 
+#ifdef __TI_COMPILER_VERSION
+#if __TI_COMPILER_VERSION >= 15009000
+    .TI.ramfunc         : {} LOAD = FLASH    PAGE = 0,
+                             RUN  = L03SARAM PAGE = 1,
+                             table(BINIT)
+#endif
+#endif
+
     /* Allocate IQ math areas: */
     IQmath              : > FLASH       PAGE = 0            /* Math Code */
     IQmathTables        : > IQTABLES    PAGE = 0, TYPE = NOLOAD
@@ -123,8 +131,8 @@ SECTIONS
 
     /*
      *  Uncomment the section below if calling the IQNexp() or IQexp()
-     *  functions from the IQMath.lib library in order to utilize the 
-     *  relevant IQ Math table in Boot ROM (This saves space and Boot ROM 
+     *  functions from the IQMath.lib library in order to utilize the
+     *  relevant IQ Math table in Boot ROM (This saves space and Boot ROM
      *  is 1 wait-state). If this section is not uncommented, IQmathTables2
      *  will be loaded into other memory (SARAM, Flash, etc.) and will take
      *  up space, but 0 wait-state is possible.

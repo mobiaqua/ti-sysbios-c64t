@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,14 +38,14 @@
  *  PAGE 0 will be used to organize program sections
  *  PAGE 1 will be used to organize data sections
  *
- *  Notes: 
+ *  Notes:
  *      Memory blocks on F28016 are uniform (ie same
- *      physical memory) in both PAGE 0 and PAGE 1.  
+ *      physical memory) in both PAGE 0 and PAGE 1.
  *      That is the same memory region should not be
  *      defined for both PAGE 0 and PAGE 1.
- *      Doing so will result in corruption of program 
- *      and/or data. 
- *       
+ *      Doing so will result in corruption of program
+ *      and/or data.
+ *
  *      L0 memory block is mirrored - that is
  *      it can be accessed in high memory or low memory.
  *      For simplicity only one instance is used in this
@@ -61,7 +61,7 @@ PAGE 0:    /* Program Memory */
    CSM_RSVD    : origin = 0x3F7F80, length = 0x000076     /* Program with all 0x0000 when CSM is in use. */
    BEGIN       : origin = 0x3F7FF6, length = 0x000002     /* Used for "boot to Flash" bootloader mode. */
    CSM_PWL     : origin = 0x3F7FF8, length = 0x000008     /* CSM password locations in FLASH */
-   
+
    ROM         : origin = 0x3FF000, length = 0x000FC0     /* Boot ROM */
    RESET       : origin = 0x3FFFC0, length = 0x000002     /* part of boot ROM  */
    VECTORS     : origin = 0x3FFFC2, length = 0x00003E     /* part of boot ROM  */
@@ -73,7 +73,7 @@ PAGE 1 :   /* Data Memory */
    L0SARAM     : origin = 0x008000, length = 0x001000     /* on-chip RAM block L0 */
 }
 
-/* 
+/*
  *  Allocate sections to memory blocks.
  *  Note:
  *      codestart   user defined section in DSP28_CodeStartBranch.asm
@@ -81,8 +81,8 @@ PAGE 1 :   /* Data Memory */
  *
  *      ramfuncs    user defined section to store functions that will be
  *                  copied from Flash into RAM
- */ 
- 
+ */
+
 SECTIONS
 {
     /* Allocate program areas: */
@@ -109,8 +109,16 @@ SECTIONS
     /* Initalized sections go in Flash */
     /* For SDFlash to program these, they must be allocated to page 0 */
     .econst             : > FLASH       PAGE = 0
-    .switch             : > FLASH       PAGE = 0      
+    .switch             : > FLASH       PAGE = 0
     .args               : > FLASH       PAGE = 0
+
+#ifdef __TI_COMPILER_VERSION
+#if __TI_COMPILER_VERSION >= 15009000
+    .TI.ramfunc         : {} LOAD = FLASH    PAGE = 0,
+                             RUN  = L0SARAM  PAGE = 1,
+                             table(BINIT)
+#endif
+#endif
 
     /* Allocate IQ math areas: */
     IQmath              : > FLASH       PAGE = 0                  /* Math Code */

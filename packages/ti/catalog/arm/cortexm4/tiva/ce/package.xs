@@ -32,6 +32,12 @@ function init()
 function getLibs(prog)
 {
     var libs = "lib/";
+    var Boot = xdc.module('ti.catalog.arm.cortexm4.tiva.ce.Boot');
+
+    /* return nothing if C files were provided to a custom library build */
+    if (Boot.$private.cFilesProvided == true) {
+        return (null);
+    }
 
     if (Program.build.cfgScript == null || !Program.build.cfgScript.match(/\.tcf$/)) {
 	libs += "Boot.a" + Program.build.target.suffix;

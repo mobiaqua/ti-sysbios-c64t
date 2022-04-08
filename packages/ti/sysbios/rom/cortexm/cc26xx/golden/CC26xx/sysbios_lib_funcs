@@ -229,6 +229,7 @@
 00000000 g     F .text:ti_sysbios_hal_Hwi_HwiProxy_startup__E__mangled__	00000000 .hidden ti_sysbios_hal_Hwi_HwiProxy_startup__E__mangled__
 00000000 g     F .text:ti_sysbios_hal_Hwi_HwiProxy_switchFromBootStack__E__mangled__	00000000 .hidden ti_sysbios_hal_Hwi_HwiProxy_switchFromBootStack__E__mangled__
 00000000 g     F .text:ti_sysbios_hal_Hwi_initStack__mangled__	00000000 .hidden ti_sysbios_hal_Hwi_initStack__mangled__
+00000000 g     F .text:ti_sysbios_hal_Hwi_initStack__mangled__Min	00000000 .hidden ti_sysbios_hal_Hwi_initStack__mangled__Min
 00000000 g     F .text:ti_sysbios_hal_Hwi_Instance_finalize__E__mangled__	00000000 .hidden ti_sysbios_hal_Hwi_Instance_finalize__E__mangled__
 00000000 g     F .text:ti_sysbios_hal_Hwi_Instance_init__E__mangled__	00000000 .hidden ti_sysbios_hal_Hwi_Instance_init__E__mangled__
 00000000 g     F .text:ti_sysbios_hal_Hwi_Module__startupDone__S	00000000 .hidden ti_sysbios_hal_Hwi_Module__startupDone__S
@@ -256,6 +257,7 @@
 00000000 g     F .text:ti_sysbios_heaps_HeapMem_getStats__E__mangled__	00000000 .hidden ti_sysbios_heaps_HeapMem_getStats__E__mangled__
 00000000 g     F .text:ti_sysbios_heaps_HeapMem_Handle__label__S__mangled__	00000000 .hidden ti_sysbios_heaps_HeapMem_Handle__label__S__mangled__
 00000000 g     F .text:ti_sysbios_heaps_HeapMem_init__I__mangled__	00000000 .hidden ti_sysbios_heaps_HeapMem_init__I__mangled__
+00000000 g     F .text:ti_sysbios_heaps_HeapMem_initPrimary__I	00000000 .hidden ti_sysbios_heaps_HeapMem_initPrimary__I
 00000000 g     F .text:ti_sysbios_heaps_HeapMem_Instance_init__E__mangled__	00000000 .hidden ti_sysbios_heaps_HeapMem_Instance_init__E__mangled__
 00000000 g     F .text:ti_sysbios_heaps_HeapMem_isBlocking__E__mangled__	00000000 .hidden ti_sysbios_heaps_HeapMem_isBlocking__E__mangled__
 00000000 g     F .text:ti_sysbios_heaps_HeapMem_leave__E	00000000 .hidden ti_sysbios_heaps_HeapMem_leave__E
@@ -311,6 +313,7 @@
 00000000 g     F .text:ti_sysbios_knl_Clock_scheduleNextTick__E__mangled__	00000000 .hidden ti_sysbios_knl_Clock_scheduleNextTick__E__mangled__
 00000000 g     F .text:ti_sysbios_knl_Clock_setFunc__E	00000000 .hidden ti_sysbios_knl_Clock_setFunc__E
 00000000 g     F .text:ti_sysbios_knl_Clock_setPeriod__E	00000000 .hidden ti_sysbios_knl_Clock_setPeriod__E
+00000000 g     F .text:ti_sysbios_knl_Clock_setTicks__E	00000000 .hidden ti_sysbios_knl_Clock_setTicks__E
 00000000 g     F .text:ti_sysbios_knl_Clock_setTimeout__E__mangled__	00000000 .hidden ti_sysbios_knl_Clock_setTimeout__E__mangled__
 00000000 g     F .text:ti_sysbios_knl_Clock_start__E__mangled__	00000000 .hidden ti_sysbios_knl_Clock_start__E__mangled__
 00000000 g     F .text:ti_sysbios_knl_Clock_startI__E__mangled__	00000000 .hidden ti_sysbios_knl_Clock_startI__E__mangled__
@@ -343,6 +346,8 @@
 00000000 g     F .text:ti_sysbios_knl_Clock_TimerProxy_trigger__E	00000000 .hidden ti_sysbios_knl_Clock_TimerProxy_trigger__E
 00000000 g     F .text:ti_sysbios_knl_Clock_triggerFunc__I__mangled__	00000000 .hidden ti_sysbios_knl_Clock_triggerFunc__I__mangled__
 00000000 g     F .text:ti_sysbios_knl_Clock_walkQueueDynamic__E__mangled__	00000000 .hidden ti_sysbios_knl_Clock_walkQueueDynamic__E__mangled__
+00000000 g     F .text:ti_sysbios_knl_Clock_walkQueuePeriodic__E	00000000 .hidden ti_sysbios_knl_Clock_getTicksUntilTimeout__E
+00000000 g     F .text:ti_sysbios_knl_Clock_walkQueuePeriodic__E	00000000 .hidden ti_sysbios_knl_Clock_walkQueuePeriodic__E
 00000000 g     F .text:ti_sysbios_knl_Clock_workFuncDynamic__E	00000000 .hidden ti_sysbios_knl_Clock_workFuncDynamic__E
 00000000 g     F .text:ti_sysbios_knl_Clock_workFunc__E__mangled__	00000000 .hidden ti_sysbios_knl_Clock_workFunc__E__mangled__
 00000000 g     F .text:ti_sysbios_knl_Event_checkEvents__I	00000000 .hidden ti_sysbios_knl_Event_checkEvents__I
@@ -553,10 +558,10 @@
 00000000 g     F .text:xdc_runtime_Error_setX__E	00000000 .hidden xdc_runtime_Error_setX__E
 00000000 g     F .text:xdc_runtime_Gate_enterSystem__E__mangled__	00000000 .hidden xdc_runtime_Gate_enterSystem__E__mangled__
 00000000 g     F .text:xdc_runtime_Gate_leaveSystem__E__mangled__	00000000 .hidden xdc_runtime_Gate_leaveSystem__E__mangled__
-00000000 g     F .text:xdc_runtime_IHeap_alloc$25	00000000 .hidden xdc_runtime_Memory_HeapProxy_alloc__E__mangled__
-00000000 g     F .text:xdc_runtime_IHeap_free$25	00000000 .hidden xdc_runtime_Memory_HeapProxy_free__E__mangled__
-00000000 g     F .text:xdc_runtime_IHeap_getStats$25	00000000 .hidden xdc_runtime_Memory_HeapProxy_getStats__E
-00000000 g     F .text:xdc_runtime_IHeap_isBlocking$25	00000000 .hidden xdc_runtime_Memory_HeapProxy_isBlocking__E
+00000000 g     F .text:xdc_runtime_IHeap_alloc$64	00000000 .hidden xdc_runtime_Memory_HeapProxy_alloc__E__mangled__
+00000000 g     F .text:xdc_runtime_IHeap_free$64	00000000 .hidden xdc_runtime_Memory_HeapProxy_free__E__mangled__
+00000000 g     F .text:xdc_runtime_IHeap_getStats$64	00000000 .hidden xdc_runtime_Memory_HeapProxy_getStats__E
+00000000 g     F .text:xdc_runtime_IHeap_isBlocking$64	00000000 .hidden xdc_runtime_Memory_HeapProxy_isBlocking__E
 00000000 g     F .text:xdc_runtime_Log_doPrint__E	00000000 .hidden xdc_runtime_Log_doPrint__E
 00000000 g     F .text:xdc_runtime_Memory_alloc__E__mangled__	00000000 .hidden xdc_runtime_Memory_alloc__E__mangled__
 00000000 g     F .text:xdc_runtime_Memory_calloc__E__mangled__	00000000 .hidden xdc_runtime_Memory_calloc__E__mangled__

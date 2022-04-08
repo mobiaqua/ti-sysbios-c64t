@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,7 @@ var HeapMem = null;
 var Memory = null;
 var Startup = null;
 var BIOS = null;
+var primaryHeapNotUsed = true;
 
 /* Table to round up to power of 2 (grow if need) */
 var powerOf2 = [2, 2, 2,                        /* 0-2 */
@@ -57,7 +58,12 @@ function module$use(mod, params)
     Startup = xdc.useModule('xdc.runtime.Startup');
 
     /* initialize HeapMem objects early */
-    Startup.firstFxns.$add(HeapMem.init);
+    if (HeapMem.primaryHeapBaseAddr == null) {
+        Startup.firstFxns.$add(HeapMem.init);
+    }
+    else {
+        Startup.firstFxns.$add(HeapMem.initPrimary);
+    }
 
     /* 
      *  Set the HeapMem module Gate to an appropriate type.
@@ -123,6 +129,27 @@ function instance$static$init(obj, params)
         obj.minBlockAlign = params.minBlockAlign;
         bufAlign = obj.minBlockAlign;        
     }
+
+    /* Make sure the alignment is at least large enough to hold all types. */    
+    obj.align = params.align;
+    if (obj.align < bufAlign) {
+        obj.align = bufAlign;
+    }
+
+    if (params.usePrimaryHeap) {
+        if (primaryHeapNotUsed) {
+            primaryHeapNotUsed = false;
+            if (HeapMem.primaryHeapBaseAddr != null) {
+                obj.head.next = null;
+                obj.head.size = 0;
+                return;
+            }
+        }
+        else {
+            HeapMem.$logError("Only one primary HeapMem instance can be defined.",
+                               this);
+        }
+    }
     
     /* Make sure the size is at least large enough to hold all types. */
     if (params.size < bufAlign) {
@@ -136,12 +163,6 @@ function instance$static$init(obj, params)
     params.size = (Math.floor(params.size / bufAlign)) * bufAlign;
     obj.head.next = null;
     obj.head.size = params.size;
-
-    /* Make sure the alignment is at least large enough to hold all types. */    
-    obj.align = params.align;
-    if (obj.align < bufAlign) {
-        obj.align = bufAlign;
-    }
 
     /*
      *  If the align directive is not supported, (add align - 1) MAUs to the

@@ -51,11 +51,12 @@ function run(cmdr, args)
     /* find the config file */
     var cfg = "";
     if (args.length > 0) {
-        cfg = args[0].replace(/\\/g, '/');
+        cfg = args[0];
     }
     else {
         cfg = findCfg(cmdr);
     }
+    cfg = cfg.replace(/\\/g, '/');
     print("\nUsing RTSC configuration file: " + cfg + "...\n");
 
     /* If 'cfg' doesn't contain any '/', it's a file in the current directory
@@ -86,7 +87,7 @@ function run(cmdr, args)
                   + " the generated source libraries before building...\n");
             cleanLibs(cmdr, mklibs);
         }
-    } 
+    }
 
     /* execute xdc.tools.configuro */
     var configuro = xdc.useModule('xdc.tools.configuro.Main');
@@ -193,7 +194,7 @@ function getCompileOpts()
                     continue;
                 }
             }
- 
+
             i++;
             if (!(i < compOpts.length)) {
                 /* break for */

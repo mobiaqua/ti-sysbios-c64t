@@ -15,18 +15,16 @@ Pkg.otherSrcs = ['boot.c', 'autoinit.c', 'link.xdt'];
 Pkg.otherFiles = Pkg.otherSrcs;
 
 var attrs = {
-    profile: Pkg.attrs.profile == "debug" ? "debug" : "whole_program",
-    copts: "--symdebug:dwarf --optimize_with_debug"
+    profile: Pkg.attrs.profile == "debug" ? "debug" : "release",
+    copts: "--symdebug:dwarf --optimize_with_debug -mo"
 };
 
 var cobjs = RtsBuild.c_objs.concat(KnlBuild.c_objs);
 for (var i = 0; i < Build.targets.length; i++) {
     var targ = Build.targets[i];
     if (targ.rts == Pkg.name) {
-        Pkg.addLibrary("lib/" + Pkg.name, targ, attrs)
-            .addObjects(cobjs);
-        Pkg.addLibrary("lib/boot", targ, attrs)
-            .addObjects(["boot", "autoinit"]);
+        Pkg.addLibrary("lib/" + Pkg.name, targ, attrs).addObjects(cobjs);
+        Pkg.addLibrary("lib/boot", targ, attrs).addObjects(["boot", "autoinit"]);
     }
 }
 

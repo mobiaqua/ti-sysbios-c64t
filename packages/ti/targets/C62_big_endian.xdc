@@ -1,13 +1,13 @@
 /* 
- *  Copyright (c) 2008 Texas Instruments and others.
+ *  Copyright (c) 2008-2015 Texas Instruments Incorporated
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *  Contributors:
  *      Texas Instruments - initial implementation
- * 
+ *
  * */
 /*
  *  ======== C62_big_endian.xdc ========
@@ -18,7 +18,7 @@
  *  ======== C62_big_endian ========
  *  @_nodoc
  *
- *  TI C62 big endian 
+ *  TI C62 big endian
  */
 metaonly module C62_big_endian inherits ti.targets.ITarget {
     override readonly config string name            = "C62_big_endian";
@@ -29,7 +29,7 @@ metaonly module C62_big_endian inherits ti.targets.ITarget {
 
     override readonly config string rts = "ti.targets.rts6000";
     override config string platform     = "ti.platforms.sim6xxx:TMS320C6211";
-    
+
     override readonly config xdc.bld.ITarget2.Command ar = {
         cmd: "ar6x",
         opts: "rq"
@@ -44,17 +44,17 @@ metaonly module C62_big_endian inherits ti.targets.ITarget {
         cmd: "cl6x",
         opts: "--compiler_revision"
     };
-    
+
     override readonly config xdc.bld.ITarget2.Command asm = {
         cmd: "cl6x -c",
         opts: "-me"
     };
 
     override readonly config xdc.bld.ITarget2.Command lnk = {
-        cmd: "lnk6x",
-        opts: ""
+        cmd: "cl6x",
+        opts: "-z"
     };
-    
+
     /*!
      *  ======== asmOpts ========
      *  User configurable assembler options.

@@ -53,6 +53,7 @@ function getCFiles(targetName)
              "pthread_rwlock.c",
              "clock.c",
              "semaphore.c",
+             "sleep.c",
              "timer.c"]);
 }
 

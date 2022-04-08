@@ -205,6 +205,7 @@
 00000000 t .text:_ti_sysbios_hal_Hwi_HwiProxy_startup__E__mangled__
 00000000 t .text:_ti_sysbios_hal_Hwi_HwiProxy_switchFromBootStack__E__mangled__
 00000000 t .text:_ti_sysbios_hal_Hwi_initStack__mangled__
+00000000 t .text:_ti_sysbios_hal_Hwi_initStack__mangled__Min
 00000000 t .text:_ti_sysbios_hal_Hwi_Instance_finalize__E__mangled__
 00000000 t .text:_ti_sysbios_hal_Hwi_Instance_init__E__mangled__
 00000000 t .text:_ti_sysbios_hal_Hwi_Module__startupDone__S
@@ -305,6 +306,7 @@
 00000000 t .text:_ti_sysbios_knl_Clock_scheduleNextTick__E__mangled__
 00000000 t .text:_ti_sysbios_knl_Clock_setFunc__E__mangled__
 00000000 t .text:_ti_sysbios_knl_Clock_setPeriod__E__mangled__
+00000000 t .text:_ti_sysbios_knl_Clock_setTicks__E
 00000000 t .text:_ti_sysbios_knl_Clock_setTimeout__E__mangled__
 00000000 t .text:_ti_sysbios_knl_Clock_start__E__mangled__
 00000000 t .text:_ti_sysbios_knl_Clock_startI__E__mangled__
@@ -315,6 +317,7 @@
 00000000 t .text:_ti_sysbios_knl_Clock_tickStop__E__mangled__
 00000000 t .text:_ti_sysbios_knl_Clock_triggerFunc__I
 00000000 t .text:_ti_sysbios_knl_Clock_walkQueueDynamic__E__mangled__
+00000000 t .text:_ti_sysbios_knl_Clock_walkQueuePeriodic__E
 00000000 t .text:_ti_sysbios_knl_Clock_workFuncDynamic__E__mangled__
 00000000 t .text:_ti_sysbios_knl_Clock_workFunc__E__mangled__
 00000000 t .text:_ti_sysbios_knl_Event_checkEvents__I__mangled__

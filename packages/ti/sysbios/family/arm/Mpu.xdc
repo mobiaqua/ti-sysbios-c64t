@@ -30,7 +30,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 /*
- *  ======== Mpu.xdc ========
+ *  ======== MPU.xdc ========
  */
 
 package ti.sysbios.family.arm;
@@ -38,7 +38,7 @@ package ti.sysbios.family.arm;
 import xdc.rov.ViewInfo;
 
 /*!
- *  ======== Mpu ========
+ *  ======== MPU ========
  *  Memory Protection Unit (MPU) Manager.
  *
  *  This module manages the Memory Protect Unit (MPU) present in many ARM
@@ -72,7 +72,7 @@ import xdc.rov.ViewInfo;
  *  the {@link #RegionAttrs bufferable}, {@link #RegionAttrs cacheable} and
  *  {@link #RegionAttrs tex} (type extension) fields of the {@link #RegionAttrs}
  *  structure which is passed as an argument to
- *  {@link #setRegion Mpu_setRegion()} function. The three memory types
+ *  {@link #setRegion MPU_setRegion()} function. The three memory types
  *  supported by the hardware are "Normal" (cacheable), "Device" and
  *  "Strongly-ordered" memory. "Device" and "Strongly-ordered" memory types
  *  are recommended for mapping peripheral address space like memory-mapped
@@ -110,7 +110,7 @@ import xdc.rov.ViewInfo;
  *  it is possible for coherency problems to arise. In order to avoid possible
  *  coherency errors, the below sequence should be followed to change the
  *  shareability attributes of the memory region:
- *  - Make the memory region nNon-cacheable and outer-shareable
+ *  - Make the memory region Non-cacheable and outer-shareable
  *  - Clean and invalidate the memory region from the cache
  *  - Change the shareability attribute to the desired value
  *
@@ -119,12 +119,12 @@ import xdc.rov.ViewInfo;
  *  *.cfg script:
  *
  *  @p(code)
- *  var Mpu = xdc.useModule('ti.sysbios.family.arm.Mpu');
+ *  var MPU = xdc.useModule('ti.sysbios.family.arm.MPU');
  *
  *  // Mark memory region as normal outer and inner write-back
  *  // and write-through cacheable
- *  var attrs = new Mpu.RegionAttrs();
- *  Mpu.initRegionAttrsMeta(attrs);
+ *  var attrs = new MPU.RegionAttrs();
+ *  MPU.initRegionAttrsMeta(attrs);
  *  attrs.enable = true;
  *  attrs.bufferable = true;
  *  attrs.cacheable = true;
@@ -135,7 +135,7 @@ import xdc.rov.ViewInfo;
  *
  *  // Set attributes for memory region of size 4MB starting at address 0x0
  *  // using MPU region Id 0 to store the attributes.
- *  Mpu.setRegionMeta(0, 0x00000000, Mpu.RegionSize_4M, attrs);
+ *  MPU.setRegionMeta(0, 0x00000000, MPU.RegionSize_4M, attrs);
  *  @p
  *
  *  @p(html)
@@ -181,9 +181,8 @@ import xdc.rov.ViewInfo;
  *  @p
  */
 
-@Template ("./Mpu.xdt") /* generate function to init MPU region entries */
 @DirectCall
-module Mpu
+module MPU
 {
     // -------- ROV views --------
 
@@ -213,6 +212,26 @@ module Mpu
                 }],
            ]
        });
+
+    /*!
+     *  Memory Protection Unit (MPU) registers. Symbol "MPU_deviceRegs" is
+     *  a physical device
+     */
+    struct DeviceRegs {
+        UInt32 TYPE;            /*! 0xD90 Type Register                      */
+        UInt32 CTRL;            /*! 0xD94 Control Register                   */
+        UInt32 RNR;             /*! 0xD98 Region Register                    */
+        UInt32 RBAR;            /*! 0xD9C Region Base Address Register       */
+        UInt32 RASR;            /*! 0xDA0 Region Attribute and Size Register */
+        UInt32 RBAR_A1;         /*! 0xDA4 MPU Alias 1                        */
+        UInt32 RASR_A1;         /*! 0xDA8 MPU Alias 1                        */
+        UInt32 RBAR_A2;         /*! 0xDAC MPU Alias 2                        */
+        UInt32 RASR_A2;         /*! 0xDB0 MPU Alias 2                        */
+        UInt32 RBAR_A3;         /*! 0xDB4 MPU Alias 3                        */
+        UInt32 RASR_A3;         /*! 0xDB8 MPU Alias 3                        */
+    };
+
+    extern volatile DeviceRegs deviceRegs;
 
     /*!
      *  ======== RegionSize ========
@@ -275,22 +294,6 @@ module Mpu
     };
 
     /*!
-     *  ======== A_nullPointer ========
-     *  Assert raised when a pointer is null
-     */
-    config xdc.runtime.Assert.Id A_nullPointer  = {
-        msg: "A_nullPointer: Pointer is null"
-    };
-
-    /*!
-     *  ======== A_invalidRegionId ========
-     *  Assert raised when an invalid region number is passed to Mpu_setRegion()
-     */
-    config xdc.runtime.Assert.Id A_invalidRegionId  = {
-        msg: "A_invalidRegionId: MPU Region number passed is invalid."
-    };
-
-    /*!
      *  ======== defaultAttrs ========
      *  Default region attributes structure
      *
@@ -307,6 +310,31 @@ module Mpu
         accPerm: 1,                     /* allow read/write access at PL1    */
         tex: 1,                         /* 1 by default                      */
         subregionDisableMask: 0         /* no subregions disabled by default */
+    };
+
+    /*!
+     *  ======== A_nullPointer ========
+     *  Assert raised when a pointer is null
+     */
+    config xdc.runtime.Assert.Id A_nullPointer  = {
+        msg: "A_nullPointer: Pointer is null"
+    };
+
+    /*!
+     *  ======== A_invalidRegionId ========
+     *  Assert raised when an invalid region number is passed to MPU_setRegion()
+     */
+    config xdc.runtime.Assert.Id A_invalidRegionId  = {
+        msg: "A_invalidRegionId: MPU Region number passed is invalid."
+    };
+
+    /*!
+     *  ======== A_unalignedBaseAddr ========
+     *  Assert raised when region's base address is not aligned to the region's
+     *  size
+     */
+    config xdc.runtime.Assert.Id A_unalignedBaseAddr  = {
+        msg: "A_unalignedBaseAddr: MPU region base address not aligned to size."
     };
 
     /*!
@@ -350,7 +378,7 @@ module Mpu
      *  ======== setRegionMeta ========
      *  Statically sets the MPU region attributes
      *
-     *  @see ti.sysbios.family.arm.r5.Mpu
+     *  @see ti.sysbios.family.arm.r5.MPU
      *
      *  @param(regionId)        MPU region number
      *  @param(regionBaseAddr)  MPU region base address
@@ -373,26 +401,10 @@ module Mpu
      *  program cache.
      *  @p
      *
-     *  This function is not supported when running in SMP mode and
-     *  will generate an assertion failure if called.
-     *
-     *  On ARM cores like Cortex-A15, both the cache and MMU need to be
-     *  enabled for data caching to work. Also, on certain SoC's like
-     *  Keystone 2, the caches need to be enabled for the inter-core
-     *  lock (used in SMP mode) to work. Therefore, disabling the MMU
-     *  is not permitted when running in SMP mode.
-     *
      *  @a(Note)
      *  This function does not change the cache L1 data/program settings.
      */
     Void disable();
-
-    /*!
-     *  @_nodoc
-     *  ======== disableBR ========
-     *  Disable background region
-     */
-    Void disableBR();
 
     /*!
      *  ======== enable ========
@@ -411,6 +423,13 @@ module Mpu
      *  This function does not change the L1 data/program cache settings.
      */
     Void enable();
+
+    /*!
+     *  @_nodoc
+     *  ======== disableBR ========
+     *  Disable background region
+     */
+    Void disableBR();
 
     /*!
      *  @_nodoc
@@ -437,7 +456,7 @@ module Mpu
      *  ======== setRegion ========
      *  Sets the MPU region attributes
      *
-     *  @see ti.sysbios.family.arm.r5.Mpu
+     *  @see ti.sysbios.family.arm.r5.MPU
      *
      *  @param(regionId)        MPU region number
      *  @param(regionBaseAddr)  MPU region base address
@@ -466,10 +485,10 @@ internal:
     };
 
     /*
-     *  ======== regionEntryMeta ========
+     *  ======== regionEntry ========
      *  Array to hold statically configured MPU region entries
      */
-    metaonly config RegionEntry regionEntryMeta[];
+    config RegionEntry regionEntry[];
 
     /*
      *  ======== isMemoryMapped ========
@@ -497,10 +516,22 @@ internal:
     Void enableAsm();
 
     /*
-     *  ======== initRegions ========
-     *  Generated C function that will initialize all MPU region entries
+     *  ======== disableBRAsm ========
+     *  Assembly function to disable background region
      */
-    Void initRegions();
+    Void disableBRAsm();
+
+    /*
+     *  ======== enableBRAsm ========
+     *  Assembly function to enable background region
+     */
+    Void enableBRAsm();
+
+    /*!
+     *  ======== isEnabledAsm ========
+     *  Assembly function that determines if the MPU is enabled
+     */
+    Bool isEnabledAsm();
 
     /*
      *  ======== setRegionAsm ========

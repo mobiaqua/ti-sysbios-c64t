@@ -41,28 +41,7 @@
  */
 function getAsmFiles(targetName)
 {
-    switch(targetName) {
-        case "ti.targets.arm.elf.M3":
-        case "ti.targets.arm.elf.M4":
-        case "ti.targets.arm.elf.M4F":
-            return (["CTM_asm.sv7M"]);
-            break;
-
-        case "gnu.targets.arm.M3":
-        case "gnu.targets.arm.M4":
-        case "gnu.targets.arm.M4F":
-            return (["CTM_asm_gnu.sv7M"]);
-            break;
-
-        case "iar.targets.arm.M3":
-        case "iar.targets.arm.M4":
-        case "iar.targets.arm.M4F":
-            return (null);
-            break;
-
-	default:
-	    return (null);
-    }
+    return (null);
 }
 
 /*
@@ -73,13 +52,6 @@ function getAsmFiles(targetName)
 function getCFiles(targetName)
 {
     return ([]);
-}
-
-if (xdc.om.$name == "cfg") {
-    var deviceTable = {
-        "TMS320C6A8168": {
-        },
-    };
 }
 
 /*

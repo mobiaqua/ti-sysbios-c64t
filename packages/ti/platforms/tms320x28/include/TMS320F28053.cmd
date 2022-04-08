@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,17 +34,17 @@
  *  Define the memory block start/length for the F28053
  */
 
-/* 
+/*
  *  PAGE 0 will be used to organize program sections
  *  PAGE 1 will be used to organize data sections
  *
- *  Notes: 
+ *  Notes:
  *        Memory blocks on F28053 are uniform (ie same
- *        physical memory) in both PAGE 0 and PAGE 1.  
+ *        physical memory) in both PAGE 0 and PAGE 1.
  *        That is the same memory region should not be
  *        defined for both PAGE 0 and PAGE 1.
- *        Doing so will result in corruption of program 
- *        and/or data. 
+ *        Doing so will result in corruption of program
+ *        and/or data.
  *
  */
 
@@ -53,25 +53,25 @@ MEMORY
 PAGE 0:    /* Program Memory */
 
     DCSM_OTP_Z2_P0  : origin = 0x3D7800, length = 0x000004		/* Part of Z1 OTP.  LinkPointer/JTAG lock/ Boot Mode */
-    
+
     /* DCSM Z1 Zone Select Contents and Reserved Locations (!!Movable!!) */
     /* Z2_DCSM_RSVD must be programmed to all 0x0000 and must immediately follow Z2 Zone Select block */
     DCSM_ZSEL_Z2_P0 : origin = 0x3D7810, length = 0x000010		/* Part of Z2 OTP.  Z2 password locations / Flash and RAM partitioning  */
     Z2_DCSM_RSVD    : origin = 0x3D7820, length = 0x0001E0		/* Program with all 0x0000 when Z2 DCSM is in use. */
 
     DCSM_OTP_Z1_P0  : origin = 0x3D7A00, length = 0x000006		/* Part of Z2 OTP.  LinkPointer/JTAG lock */
-   
+
     /* DCSM Z1 Zone Select Contents and Reserved Locations (!!Movable!!) */
     /* Z1_DCSM_RSVD must be programmed to all 0x0000 and must immediately follow Z1 Zone Select block */
     DCSM_ZSEL_Z1_P0 : origin = 0x3D7A10, length = 0x000010		/* Part of Z1 OTP.  Z1 password locations / Flash and RAM partitioning */
     Z1_DCSM_RSVD    : origin = 0x3D7A20, length = 0x0001E0	    /* Part of Z1 OTP.  Program with all 0x0000 when Z1 DCSM is in use. */
-    
+
     FLASH           : origin = 0x3F0000, length = 0x007FFE		/* on-chip FLASH */
     BEGIN           : origin = 0x3F7FFE, length = 0x000002		/* Part of FLASHA.  Used for "boot to Flash" bootloader mode. */
-   
+
     Z1_SCC_ROM      : origin = 0x3F8000, length = 0x000400		/* Zone 1 Safe-Copy Code Secure ROM */
-    Z2_SCC_ROM      : origin = 0x3F8400, length = 0x000400		/* Zone 2 Safe-Copy Code Secure ROM */ 
-   
+    Z2_SCC_ROM      : origin = 0x3F8400, length = 0x000400		/* Zone 2 Safe-Copy Code Secure ROM */
+
     IQTABLES        : origin = 0x3FE000, length = 0x000B50		/* IQ Math Tables in Boot ROM */
     IQTABLES2       : origin = 0x3FEB50, length = 0x00008C		/* IQ Math Tables in Boot ROM */
     IQTABLES3       : origin = 0x3FEBDC, length = 0x0000AA		/* IQ Math Tables in Boot ROM */
@@ -81,7 +81,7 @@ PAGE 0:    /* Program Memory */
     VECTORS         : origin = 0x3FFFC2, length = 0x00003E     /* part of boot ROM */
 
 PAGE 1 :   /* Data Memory */
-   
+
     M01SARAM        : origin = 0x000000, length = 0x000800     /* on-chip RAM block M0, M1 */
     PIEVECT         : origin = 0xD00,    length = 0x100
     L03SARAM        : origin = 0x008000, length = 0x002000     /* on-chip RAM block L0-L3 */
@@ -95,7 +95,7 @@ PAGE 1 :   /* Data Memory */
  *
  *      ramfuncs    user defined section to store functions that will be
  *                  copied from Flash into RAM
- */ 
+ */
 
 SECTIONS
 {
@@ -118,7 +118,7 @@ SECTIONS
     dcsm_rsvd_z1        : > Z1_DCSM_RSVD        PAGE = 0
     dcsm_zsel_z2        : > DCSM_ZSEL_Z2_P0     PAGE = 0
     dcsm_rsvd_z2        : > Z2_DCSM_RSVD        PAGE = 0
-   
+
     /* Allocate uninitalized data sections: */
     .stack              : > M01SARAM | L03SARAM     PAGE = 1
     .ebss               : > M01SARAM | L03SARAM     PAGE = 1
@@ -128,17 +128,25 @@ SECTIONS
     /* Initalized sections go in Flash */
     /* For SDFlash to program these, they must be allocated to page 0 */
     .econst             : > FLASH       PAGE = 0
-    .switch             : > FLASH       PAGE = 0      
+    .switch             : > FLASH       PAGE = 0
     .args               : > FLASH       PAGE = 0
+
+#ifdef __TI_COMPILER_VERSION
+#if __TI_COMPILER_VERSION >= 15009000
+    .TI.ramfunc         : {} LOAD = FLASH    PAGE = 0,
+                             RUN  = L03SARAM PAGE = 1,
+                             table(BINIT)
+#endif
+#endif
 
     /* Allocate IQ math areas: */
     IQmath              : > FLASH       PAGE = 0        /* Math Code */
-    IQmathTables        : > IQTABLES    PAGE = 0, TYPE = NOLOAD 
-   
+    IQmathTables        : > IQTABLES    PAGE = 0, TYPE = NOLOAD
+
     /*
      *  Uncomment the section below if calling the IQNexp() or IQexp()
-     *  functions from the IQMath.lib library in order to utilize the 
-     *  relevant IQ Math table in Boot ROM (This saves space and Boot ROM 
+     *  functions from the IQMath.lib library in order to utilize the
+     *  relevant IQ Math table in Boot ROM (This saves space and Boot ROM
      *  is 1 wait-state). If this section is not uncommented, IQmathTables2
      *  will be loaded into other memory (SARAM, Flash, etc.) and will take
      *  up space, but 0 wait-state is possible.

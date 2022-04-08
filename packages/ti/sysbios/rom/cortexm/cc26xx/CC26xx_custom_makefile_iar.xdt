@@ -148,7 +148,7 @@
     copy(goldenDir+"romFuncs.txt", Build.$private.outputDir+"/romInternFuncs.txt");
 %%}
 
-MAKEFLAGS = -j16
+MAKEFLAGS = -j8
 
 RTSLIB = -i`CGEN`/lib/ -llibc.a
 
@@ -167,7 +167,7 @@ BIOS_ROOT = `BIOSROOT`
 
 BIOS_DEFS = `Build.getDefs() + ROM.getConfigDefs()`
 
-INTERN_FUNCS = `fileToString(goldenDir+"romFuncs.txt")`
+INTERN_FUNCS = ""
 
 BIOS_INC  = -I"`File.getDOSPath(this.$package.packageRepository)`"
 
@@ -190,8 +190,8 @@ CC_LIB = `CGEN`/bin/`TARGET.cc.cmd` `CCOPTS_LIB` -I `CGEN`/include
 CC_PP = `CGEN`/bin/`TARGET.cc.cmd` `CCOPTS_PP` -I `CGEN`/include `POPTS`
 
 %if (environment["os.name"].match(/Windows.*/i)) {
-DEL = cmd.exe /q /c del /q /f
-CP = cmd.exe /q /c copy /Y
+DEL = `XDCROOT`../bin/rm -f
+CP = `XDCROOT`../bin/cp -f
 %}
 %else {
 DEL = rm -f
@@ -208,8 +208,12 @@ define ASSEMBLE
 endef
 %var LIB = "rom_sysbios.a" + TARGET.suffix;
 %var ROM_EXEC = "rtos_rom.x" + TARGET.suffix;
+%var CFG_OBJ = "rom_sysbios_config.obj";
+%var SYMBOL_MAP_FILE = "symbolMapFile.mak";
 
 all: `LIB`
+
+include `goldenDir``SYMBOL_MAP_FILE`
 
 %var asmSources = Build.getAsmFiles(TARGET.$name);
 %/* 
@@ -246,13 +250,13 @@ rom_`libPP`: `s` makefile
 % * print "Preprocessing" banner on first generated config.c
 % * file rule to make sure it gets printed after a clean.
 % */
-%if (printPreprocessingStarted == true && libPP.match(/_config_lib.pp/)) {
+%if (printPreprocessingStarted == true) {
 	@echo Preprocessing library source files ...
 %   printPreprocessingStarted = false;
 %}
 	@$(CC_PP) --preprocess=nl `libPP` $(BIOS_DEFS) $(XOPTS) $(INCS) \
 	`srcName(s)`
-	@$(XDC_ROOT)/../xs -c `romModuleLibDir`../mangleCFile.xs `libPP` rom_`libPP` romInternFuncs.txt  "$(INTERN_FUNCS)"
+	@$(XDC_ROOT)/../xs -c `romModuleLibDir`../mangleCFile.xs `libPP` rom_`libPP` romInternFuncs.txt  "$(`libPP`_SYMS)"
 
 %}
 
@@ -265,7 +269,7 @@ rom_sysbios.obj: `LIBPPS.join(" ")` makefile
 
 `LIB`: rom_sysbios.obj `LIBASMOBJS.join(" ")`
 	@-$(call RM, $@)
-	@$(AR) $@ $^
+	@$(AR) $@ $^ `goldenDir``CFG_OBJ`
 	@echo Library build complete.
 
 clean:

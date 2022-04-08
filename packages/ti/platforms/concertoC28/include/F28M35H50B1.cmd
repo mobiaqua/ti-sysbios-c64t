@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,6 +64,13 @@ SECTIONS
                   LOAD_SIZE(_RamfuncsLoadSize),
                   LOAD_END(_RamfuncsLoadEnd),
                   RUN_START(_RamfuncsRunStart)
+#ifdef __TI_COMPILER_VERSION
+#if __TI_COMPILER_VERSION >= 15009000
+    .TI.ramfunc : {} LOAD = FLASH     PAGE = 0,
+                     RUN  = L03SARAM  PAGE = 1,
+                     TABLE(BINIT)
+#endif
+#endif
 
     /* Initalized sections go in Flash */
     .econst     : > FLASH   PAGE = 0

@@ -30,6 +30,11 @@ SECTIONS
 {
     .intvecs:   > 0x00000000
     .text   :   > CODESRAM
+#ifdef __TI_COMPILER_VERSION
+#if __TI_COMPILER_VERSION >= 15009000
+    .TI.ramfunc : {} > CODESRAM
+#endif
+#endif
     .const  :   > CODESRAM
     .cinit  :   > CODESRAM
     .pinit  :   > CODESRAM

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,9 +31,7 @@
  */
 /*
  *  ======== package.xdc ========
- *
  *  Stellaris LM4 target-specific modules
- *
  */
 
 requires ti.sysbios.interfaces;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -71,6 +71,60 @@ Void HeapMem_init()
          */
         obj->buf = (Char *)xdc_uargToPtr(((Memory_Size)(obj->buf) + (obj->align - 1)) &
                             ~(obj->align - 1));
+
+        /* Place the initial header */
+        HeapMem_restore(obj);
+    }
+}
+
+/*
+ *  ======== HeapMem_initPrimary ========
+ */
+Void HeapMem_initPrimary()
+{
+    Int i;
+    HeapMem_Object *obj;
+    Bool initializingPrimaryHeap;
+
+    /*
+     * HeapMem inherits from IHeap. Is part of runtime.
+     * Will be called during first pass.
+     * All APIs need to be ready after first pass.
+     */
+
+    for (i = 0; i < HeapMem_Object_count(); i++) {
+        initializingPrimaryHeap = FALSE;
+
+        obj = HeapMem_Object_get(NULL, i);
+
+        /*
+         * use of the 'primaryHeap' buffer is flagged by obj->buf being
+         * statically set to null in instance$static$init().
+         */
+        if (obj->buf == NULL) {
+            obj->buf = HeapMem_primaryHeapBaseAddr;
+            initializingPrimaryHeap = TRUE;
+        }
+
+        /*
+         * Some targets don't support the align directive (28x, Linux) and
+         * the buffer must be aligned at runtime. The best solution is to
+         * simply perform the below math on all targets.
+         *
+         * On targets that don't support the align directive, the static
+         * create code will pad the buffer with enough extra space to align
+         * the buffer. That way, the HeapMem size remains valid (there's
+         * at least that much space) and does not have to be adjusted here.
+         */
+        obj->buf = (Char *)xdc_uargToPtr(((Memory_Size)(obj->buf) + (obj->align - 1)) &
+                            ~(obj->align - 1));
+
+        if (initializingPrimaryHeap) {
+            /* HeapMem.primaryHeapEndAddress was encoded in the object's head.next field */
+            obj->head.size = (UArg)HeapMem_primaryHeapEndAddr - (UArg)obj->buf;
+            /* Make sure the size is a multiple of minBlockAlign */
+            obj->head.size = (obj->head.size / obj->minBlockAlign) * obj->minBlockAlign;
+        }
 
         /* Place the initial header */
         HeapMem_restore(obj);

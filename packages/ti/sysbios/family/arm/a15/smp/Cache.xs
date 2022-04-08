@@ -71,6 +71,9 @@ if (xdc.om.$name == "cfg") {
     };
 
     deviceTable["DRA7XX"] = deviceTable["Vayu"];
+    deviceTable["C66AK2E05"] = deviceTable["TCI6636K2H"];
+    deviceTable["TCI6630K2L"] = deviceTable["TCI6636K2H"];
+    deviceTable["TCI6638K2K"] = deviceTable["TCI6636K2H"];
 }
 
 /*

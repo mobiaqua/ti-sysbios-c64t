@@ -179,7 +179,8 @@ function getLinkTemplate(prog)
     var tpkg = tname.substring(0, tname.lastIndexOf('.'));
 
     /* Use bare metal linker command file if appropriate */
-    if (Program.build.target.$name.match(/gnu.targets.arm.A/)) {
+    if (Program.build.target.$name.match(/gnu.targets.arm.A/) ||
+        Program.build.target.$name.match(/gnu.targets.arm.M/)) {
         var templateName = tpkg.replace(/\./g, "/") + "/linkcmd_bm_v7a.xdt";
     }
     else {

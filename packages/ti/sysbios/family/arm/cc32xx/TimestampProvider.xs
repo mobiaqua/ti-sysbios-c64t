@@ -35,10 +35,8 @@
  */
 
 var BIOS = null;
-var Timer = null;
 var Startup = null;
 var TimestampProvider = null;
-var Clock = null;
 
 /*
  *  ======== module$meta$init ========
@@ -61,7 +59,6 @@ function module$meta$init()
 function module$use()
 {
     BIOS = xdc.useModule('ti.sysbios.BIOS');
-    Timer = xdc.useModule('ti.sysbios.family.arm.cc32xx.Timer');
     Startup = xdc.useModule('xdc.runtime.Startup');
 
     var Diags = xdc.useModule('xdc.runtime.Diags');
@@ -71,34 +68,18 @@ function module$use()
         }
     }
 
-    /* if user has not specified useClockTimer ... */
-    if (TimestampProvider.useClockTimer == undefined) {
-	/* assume false */
-	TimestampProvider.useClockTimer = false;
-        /* if Clock is enabled, default to share its timer */
-        if (BIOS.clockEnabled) {
-            Clock = xdc.module('ti.sysbios.knl.Clock');
-            if ((Clock.TimerProxy.delegate$.$name.match(
-                    /ti.sysbios.family.arm.cc32xx.Timer/)) &&
-                    (Clock.tickSource != Clock.TickSource_NULL)) {
-                TimestampProvider.useClockTimer = true;
-            }
-        }
+    if (TimestampProvider.$written("useClockTimer")) {
+        TimestampProvider.$logWarning("'useClockTimer' " +
+            "is deprecated and will not be supported in future releases.",
+            TimestampProvider, "useClockTimer");
     }
-    else if (TimestampProvider.useClockTimer == true) {
-        if (BIOS.clockEnabled == false) {
-            TimestampProvider.$logError("Clock is not enabled, cannot share its Timer",
-                    TimestampProvider, "useClockTimer");
-        }
 
-        Clock = xdc.module('ti.sysbios.knl.Clock');
-        if (!Clock.TimerProxy.delegate$.$name.match(
-                 /ti.sysbios.family.arm.cc32xx.Timer/)) {
-            TimestampProvider.$logWarning("Clock is not using cc32xx Timer. " +
-                    "Setting TimestampProvider.useClockTimer to false",
-                    TimestampProvider, "useClockTimer");
-            TimestampProvider.useClockTimer = false;
-        }
+    TimestampProvider.useClockTimer = false;
+
+    if (TimestampProvider.$written("timerId")) {
+        TimestampProvider.$logWarning("'timerId' " +
+            "is deprecated and will not be supported in future releases.",
+            TimestampProvider, "timerId");
     }
 }
 
@@ -107,48 +88,7 @@ function module$use()
  */
 function module$static$init(mod, params)
 {
-    if (TimestampProvider.useClockTimer == false) {
-        var  timerParams = new Timer.Params();
-
-        timerParams.period = Timer.MAX_PERIOD;
-        timerParams.periodType = Timer.PeriodType_COUNTS;
-        timerParams.runMode = Timer.RunMode_CONTINUOUS;
-        timerParams.startMode = Timer.StartMode_USER;
-
-        mod.timer = Timer.create(TimestampProvider.timerId,
-                    null, timerParams);
-
-        Startup.lastFxns.$add(TimestampProvider.startTimer);
-    }
-    else {
-        mod.timer = null;
-    }
-}
-
-/*
- *  ======== module$view$init ========
- */
-function module$view$init(view, mod)
-{
-    var Program = xdc.useModule('xdc.rov.Program');
-    var Timer = Program.scanModule('ti.sysbios.family.arm.cc32xx.Timer');
-
-    view.timer = Timer.$scanHandle(mod.timer).$view;
-    view.usesClockTimer = Program.$modules['ti.sysbios.family.arm.cc32xx.TimestampProvider'].useClockTimer;
-}
-
-/*
- *  ======== module$validate ========
- */
-function module$validate()
-{
-    var BIOS = xdc.module('ti.sysbios.BIOS');
-    var Clock = xdc.module('ti.sysbios.knl.Clock');
-
-    if ((!BIOS.clockEnabled || (Clock.tickSource == Clock.TickSource_NULL))
-            && (this.useClockTimer == true)) {
-        TimestampProvider.$logError("Clock is not enabled, cannot share its Timer", TimestampProvider, "useClockTimer");
-    }
+    Startup.lastFxns.$add(TimestampProvider.startTimer);
 }
 
 /*

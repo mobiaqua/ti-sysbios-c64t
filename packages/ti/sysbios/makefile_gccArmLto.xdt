@@ -87,8 +87,8 @@ AR = `CGEN`/`TARGET.arBin.cmd` `TARGET.ar.opts`
 %if (BIOS.buildingAppLib == false) {
 %    Build.$private.libDir = Build.$private.libDir.replace(/\//g,'\\');
 %}
-DEL = cmd.exe /q /c del /q /f
-CP = cmd.exe /q /c copy /Y
+DEL = `XDCROOT`../bin/rm -f
+CP = `XDCROOT`../bin/cp -f
 %}
 %else {
 DEL = rm -f
@@ -156,7 +156,6 @@ clean:
 %else {
 	@$(DEL) ../makefile.libs
 %}
-	@-$(call RM, `LIB`)
 %if (BIOS.buildingAppLib == false) {
 	@-$(call RM, "`Build.$private.libDir``LIB`")
 %}

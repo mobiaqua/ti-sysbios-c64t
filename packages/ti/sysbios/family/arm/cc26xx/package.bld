@@ -39,9 +39,6 @@ var BiosBuild = xdc.loadCapsule("ti/sysbios/Build.xs");
 var objList = [
     "Alarm.c",
     "Boot.c",
-    "Power.c",
-    "Power_standbyPolicy.c",
-    "Power_calibrateRCOSC.c",
     "Seconds.c",
     "Timer.c",
     "TimestampProvider.c",
@@ -56,10 +53,9 @@ var trgFilter = {
 BiosBuild.buildLibs(objList, undefined, trgFilter, arguments);
 
 Pkg.otherFiles = [ "package.bld",
-		   "PowerCC2650.h", "Boot.xdt", "Boot.xml",
-		   "Alarm.xml", "TimestampProvider.xml",
-		   "Power_calibrateRCOSC.c",
-		   "Power.xml"];
+                   "Boot.xdt", "Boot.xml",
+                   "Alarm.xml", "TimestampProvider.xml"
+                 ];
 
 /* include source files in the release package */
 Pkg.attrs.exportSrc = true;

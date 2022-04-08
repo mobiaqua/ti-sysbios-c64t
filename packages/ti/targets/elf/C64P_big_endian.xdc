@@ -12,10 +12,10 @@
 
 /*
  *  ======== C64P_big_endian.xdc ========
- *
  */
 
 /*!
+ *  @_nodoc
  *  ======== C64P_big_endian ========
  *  TI C64P big endian (ELF)
  */

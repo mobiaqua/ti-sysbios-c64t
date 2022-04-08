@@ -516,6 +516,15 @@ module Clock
     TimerProxy.Handle getTimerHandle();
 
     /*!
+     *  @_nodoc
+     *  ======== setTicks ========
+     *  Set the internal Clock tick counter
+     *
+     *  Used internally by Power modules.
+     */
+    Void setTicks(UInt32 ticks);
+
+    /*!
      *  ======== tickStop ========
      *  Stop clock for reconfiguration
      *
@@ -694,10 +703,33 @@ module Clock
 
     /*!
      *  @_nodoc
+     *  ======== getTicksUntilTimeout ========
+     *  Get the number of Clock tick periods between now and the next
+     *  active Clock object timeout.
+     *
+     *  Used internally by Power modules.
+     *
+     *  @a(constraints)
+     *  Must be called with interrupts disabled.  Only applicable for
+     *  Clock.TickSource_TIMER.
+     *
+     *  @b(returns)     count in ticks
+     */
+    UInt32 getTicksUntilTimeout();
+
+    /*!
+     *  @_nodoc
      *  ======= walkQueueDynamic ========
      *  Walk Clock's work queue for TickMode_DYNAMIC
      */
     UInt32 walkQueueDynamic(Bool service, UInt32 tick);
+
+    /*!
+     *  @_nodoc
+     *  ======= walkQueuePeriodic ========
+     *  Walk Clock's work queue for TickMode_PERIODIC
+     */
+    UInt32 walkQueuePeriodic();
 
     /*!
      *  @_nodoc

@@ -361,12 +361,6 @@ internal:   /* not for client use */
     Void initDevice(Object *timer);
 
     /*
-     *  ======== postInit ========
-     *  finish initializing static Timers
-     */
-    Int postInit(Object *timer, Error.Block *eb);
-
-    /*
      *  ======== setThreshold ========
      *  set the compare threshold in RTC register
      */

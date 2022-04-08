@@ -54,6 +54,7 @@ function module$meta$init()
     Build = xdc.useModule('ti.sysbios.Build');
     F28004x = xdc.module('ti.sysbios.rom.c28.f28004x.F28004x');
 
+    /* no need for abstract interface */
     F28004x.common$.fxntab = false;
 
     Program = xdc.useModule('xdc.cfg.Program');
