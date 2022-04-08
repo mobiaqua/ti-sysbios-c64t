@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Texas Instruments Incorporated
+ * Copyright (c) 2015-2018 Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -714,7 +714,7 @@ Bool Hwi_getCoreStackInfo(Hwi_StackInfo *stkInfo, Bool computeStackDepth,
 
     /* Copy the stack base address and size */
     if (coreId == 0) {
-        stkInfo->hwiStackSize = Hwi_module->isrStackSize;
+        stkInfo->hwiStackSize = (SizeT)Hwi_module->isrStackSize;
         stkInfo->hwiStackBase = Hwi_module->isrStackBase;
     }
     else {
