@@ -204,6 +204,7 @@ settings.device["TDA3XX"]         = settings.device["DRA7XX"];
 settings.device["IWR16XX"]        = settings.device["AWR16XX"];
 settings.device["AWR18XX"]        = settings.device["AWR16XX"];
 settings.device["IWR18XX"]        = settings.device["AWR16XX"];
+settings.device["IWR68XX"]        = settings.device["AWR16XX"];
 
 /*
  *  ======== deviceSupportCheck ========
