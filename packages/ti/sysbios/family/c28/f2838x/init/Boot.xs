@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Texas Instruments Incorporated
+ * Copyright (c) 2018-2019, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -97,6 +97,6 @@ function module$validate()
 function viewInitModule(view, obj)
 {
     var Program = xdc.useModule('xdc.rov.Program');
-    var Boot = xdc.useModule('ti.catalog.c2800.initF2837x.Boot');
+    var Boot = xdc.useModule('ti.sysbios.family.c28.f2838x.init.Boot');
     var modCfg = Program.getModuleConfig(Boot.$name);
 }

@@ -4,7 +4,7 @@
  */
 
 /*
- * Copyright (c) 2018, Texas Instruments Incorporated
+ * Copyright (c) 2018-2019, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,8 +69,8 @@ metaonly module M4F inherits ti.targets.arm.elf.IArm {
     };
 
     override readonly config xdc.bld.ITarget2.Command ar = {
-        cmd:  "tiarmar",
-        opts: "q"
+        cmd:  "tiarmar -c",
+        opts: "-q"
     };
 
     /*!

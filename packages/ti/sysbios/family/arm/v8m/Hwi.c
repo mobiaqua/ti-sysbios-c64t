@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Texas Instruments Incorporated
+ * Copyright (c) 2018-2019 Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -812,6 +812,15 @@ Bool Hwi_getStackInfo(Hwi_StackInfo *stkInfo, Bool computeStackDepth)
 }
 
 /*
+ *  ======== Hwi_getCoreStackInfo ========
+ *  Used to get Hwi stack usage info.
+ */
+Bool Hwi_getCoreStackInfo(Hwi_StackInfo *stkInfo, Bool computeStackDepth, UInt coreId)
+{
+    return (Hwi_getStackInfo(stkInfo,  computeStackDepth));
+}
+
+/*
  *  ======== Hwi_setPriority ========
  *  Set an interrupt's priority.
  *
@@ -939,9 +948,9 @@ Void Hwi_excHandler(UInt *excStack, UInt lr)
 {
     Hwi_module->excActive = TRUE;
 
-    /* spin here if no exception handler is plugged */
-    while (Hwi_excHandlerFunc == NULL) {
-        ;
+    /* return to spin loop if no exception handler is plugged */
+    if (Hwi_excHandlerFunc == NULL) {
+        return;
     }
 
     Hwi_excHandlerFunc(excStack, lr);

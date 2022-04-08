@@ -40,7 +40,7 @@ var EventCombiner = null;
 
 if (xdc.om.$name == "cfg") {
     var deviceTable = {
-        "J7ES": {
+        "J7.*": {
             EVTRegs : 0x08020000
         },
     }

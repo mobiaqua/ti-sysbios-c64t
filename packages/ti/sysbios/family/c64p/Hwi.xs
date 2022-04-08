@@ -74,7 +74,7 @@ function getCFiles(targetName)
 
 if (xdc.om.$name == "cfg") {
     var deviceTable = {
-        "J7ES": {
+        "J7.*": {
             INTRMUX1Address : 0x08020104
         },
     }

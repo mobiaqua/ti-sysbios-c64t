@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Texas Instruments Incorporated
+ * Copyright (c) 2018-2019, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1801,13 +1801,28 @@ function viewInitVectorTable(view)
 function viewInitModule(view, mod)
 {
     var Program = xdc.useModule('xdc.rov.Program');
+    var CallStack = xdc.useModule('xdc.rov.CallStack');
+
+    CallStack.fetchRegisters(["CTRL_FAULT_BASE_PRI"]);
+    var ctrlFaultBasePri = CallStack.getRegister("CTRL_FAULT_BASE_PRI");
+
     var halHwiModCfg = Program.getModuleConfig('ti.sysbios.hal.Hwi');
     var hwiModCfg = Program.getModuleConfig('ti.sysbios.family.arm.v8m.Hwi');
 
     viewNvicFetch(this);
+
     view.activeInterrupt = String(this.ICSR & 0xff);
     view.pendingInterrupt = String((this.ICSR & 0xff000) >> 12);
-    view.processorState = (this.DSCSR & 0x10000) ? "Secure" : "Non Secure";
+    view.processorState = (this.DSCSR & 0x10000) ? "Secure, " : "Non Secure, ";
+    if (view.activeInterrupt != "0") {
+        view.processorState += "Handler";
+    }
+    else if (ctrlFaultBasePri & 0x01000000) {
+        view.processorState += "Unpriv, Thread";
+    }
+    else {
+        view.processorState += "Priv, Thread";
+    }
 
     if ((view.activeInterrupt > 0) && (view.activeInterrupt < 14)) {
         view.exception = "Yes";

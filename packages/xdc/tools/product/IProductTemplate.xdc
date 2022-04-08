@@ -158,8 +158,9 @@ metaonly interface IProductTemplate
      *                               to build and these may be specified
      *                               here.
      *  @field(linkerBuildOptions)   Special linker options to build template
-     *  @field(endianness)        String containing the endianness of the project
-     *                            (little|big|be8|be32).
+     *  @field(endianness)        String containing the endianness of the
+     *                            project (little|big|be8|be32).
+     *  @field(outputFormat)      String indicating object file format (COFF, ELF)
      *  @field(requiredProducts)  Products required to build this
      *                            example. Products are  identified by
      *                            their globally unique
@@ -272,6 +273,7 @@ metaonly interface IProductTemplate
         String   compilerBuildOptions; /*! Special compiler options */
         String   linkerBuildOptions; /*! Special linker options */
         String   endianness;         /*! endian setting (little|big|be8|be32) */
+        String   outputFormat;       /*! format of object file (COFF or ELF) */
         String   requiredProducts[]; /*! List of products required to build
                                       *  this example
                                       */

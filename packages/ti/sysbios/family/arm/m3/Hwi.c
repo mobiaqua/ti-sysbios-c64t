@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018 Texas Instruments Incorporated
+ * Copyright (c) 2015-2019 Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -926,9 +926,9 @@ Void Hwi_excHandler(UInt *excStack, UInt lr)
 {
     Hwi_module->excActive[0] = TRUE;
 
-    /* spin here if no exception handler is plugged */
-    while (Hwi_excHandlerFunc == NULL) {
-	;
+    /* return to spin loop if no exception handler is plugged */
+    if (Hwi_excHandlerFunc == NULL) {
+        return;
     }
 
     Hwi_excHandlerFunc(excStack, lr);
@@ -1443,6 +1443,21 @@ Void Hwi_excDumpRegs(UInt lr)
  *  ======== Hwi_flushVnvic ========
  */
 Void Hwi_flushVnvic()
+{
+}
+
+/*
+ *  ======== Hwi_swiDisableNull ========
+ */
+UInt Hwi_swiDisableNull()
+{
+    return (0);
+}
+
+/*
+ *  ======== Hwi_swiRestoreNull ========
+ */
+Void Hwi_swiRestoreNull(UInt key)
 {
 }
 
