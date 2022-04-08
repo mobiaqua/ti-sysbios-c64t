@@ -33,6 +33,11 @@
 ;  ======== Hwi_disp_always.s71 ========
 ;
 ;
+        .if $isdefed("__TI_ASSEMBLER_VERSION__")
+        .if __TI_ASSEMBLER_VERSION__ < 1003000
+            .emsg "Compiler version must be 1.3.0 STS or higher"
+        .endif
+        .endif
 
         .cdecls C,NOLIST,"package/internal/Hwi.xdc.h"
 
@@ -362,21 +367,21 @@ ti_sysbios_family_c7x_Hwi_dispatchAlways:
 ||      mvpb.s2   p7, b7
         std.d1x   b6, *SP[Hwi_SFP6]
 ||      std.d2    b7, *SP[Hwi_SFP7]
-||      mvc.c2    stracntr0, vb15
+||      mvc.c2    sa0cntr0, vb15
         vst8d.d2 vb15, *SP[Hwi_SFSTRACNTR0]
-||      mvc.c2    stracntr1, vb15
+||      mvc.c2    sa1cntr0, vb15
         vst8d.d2 vb15, *SP[Hwi_SFSTRACNTR1]
-||      mvc.c2    stracntr2, vb15
+||      mvc.c2    sa2cntr0, vb15
         vst8d.d2 vb15, *SP[Hwi_SFSTRACNTR2]
-||      mvc.c2    stracntr3, vb15
+||      mvc.c2    sa3cntr0, vb15
         vst8d.d2 vb15, *SP[Hwi_SFSTRACNTR3]
-||      mvc.c2    stracr0, vb15
+||      mvc.c2    sa0cr, vb15
         vst8d.d2 vb15, *SP[Hwi_SFSTRACR0]
-||      mvc.c2    stracr1, vb15
+||      mvc.c2    sa1cr, vb15
         vst8d.d2 vb15, *SP[Hwi_SFSTRACR1]
-||      mvc.c2    stracr2, vb15
+||      mvc.c2    sa2cr, vb15
         vst8d.d2 vb15, *SP[Hwi_SFSTRACR2]
-||      mvc.c2    stracr3, vb15
+||      mvc.c2    sa3cr, vb15
         vst8d.d2 vb15, *SP[Hwi_SFSTRACR3]
 ||      sesave.l2 3, 1, vb15
         vst8d.d2 vb15, *SP[Hwi_SFSE1_3]
@@ -425,21 +430,21 @@ ti_sysbios_family_c7x_Hwi_dispatchAlways:
         saclose.c2 3
 
         vld8d.d1 *SP[Hwi_SFSTRACNTR0], vb15
-        mvc.c2    vb15, stracntr0
+        mvc.c2    vb15, sa0cntr0
 ||      vld8d.d1 *SP[Hwi_SFSTRACNTR1], vb15
-        mvc.c2    vb15, stracntr1
+        mvc.c2    vb15, sa1cntr0
 ||      vld8d.d1 *SP[Hwi_SFSTRACNTR2], vb15
-        mvc.c2    vb15, stracntr2
+        mvc.c2    vb15, sa2cntr0
 ||      vld8d.d1 *SP[Hwi_SFSTRACNTR3], vb15
-        mvc.c2    vb15, stracntr3
+        mvc.c2    vb15, sa3cntr0
 ||      vld8d.d1 *SP[Hwi_SFSTRACR0], vb15
-        mvc.c2    vb15, stracr0
+        mvc.c2    vb15, sa0cr
 ||      vld8d.d1 *SP[Hwi_SFSTRACR1], vb15
-        mvc.c2    vb15, stracr1
+        mvc.c2    vb15, sa1cr
 ||      vld8d.d1 *SP[Hwi_SFSTRACR2], vb15
-        mvc.c2    vb15, stracr2
+        mvc.c2    vb15, sa2cr
 ||      vld8d.d1 *SP[Hwi_SFSTRACR3], vb15
-        mvc.c2    vb15, stracr3
+        mvc.c2    vb15, sa3cr
 
         ldd.d1    *SP[Hwi_SFP7], b7
         ldd.d1    *SP[Hwi_SFP6], b6
