@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018, Texas Instruments Incorporated
+ * Copyright (c) 2016-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-var CC26xx = xdc.module('ti.sysbios.rom.cortexm.cc26xx.CC26xx');
+var CC26xx = xdc.module('ti.sysbios.rom.cortexm.cc26xx.cc26x2v2.CC26xx');
 
 var Build = xdc.useModule('ti.sysbios.Build');
 Build.buildROM = false;
@@ -114,12 +114,27 @@ Timestamp.SupportProxy = rtcTimestamp;
 var halHwi = xdc.useModule('ti.sysbios.hal.Hwi');
 halHwi.checkStackFlag = false; /* avoids pulling in hal Hwi_checkStack() */
 
-xdc.loadCapsule("ti/sysbios/rom/cortexm/cc26xx/CC26xx_externs.xs");
+var ROM = xdc.module('ti.sysbios.rom.ROM');
+
+/* give default placements for the ROM referenced structures for IAR */
+if (Program.build.target.$name.match(/iar/)) {
+    if (!ROM.$written("constStructAddr")) {
+        ROM.constStructAddr = 0x1000;
+    }
+    if (!ROM.$written("dataStructAddr")) {
+        ROM.dataStructAddr = 0x20000110;
+    }
+    if (!ROM.$written("externFuncStructAddr")) {
+        ROM.externFuncStructAddr = 0x13c0;
+    }
+}
+
+xdc.loadCapsule("ti/sysbios/rom/cortexm/cc26xx/cc26x2v2/CC26xx_externs.xs");
 
 if (Program.build.target.$name.match(/gnu/)) {
     var Reset = xdc.useModule('xdc.runtime.Reset');
     Reset.fxns[Reset.fxns.length++] =
-        "&ti_sysbios_rom_cortexm_cc26xx_CC26xx_dataInit"
+        "&ti_sysbios_rom_cortexm_cc26xx_cc26x2v2_CC26xx_dataInit"
 
     var ReentSupport = xdc.useModule('ti.sysbios.rts.gnu.ReentSupport');
     ReentSupport.enableReentSupport = false;
