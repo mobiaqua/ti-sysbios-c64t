@@ -1,0 +1,11 @@
+/*
+ *  Copyright 2015 by Texas Instruments Incorporated.
+ *
+ */
+
+Pkg.otherFiles = ["std.h"];
+Pkg.otherSrcs = Pkg.otherFiles;
+/*
+
+ */
+

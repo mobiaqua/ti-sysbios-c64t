@@ -1,0 +1,46 @@
+/*
+ *  Copyright 2015 by Texas Instruments Incorporated.
+ *
+ */
+
+var RtsBuild = xdc.loadCapsule('xdc/runtime/build.xs');
+var KnlBuild = xdc.loadCapsule('xdc/runtime/knl/build.xs');
+
+Pkg.makePrologue = RtsBuild.makePrologue;
+
+/* autoinit.c in 4.0 and 3.3 is same, so for now we keep only one copy */
+SRCS = ["boot.c", "pre_init.c", "autoinit.c"];
+
+/* define additional sources provided by this package */
+BOOTFILES = [
+    "boot_3.2.c", "boot_2.1.c", "boot_4.0.c",
+    "autoinit_2.1.c", "autoinit_4.2.c"
+];
+
+Pkg.otherSrcs = SRCS.concat(BOOTFILES);
+Pkg.otherFiles = Pkg.otherSrcs;
+Pkg.otherFiles.$add("link.xdt");
+
+Pkg.generatedFiles = ["lib/"];
+
+var attrs = {
+    profile: Pkg.attrs.profile == "debug" ? "debug" : "whole_program",
+    /* add debug without sacrificing optimizations; this allows stack trace
+     * displays in the debugger
+     */
+    copts: "--symdebug:dwarf --optimize_with_debug"
+};
+
+var cobjs = RtsBuild.objs.concat(KnlBuild.c_objs);
+for (var i = 0; i < Build.targets.length; i++) {
+    var targ = Build.targets[i];
+    if (targ.rts == Pkg.name) {
+        Pkg.addLibrary("lib/" + Pkg.name, targ, attrs).addObjects(cobjs);
+        Pkg.addLibrary("lib/boot", targ, attrs).addObjects(SRCS);
+    }
+}
+
+/*
+
+ */
+

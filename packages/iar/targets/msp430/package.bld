@@ -1,0 +1,12 @@
+/*
+ *  Copyright 2015 by Texas Instruments Incorporated.
+ *
+ */
+
+Pkg.otherSrcs = ["std.h", "runh"];
+
+Pkg.otherFiles = Pkg.otherSrcs;
+/*
+
+ */
+

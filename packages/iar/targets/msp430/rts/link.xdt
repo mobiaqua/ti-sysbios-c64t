@@ -1,0 +1,14 @@
+%%{
+/*
+ *  Copyright 2015 by Texas Instruments Incorporated.
+ *
+ */
+
+%%}
+-eexit=xdc_runtime_System_exit__E
+%%{
+/*
+
+ */
+
+%%}
