@@ -4,7 +4,7 @@
  */
 
 /*
- * Copyright (c) 2019, Texas Instruments Incorporated
+ * Copyright (c) 2020 Texas Instruments Incorporated - http://www.ti.com
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,28 +36,26 @@
  */
 
 /*
- *  ======== M33.genConstCustom ========
- *
- *  This function is invoked at the config time, therefore we can check the
- *  build profile.
+ *  ======== M0.getISAChain ========
+ *  M0 implementation for ITarget.getISAChain()
  */
-function genConstCustom(names, types)
+function getISAChain (isa)
 {
-    if (xdc.om.$name != 'cfg') {
-        return (null);
+    var myChain = [this.isa];
+    var isaIn = (isa == null ? this.isa : isa)
+
+    for (var i = 0; i < myChain.length; i++) {
+        if (myChain[i] == isaIn) {
+            break;
+        }
     }
 
-    var sb = new java.lang.StringBuilder();
-    for (var i = 0; i < names.length; i++) {
-        var adjName = names[i];
-        if (names[i].match(/.*__A$/)) {
-            adjName += "[]";
-        }
-        sb.append('const ' + types[i] + ' ' + adjName
-            + " __attribute__ ((section (\".const:" + names[i]
-            + "\")));\n");
+    if (i == myChain.length) {
+        return (null);
     }
-    return (sb.toString() + "");
+    else {
+        return (myChain.slice(0, i + 1));
+    }
 }
 /*
 

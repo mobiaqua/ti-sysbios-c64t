@@ -1,10 +1,5 @@
 /*
- *  Copyright 2020 by Texas Instruments Incorporated.
- *
- */
-
-/*
- * Copyright (c) 2018, Texas Instruments Incorporated
+ * Copyright (c) 2020, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,31 +30,33 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
- *  ======== M4.genConstCustom ========
- *
- *  This function is invoked at the config time, therefore we can check the
- *  build profile.
- */
-function genConstCustom(names, types)
-{
-    if (xdc.om.$name != 'cfg') {
-        return (null);
-    }
+#ifndef ti_sysbios_family_c7x_MemProtect__epilogue__include
+#define ti_sysbios_family_c7x_MemProtect__epilogue__include
 
-    var sb = new java.lang.StringBuilder();
-    for (var i = 0; i < names.length; i++) {
-        var adjName = names[i];
-        if (names[i].match(/.*__A$/)) {
-            adjName += "[]";
-        }
-        sb.append('const ' + types[i] + ' ' + adjName
-            + " __attribute__ ((section (\".const:" + names[i]
-            + "\")));\n");
-    }
-    return (sb.toString() + "");
-}
-/*
+#include <ti/sysbios/family/c7x/Mmu.h>
 
- */
+#define ti_sysbios_hal_MemProtect_NUM_KERNEL_ACL_ENTRIES  4
+#define ti_sysbios_hal_MemProtect_NUM_USER_ACL_ENTRIES    4
+#define ti_sysbios_hal_MemProtect_NUM_ACL_ENTRIES         8
 
+typedef struct ti_sysbios_family_c7x_MemProtect_MapData {
+    Ptr baseAddress;
+    SizeT length;
+    ti_sysbios_family_c7x_Mmu_MapAttrs attrs;
+} ti_sysbios_family_c7x_MemProtect_MapData;
+
+typedef struct ti_sysbios_hal_MemProtect_Struct {
+    ti_sysbios_family_c7x_MemProtect_MapData acl[ti_sysbios_hal_MemProtect_NUM_USER_ACL_ENTRIES];
+} ti_sysbios_hal_MemProtect_Struct;
+
+/* macros */
+#define MemProtect_Struct                                 \
+    ti_sysbios_hal_MemProtect_Struct
+#define MemProtect_NUM_KERNEL_ACL_ENTRIES                 \
+    ti_sysbios_hal_MemProtect_NUM_KERNEL_ACL_ENTRIES
+#define MemProtect_NUM_USER_ACL_ENTRIES                   \
+    ti_sysbios_hal_MemProtect_NUM_USER_ACL_ENTRIES
+#define MemProtect_NUM_ACL_ENTRIES                        \
+    ti_sysbios_hal_MemProtect_NUM_ACL_ENTRIES
+
+#endif

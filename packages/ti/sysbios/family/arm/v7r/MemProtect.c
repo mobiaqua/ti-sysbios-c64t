@@ -69,7 +69,7 @@ Void MemProtect_programMpuEntry(UInt8 id, UInt32 begin, UInt32 end,
 Int MemProtect_constructDomain(MemProtect_Struct *obj, MemProtect_Acl *acl,
     UInt16 aclLength)
 {
-    UInt8  i;
+    UInt16 i;
     SizeT  length;
     Ptr    baseAddress;
     UInt32 flags, regionAttrs, regionSize;
@@ -92,6 +92,11 @@ Int MemProtect_constructDomain(MemProtect_Struct *obj, MemProtect_Acl *acl,
         /* Read user supplied ACL entry */
         baseAddress = acl[i].baseAddress;
         length = acl[i].length;
+
+        /* Verify length is a power of 2 */
+        if (length && (length & (length - 1)) != 0) {
+            return (-5);
+        }
 
         /* verify base address is a multiple of length */
         if (length && (((UInt32)baseAddress & (length - 1)) != 0)) {

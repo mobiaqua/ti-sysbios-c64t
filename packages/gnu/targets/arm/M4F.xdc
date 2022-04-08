@@ -61,12 +61,12 @@ metaonly module M4F inherits IM {
 
     override readonly config ITarget2.Command asm = {
         cmd: "$(rootDir)/bin/$(GCCTARG)-gcc -c -x assembler-with-cpp",
-        opts: "-Wa,-mcpu=cortex-m4 -Wa,-mthumb -Wa,-mfloat-abi=hard -Wa,-mfpu=fpv4-sp-d16 "
+        opts: "-mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 "
     };
 
     readonly config ITarget2.Command asmBin = {
         cmd: "bin/arm-none-eabi-gcc -c -x assembler-with-cpp",
-        opts: "-Wa,-mcpu=cortex-m4 -Wa,-mthumb -Wa,-mfloat-abi=hard -Wa,-mfpu=fpv4-sp-d16 "
+        opts: "-mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 "
     };
 
     override config ITarget2.Options lnkOpts = {

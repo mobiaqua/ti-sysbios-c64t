@@ -48,11 +48,15 @@ var objList = [
     "Hwi_disp_always",
     "Hwi_startup.c",
     "IntrinsicsSupport.c",
+    "MemProtect.c",
     "Mmu.c",
     "Mmu_asm",
+    "SysCall.c",
+    "SysCall_asm",
     "TaskSupport.c",
     "TaskSupport_asm",
     "TimestampProvider.c",
+    "TimestampProvider_svc.c",
     "boot.c",
 ];
 
@@ -66,6 +70,13 @@ BiosBuild.buildLibs(objList, undefined, trgFilter, arguments);
 Pkg.otherFiles = [
                   "package.bld",
                   "linkcmd.xdt",
+                  "SysCall_asm.h",
+                  "SysCall__prologue.h",
+                  "SysCall__epilogue.h",
+                  "MemProtect__prologue.h",
+                  "MemProtect__epilogue.h",
+                  "TimestampProvider__prologue.h",
+                  "TimestampProvider__epilogue.h",
                  ];
 
 /* include source files in the release package */

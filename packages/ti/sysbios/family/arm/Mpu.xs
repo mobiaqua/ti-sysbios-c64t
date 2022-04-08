@@ -99,6 +99,8 @@ if (xdc.om.$name == "cfg" || typeof(genCdoc) != "undefined") {
     deviceTable["TM4.*"]         = deviceTable["MSP432P401R"];
 
     /* SimpleLink devices */
+    deviceTable["CC13.1.*"] = deviceTable["CC26.2.*"];
+    deviceTable["CC26.1.*"] = deviceTable["CC26.2.*"];
     deviceTable["CC13.2.*"] = deviceTable["CC26.2.*"];
 
     /* Keystone3 devices */

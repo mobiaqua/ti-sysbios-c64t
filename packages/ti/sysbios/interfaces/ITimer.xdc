@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2019, Texas Instruments Incorporated
+ * Copyright (c) 2013-2020, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -89,6 +89,8 @@ interface ITimer
      *  Timer is dynamically reprogrammed for the next required tick. This mode
      *  is intended only for use by the Clock module when it is operating in
      *  TickMode_DYNAMIC; it is not applicable for user-created Timer instances.
+     *  The behavior is similar to RunMode_ONESHOT, but the timer will be reprogrammed
+     *  and restarted automatically by the Clock module upon each timer interrupt.
      */
     /* REQ_TAG(SYSBIOS-1026) */
     enum RunMode {
@@ -168,6 +170,19 @@ interface ITimer
     /*! 
      *  ======== getStatus ========
      *  Returns timer status (free or in use).
+     *
+     *  Thread safety should be observed when using {@link #getStatus}.
+     *  For example, to protect against preemption surround the query of
+     *  timer status with {@link ti.sysbios.hal.Hwi#disable Hwi_disable()} and
+     *  {@link ti.sysbios.hal.Hwi#restore Hwi_restore()} calls:
+     *
+     *  @p(code)
+     *  // disable interrupts to avoid another thread claiming this timer
+     *  key = Hwi_disable();
+     *  status = Timer_getStatus(timerId);
+     *  ...
+     *  Hwi_restore(key);
+     *  @p
      *
      *  @b(returns)     timer status
      */
@@ -315,6 +330,10 @@ instance:
      *  Hwi_restore(key);
      *  @p
      *
+     *  @a(constraints)
+     *  Timer_start() should not be called if the timer has already been
+     *  started.
+     *
      *  @a(side effects)
      *  Enables the timer's interrupt.
      */
@@ -422,6 +441,20 @@ instance:
     /*!
      *  ======== getCount ========
      *  Read timer counter register
+     *
+     *  Thread safety may be a concern when using {@link #getCount}, to avoid
+     *  using a stale count value. For example, to protect against preemption
+     *  surround the query of timer count with
+     *  {@link ti.sysbios.hal.Hwi#disable Hwi_disable()} and
+     *  {@link ti.sysbios.hal.Hwi#restore Hwi_restore()} calls:
+     *
+     *  @p(code)
+     *  // disable interrupts to read current timer count
+     *  key = Hwi_disable();
+     *  currentCount = Timer_getCount();
+     *  ...
+     *  Hwi_restore(key);
+     *  @p
      *
      *  @b(returns)     timer counter value
      */

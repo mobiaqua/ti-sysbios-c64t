@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, Texas Instruments Incorporated
+ * Copyright (c) 2017-2020, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -160,7 +160,7 @@ package ti.sysbios.hal;
  *  @p(code)
  *  Int MemProtect_constructDomain(MemProtect_Struct *obj, struct MemProtect_Acl *acl, UInt16 aclLength)
  * 
- *  Void MemProtect_destructDomain(MemProtect_Struct *obj)
+ *  Int MemProtect_destructDomain(MemProtect_Struct *obj)
  *  @p
  *
  *  @a(MemProtect Functions)

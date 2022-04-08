@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2019, Texas Instruments Incorporated
+ * Copyright (c) 2015-2020, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -662,6 +662,7 @@ Timer_FuncPtr Timer_getFunc(Timer_Object *obj, UArg *arg)
  */
 Void Timer_setFunc(Timer_Object *obj, Timer_FuncPtr fxn, UArg arg)
 {
+    Assert_isTrue((fxn != NULL), NULL);
     obj->tickFxn = fxn;
     obj->arg = arg;
 }

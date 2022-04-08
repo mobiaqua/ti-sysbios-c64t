@@ -173,6 +173,12 @@ if (xdc.om.$name == "cfg") {
             resetVectorAddress : 0x00200000,    /* placed low in flash */
             vectorTableAddress : 0x20000000,
         },
+        "CC26.1.*": {
+            numInterrupts : 16 + 38,            /* supports 54 interrupts */
+            numPriorities : 8,
+            resetVectorAddress : 0x0,           /* placed low in flash */
+            vectorTableAddress : 0x20000000,
+        },
         "CC26.2.*": {
             numInterrupts : 16 + 38,            /* supports 54 interrupts */
             numPriorities : 8,
@@ -233,6 +239,7 @@ if (xdc.om.$name == "cfg") {
     deviceTable["OMAP5430"]      = deviceTable["OMAP4430"];
     deviceTable["Vayu"]          = deviceTable["OMAP4430"];
     deviceTable["DRA7XX"]        = deviceTable["OMAP4430"];
+    deviceTable["CC13.1.*"]      = deviceTable["CC26.1.*"];
     deviceTable["CC13.2.*"]      = deviceTable["CC26.2.*"];
     deviceTable["CC13.*"]        = deviceTable["CC26.*"];
     deviceTable["CC3235S"]       = deviceTable["CC3200"];
@@ -344,13 +351,6 @@ function module$meta$init()
     Program.sectMap[".bootVecs"] = new Program.SectionSpec();
     Program.sectMap[".bootVecs"].type = "DSECT";
 
-    if (!Program.build.target.$name.match(/gnu/)) {
-        /* create our .vecs & .resetVecs SectionSpecs */
-        Program.sectMap[".resetVecs"] = new Program.SectionSpec();
-        Program.sectMap[".vecs"] = new Program.SectionSpec();
-        Program.sectMap[".vecs"].type = "NOLOAD";
-    }
-
     /*
      * Initialize meta-only Hwi object array
      */
@@ -437,6 +437,13 @@ function module$use()
     }
     else {
         Memory = xdc.useModule('xdc.runtime.Memory');
+    }
+
+    if (Hwi.placeVectorTables && !Program.build.target.$name.match(/gnu/)) {
+        /* create our .vecs & .resetVecs SectionSpecs */
+        Program.sectMap[".resetVecs"] = new Program.SectionSpec();
+        Program.sectMap[".vecs"] = new Program.SectionSpec();
+        Program.sectMap[".vecs"].type = "NOLOAD";
     }
 
     if (Hwi.dispatcherSwiSupport == undefined) {
@@ -656,7 +663,7 @@ function module$static$init(mod, params)
     /*
      * Non GNU targets have to deal with legacy config files
      */
-    if (!Program.build.target.$name.match(/gnu/)) {
+    if (Hwi.placeVectorTables && !Program.build.target.$name.match(/gnu/)) {
 
         /*
          * Some legacy config files explicitly place the vector table sections
@@ -704,7 +711,13 @@ function module$static$init(mod, params)
         Startup.firstFxns.$add(Hwi.initNVIC);
     }
 
-    mod.vectorTableBase = Hwi.vectorTableAddress;
+    if ((Hwi.vectorTableAddress != Hwi.resetVectorAddress) ||
+            (Hwi.placeVectorTables == false)) {
+        mod.vectorTableBase = $externPtr('ti_sysbios_family_arm_m3_Hwi_ramVectors[0]');
+    }
+    else {
+        mod.vectorTableBase = Hwi.vectorTableAddress;
+    }
 
     if (Hwi.vectorTableAddress > 0x3fffc000) {
         Hwi.$logError("Vector Table must be placed at or below 0x3FFFFC00",

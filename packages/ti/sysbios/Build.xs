@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2020 Texas Instruments Incorporated - http://www.ti.com
+ * Copyright (c) 2015-2020, Texas Instruments Incorporated - http://www.ti.com
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,6 +67,7 @@ var ccOptsList = {
     "ti.targets.C28_float"                      : custom28xOpts,
     "ti.targets.elf.C28_float"                  : custom28xOpts,
     "ti.targets.elf.C64P"                       : custom6xOpts,
+    "ti.targets.elf.C28_float64"                : custom28xOpts,
     "ti.targets.elf.C674"                       : custom6xOpts,
     "ti.targets.elf.C67P"                       : custom6xOpts,
     "ti.targets.elf.C64T"                       : custom6xOpts,
@@ -465,6 +466,7 @@ function getDefs()
 {
     var BIOS = xdc.module("ti.sysbios.BIOS");
     var Hwi = xdc.module("ti.sysbios.hal.Hwi");
+    var HwiC28 = xdc.module("ti.sysbios.family.c28.Hwi");
     var Settings = xdc.module("ti.sysbios.family.Settings");
     var HwiDelegate = Settings.getDefaultHwiDelegate();
     var HwiDelegateName = HwiDelegate.replace(/\./g, "_");
@@ -642,6 +644,13 @@ function getDefs()
 
     if (BIOS.logsEnabled == false) {
         defs += " -Dxdc_runtime_Log_DISABLE_ALL";
+    }
+
+    if (HwiC28.regsVCRC) {
+        defs += " -Dti_sysbios_family_c28_Hwi_regsVCRC__D=TRUE";
+    }
+    else {
+        defs += " -Dti_sysbios_family_c28_Hwi_regsVCRC__D=FALSE";
     }
 
     defs += Build.getCommandLineDefs();

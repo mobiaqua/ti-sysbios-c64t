@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2019, Texas Instruments Incorporated
+ * Copyright (c) 2015-2020, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -84,6 +84,10 @@ Void Task_schedule(Void)
     Queue_Handle maxQ;
     Task_Object *prevTask;
     Task_Object *curTask;
+#if defined(ti_sysbios_knl_Task_minimizeLatency__D) \
+    && (ti_sysbios_knl_Task_minimizeLatency__D == TRUE)
+    volatile UInt delay;
+#endif
 #ifdef ti_sysbios_knl_Task_ENABLE_SWITCH_HOOKS
     Int i;
 #endif
@@ -138,6 +142,13 @@ Void Task_schedule(Void)
 #elif defined(ti_sysbios_knl_Task_minimizeLatency__D) \
     && (ti_sysbios_knl_Task_minimizeLatency__D == TRUE)
             Hwi_enable();
+            for (delay = 0; delay < 1U; delay = delay + 1U) {
+                /*
+                 * There's an issue with the C6x optimzer where a back-to-back
+                 * enable/disable is not enough to open the window for an ISR.
+                 * This short 'volatile delay' loop works around that issue.
+                 */
+            }
             Hwi_disable();
 #endif
             if ((BIOS_mpeEnabled == TRUE) &&
@@ -340,6 +351,22 @@ Bool Task_enabled(Void)
  */
 UInt Task_disable(Void)
 {
+    /*
+     * The following Read-Modify-Write of 'locked' does not
+     * require atomic execution. If locked is 'FALSE' on entry
+     * all other pre-empting manipulations of 'locked' will
+     * restore 'locked' to 'FALSE' prior to returning to this
+     * thread. Therefore, if the fetched value of 'key' is FALSE,
+     * even though many pre-empting operations may manipulate
+     * 'locked' prior to the next statement setting it to TRUE,
+     * by design, 'locked' will have been set back to 'FALSE'
+     * prior to returning to this thread.
+     * The same logic applies to 'locked' having a value of
+     * TRUE on entry. All other pre-empting operations will
+     * reset 'locked' to TRUE prior to returning to this thread.
+     * Consequently, the return value of Task_disable() will always
+     * match the on-entry state of 'locked'.
+     */
     UInt key = (UInt)Task_module->locked;
 
     Task_module->locked = TRUE;
@@ -1136,6 +1163,8 @@ Ptr Task_getHookContext(Task_Object *tsk, Int id)
 /* REQ_TAG(SYSBIOS-454) */
 Void Task_setHookContext(Task_Object *tsk, Int id, Ptr hookContext)
 {
+    Assert_isTrue(((id < Task_hooks.length) && (id >= 0)), Task_A_badContextId);
+
     tsk->hookEnv[id] = hookContext;
 }
 
@@ -1419,9 +1448,12 @@ Void Task_allBlockedFunction(Void)
     }
     else if (Task_allBlockedFunc == NULL) {
         (Void)Hwi_enable();
-        /* Guarantee that interrupts are enabled briefly */
         for (delay = 0; delay < 1U; delay = delay + 1U) {
-           ;
+            /*
+             * There's an issue with the C6x optimzer where a back-to-back
+             * enable/disable is not enough to open the window for an ISR.
+             * This short 'volatile delay' loop works around that issue.
+             */
         }
         (Void)Hwi_disable();
     }

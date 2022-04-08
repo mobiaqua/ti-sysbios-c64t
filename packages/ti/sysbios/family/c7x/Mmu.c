@@ -201,6 +201,9 @@ Void Mmu_disable()
     /* disables the MMU */
     Mmu_disableI();
 
+    /* Invalidate entire TLB */
+    Mmu_tlbInvAll(0);
+    
     /* set cache back to initial settings */
     Cache_enable(type);
 
@@ -225,6 +228,7 @@ Void Mmu_disableI()
 Void Mmu_enable()
 {
     UInt   key;
+    UInt   mode;
 
     /* if MMU is already enabled then just return */
     if (Mmu_isEnabled()) {
@@ -233,13 +237,34 @@ Void Mmu_enable()
 
     key = Hwi_disable();
 
+    Cache_disable(Cache_Type_L1D);
+    
     /* Invalidate entire TLB */
     Mmu_tlbInvAll(0);
     
     /* enables the MMU */
+    mode = ti_sysbios_family_c7x_Hwi_getCXM__E();
+    if (mode == Hwi_TSR_CXM_SecureSupervisor) {
+        Mmu_enableI_secure();
+    }
     Mmu_enableI();
     
+    Cache_enable(Cache_Type_L1D);
+
     Hwi_restore(key);
+}
+
+/*
+ *  ======== Mmu_enableI_secure ========
+ */
+Void Mmu_enableI_secure()
+{
+    asm("\t mvk64.l1    0x80000000000000C1LL, a2 \n"
+        "\t mvc.s1      SCR, a3                  \n"
+        "\t nop                                  \n"
+        "\t ord.l1      a2, a3, a3               \n"
+        "\t mvc.s1      a3, SCR                  \n"
+        "\t mvc.s1      a3, SCR_S");
 }
 
 /*
@@ -248,11 +273,10 @@ Void Mmu_enable()
 Void Mmu_enableI()
 {
     asm("\t mvk64.l1    0x80000000000000C1LL, a2 \n"
-        "\t mvc.s1      SCR, a3                  \n"
+        "\t mvc.s1      SCR, a3                \n"
         "\t nop                                  \n"
         "\t ord.l1      a2, a3, a3               \n"
-        "\t mvc.s1      a3, SCR                  \n"
-        "\t mvc.s1      a3, SCR_S");
+        "\t mvc.s1      a3, SCR");
 }
 
 /*
@@ -361,6 +385,7 @@ Void Mmu_readBlockEntry(UInt8 level, UInt64 *tablePtr, UInt16 tableIdx,
     desc = tablePtr[tableIdx];
 
     mapAttrs->attrIndx = (Mmu_AttrIndx)((desc >> 2) & 0x7);
+    mapAttrs->ns = (desc >> 5) & 0x1;
     mapAttrs->accessPerm = (Mmu_AccessPerm)((desc >> 6) & 0x3);
     mapAttrs->shareable = (Mmu_Shareable)((desc >> 8) & 0x3);
     mapAttrs->global = !((desc >> 11) & 0x1);
@@ -486,7 +511,13 @@ Void Mmu_startup()
 //    Mmu_tlbInvAll(0);
     
     if (Mmu_enableMMU) {
-        Mmu_enableI();
+        mode = ti_sysbios_family_c7x_Hwi_getCXM__E();
+        if (mode == Hwi_TSR_CXM_SecureSupervisor) {
+            Mmu_enableI_secure();
+        }
+        else {
+            Mmu_enableI();
+        }
     }
 
     if (Hwi_bootToNonSecure) {
@@ -589,7 +620,7 @@ Bool Mmu_tableWalk(UInt8 level, UInt64 *tablePtr, UInt64 *vaddr, UInt64 *paddr,
 }
 
 /*
- *  ======== Mmu_intFuncDefault ========
+ *  ======== Mmu_initFuncDefault ========
  */
 Void Mmu_initFuncDefault()
 {
@@ -604,6 +635,7 @@ Void Mmu_initFuncDefault()
 
     attrs.attrIndx = Mmu_AttrIndx_MAIR0;
     attrs.ns = 0;
+    attrs.privExecute = 1;
 
     ret = Mmu_map(0x02400000, 0x02400000, 0x000c0000, &attrs, 1); /* dmtimer */
     if (!ret) {
@@ -635,7 +667,7 @@ Void Mmu_initFuncDefault()
     /*
      * Setup non-secure mappings
      */
-
+#if ti_sysbios_family_c7x_Hwi_bootToNonSecure__D
     attrs.attrIndx = Mmu_AttrIndx_MAIR0;
     attrs.ns = 1;
 
@@ -666,7 +698,7 @@ Void Mmu_initFuncDefault()
     if (!ret) {
         goto fail;
     }
-
+#endif
     return;
 
 fail:

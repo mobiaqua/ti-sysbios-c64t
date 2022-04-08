@@ -4,7 +4,7 @@
  */
 
 /*
- * Copyright (c) 2008-2019 Texas Instruments Incorporated
+ * Copyright (c) 2008-2020 Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,12 +78,7 @@ metaonly module C28_float inherits ti.targets.ITarget {
      */
     override readonly config xdc.bld.ITarget2.Command cc = {
         cmd: "cl2000 -c",
-/*
-        opts: "--preproc_with_comment -v28 -DLARGE_MODEL=1 -ml --float_support=fpu32 --abi=eabi"
-        opts: "-ppc -v28 -DLARGE_MODEL=1 -ml --float_support=fpu32 --abi=eabi"
-        opts: "-v28 -DLARGE_MODEL=1 -ml --float_support=fpu32 --abi=eabi"
-*/
-        opts: "-v28 -DLARGE_MODEL=1 -ml --float_support=fpu32 --abi=eabi"
+        opts: "-v28 -DLARGE_MODEL=1 -ml --float_support=fpu32 --diag_suppress=3195 --abi=eabi"
     };
 
     /*!
@@ -106,11 +101,6 @@ metaonly module C28_float inherits ti.targets.ITarget {
      */
     override readonly config xdc.bld.ITarget2.Command asm = {
         cmd: "cl2000 -c",
-/*
-        opts: "--preproc_with_comment -v28 -ml -DLARGE_MODEL=1 --float_support=fpu32 --abi=eabi"
-        opts: "-ppc -v28 -ml -DLARGE_MODEL=1 --float_support=fpu32 --abi=eabi"
-        opts: "-v28 -ml -DLARGE_MODEL=1 --float_support=fpu32 --abi=eabi"
-*/
         opts: "-v28 -ml -DLARGE_MODEL=1 --float_support=fpu32 --abi=eabi"
     };
 
@@ -144,11 +134,6 @@ metaonly module C28_float inherits ti.targets.ITarget {
         prefix: "-q -u _c_int00",
         suffix: "-w -c -m $(XDCCFGDIR)/$@.map -l $(rootDir)/lib/libc.a"
     };
-
-/*
-    override readonly config xdc.bld.ITarget2.Command lnk =
-        ti.targets.C28_float.lnk;
-*/
 
     override readonly config xdc.bld.ITarget2.Command vers =
         ti.targets.C28_float.vers;

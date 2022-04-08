@@ -11,9 +11,9 @@
 /* Memory Map                                                                 */
 MEMORY{
     VECS             : origin=0x00000000 length=0x00000100
-    ATCM       (RWX) : origin=0x41000000 length=0x00008000 fill=0xFFFFFFFF
+    ATCM       (RWX) : origin=0x41000000 length=0x00008000
     BTCM       (RWX) : origin=0x41010000 length=0x00008000
-    RAM0       (RW)  : origin=0x70000000 length=0x00080000
+    RAM0       (RW)  : origin=0x70000000 length=0x00200000
 }
 
 /*----------------------------------------------------------------------------*/
@@ -28,6 +28,6 @@ SECTIONS{
     .data             : {} > BTCM | RAM0
     .sysmem           : {} > RAM0
     .args             : {} > RAM0
-    .stack            : {} > ATCM | BTCM | RAM0 fill=0xFFFFFFFF
+    .stack            : {} > ATCM | BTCM | RAM0
 }
 /*----------------------------------------------------------------------------*/

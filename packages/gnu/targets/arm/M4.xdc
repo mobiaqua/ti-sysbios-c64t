@@ -61,12 +61,12 @@ metaonly module M4 inherits IM {
 
     override readonly config ITarget2.Command asm = {
         cmd: "$(rootDir)/bin/$(GCCTARG)-gcc -c -x assembler-with-cpp",
-        opts: "-Wa,-mcpu=cortex-m4 -Wa,-mthumb"
+        opts: "-mcpu=cortex-m4 -mthumb"
     };
 
     readonly config ITarget2.Command asmBin = {
         cmd: "bin/arm-none-eabi-gcc -c -x assembler-with-cpp",
-        opts: "-Wa,-mcpu=cortex-m4 -Wa,-mthumb"
+        opts: "-mcpu=cortex-m4 -mthumb"
     };
 
     override config ITarget2.Options lnkOpts = {

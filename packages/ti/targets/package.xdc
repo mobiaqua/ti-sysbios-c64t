@@ -26,11 +26,10 @@ requires xdc.bld;
  *  that enables these tools to to be used by the XDC Build Engine.
  */
 package ti.targets [1,0,3] {
-    module C64P, C64P_big_endian, C674, C674_big_endian;
-    module C64T, C66, C66_big_endian;
+    module C64T;
     module C28, C28_large, C28_float;
-    module C62, C62_big_endian;
-    module C64, C64_big_endian;
+    module C64P, C674;
+    module C66;
 
     interface ITarget;
 }

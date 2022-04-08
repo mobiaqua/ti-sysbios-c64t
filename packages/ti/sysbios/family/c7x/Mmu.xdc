@@ -601,6 +601,11 @@ internal:
     Void enableI();
 
     /*
+     *  ======== enableI_secure ========
+     */
+    Void enableI_secure();
+
+    /*
      *  ======== configInfo ========
      *  This is a const object that contains pre-initialized config info
      *  about the MMU. Goal is to save some computation time at runtime

@@ -197,7 +197,7 @@ function module$static$init(mod, params)
         Hwi.vectorTableBase_SS = $externPtr('secure_soft_reset');
     }
     else {
-        Hwi.vectorTableBase_SS = 0;
+        Hwi.vectorTableBase_SS = $externPtr('soft_reset');
     }
 
     mod.ierMask = 2;    // enable NMI
@@ -499,7 +499,10 @@ function viewGetStackInfo()
         else {
             var size = Program.getSymbolValue("__STACK_SIZE");
         }
-        var stackBase = Program.getSymbolValue("__stack");
+        var stackBase = Program.getSymbolValue("_stack");
+        /* bottom 64K+8K is for HW stack, SW stack starts at base + 64K+8K */
+        stackBase += 0x12000;
+        size -= 0x12000;
         var stackData = Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UChar', isScalar: true}, stackBase, size);
     }
     catch (e) {

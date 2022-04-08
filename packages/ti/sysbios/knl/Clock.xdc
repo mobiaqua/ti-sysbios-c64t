@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2019, Texas Instruments Incorporated
+ * Copyright (c) 2013-2020, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -93,13 +93,6 @@ import xdc.runtime.Log;
  *  then all Clock functions are executed within the context of
  *  a Timer Hwi.
  *
- *  @a(Note)
- *  @p(blist)
- *  As Clock functions execute in either a Swi or Hwi context, they
- *  are not permitted to call blocking APIs.
- *  @p
- *  @a
- *
  *  The getTicks() function returns number of clock ticks since startup.
  *
  *  By default, the Timer module defined by {@link #TimerProxy} is used to
@@ -149,6 +142,72 @@ import xdc.runtime.Log;
  *       ...
  *  }
  *  @p
+ *
+ *  @a(Note)
+ *  As Clock functions execute in either a Swi or Hwi context, they
+ *  are not permitted to call blocking APIs.
+
+ *  Clock requires regular interrupts by an underlying timer peripheral. (If
+ *  operating with TickSource_USER, Clock requires regular invocation via
+ *  Clock_tick().)  If the timer interrupt is inadvertently disabled Clock ticks
+ *  will stop incrementing, Clock functions will not execute, and when queried
+ *  Clock will report incorrect tick counts, timeouts, and ticks until timeout.
+ *
+ *  Clock objects are maintained in a queue, and there may be multiple Clock
+ *  objects that need to be serviced upon a given timer interrupt.  Depending upon
+ *  the content of the queue, and the servicing of other objects that have timed
+ *  out, there will be some corresponding jitter in timing between the timer
+ *  interrupt and the actual invocation of a Clock object's function.
+ *
+ *  If there is a mismatch in the configured Clock tick period and the resolution
+ *  of the underlying timer peripheral, by convention Clock will generate a timeout
+ *  early, rather than late.  For example, if the desired Clock tick period is 1
+ *  millisecond, and the underlying timer is clocked at 32768Hz, the counts
+ *  corresponding to 1 millisecond would be 32.678.  Since an integer value must
+ *  be set in the timer peripheral, a truncated value of 32 counts will be used
+ *  per interrupt, resulting in an actual tick period of 0.977 msec.
+ *
+ *  Clock timing services require timely servicing of the timer peripheral
+ *  interrupt by the CPU, as well as timely execution of the Clock work function
+ *  (typically executed as a Swi).  For the case where Clock runs and sees that
+ *  there have been multiple intervening timer interrupts since it was last able to
+ *  process its queue, it will walk the queue multiple times to 'catch up' and
+ *  resync the timeouts. If this happens the timing of execution of the missed
+ *  ticks will be faster than typical.  For example, if Clock finds there have been
+ *  three intervening timer interrupts since it was last able to run, it will walk
+ *  its queue three times rapidly to replay the missed ticks, in sequence, once for
+ *  each intervening delayed tick.  So if there are Clock objects that timeout on
+ *  each tick increment, they will be invoked in order, but the delay between the
+ *  invocation of these functions will not be a full Clock tick period; it will be
+ *  much quicker, as quickly as Clock is able to repeatedly process its queue to
+ *  resync to real time.
+ *
+ *  Timely execution of the Clock work function is especially important for
+ *  TickMode_DYNAMIC, as the timer peripheral needs to be reprogrammed on each
+ *  timer peripheral interrupt.  The ability of Clock to keep time sync will vary
+ *  by the configured Clock tick period, the underlying timer implementation, the
+ *  peripheral's count width and resolution, and the rate that the timer
+ *  increments.  In an extreme case, if the delay from the timer raising the
+ *  interrupt to the execution of the Clock work function exceeds the rollover
+ *  period of the underlying timer peripheral (e.g. a 16-bit timer running at 32kHz
+ *  rolling over every 2 seconds), time sync will be lost, the next interrupt may
+ *  be significantly delayed, and there will be gaps of lost Clock ticks versus
+ *  real time.  Some general guidelines for TickMode_DYNAMIC to maintain continuous
+ *  time sync are listed below.  Some implementations may be more tolerant to
+ *  delays; these are conservative general limits.  If these conditions cannot be
+ *  met the Clock module should be configured for TickMode_PERIODIC.
+ *  @p(blist)
+ *  - Hardware interrupts must not be disabled too long, to exceed a Clock tick
+ *  period interval.
+ *  -Non-nestable hardware ISRs must not run longer than the Clock tick period
+ *  interval.
+ *  -No application Swi or Hwi should be allowed to run at the same or higher
+ *  priority as the Clock work function, long enough to exceed the Clock tick
+ *  period interval.
+ *  -The total execution time of Clock functions that execute on a given tick
+ *  interrupt must not exceed the Clock tick period interval.
+ *  @p
+ *  @a
  *
  *  @p(html)
  *  <h3> Calling Context </h3>
@@ -890,7 +949,28 @@ instance:
      *  period value.
      *
      *  @a(constraints)
-     *  Timeout of instance cannot be zero
+     *  The timeout of an instance cannot be zero.
+     *
+     *  @a(constraints)
+     *  When using a very fast Clock tick period it may not always be possible
+     *  to start a Clock object with maximum timeout (0xFFFFFFFF).  This limit
+     *  applies when Clock_start() is called while Clock is in-process of
+     *  servicing its timeout queue (called by another ISR, by a higher-priority
+     *  Swi, or within a Clock function). In this situation the timeout of the
+     *  newly-started object may occur in the near future rather than in the
+     *  far future. For one-shot objects there will be a single early timeout;
+     *  for periodic objects there will be an early timeout, but the next
+     *  timeout will occur correctly offset from the first timeout. This
+     *  condition is due to a Clock tick count wrap, and only occurs when there
+     *  is a very fast Clock tick period such that there are virtual Clock tick
+     *  period increments between the last timer interrupt to the invocation of
+     *  Clock_start(). For example, if the Clock tick period is 10 usec, and if
+     *  the Clock tick count is 0x10000005 when the interrupt occurs, and if
+     *  there are 3 intervening tick periods (30 usec) before the call to
+     *  Clock_start(), then the future timeout will be computed as
+     *  0x10000005 + 3 + 0xFFFFFFFF = 0x10000007, only 2 ticks in the future.
+     *  In this case, the maximum timeout should be limited to 0xFFFFFFFD to
+     *  achieve the maximum delay since the last timer interrupt.
      */
     Void start();
 

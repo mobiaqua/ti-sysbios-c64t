@@ -1,10 +1,5 @@
 /*
- *  Copyright 2020 by Texas Instruments Incorporated.
- *
- */
-
-/*
- * Copyright (c) 2018, Texas Instruments Incorporated
+ * Copyright (c) 2020, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,31 +30,6 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
- *  ======== M33F.genConstCustom ========
- *
- *  This function is invoked at the config time, therefore we can check the
- *  build profile.
- */
-function genConstCustom(names, types)
-{
-    if (xdc.om.$name != 'cfg') {
-        return (null);
-    }
-
-    var sb = new java.lang.StringBuilder();
-    for (var i = 0; i < names.length; i++) {
-        var adjName = names[i];
-        if (names[i].match(/.*__A$/)) {
-            adjName += "[]";
-        }
-        sb.append('const ' + types[i] + ' ' + adjName
-            + " __attribute__ ((section (\".const:" + names[i]
-            + "\")));\n");
-    }
-    return (sb.toString() + "");
-}
-/*
-
- */
-
+#ifndef ti_sysbios_family_c7x_TimestampProvider__prologue__include
+#define ti_sysbios_family_c7x_TimestampProvider__prologue__include
+#endif

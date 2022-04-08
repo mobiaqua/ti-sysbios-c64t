@@ -51,6 +51,7 @@ function getCFiles(targetName)
         case "ti.targets.arm.elf.M4F":
         case "ti.targets.arm.elf.R5F":
         case "ti.targets.arm.elf.R5Ft":
+        case "ti.targets.elf.C71":
             return (null);
         /*
          * MemProtectNull.c has a dummy implementation of all
@@ -109,5 +110,9 @@ function module$use()
     if ((Program.build.target.$name == "ti.targets.arm.elf.R5F") ||
         (Program.build.target.$name == "ti.targets.arm.elf.R5Ft")) {
         xdc.useModule('ti.sysbios.family.arm.v7r.MemProtect');
+    }
+
+    if (Program.build.target.$name == "ti.targets.elf.C71") {
+        xdc.useModule('ti.sysbios.family.c7x.MemProtect');
     }
 }

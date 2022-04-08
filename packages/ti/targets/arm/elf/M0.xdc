@@ -4,7 +4,7 @@
  */
 
 /*
- * Copyright (c) 2018, Texas Instruments Incorporated
+ * Copyright (c) 2020 Texas Instruments Incorporated - http://www.ti.com
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,29 +35,24 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
- *  ======== M3.genConstCustom ========
- *
- *  This function is invoked at the config time, therefore we can check the
- *  build profile.
+/*!
+ *  ======== M0.xdc ========
+ *  Cortex M0 little endian thumb2 (ELF)
  */
-function genConstCustom(names, types)
-{
-    if (xdc.om.$name != 'cfg') {
-        return (null);
-    }
+metaonly module M0 inherits ti.targets.arm.elf.IM0 {
+    override readonly config string name        = "M0";
+    override readonly config string suffix      = "em0";
+    override readonly config string rts         = "ti.targets.arm.rtsarm";
 
-    var sb = new java.lang.StringBuilder();
-    for (var i = 0; i < names.length; i++) {
-        var adjName = names[i];
-        if (names[i].match(/.*__A$/)) {
-            adjName += "[]";
-        }
-        sb.append('const ' + types[i] + ' ' + adjName
-            + " __attribute__ ((section (\".const:" + names[i]
-            + "\")));\n");
-    }
-    return (sb.toString() + "");
+    override readonly config xdc.bld.ITarget2.Command cc = {
+        cmd:  "armcl -c",
+        opts: "--endian=little -mv6M0 --abi=eabi"
+    };
+
+    override readonly config xdc.bld.ITarget2.Command asm = {
+        cmd:  "armcl -c",
+        opts: "--endian=little -mv6M0 --abi=eabi"
+    };
 }
 /*
 

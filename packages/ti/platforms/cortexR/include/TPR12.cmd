@@ -1,7 +1,7 @@
 /*----------------------------------------------------------------------------*/
 /* TPR12.cmd                                                              */
 /*                                                                            */
-/* (c) Texas Instruments 2019, All rights reserved.                           */
+/* (c) Texas Instruments 2019-2020, All rights reserved.                           */
 /*                                                                            */
 
 /* USER CODE BEGIN (0) */
@@ -11,7 +11,7 @@
 /* Memory Map                                                                 */
 MEMORY{
     VECTORS       (X) : origin=0x00000000 length=0x00000100
-    TCMA_RAM    (RWX) : origin=0x00020100 length=0x00003f00 fill=0xFFFFFFFF
+    TCMA_RAM    (RWX) : origin=0x00000100 length=0x00003f00
     TCMB_RAM    (RWX) : origin=0x00080000 length=0x00004000
     L2_RAM_BANK0 (RW) : origin=0x10200000 length=0x00080000
     L2_RAM_BANK1 (RW) : origin=0x10280000 length=0x00070000

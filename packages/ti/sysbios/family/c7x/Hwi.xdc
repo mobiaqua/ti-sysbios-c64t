@@ -45,12 +45,12 @@ import xdc.runtime.Log;
 
 /*!
  *  ======== Hwi ========
- *  C64+ Hardware Interrupt Support Module.
+ *  C7x Hardware Interrupt Support Module.
  *
- *  This Hwi module provides C64+ family-specific implementations of the
+ *  This Hwi module provides C7x family-specific implementations of the
  *  APIs defined in {@link ti.sysbios.interfaces.IHwi IHwi}.
  *
- *  Additional C64+ device-specific APIs are also provided.
+ *  Additional C7x device-specific APIs are also provided.
  *
  *  An example of creating a Hwi instance:
  *
@@ -66,7 +66,7 @@ import xdc.runtime.Log;
  *  // Initialize the Hwi parameters
  *  Hwi_Params_init(&params);
  *
- *  // Set the GEM event id in the params
+ *  // Set the event id in the params
  *  params.eventId = 78
  *
  *  // Specify the interrupt vector number
@@ -387,13 +387,13 @@ module Hwi inherits ti.sysbios.interfaces.IHwi
 
     /*!
      *  ======== eventMap ========
-     *  Maps a GEM event to interrupt number
+     *  Maps a event to interrupt number
      *
-     *  Function maps a GEM event to an interrupt number so that the
+     *  Function maps a event to an interrupt number so that the
      *  event is the interrupt source of the vector.
      *
      *  @p(code)
-     *      // Maps GEM event #65 as the interrupt source of int vector #7
+     *      // Maps event #65 as the interrupt source of int vector #7
      *      Hwi_eventMap(7, 65);
      *  @p
      *
@@ -404,13 +404,13 @@ module Hwi inherits ti.sysbios.interfaces.IHwi
 
     /*!
      *  ======== eventMapMeta ========
-     *  Maps GEM Event to interrupt number statically
+     *  Maps Event to interrupt number statically
      *
-     *  Function maps a GEM event to an interrupt number so that the
+     *  Function maps a event to an interrupt number so that the
      *  event is the interrupt source of the vector.
      *
      *  @p(code)
-     *      // Maps GEM event #65 as the interrupt source of int vector #7
+     *      // Maps event #65 as the interrupt source of int vector #7
      *      Hwi.eventMapMeta(7, 65);
      *  @p
      *

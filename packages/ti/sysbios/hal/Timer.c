@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2019, Texas Instruments Incorporated
+ * Copyright (c) 2012-2020, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,6 +36,7 @@
  */
 
 #include <xdc/std.h>
+#include <xdc/runtime/Assert.h>
 #include <xdc/runtime/Error.h>
 #include <xdc/runtime/Types.h>
 #include <xdc/runtime/Startup.h>
@@ -227,6 +228,7 @@ UInt32 Timer_getPeriod(Timer_Object *timer)
 /* REQ_TAG(SYSBIOS-1028) */
 Void Timer_getFreq(Timer_Object *timer, Types_FreqHz *freq)
 {
+    Assert_isTrue((freq != NULL), NULL);
     Timer_TimerProxy_getFreq((timer->pi), freq);
 }
 
@@ -236,6 +238,7 @@ Void Timer_getFreq(Timer_Object *timer, Types_FreqHz *freq)
 /* REQ_TAG(SYSBIOS-1029) */
 Timer_FuncPtr Timer_getFunc(Timer_Object *timer, UArg *arg)
 {
+    Assert_isTrue((arg != NULL), NULL);
     return (Timer_TimerProxy_getFunc((timer->pi), arg));
 }
 

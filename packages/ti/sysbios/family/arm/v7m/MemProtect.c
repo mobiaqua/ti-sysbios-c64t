@@ -93,6 +93,11 @@ Int MemProtect_constructDomain(MemProtect_Struct *obj, MemProtect_Acl *acl,
         baseAddress = acl[i].baseAddress;
         length = acl[i].length;
 
+        /* Verify length is a power of 2 */
+        if (length && (length & (length - 1)) != 0) {
+            return (-5);
+        }
+
         /* verify base address is a multiple of length */
         if (((UInt32)baseAddress & (length - 1)) != 0) {
             return (-3);
@@ -124,7 +129,13 @@ Int MemProtect_constructDomain(MemProtect_Struct *obj, MemProtect_Acl *acl,
 
 Int MemProtect_destructDomain(MemProtect_Struct *obj)
 {
-    return (0);
+    /*
+     * This API is provided for completeness and possible future
+     * expansion. It is not used in practice. Memory protection
+     * domains are constructed at boot time and never changed
+     * during runtime. We always return an error status.
+     */
+    return (-1);
 }
 
 UInt32 MemProtect_parseFlags(UInt32 flags)

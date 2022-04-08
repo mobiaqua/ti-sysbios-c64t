@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019, Texas Instruments Incorporated
+ * Copyright (c) 2014-2020, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1110,10 +1110,9 @@ Void Timer_enableCC26xx(Int id)
     if (gpt != INVALID_TIMER_ID) {
 
         /* if it is not already on, turn on the PERIPH domain */
-        if (PRCMPowerDomainStatus(PRCM_DOMAIN_PERIPH) !=
-            PRCM_DOMAIN_POWER_ON) {
+        if (PRCMPowerDomainsAllOn(PRCM_DOMAIN_PERIPH) != PRCM_DOMAIN_POWER_ON) {
             PRCMPowerDomainOn(PRCM_DOMAIN_PERIPH);
-            while (PRCMPowerDomainStatus(PRCM_DOMAIN_PERIPH) !=
+            while (PRCMPowerDomainsAllOn(PRCM_DOMAIN_PERIPH) !=
                 PRCM_DOMAIN_POWER_ON) {};
         }
 

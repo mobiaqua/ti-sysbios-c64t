@@ -632,9 +632,16 @@ Bool Hwi_getStackInfo(Hwi_StackInfo *stkInfo, Bool computeStackDepth)
     Char *isrSP;
     Bool stackOverflow;
 
-    /* Copy the stack base address and size */
-    stkInfo->hwiStackSize = (SizeT)_symval(&__TI_STACK_SIZE) - HWI_ECSP_SIZE;
-    stkInfo->hwiStackBase = _stack + HWI_ECSP_SIZE;
+    /*
+     * Copy the stack base address and size.
+     *
+     * Adjust for HW ECSP/TCSP portions.  TCSP only temporarily occupies
+     * 0x2000 bytes of stack starting at _stack + HWI_ECSP_SIZE, until
+     * the first Task switch.
+     */
+    stkInfo->hwiStackSize = (SizeT)_symval(&__TI_STACK_SIZE) -
+                            (HWI_ECSP_SIZE + 0x2000);
+    stkInfo->hwiStackBase = _stack + HWI_ECSP_SIZE + 0x2000;
 
     isrSP = stkInfo->hwiStackBase;
 
@@ -757,8 +764,8 @@ Void Hwi_dispatchCore(Int intNum)
     }
 #endif
 
-//    Log_write5(Hwi_LM_begin, (IArg)hwi, (IArg)hwi->fxn,
-//               (IArg)prevThreadType, (IArg)intNum, hwi->irp);
+    Log_write5(Hwi_LM_begin, (IArg)hwi, (IArg)hwi->fxn,
+              (IArg)prevThreadType, (IArg)intNum, hwi->irp);
 
     /* call the user's isr */
     if (Hwi_dispatcherAutoNestingSupport) {
@@ -776,7 +783,7 @@ Void Hwi_dispatchCore(Int intNum)
         (fxn)(arg);
     }
 
-//    Log_write1(Hwi_LD_end, (IArg)hwi);
+    Log_write1(Hwi_LD_end, (IArg)hwi);
 
 #ifndef ti_sysbios_hal_Hwi_DISABLE_ALL_HOOKS
     /* call the end hooks */

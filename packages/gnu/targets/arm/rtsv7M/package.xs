@@ -58,7 +58,8 @@ function close()
         return;
     }
 
-    if ((Program.build.target.isa == "v7M") ||
+    if ((Program.build.target.isa == "v6M") ||
+        (Program.build.target.isa == "v7M") ||
         (Program.build.target.isa == "v7M4")) {
         if (Program.sectMap[".bootVecs"] === undefined) {
             Program.sectMap[".intvecs (0) : AT(0) { KEEP(*(.bootVecs)) }"] = new Program.SectionSpec();

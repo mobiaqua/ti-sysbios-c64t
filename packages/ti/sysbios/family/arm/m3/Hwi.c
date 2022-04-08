@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2019 Texas Instruments Incorporated
+ * Copyright (c) 2015-2020 Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -131,6 +131,10 @@ Hwi_Handle Hwi_construct2(Hwi_Struct2 *hwiStruct2, Int intNum,
         Hwi_FuncPtr hwiFxn, const Hwi_Params *prms)
 {
     Hwi_Handle   hwi;
+
+    if (intNum >= Hwi_NUM_INTERRUPTS) {
+        return (NULL);
+    }
 
     /* check vector table entry for already in use vector */
     if (*(Hwi_module->vectorTable + intNum) != Hwi_nullIsrFunc) {
@@ -579,7 +583,7 @@ UInt Hwi_enableFxn()
  */
 UInt Hwi_disableInterrupt(UInt intNum)
 {
-    UInt oldEnableState, index, mask;
+    UInt oldEnableState, index, mask, key;
 
     if (intNum >= 16U) {
 
@@ -592,8 +596,10 @@ UInt Hwi_disableInterrupt(UInt intNum)
         Hwi_nvic.ICER[index] = mask;
     }
     else if (intNum == 15U) {
+        key = Hwi_disable();
         oldEnableState = Hwi_nvic.STCSR & 0x00000002U;
         Hwi_nvic.STCSR &= ~0x00000002U;  /* disable SysTick Int */
+        Hwi_restore(key);
     }
     else {
         oldEnableState = 0;
@@ -607,7 +613,7 @@ UInt Hwi_disableInterrupt(UInt intNum)
  */
 UInt Hwi_enableInterrupt(UInt intNum)
 {
-    UInt oldEnableState, index, mask;
+    UInt oldEnableState, index, mask, key;
 
     if (intNum >= 16U) {
 
@@ -620,8 +626,10 @@ UInt Hwi_enableInterrupt(UInt intNum)
         Hwi_nvic.ISER[index] = mask;
     }
     else if (intNum == 15U) {
+        key = Hwi_disable();
         oldEnableState = Hwi_nvic.STCSR & 0x00000002U;
         Hwi_nvic.STCSR |= 0x00000002U;   /* enable SysTick Int */
+        Hwi_restore(key);
     }
     else {
         oldEnableState = 0;
@@ -635,7 +643,7 @@ UInt Hwi_enableInterrupt(UInt intNum)
  */
 Void Hwi_restoreInterrupt(UInt intNum, UInt key)
 {
-    UInt index, mask;
+    UInt index, mask, hwiKey;
 
     if (intNum >= 16U) {
 
@@ -652,12 +660,14 @@ Void Hwi_restoreInterrupt(UInt intNum, UInt key)
     }
     else {
         if (intNum == 15U) {
+            hwiKey = Hwi_disable();
             if (key != 0U) {
                 Hwi_nvic.STCSR |= 0x00000002U;       /* enable SysTick Int */
             }
             else {
                 Hwi_nvic.STCSR &= ~0x00000002U;      /* disable SysTick Int */
             }
+            Hwi_restore(hwiKey);
         }
     }
 }
@@ -688,11 +698,10 @@ Void Hwi_clearInterrupt(UInt intNum)
  */
 Hwi_Handle Hwi_getHandle(UInt intNum)
 {
-    Hwi_VectorFuncPtr *func;
-
-    func = Hwi_module->vectorTable + intNum;
-
     if (Hwi_numSparseInterrupts != 0U) {
+        Hwi_VectorFuncPtr *func;
+        func = Hwi_module->vectorTable + intNum;
+
         if (*func != Hwi_nullIsrFunc) {
             Char *vectorPtr = (Char *)func;
             vectorPtr -= 1;
@@ -726,7 +735,7 @@ Void Hwi_plug(UInt intNum, Void *fxn)
 }
 
 /*
- *  ======== switchFromBootStack ========
+ *  ======== Hwi_switchFromBootStack ========
  *  Indicate that we are leaving the boot stack and
  *  are about to switch to a task stack.
  *

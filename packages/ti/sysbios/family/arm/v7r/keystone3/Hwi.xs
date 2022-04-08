@@ -229,6 +229,16 @@ function module$use()
         Program.sectMap[".vecs"].loadAddress =
             device.resetVectorAddress;
     }
+
+    /* Hwi used for workaround for SYSBIOS-1422 */
+    var hwiParams = new Hwi.Params();
+    hwiParams.priority = 0;
+    hwiParams.triggerType = Hwi.TriggerType_PULSE;
+    hwiParams.enableInt = true;
+    var hwi = Hwi.create(Hwi.dummyIRQ, "&dummyFxn", hwiParams);
+    if (hwi == null) {
+        Hwi.$logError("dummyIRQ (IRQ #" + Hwi.dummyIRQ + ") create failed\n");
+    }
 }
 
 /*
@@ -347,7 +357,12 @@ function instance$static$init(obj, intNum, fxn, params)
         obj.priority = Hwi.DEFAULT_INT_PRIORITY;
     }
     else {
-        obj.priority = params.priority;
+        if (params.priority == 0 && intNum != Hwi.dummyIRQ) {
+            Hwi.$logError("Hwi priority 0 reserved for workaround of Pulsar Dual R5F-SS interrupt preemption issue.", this);
+        }
+        else {
+            obj.priority = params.priority;
+        }
     }
 
     if (params.enableInt) {

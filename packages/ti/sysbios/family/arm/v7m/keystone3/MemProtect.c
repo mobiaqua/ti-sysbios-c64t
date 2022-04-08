@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, Texas Instruments Incorporated
+ * Copyright (c) 2017-2020, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -77,7 +77,7 @@ static Bool MemProtect_domainCreateDone;
 Int MemProtect_constructDomain(MemProtect_Struct *obj, MemProtect_Acl *acl,
     UInt16 aclLength)
 {
-    UInt8  i;
+    UInt16 i;
     UInt   key;
     UInt32 flags;
 
@@ -133,7 +133,7 @@ Int MemProtect_destructDomain(MemProtect_Struct *obj)
  *  ======== MemProtect_init ========
  */
 /* REQ_TAG(SYSBIOS-1010) */
-#if defined(__GNUC__)
+#if (defined(__GNUC__) && !defined(__ti__)) || (defined(__GNUC__) && defined(__clang__))
 Void __attribute__ ((weak)) MemProtect_init()
 #else
 #pragma WEAK(MemProtect_init)
@@ -225,7 +225,7 @@ Bool MemProtect_isDataInKernelSpace(Ptr obj, SizeT size)
 
 #if defined(__IAR_SYSTEMS_ICC__)
 __weak Void DMSC_programFirewall(Ptr baseAddress, SizeT size, UInt32 flags)
-#elif defined(__GNUC__) && !defined(__ti__)
+#elif (defined(__GNUC__) && !defined(__ti__)) || (defined(__GNUC__) && defined(__clang__))
 Bool __attribute__((weak)) DMSC_programFirewall(Ptr baseAddress, SizeT size, UInt32 flags)
 #else
 #pragma WEAK (DMSC_programFirewall)

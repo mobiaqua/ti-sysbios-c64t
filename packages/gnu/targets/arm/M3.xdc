@@ -63,12 +63,12 @@ metaonly module M3 inherits IM {
 
     override readonly config ITarget2.Command asm = {
         cmd: "$(rootDir)/bin/$(GCCTARG)-gcc -c -x assembler-with-cpp",
-        opts: "-Wa,-mcpu=cortex-m3 -Wa,-mthumb"
+        opts: "-mcpu=cortex-m3 -mthumb"
     };
 
     readonly config ITarget2.Command asmBin = {
         cmd: "bin/arm-none-eabi-gcc -c -x assembler-with-cpp",
-        opts: "-Wa,-mcpu=cortex-m3 -Wa,-mthumb"
+        opts: "-mcpu=cortex-m3 -mthumb"
     };
 
     override config ITarget2.Options lnkOpts = {

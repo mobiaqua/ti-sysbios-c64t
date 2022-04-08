@@ -70,6 +70,23 @@ var trgFilter = {
 /* generate ti target libs */
 BiosBuild.buildLibs(objList, undefined, trgFilter, arguments);
 
+var objList = [
+    "SysCall.c",
+    "SysCall_asm_gnu"
+];
+
+/* generate makefiles */
+
+var trgFilter = {
+    field: "$name",
+    list: [
+            "ti.targets.arm.clang.M3"
+          ]
+};
+
+/* generate ti target libs */
+BiosBuild.buildLibs(objList, undefined, trgFilter, arguments);
+
 Pkg.otherFiles = [ "package.bld", "SysCall_asm.h", "SysCall__epilogue.h",
     "SysCall__prologue.h", "MemProtect__epilogue.h", "MemProtect__prologue.h" ];
 

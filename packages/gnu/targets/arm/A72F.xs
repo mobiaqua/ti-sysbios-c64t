@@ -4,7 +4,7 @@
  */
 
 /*
- * Copyright (c) 2018, Texas Instruments Incorporated
+ * Copyright (c) 2016-2020 Texas Instruments Incorporated - http://www.ti.com
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,28 +36,27 @@
  */
 
 /*
- *  ======== M4F.genConstCustom ========
- *
- *  This function is invoked at the config time, therefore we can check the
- *  build profile.
+ *  ======== A72F.getISAChain ========
+ *  A72F implementation for ITarget.getISAChain()
  */
-function genConstCustom(names, types)
+function getISAChain (isa)
 {
-    if (xdc.om.$name != 'cfg') {
-        return (null);
+    var myChain = ["v8A", this.isa];
+    var isaIn = (isa == null ? this.isa : isa)
+
+    /* Check if 'isa' belongs to v8A family */
+    for (var i = 0; i < myChain.length; i++) {
+        if (myChain[i] == isaIn) {
+            break;
+        }
     }
 
-    var sb = new java.lang.StringBuilder();
-    for (var i = 0; i < names.length; i++) {
-        var adjName = names[i];
-        if (names[i].match(/.*__A$/)) {
-            adjName += "[]";
-        }
-        sb.append('const ' + types[i] + ' ' + adjName
-            + " __attribute__ ((section (\".const:" + names[i]
-            + "\")));\n");
+    if (i == myChain.length) {
+        return (null);
     }
-    return (sb.toString() + "");
+    else {
+        return (myChain.slice(0, i + 1));
+    }
 }
 /*
 

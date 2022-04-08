@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2019, Texas Instruments Incorporated
+ * Copyright (c) 2015-2020, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,7 +75,7 @@
  *  Set up and run Swi.
  *  Enter with Hwi's disabled
  *  Calls Swi function with interrupts enabled
- *  Exits with Hwi's enabled
+ *  Exits with Hwi's disabled
  *  When no Swis are running, curQ is NULL
  */
 Void Swi_run(Swi_Object *swi)
@@ -692,6 +692,8 @@ Void Swi_post(Swi_Object *swi)
  */
 Ptr Swi_getHookContext(Swi_Object *swi, Int id)
 {
+    Assert_isTrue(((id < Swi_hooks.length) && (id >= 0)), Swi_A_badContextId);
+
     return swi->hookEnv[id];
 }
 
@@ -700,6 +702,8 @@ Ptr Swi_getHookContext(Swi_Object *swi, Int id)
  */
 Void Swi_setHookContext(Swi_Object *swi, Int id, Ptr hookContext)
 {
+    Assert_isTrue(((id < Swi_hooks.length) && (id >= 0)), Swi_A_badContextId);
+
     swi->hookEnv[id] = hookContext;
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019, Texas Instruments Incorporated
+ * Copyright (c) 2014-2020, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -146,13 +146,14 @@ Void Clock_setTicks(UInt32 ticks)
 }
 
 /*
- *  ======== Clock_ticksUntilInterrupt  ========
+ *  ======== Clock_getTicksUntilInterrupt  ========
  */
 UInt32 Clock_getTicksUntilInterrupt(Void)
 {
     UInt32 ticks;
 
-    if ((Clock_TickSource)CLOCK_TICK_SOURCE == Clock_TickSource_TIMER) {
+    if (((Clock_TickSource)CLOCK_TICK_SOURCE == Clock_TickSource_TIMER) &&
+        ((Clock_TickMode)CLOCK_TICK_MODE == Clock_TickMode_DYNAMIC)) {
 
         UInt32 current;
         UInt key;

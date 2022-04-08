@@ -61,25 +61,40 @@ typedef struct ti_sysbios_hal_MemProtect_Acl {
 } ti_sysbios_hal_MemProtect_Acl;
 
 /* Target specific macro and structure definitions */
-#if ((defined(__TI_COMPILER_VERSION__) && defined(__ARM_ARCH) && (__ARM_ARCH == 7) && (__ARM_ARCH_PROFILE == 'M') && defined(__ARM_FEATURE_SIMD32)) || \
+#if (((defined(__TI_COMPILER_VERSION__) || defined(__ti_version__)) && defined(__ARM_ARCH) && (__ARM_ARCH == 7) && (__ARM_ARCH_PROFILE == 'M') && defined(__ARM_FEATURE_SIMD32)) || \
     (defined(__GNUC__) && (defined(gnu_targets_arm_M4) || defined(gnu_targets_arm_M4F))))
 
 #include <ti/sysbios/family/arm/v7m/MemProtect.h>
 
-#elif ((defined(__TI_COMPILER_VERSION__) && defined(__ARM_ARCH) && (__ARM_ARCH == 7) && (__ARM_ARCH_PROFILE == 'M') && !defined(__ARM_FEATURE_SIMD32)) || \
+extern UInt32 ti_sysbios_hal_MemProtect_parseFlags(UInt32 flags);
+
+#elif (((defined(__TI_COMPILER_VERSION__) || defined(__ti_version__)) && defined(__ARM_ARCH) && (__ARM_ARCH == 7) && (__ARM_ARCH_PROFILE == 'M') && !defined(__ARM_FEATURE_SIMD32)) || \
     (defined(__GNUC__) && (defined(gnu_targets_arm_M3))))
 
 #include <ti/sysbios/family/arm/v7m/keystone3/MemProtect.h>
 
-#elif (defined(__TI_COMPILER_VERSION__) && defined(__ARM_ARCH) && (__ARM_ARCH == 7) && (__ARM_ARCH_PROFILE == 'R') && defined(__ARM_FEATURE_SIMD32))
+extern UInt32 ti_sysbios_hal_MemProtect_parseFlags(UInt32 flags);
+
+#elif ((defined(__TI_COMPILER_VERSION__) || defined(__ti_version__)) && defined(__ARM_ARCH) && (__ARM_ARCH == 7) && (__ARM_ARCH_PROFILE == 'R') && defined(__ARM_FEATURE_SIMD32))
 
 #include <ti/sysbios/family/arm/v7r/MemProtect.h>
+
+extern UInt32 ti_sysbios_hal_MemProtect_parseFlags(UInt32 flags);
+
+#elif (defined(__TI_COMPILER_VERSION__) && defined(__C7000__) && (__C7000__ == 1))
+
+#include <ti/sysbios/family/c7x/MemProtect.h>
+#include <ti/sysbios/family/c7x/Mmu.h>
+
+extern UInt32 ti_sysbios_hal_MemProtect_parseFlags(UInt32 flags, ti_sysbios_family_c7x_Mmu_MapAttrs *attrs);
 
 #else
 
 typedef Void ti_sysbios_hal_MemProtect_Struct;
 
 #define MemProtect_Struct   ti_sysbios_hal_MemProtect_Struct
+
+extern UInt32 ti_sysbios_hal_MemProtect_parseFlags(UInt32 flags);
 
 #endif
 
@@ -92,8 +107,6 @@ extern Int ti_sysbios_hal_MemProtect_constructDomain(
 
 extern Int ti_sysbios_hal_MemProtect_destructDomain(
     ti_sysbios_hal_MemProtect_Struct *obj);
-
-extern UInt32 ti_sysbios_hal_MemProtect_parseFlags(UInt32 flags);
 
 /* REQ_TAG(SYSBIOS-571) */
 extern Void ti_sysbios_hal_MemProtect_startup(Void);

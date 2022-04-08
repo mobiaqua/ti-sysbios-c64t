@@ -4,7 +4,7 @@
  */
 
 /*
- * Copyright (c) 2013-2019 Texas Instruments Incorporated
+ * Copyright (c) 2013-2020 Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -128,6 +128,7 @@ metaonly interface ITarget inherits xdc.bld.ITarget3 {
         [".C",    {suf: ".C",   typ: "cpp"}],
         [".cc",   {suf: ".cc",  typ: "cpp"}],
         [".s",    {suf: ".s",   typ: "asm"}],
+        [".sv6M", {suf: ".sv6M",typ: "asm"}],
         [".sv7M", {suf: ".sv7M",typ: "asm"}],
         [".sv8M", {suf: ".sv8M",typ: "asm"}],
     ];
@@ -192,7 +193,7 @@ metaonly interface ITarget inherits xdc.bld.ITarget3 {
         }],
         ["release", {
             compileOpts: {
-                copts: "-Ohs --dlib_config $(rootDir)/inc/c/DLib_Config_Normal.h",
+                copts: "--debug -Ohs --dlib_config $(rootDir)/inc/c/DLib_Config_Normal.h",
             },
             linkOpts: "--semihosting=iar_breakpoint",
         }],
@@ -204,7 +205,7 @@ metaonly interface ITarget inherits xdc.bld.ITarget3 {
         }],
         ["release_full", {
             compileOpts: {
-                copts: "-Ohs --dlib_config $(rootDir)/inc/c/DLib_Config_Full.h",
+                copts: "--debug -Ohs --dlib_config $(rootDir)/inc/c/DLib_Config_Full.h",
             },
             linkOpts: "--semihosting=iar_breakpoint",
         }],

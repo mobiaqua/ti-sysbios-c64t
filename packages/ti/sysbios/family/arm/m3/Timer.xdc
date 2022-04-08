@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2019, Texas Instruments Incorporated
+ * Copyright (c) 2013-2020, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -235,6 +235,9 @@ instance:
     /*!
      *  ======== reconfig ========
      *  Used to modify static timer instances at runtime.
+     *
+     *  @a(constraints)
+     *  Timer_reconfig() should not be called for a timer that has been started.
      *
      *  @param(timerParams)     timer Params
      *  @param(tickFxn)         function that runs when timer expires

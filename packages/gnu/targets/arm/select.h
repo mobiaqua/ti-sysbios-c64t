@@ -35,6 +35,14 @@
 #    else
 #        define xdc_target_name__ M4
 #    endif
+#elif defined (__ARM_ARCH_8A) || defined (__ARM_ARCH_8A__)
+#        define xdc_target_name__ A53F
+#elif defined (__ARM_ARCH_8M_MAIN__)
+#    if defined(__VFP_FP__)
+#        define xdc_target_name__ M33F
+#    else
+#        define xdc_target_name__ M33
+#    endif
 #endif
 
 #if defined(xdc_target_name__) && defined(xdc_target_types__)

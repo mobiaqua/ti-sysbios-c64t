@@ -48,10 +48,12 @@ function getAsmFiles(targetName)
         case "ti.targets.arm.elf.M4F":
             return (["SysCall_asm.sv7M"]);
             break;
-
-    default:
-        return (null);
-        break;
+        case "ti.targets.arm.clang.M3":
+            return (["SysCall_asm_gnu.sv7M"]);
+            break;
+        default:
+            return (null);
+            break;
     }
 }
 

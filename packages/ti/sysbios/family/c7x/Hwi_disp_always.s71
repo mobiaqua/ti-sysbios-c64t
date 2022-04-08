@@ -97,10 +97,11 @@ Hwi_SFP4      .set    49
 Hwi_SFP5      .set    50
 Hwi_SFP6      .set    51
 Hwi_SFP7      .set    52
+Hwi_SFRXMR    .set    53
 
 
 ; 512 bit (64 byte) offsets
-Hwi_SFVB0     .set    53
+Hwi_SFVB0     .set    54
 Hwi_SFVB1     .set    Hwi_SFVB0 + (8*1)
 Hwi_SFVB2     .set    Hwi_SFVB0 + (8*2)
 Hwi_SFVB3     .set    Hwi_SFVB0 + (8*3)
@@ -168,6 +169,7 @@ SP              .set    d15
 
         .global ti_sysbios_family_c7x_Hwi_dispatchC__I
         .global ti_sysbios_family_c7x_Hwi_dispatchAlways
+        .global ti_sysbios_family_c7x_SysCall_syscallHandler__I
 
 ti_sysbios_family_c7x_Hwi_Module__state__V .tag ti_sysbios_family_c7x_Hwi_Module_State
 
@@ -193,6 +195,24 @@ nme:
         .align 0x200
 evt:
         b.b1      $PCR_OFFSET(ti_sysbios_family_c7x_Hwi_dispatchAlways)
+
+    .if $isdefed("ti_sysbios_family_c7x_SysCall_vector__D")
+
+        .align 0x1000
+scall:
+        .align 0x40
+        mvk64.l1  0, a0    ; used for enterPrivMode
+        b.b1      $PCR_OFFSET(ti_sysbios_family_c7x_SysCall_syscallHandler__I)
+
+        .align 0x40
+        mvk64.l1  1, a0    ; used for enterUnprivMode
+        b.b1      $PCR_OFFSET(ti_sysbios_family_c7x_SysCall_syscallHandler__I)
+
+        .align 0x40
+        mvk64.l1  2, a0    ; used for restorePrivMode
+        b.b1      $PCR_OFFSET(ti_sysbios_family_c7x_SysCall_syscallHandler__I)
+
+    .endif
 
         .sect .secure_vecs
 
@@ -367,6 +387,8 @@ ti_sysbios_family_c7x_Hwi_dispatchAlways:
 ||      mvpb.s2   p7, b7
         std.d1x   b6, *SP[Hwi_SFP6]
 ||      std.d2    b7, *SP[Hwi_SFP7]
+||      mvc.s1    rxmr_s, a0
+        std.d1    a0, *SP[Hwi_SFRXMR]
 ||      mvc.c2    sa0cntr0, vb15
         vst8d.d2 vb15, *SP[Hwi_SFSTRACNTR0]
 ||      mvc.c2    sa1cntr0, vb15
@@ -446,7 +468,9 @@ ti_sysbios_family_c7x_Hwi_dispatchAlways:
 ||      vld8d.d1 *SP[Hwi_SFSTRACR3], vb15
         mvc.c2    vb15, sa3cr
 
+        ldd.d1    *SP[Hwi_SFRXMR], a0
         ldd.d1    *SP[Hwi_SFP7], b7
+||      mvc.s1    a0, rxmr_s
         ldd.d1    *SP[Hwi_SFP6], b6
 ||      mv.l2     b7, p7
         ldd.d1    *SP[Hwi_SFP5], b5

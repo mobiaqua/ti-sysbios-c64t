@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2019, Texas Instruments Incorporated
+ * Copyright (c) 2013-2020, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,6 +69,9 @@ Void Semaphore_Instance_init(Semaphore_Object *sem, Int count,
 {
     Queue_Handle pendQ;
     UInt hwiKey;
+
+    Assert_isTrue((count >= 0) && (UInt)count <= 0xffffU,
+        Semaphore_A_overflow);
 
     /* CWARN.CONSTCOND.IF */
     if (BIOS_mpeEnabled != FALSE) {

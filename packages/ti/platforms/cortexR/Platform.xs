@@ -151,12 +151,24 @@ function instance$meta$init(name)
             + "name of the selected device.", this, this.deviceName);
     }
 
-    if (nameParams[1] != "false" && Boolean(nameParams[1]).valueOf()) {
-        this.includeLinkCmdFile = true;
-    }
-
-    if (nameParams[2] != undefined && !isNaN(parseFloat(nameParams[2]))) {
-        this.clockRate = parseFloat(nameParams[2]);
+    if (nameParams[1] != undefined) {
+        if (nameParams[1] == "MAIN" || nameParams[1] == "MCU") {
+            this.deviceName = this.deviceName + "_" + nameParams[1];
+            if (nameParams[2] != undefined && nameParams[2].valueOf() != 0) {
+                this.includeLinkCmdFile = true;
+            }
+            if (nameParams[3] != undefined && !isNaN(parseFloat(nameParams[3]))) {
+                this.clockRate = parseFloat(nameParams[3]);
+            }
+        }
+        else {
+            if (nameParams[1] != "0") {
+                this.includeLinkCmdFile = true;
+            }
+            if (nameParams[2] != undefined && !isNaN(parseFloat(nameParams[2]))) {
+                this.clockRate = parseFloat(nameParams[2]);
+            }
+        }
     }
 
     if (this.externalMemoryMap.length != 0) {
