@@ -114,6 +114,8 @@
     }
 %%}
 
+SHELL = /bin/bash
+
 MAKEFLAGS = -j16
 
 RTSLIB = -i`CGEN`/lib/ -llibc.a
@@ -207,14 +209,12 @@ all: `ROM_EXEC` `LIB`
 %   ROMASMOBJS.push(romAsmObj)
 %   LIBASMOBJS.push(libAsmObj)
 `romAsmObj`: `s` romExternFuncs.txt makefile
-	@-$(call RM, $@)
 	@$(CP) $(BIOS_ROOT)`s` `romAsmFile`
 	@$(XDC_ROOT)/../xs -c `RomModule.libDir`../mangleAsmFile.xs `romAsmFile` `romAsmFile` romExternFuncs.txt
 	@$(ASM) --output_file=`romAsmObj` -i$(BIOS_ROOT)`asmDir` $(BIOS_DEFS) $(XOPTS) $(INCS) `romAsmFile`
 
 `libAsmObj`: `s` romInternFuncs.txt makefile
 	@echo asm`TARGET.suffix` `libAsmFile` ...
-	@-$(call RM, $@)
 	@$(CP) $(BIOS_ROOT)`s` `libAsmFile`
 	@$(XDC_ROOT)/../xs -c `RomModule.libDir`../mangleAsmFile.xs `libAsmFile` `libAsmFile` romInternFuncs.txt
 	@$(ASM) --output_file=`libAsmObj` -i$(BIOS_ROOT)`asmDir` $(BIOS_DEFS) $(XOPTS) $(INCS) `libAsmFile`
@@ -238,7 +238,6 @@ all: `ROM_EXEC` `LIB`
 %   LIBPPS.push("mangled_" + libPP);
 mangled_`libPP`: `s` romInternFuncs.txt makefile
 	@echo pp`TARGET.suffix` `s` ...
-	@-$(call RM, `libPP`)
 	@$(CC) -ppl --output_file=`libPP` $(BIOS_DEFS) $(XOPTS) $(INCS) \
 	`srcName(s)`
 	@$(XDC_ROOT)/../xs -c `RomModule.libDir`../mangleCFile.xs `libPP` mangled_`libPP` romInternFuncs.txt "$(INTERN_FUNCS)"
@@ -261,7 +260,6 @@ mangled_`libPP`: `s` romInternFuncs.txt makefile
 %   LIBPPS.push("mangled_" + libPP);
 mangled_`libPP`: `s` romInternFuncs.txt makefile
 	@echo pp`TARGET.suffix` `s` ...
-	@-$(call RM, `libPP`)
 	@$(CC) -ppl --output_file=`libPP` $(BIOS_DEFS) $(XOPTS) $(INCS) \
 	`srcName(s)`
 	@$(XDC_ROOT)/../xs -c `RomModule.libDir`../mangleCFile.xs `libPP` mangled_`libPP` romInternFuncs.txt "$(INTERN_FUNCS)"
@@ -284,18 +282,18 @@ mangled_`libPP`: `s` romInternFuncs.txt makefile
 %           var romPP = baseName(s) + "_rom.pp";
 %	}
 %   }
-%   ROMPPS.push(romPP);
-`romPP`: `s` romExternFuncs.txt makefile
+%   ROMPPS.push("mangled_" + romPP);
+mangled_`romPP`: `s` romExternFuncs.txt
 	@echo cpp`TARGET.suffix` `s` ...
 	@$(CC) -ppl --output_file=`romPP` $(BIOS_DEFS) $(ROM_LIB_DEFS) $(XOPTS) $(INCS) \
 	`srcName(s)`
 	@if [[ -s romExternFuncs.txt ]]; then \
-	$(XDC_ROOT)/../xs -c `RomModule.libDir`../mangleCFile.xs `romPP` `romPP` romExternFuncs.txt "$(EXTERN_FUNCS)"; \
+	$(XDC_ROOT)/../xs -c `RomModule.libDir`../mangleCFile.xs `romPP` mangled_`romPP` romExternFuncs.txt "$(EXTERN_FUNCS)"; \
 	fi
 
 %}
 
-BIOS_rom.obj: `ROMPPS.join(" ")`
+mangled_BIOS_rom.obj: `ROMPPS.join(" ")`
 	@echo ROM Build Stage0: Create the OBJ files that will go into the ROM based on the
 	@echo specified set of modules.
 	@-$(call RM, $@)
@@ -328,21 +326,22 @@ BIOS_rom.obj: `ROMPPS.join(" ")`
 	@-$(call RM, "`RomModule.libDir``LIB`")
 	@$(CP) `LIB` "`RomModule.libDir``LIB`"
 
-`ROM_EXEC`: BIOS_rom.obj `ROMASMOBJS.join(" ")` `TestName`_p`TARGET.suffix`.obj `TestName`.obj
+`ROM_EXEC`: mangled_BIOS_rom.obj `ROMASMOBJS.join(" ")` `TestName`_p`TARGET.suffix`.obj `TestName`.obj
 	@echo ROM Build Stage 1: Partially link the component library OBJ files.
 	@echo Manually parse the resulting rom_p.map file to
 	@echo determine the names of each non-ROM function referenced by the ROM.
 	@echo This list is then used to populate ROM.funcTable[] entries in the
 	@echo `TestName`.cfg file.
 	@echo lnk`TARGET.suffix` rom_p.obj
-	@$(LNK) -r --output_file=rom_p.obj -m rom_p.map `TestName`.obj BIOS_rom.obj `ROMASMOBJS.join(" ")`
+	@$(LNK) -r --output_file=rom_p.obj -m rom_p.map `TestName`.obj mangled_BIOS_rom.obj `ROMASMOBJS.join(" ")`
+	@$(XDC_ROOT)/../xs -c `RomModule.libDir`../checkPartialMapFile.xs  rom_p.map
 	@echo ROM Build Stage 2: create the executable ROM image "rom.obj".
 	@echo lnk`TARGET.suffix` `ROM_EXEC`
-	@$(LNK) --output_file=`ROM_EXEC` -m rtos_rom.map `TestName`_p`TARGET.suffix`.obj `TestName`.obj BIOS_rom.obj `ROMASMOBJS.join(" ")` `RomModule.libDir`../`TestName`.cmd `TestName`_p`TARGET.suffix`.xdl $(LIBS) $(RTSLIB)
+	@$(LNK) --output_file=`ROM_EXEC` -m rtos_rom.map `TestName`_p`TARGET.suffix`.obj `TestName`.obj mangled_BIOS_rom.obj `ROMASMOBJS.join(" ")` `RomModule.libDir`../`TestName`.cmd `TestName`_p`TARGET.suffix`.xdl $(LIBS) $(RTSLIB)
 	@echo create load image file containing only the ROM-able content
 	@$(HEX) -exclude .sysbios_rom_data -exclude .sysbios_rom_const -exclude .ti_catalog_c2800_initF2837x_begin -exclude .bigc_text -exclude .mangled_apis_text -exclude .ti_catalog_c2800_initF2837x_flashfuncs -exclude .text:ti_catalog_c2800_initF2837x_flashfuncs -exclude .cinit -exclude .text -exclude .econst -exclude .binit `ROM_EXEC` --load_image --section_name_prefix=sysbios -o rtos_rom_image.obj
 	@sectti rtos_rom_image.obj | grep sysbios > rtos_rom_image_sections.txt
-	@$(XDC_ROOT)/../xs -c `RomModule.libDir`../createRomImageLinkCmdFile.xs rtos_rom_image_sections.txt rtos_rom_image_link.cmd
+	@$(XDC_ROOT)/../xs -c `RomModule.libDir`../createRomImageLinkCmdFile.xs rtos_rom_image_sections.txt rtos_rom.map rtos_rom_image_link.cmd
 	@$(CP) `ROM_EXEC` "`RomModule.libDir`"
 	@$(CP) rtos_rom_image.obj "`RomModule.libDir`"
 	@$(CP) rtos_rom_image_sections.txt "`RomModule.libDir`"
@@ -356,7 +355,7 @@ BIOS_rom.obj: `ROMPPS.join(" ")`
 	@$(CP) sysbios_rom_data "`RomModule.libDir`"
 	@echo Create list of functions to remove from `LIB`.
 	@$(XDC_ROOT)/../xs -c `RomModule.libDir`../createRomFuncs.xs  sysbios_rom_text romInternFuncs.txt romInternFuncs.keep
-	@sort romInternFuncs.txt > romFuncs.txt
+	@sort romInternFuncs.keep > romFuncs.txt
 	@$(CP) romFuncs.txt "`RomModule.libDir`"
 	@echo Create `TestName`_link_ti.xdt file
 	@$(XDC_ROOT)/../xs -c `RomModule.libDir`../createLinkCmdFile.xs  sysbios_rom_text sysbios_rom_const sysbios_rom_data `TestName`_link_ti.xdt

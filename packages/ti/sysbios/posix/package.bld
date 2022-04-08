@@ -42,18 +42,24 @@ var objList = [
     "pthread_cond.c",
     "pthread_mutex.c",
     "pthread_rwlock.c",
+    "semaphore.c",
 ];
 
-var trgFilter = {
-    field: "isa",
-    list: [ "v7M4" ]      /* build for all M4 targets ... */
-};
+//var trgFilter = {
+//    field: "isa",
+//    list: [ "v7M4" ]      /* build for all M4 targets ... */
+//};
 
 /* generate makefiles */
-BiosBuild.buildLibs(objList, undefined, trgFilter, arguments);
+//BiosBuild.buildLibs(objList, undefined, trgFilter, arguments);
+BiosBuild.buildLibs(objList, undefined, null, arguments);
+
+/* generate smp makefiles */
+BiosBuild.buildLibs(objList, undefined, null, ["profile=smp"]);
 
 Pkg.otherFiles = [
     "package.xdc",
+    "package.xs",
     "package.bld",
     "pthread.c",
     "pthread_barrier.c",
@@ -62,7 +68,13 @@ Pkg.otherFiles = [
     "pthread_rwlock.c",
     "pthread.h",
     "_pthread.h",
-    "_pthread_error.h"
+    "_pthread_error.h",
+    "_time.h",
+    "semaphore.h",
+    "semaphore.c",
+    "Settings.xdc",
+    "Settings.xs",
+    "Settings.h"
     ];
 
 /* include source files in the release package */

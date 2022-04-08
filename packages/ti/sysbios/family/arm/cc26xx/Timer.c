@@ -327,15 +327,22 @@ UInt32 Timer_getCount(Timer_Object *obj)
  */
 UInt64 Timer_getCount64(Timer_Object *obj)
 {
-    UInt32 curSec;
     UInt32 curSubSec;
+    UInt32 curSec1;
+    UInt32 curSec2;
     UInt64 count;
 
-    /* read of SEC latches SUBSEC; read in this order for proper timestamp */
-    curSec = HWREG(AON_RTC_BASE + AON_RTC_O_SEC);
-    curSubSec = HWREG(AON_RTC_BASE + AON_RTC_O_SUBSEC);
+    /* read seconds count */
+    curSec1 = HWREG(AON_RTC_BASE + AON_RTC_O_SEC);
 
-    count = curSec;
+    /* read subseconds count, watching for rollover into seconds count */
+    do {
+        curSubSec = HWREG(AON_RTC_BASE + AON_RTC_O_SUBSEC);
+        curSec2 = curSec1;
+        curSec1 = HWREG(AON_RTC_BASE + AON_RTC_O_SEC);
+    } while(curSec1 != curSec2);
+
+    count = curSec1;
     count = (count << 32) + curSubSec;
 
     return(count);

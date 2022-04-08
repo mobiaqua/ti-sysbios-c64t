@@ -52,10 +52,10 @@ if (BIOS.$written("assertsEnabled") && BIOS.assertsEnabled == true) {
 }
 BIOS.assertsEnabled = false;
 
-if (BIOS.$written("includeXdcRuntime") && BIOS.includeXdcRuntime == false) {
-    F28004x.$logWarning("BIOS.includeXdcRuntimeEnabled must be set to true for ROM applications.", BIOS, "includeXdcRuntime");
+if (BIOS.$written("includeXdcRuntime") && BIOS.includeXdcRuntime == true) {
+    F28004x.$logWarning("BIOS.includeXdcRuntimeEnabled must be set to false for ROM applications.", BIOS, "includeXdcRuntime");
 }
-BIOS.includeXdcRuntime = true;
+BIOS.includeXdcRuntime = false;
 
 /* allow Mod_construct() Mod_destruct() */
 if (BIOS.$written("runtimeCreatesEnabled") && BIOS.runtimeCreatesEnabled == false) {

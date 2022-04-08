@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2014-2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,7 @@
 
 #include <xdc/std.h>
 
+#include <ti/sysbios/hal/Hwi.h>
 #include <ti/sysbios/knl/Clock.h>
 
 #include <xdc/runtime/Startup.h>
@@ -140,11 +141,32 @@ UInt32 SecondsClock_get(Void)
 }
 
 /*
+ *  ======== SecondsClock_getTime ========
+ */
+UInt32 SecondsClock_getTime(SecondsClock_Time *ts)
+{
+    UInt key;
+    UInt ticks;
+
+    key = Hwi_disable();
+
+    ts->secs = SecondsClock_module->seconds;
+    ticks = Clock_getTicks() - SecondsClock_module->ticks;
+
+    Hwi_restore(key);
+
+    ts->nsecs = ticks * Clock_tickPeriod * 1000;
+
+    return (0);
+}
+
+/*
  *  ======== SecondsClock_increment ========
  */
 Void SecondsClock_increment(UArg arg)
 {
     SecondsClock_module->seconds++;
+    SecondsClock_module->ticks = Clock_getTicks();
 
     /*
      *  If we have drift, adjust seconds if count1 is a multiple of c1

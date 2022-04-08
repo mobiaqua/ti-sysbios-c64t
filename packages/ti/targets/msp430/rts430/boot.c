@@ -3,7 +3,9 @@
  *
  */
 
-#if __TI_COMPILER_VERSION__ >= 4003000
+#if __TI_COMPILER_VERSION__ >= 4004000
+#include "boot_4.4.c"
+#elif __TI_COMPILER_VERSION__ >= 4003000
 #include "boot_4.3.c"
 #elif __TI_COMPILER_VERSION__ >= 4000000
 #include "boot_4.0.c"

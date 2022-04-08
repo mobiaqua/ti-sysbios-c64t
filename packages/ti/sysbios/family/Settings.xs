@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,6 +60,7 @@ var family = {
     "ti.targets.arm.elf.M3" :                   "arm",
     "ti.targets.arm.elf.M4" :                   "arm",
     "ti.targets.arm.elf.M4F" :                  "arm",
+    "ti.targets.arm.elf.R5F" :                  "arm",
     "gnu.targets.arm.M3" :                      "arm",
     "gnu.targets.arm.M4" :                      "arm",
     "gnu.targets.arm.M4F" :                     "arm",
@@ -69,9 +70,6 @@ var family = {
     "gnu.targets.arm.A9F" :                     "arm",
     "gnu.targets.arm.A15" :                     "arm",
     "gnu.targets.arm.A15F" :                    "arm",
-    "ti.targets.arm.elf.R4t_big_endian" :       "arm",
-    "ti.targets.arm.elf.R4Ft" :                 "arm",
-    "ti.targets.arm.elf.R4Ft_big_endian" :      "arm",
     "iar.targets.arm.M3" :                      "arm",
     "iar.targets.arm.M4" :                      "arm",
     "iar.targets.arm.M4F" :                     "arm",

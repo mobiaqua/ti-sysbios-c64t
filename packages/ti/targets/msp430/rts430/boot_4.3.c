@@ -65,8 +65,8 @@ extern void __interrupt _c_int00_noinit_noexit_mpu_init();
 extern int  _system_pre_init(void);
 extern void __mpu_init(void);
 
-void              (*_cleanup_ptr)(void);
-void _DATA_ACCESS (*_dtors_ptr)(int);
+void              (*__TI_cleanup_ptr)(void);
+void _DATA_ACCESS (*__TI_dtors_ptr)(int);
 
 /*---------------------------------------------------------------------------*/
 /* Allocate the memory for the system stack.  This section will be sized     */
@@ -118,7 +118,7 @@ __asm("_reset_vector:\n\t.field _c_int00, 16");
 #define INIT_EXIT_PTRS() do { } while(0)
 #define INIT_LOCKS()     do { } while(0)
 #else
-#define INIT_EXIT_PTRS() do { _cleanup_ptr = NULL; _dtors_ptr = NULL; } while(0)
+#define INIT_EXIT_PTRS() do { __TI_cleanup_ptr = NULL; __TI_dtors_ptr = NULL; } while(0)
 #define INIT_LOCKS()     do { _lock = _nop; _unlock = _nop; } while(0)
 #endif
 

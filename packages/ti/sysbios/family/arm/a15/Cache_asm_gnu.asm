@@ -1,5 +1,5 @@
 @
-@  Copyright (c) 2014, Texas Instruments Incorporated
+@  Copyright (c) 2015, Texas Instruments Incorporated
 @  All rights reserved.
 @
 @  Redistribution and use in source and binary forms, with or without
@@ -59,6 +59,8 @@
         SMP_ASM(.global ti_sysbios_family_arm_a15_smp_Cache_preFetch__I)
         SMP_ASM(.global ti_sysbios_family_arm_a15_smp_Cache_getEnabled__E)
         SMP_ASM(.global ti_sysbios_family_arm_a15_smp_Cache_getCacheLevelInfo__I)
+        SMP_ASM(.global ti_sysbios_family_arm_a15_smp_Cache_getL2AuxControlReg__I)
+        SMP_ASM(.global ti_sysbios_family_arm_a15_smp_Cache_setL2AuxControlReg__I)
 
         UP_ASM(.global ti_sysbios_family_arm_a15_Cache_disableL1D__I)
         UP_ASM(.global ti_sysbios_family_arm_a15_Cache_disableL1P__I)
@@ -81,6 +83,8 @@
         UP_ASM(.global ti_sysbios_family_arm_a15_Cache_preFetch__I)
         UP_ASM(.global ti_sysbios_family_arm_a15_Cache_getEnabled__E)
         UP_ASM(.global ti_sysbios_family_arm_a15_Cache_getCacheLevelInfo__I)
+        UP_ASM(.global ti_sysbios_family_arm_a15_Cache_getL2AuxControlReg__I)
+        UP_ASM(.global ti_sysbios_family_arm_a15_Cache_setL2AuxControlReg__I)
 
         .arm
         .align  4
@@ -772,6 +776,39 @@ UP_ASM(ti_sysbios_family_arm_a15_Cache_enableBP__E:)
         mrc     p15, #0, r0, c1, c0, #0 @ read register SCTLR
         orr     r0, r0, #0x0800         @ set Z bit in SCTLR to enable BP
         mcr     p15, #0, r0, c1, c0, #0 @ BP enabled
+        bx      lr
+        .endfunc
+
+@
+@ ======== Cache_getL2AuxControlReg ========
+@
+        .text
+        SMP_ASM(.func ti_sysbios_family_arm_a15_smp_Cache_getL2AuxControlReg__I)
+        UP_ASM(.func ti_sysbios_family_arm_a15_Cache_getL2AuxControlReg__I)
+
+SMP_ASM(ti_sysbios_family_arm_a15_smp_Cache_getL2AuxControlReg__I:)
+UP_ASM(ti_sysbios_family_arm_a15_Cache_getL2AuxControlReg__I:)
+        mrc     p15, #1, r0, c15, c0, #0 @ read L2ACTLR register
+
+        bx      lr
+        .endfunc
+
+@
+@ ======== Cache_setL2AuxControlReg ========
+@ This function should only be called on OMAP5 and J6 devices
+@
+        .text
+        SMP_ASM(.func ti_sysbios_family_arm_a15_smp_Cache_setL2AuxControlReg__I)
+        UP_ASM(.func ti_sysbios_family_arm_a15_Cache_setL2AuxControlReg__I)
+
+SMP_ASM(ti_sysbios_family_arm_a15_smp_Cache_setL2AuxControlReg__I:)
+UP_ASM(ti_sysbios_family_arm_a15_Cache_setL2AuxControlReg__I:)
+        push    {r4-r12, lr}
+        ldr     r12, =0x104
+        dsb
+        smc     0x1
+        pop     {r4-r12, lr}
+
         bx      lr
         .endfunc
 

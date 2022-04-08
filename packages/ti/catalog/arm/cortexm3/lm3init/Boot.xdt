@@ -37,8 +37,8 @@
 % /* Don't generate Boot_init if this is a romimage */
 % if (!Program.$$isrom && (Program.build.rtsName !== null)) {
 %var Boot = xdc.module("ti.catalog.arm.cortexm3.lm3init.Boot");
-    extern Void ti_catalog_arm_cortexm3_lm3init_Boot_sysCtlClockSet(UInt ulConfig);
-    extern Void ti_catalog_arm_cortexm3_lm3init_Boot_configureLdo(UInt ulVoltage);
+    extern xdc_Void ti_catalog_arm_cortexm3_lm3init_Boot_sysCtlClockSet(xdc_UInt ulConfig);
+    extern xdc_Void ti_catalog_arm_cortexm3_lm3init_Boot_configureLdo(xdc_UInt ulVoltage);
 
 #if defined(__ti__)
 #pragma CODE_SECTION(ti_catalog_arm_cortexm3_lm3init_Boot_init, ".text:.bootCodeSection")
@@ -47,14 +47,14 @@
 /*
  *  ======== ti_catalog_arm_cortexm3_lm3init_Boot_init ========
  */
-Void ti_catalog_arm_cortexm3_lm3init_Boot_init()
+xdc_Void ti_catalog_arm_cortexm3_lm3init_Boot_init()
 {
 %if (Boot.configureClock == true) {
-    ti_catalog_arm_cortexm3_lm3init_Boot_sysCtlClockSet((UInt)
+    ti_catalog_arm_cortexm3_lm3init_Boot_sysCtlClockSet((xdc_UInt)
         (`Boot.ulConfig`));
 %}
 %if (Boot.configureLdo == true) {
-    ti_catalog_arm_cortexm3_lm3init_Boot_configureLdo((UInt)(`Boot.ldoOut`));
+    ti_catalog_arm_cortexm3_lm3init_Boot_configureLdo((xdc_UInt)(`Boot.ldoOut`));
 %}
 }
 %}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2014-2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,6 +67,42 @@ UInt32 Seconds_get(Void)
     Hwi_restore(key);
 
     return (curSeconds);
+}
+
+/*
+ *  ======== Seconds_getTime ========
+ */
+UInt32 Seconds_getTime(Seconds_Time *ts)
+{
+    volatile UInt32 seconds;
+    volatile UInt32 subseconds;
+    UInt32 temp;
+    UInt64 nsecs;
+
+    /* read seconds and subseconds, watching for rollover into seconds count */
+    seconds = HWREG(AON_RTC_BASE + AON_RTC_O_SEC);
+    do {
+        subseconds = HWREG(AON_RTC_BASE + AON_RTC_O_SUBSEC);
+        temp = seconds;
+        seconds = HWREG(AON_RTC_BASE + AON_RTC_O_SEC);
+    } while(seconds != temp);
+
+    seconds = (seconds - Seconds_module->refSeconds) +
+        Seconds_module->setSeconds;
+
+    ts->secs = seconds;
+
+    /*
+     *  Throw away the lower 16 bits of the subseconds since this
+     *  used for temparature correction and does not accurately
+     *  reflect the time.
+     */
+    subseconds = subseconds >> 16;
+
+    nsecs = (1000000000 * (UInt64)subseconds) / 65536;
+    ts->nsecs = (UInt32)nsecs;
+
+    return (0);
 }
 
 /*

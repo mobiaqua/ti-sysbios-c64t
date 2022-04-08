@@ -22,10 +22,10 @@
 % /* Don't generate Boot_init if this is a romimage */
 % if (!Program.$$isrom && (Program.build.rtsName !== null)) {
 %var Boot = xdc.module("ti.catalog.msp430.init.Boot");
-    extern Void ti_catalog_msp430_init_Boot_disableWatchdog(UInt address);
-    extern Void ti_catalog_msp430_init_Boot_configureDCO(Void);
-    extern Void ti_catalog_msp430_init_Boot_configureDCO_CS_A(Void);
-    extern Void ti_catalog_msp430_init_Boot_configureDCO_CS_A_useLFXT(Void);
+    extern xdc_Void ti_catalog_msp430_init_Boot_disableWatchdog(xdc_UInt address);
+    extern xdc_Void ti_catalog_msp430_init_Boot_configureDCO(xdc_Void);
+    extern xdc_Void ti_catalog_msp430_init_Boot_configureDCO_CS_A(xdc_Void);
+    extern xdc_Void ti_catalog_msp430_init_Boot_configureDCO_CS_A_useLFXT(xdc_Void);
 
 #if defined(__ti__)
 #pragma CODE_SECTION(ti_catalog_msp430_init_Boot_init, ".text:.bootCodeSection")
@@ -37,7 +37,7 @@
 #if defined(__ICC430__)
     #pragma location="CSTART"
 #endif
-Void ti_catalog_msp430_init_Boot_init(Void)
+xdc_Void ti_catalog_msp430_init_Boot_init(xdc_Void)
 {
 %if (Boot.disableWatchdog == true) {
     ti_catalog_msp430_init_Boot_disableWatchdog(`Boot.watchdogAddress`);

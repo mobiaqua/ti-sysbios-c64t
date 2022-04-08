@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,3 +54,10 @@ extern __FAR__ DEV_Fxns DNL_FXNS;
 #endif /* extern "C" */
 
 #endif  /* DNL_ */
+
+#ifndef DSPBIOSSUPPORTWARNING
+#define DSPBIOSSUPPORTWARNING
+
+#warn The DSP/BIOS compatibility APIs are no longer supported. The ti/bios/include files and library can be used as-is but they will not be supported in this or future releases. We recommend that you use the native SYS/BIOS APIs.
+
+#endif

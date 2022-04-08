@@ -171,13 +171,13 @@ CC = `CGEN`/bin/`TARGET.cc.cmd` $(CCOPTS) -I `CGEN`/include
 ASM = `CGEN`/bin/`TARGET.asm.cmd` $(CCOPTS) -I `CGEN`/include
 AR = `CGEN`/bin/`TARGET.ar.cmd` `TARGET.ar.opts`
 
-%var CCOPTS_LIB = BIOS.getCCOpts(TARGET.name).toString().replace("--opt_for_speed=0","--opt_for_speed=2");
+%var CCOPTS_LIB = BIOS.getCCOpts(TARGET.name).toString();
 CC_LIB = `CGEN`/bin/`TARGET.cc.cmd` `CCOPTS_LIB` -I `CGEN`/include
 
-%var CCOPTS_PP = BIOS.getCCOpts(TARGET.name).toString().replace(/\-o3/," ");
-%CCOPTS_PP = CCOPTS_PP.toString().replace(/\-\-program_level_compile/,"");
-%CCOPTS_PP = CCOPTS_PP.toString().replace(/\-\-optimize_with_debug/,"");
-%CCOPTS_PP = CCOPTS_PP.toString().replace(/\-\-opt_for_speed=2/,"");
+%var CCOPTS_PP = BIOS.getCCOpts(TARGET.name).toString().replace(/ \-o3/," ");
+%CCOPTS_PP = CCOPTS_PP.toString().replace(/ \-\-program_level_compile/,"");
+%CCOPTS_PP = CCOPTS_PP.toString().replace(/ \-\-optimize_with_debug/,"");
+%CCOPTS_PP = CCOPTS_PP.toString().replace(/ \-\-opt_for_speed=./,"");
 %CCOPTS_PP = CCOPTS_PP.toString().replace("-Dti_sysbios_family_arm_m3_Hwi_enableException__D=FALSE","");
 %CCOPTS_PP = CCOPTS_PP.toString().replace("-Dti_sysbios_family_arm_m3_Hwi_disablePriority__D=32U","");
 CC_PP = `CGEN`/bin/`TARGET.cc.cmd` `CCOPTS_PP` -I `CGEN`/include
@@ -244,18 +244,21 @@ mangled_`libPP`: `s`
 
 %}
 
-%var BIOS_lib_obj = LIBPPS[0].substring(0, LIBPPS[0].lastIndexOf('.')) + ".obj";
-`BIOS_lib_obj`: `LIBPPS.join(" ")`
+sysbios.obj: `LIBPPS.join(" ")`
 	@echo Creating the SYS/BIOS library that contains the APIs not included in the ROM ...
-	@$(CC_LIB) $(BIOS_DEFS) $(XOPTS) $(INCS) \
+	@$(CC_LIB) $(BIOS_DEFS) $(XOPTS) $(INCS) --output_file=sysbios.obj \
 %for each (var s in LIBPPS) {
 	`s` \
 %}
 
-`LIB`: intro `BIOS_lib_obj` `LIBASMOBJS.join(" ")`
+`LIB`: intro sysbios.obj `LIBASMOBJS.join(" ")`
 	@-$(call RM, $@)
 	@$(AR) $@ $(filter-out intro,$^)
 	@echo Library build complete.
 
 clean:
+%/* Force reconfig on CCS project after a clean so that config.c files are generated before gmake -k all */
+%if (environment["os.name"].match(/Windows.*/i)) {
+	@$(DEL) ..\makefile.libs
+%}
 	@-$(call RM, *.obj)

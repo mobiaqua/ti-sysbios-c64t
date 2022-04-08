@@ -33,15 +33,52 @@
  *  ======== _pthread_error.h ========
  */
 
-#ifndef __PTHREAD_ERROR_H_
-#define __PTHREAD_ERROR_H_
+#ifndef ti_sysbios_posix__pthread_error_include
+#define ti_sysbios_posix__pthread_error_include
 
-#define	EPERM 1		/* Do not have permission to do the operation  */
-#define	ENOMEM 12	/* Not enough core */
-#define	EBUSY 16	/* Mount device busy */
-#define	EINVAL 22	/* Invalid argument */
-#define	EDEADLK 45	/* Deadlock condition */
-#define ENOSYS 88	/* Function not implemented */
-#define ETIMEDOUT 116	/* Timed out waiting for resource */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#ifndef EPERM
+#define EPERM        1  /* Do not have permission to do the operation  */
+#endif
+
+#ifndef ENOMEM
+#define ENOMEM       12      /* Cannot allocate memory */
+#endif
+
+#ifndef EBUSY
+#define EBUSY        16  /* Device busy */
+#endif
+
+#ifndef EINVAL
+#define EINVAL       22  /* Invalid argument */
+#endif
+
+#ifndef EDEADLK
+#define EDEADLK      45 /* Deadlock condition - from gcc tools sys/errno.h
+                         * (Different from ndk serrno.h where EDEADLK is
+                         * defined as 11.)
+                         */
+#endif
+
+#ifndef ENOSYS
+#define ENOSYS       88 /* Function not implemented */
+#endif
+
+#ifndef ETIMEDOUT
+#define ETIMEDOUT    60  /* Timed out waiting for resource (from ndk serrno.h
+                          * GCC tools sys/errno.h defines ETIMEDOUT to 116.
+                          */
+#endif
+
+#define EAGAIN       35  /* Semaphore not available (from ndk serrno.h).
+                          * GCC tools sys/errno.h defines EAGAIN to 11.
+                          */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

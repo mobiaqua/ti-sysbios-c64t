@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2014-2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -77,18 +77,6 @@ typedef UInt8 Power_Resource;
 
 #define PARENTMASK     0x3F
 #define NOPARENT       0x3F
-
-/* Power resource database record format */
-typedef struct ti_sysbios_family_arm_cc26xx_Power_ResourceRecord {
-    UInt8 flags;          /* resource type : first parent */
-    UInt8 flags2;         /* second parent */
-    UInt16 driverlibID;
-} ti_sysbios_family_arm_cc26xx_Power_ResourceRecord;
-
-extern const ti_sysbios_family_arm_cc26xx_Power_ResourceRecord
-    ti_sysbios_family_arm_cc26xx_Power_db[];
-extern Fxn ti_sysbios_family_arm_cc26xx_Power_resourceHandlers[];
-extern volatile UInt8 ti_sysbios_family_arm_cc26xx_Power_refCount[];
 
 #ifdef __cplusplus
 }

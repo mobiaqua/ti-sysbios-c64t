@@ -45,9 +45,6 @@ BIOSRtsGateProxy.common$.outPolicy = Types.SEPARATE_FILE;
 var Clock = xdc.useModule('ti.sysbios.knl.Clock');
 Clock.common$.outPolicy = Types.SEPARATE_FILE;
 
-var ClockTimerProxy = xdc.module('ti.sysbios.knl.Clock_TimerProxy');
-ClockTimerProxy.common$.outPolicy = Types.SEPARATE_FILE;
-
 var Task = xdc.useModule('ti.sysbios.knl.Task');
 Task.common$.outPolicy = Types.SEPARATE_FILE;
 
@@ -78,9 +75,6 @@ halHwiProxy.common$.outPolicy = Types.SEPARATE_FILE;
 var halTimer = xdc.useModule('ti.sysbios.hal.Timer');
 halTimer.common$.outPolicy = Types.SEPARATE_FILE;
 
-var halTimerProxy = xdc.module('ti.sysbios.hal.Timer_TimerProxy');
-halTimerProxy.common$.outPolicy = Types.SEPARATE_FILE;
-
 var c28Hwi = xdc.useModule('ti.sysbios.family.c28.Hwi');
 c28Hwi.common$.outPolicy = Types.SEPARATE_FILE;
 
@@ -102,41 +96,9 @@ GateHwi.common$.outPolicy = Types.SEPARATE_FILE;
 var GateMutex = xdc.useModule('ti.sysbios.gates.GateMutex');
 GateMutex.common$.outPolicy = Types.SEPARATE_FILE;
 
-var System = xdc.useModule('xdc.runtime.System');
-System.common$.outPolicy = Types.SEPARATE_FILE;
-
-var System_Module_GateProxy = xdc.module('xdc.runtime.System_Module_GateProxy');
-System_Module_GateProxy.common$.outPolicy = Types.SEPARATE_FILE;
-
-var SysCallback = xdc.module('xdc.runtime.SysCallback');
-SysCallback.common$.outPolicy = Types.SEPARATE_FILE;
-
-var Timestamp = xdc.useModule('xdc.runtime.Timestamp');
-Timestamp.common$.outPolicy = Types.SEPARATE_FILE;
-
-var Timestamp_SupportProxy = xdc.module('xdc.runtime.Timestamp_SupportProxy');
-Timestamp_SupportProxy.common$.outPolicy = Types.SEPARATE_FILE;
-
-var LocalError = xdc.module('xdc.runtime.Error');
-LocalError.common$.outPolicy = Types.SEPARATE_FILE;
-
-var Memory = xdc.module('xdc.runtime.Memory');
-Memory.common$.outPolicy = Types.SEPARATE_FILE;
-
-var Memory_HeapProxy = xdc.module('xdc.runtime.Memory_HeapProxy');
-Memory_HeapProxy.common$.outPolicy = Types.SEPARATE_FILE;
-
-var HeapMem = xdc.useModule('ti.sysbios.heaps.HeapMem');
-HeapMem.common$.outPolicy = Types.SEPARATE_FILE;
-
-var HeapMem_Module_GateProxy = xdc.module('ti.sysbios.heaps.HeapMem_Module_GateProxy');
-HeapMem_Module_GateProxy.common$.outPolicy = Types.SEPARATE_FILE;
-
 /* use the c28 Timer and TimestampProvider modules */
 var c28Timer = xdc.useModule('ti.sysbios.family.c28.Timer');
 c28Timer.common$.outPolicy = Types.SEPARATE_FILE;
-Clock.TimerProxy = c28Timer;
 
 var c28Timestamp = xdc.useModule('ti.sysbios.family.c28.f2837x.TimestampProvider');
 c28Timestamp.common$.outPolicy = Types.SEPARATE_FILE;
-Timestamp.SupportProxy = c28Timestamp;

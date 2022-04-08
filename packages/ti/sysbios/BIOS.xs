@@ -100,8 +100,8 @@ function module$meta$init()
              Program.cpu.deviceName.match(/F2837/)) {
         var Boot = xdc.module('ti.catalog.c2800.initF2837x.Boot');
 
-	if ('registerFreqListener' in Boot) {
-	    Boot.registerFreqListener(this);
+        if ('registerFreqListener' in Boot) {
+            Boot.registerFreqListener(this);
         }
     }
     /*
@@ -115,12 +115,24 @@ function module$meta$init()
             Boot28.registerFreqListener(this);
         }
     }
-
     /* register frequency listener for MSP432 */
     else if (Program.cpu.deviceName.match(/432/)) {
         var Boot = xdc.module('ti.sysbios.family.arm.msp432.init.Boot');
         if ('registerFreqListener' in Boot) {
             Boot.registerFreqListener(this);
+        }
+    }
+    /*
+     * register frequency listener for Cortex-R5 based devices
+     */
+    else if (Program.build.target.name.match(/R5F/)) {
+        var settings = xdc.module('ti.sysbios.family.Settings');
+        var defaultBootModule = settings.getDefaultBootModule();
+        if (defaultBootModule != null) {
+            var BootModule = xdc.useModule(defaultBootModule);
+            if ('registerFreqListener' in BootModule) {
+                BootModule.registerFreqListener(this);
+            }
         }
     }
 
@@ -613,6 +625,7 @@ function viewInitModule(view, obj)
         if ((Program.build.target.name == "M3") ||
             (Program.build.target.name == "M4") ||
             (Program.build.target.name == "M4F") ||
+            (Program.build.target.name == "A9F") ||
             (Program.build.target.name == "A15F")) {
             var threadType = Program.fetchArray({type:'xdc.rov.support.ScalarStructs.S_UChar', isScalar:true},
                             obj.smpThreadType,

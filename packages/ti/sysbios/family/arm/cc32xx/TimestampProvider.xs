@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2014-2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,9 +78,26 @@ function module$use()
         /* if Clock is enabled, default to share its timer */
         if (BIOS.clockEnabled) {
             Clock = xdc.module('ti.sysbios.knl.Clock');
-            if (Clock.tickSource != Clock.TickSource_NULL){
+            if ((Clock.TimerProxy.delegate$.$name.match(
+                    /ti.sysbios.family.arm.cc32xx.Timer/)) &&
+                    (Clock.tickSource != Clock.TickSource_NULL)) {
                 TimestampProvider.useClockTimer = true;
             }
+        }
+    }
+    else if (TimestampProvider.useClockTimer == true) {
+        if (BIOS.clockEnabled == false) {
+            TimestampProvider.$logError("Clock is not enabled, cannot share its Timer",
+                    TimestampProvider, "useClockTimer");
+        }
+
+        Clock = xdc.module('ti.sysbios.knl.Clock');
+        if (!Clock.TimerProxy.delegate$.$name.match(
+                 /ti.sysbios.family.arm.cc32xx.Timer/)) {
+            TimestampProvider.$logWarning("Clock is not using cc32xx Timer. " +
+                    "Setting TimestampProvider.useClockTimer to false",
+                    TimestampProvider, "useClockTimer");
+            TimestampProvider.useClockTimer = false;
         }
     }
 }

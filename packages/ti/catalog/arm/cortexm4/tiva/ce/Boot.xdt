@@ -44,15 +44,15 @@
 /*
  *  ======== ti_catalog_arm_cortexm4_tiva_ce_Boot_init ========
  */
-Void ti_catalog_arm_cortexm4_tiva_ce_Boot_init()
+xdc_Void ti_catalog_arm_cortexm4_tiva_ce_Boot_init()
 {
 %if (Boot.configureClock == true) {
 %if (Boot.enhancedClockMode == true) {
-    ti_catalog_arm_cortexm4_tiva_ce_Boot_sysCtlClockFreqSet((ULong)
-        (`Boot.ulConfig`), (ULong)(`Boot.cpuFrequency`));
+    ti_catalog_arm_cortexm4_tiva_ce_Boot_sysCtlClockFreqSet((xdc_ULong)
+        (`Boot.ulConfig`), (xdc_ULong)(`Boot.cpuFrequency`));
 %}
 % else {
-    ti_catalog_arm_cortexm4_tiva_ce_Boot_sysCtlClockSet((ULong)
+    ti_catalog_arm_cortexm4_tiva_ce_Boot_sysCtlClockSet((xdc_ULong)
         (`Boot.ulConfig`));
 %}
 %}

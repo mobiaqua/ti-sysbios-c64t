@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,6 @@ function getAsmFiles(targetName)
     switch(targetName) {
         case "ti.targets.arm.elf.Arm9":
         case "ti.targets.arm.elf.A8Fnv":
-        case "ti.targets.arm.elf.R4Ft_big_endian":
             return (["HwiCommon_asm.asm"]);
             break;
 

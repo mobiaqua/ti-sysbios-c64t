@@ -52,7 +52,7 @@
 
 % if (Program.build.target.$name.match(/gnu/) &&
 %     (Program.build.target.name == "M0")) {
-UChar ti_platforms_tm0sxx_stack[`Program.stack`] __attribute__ ((aligned(8), section (".stack")));
+xdc_UChar ti_platforms_tm0sxx_stack[`Program.stack`] __attribute__ ((aligned(8), section (".stack")));
 % }
 %%{
 /*

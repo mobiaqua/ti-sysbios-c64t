@@ -1,6 +1,6 @@
 %%{
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -72,9 +72,9 @@ Void ti_sysbios_BIOS_startFunc__I()
 %}
 }
 
-#if defined(__ti__)
+%if (Program.build.target.$name.match(/ti/)) {
 #include <_lock.h>
-#endif
+%}
 
 %var mobj = '(&ti_sysbios_BIOS_Module__state__V)';
 Void ti_sysbios_BIOS_atExitFunc__I(Int notused)
@@ -87,22 +87,22 @@ Void ti_sysbios_BIOS_atExitFunc__I(Int notused)
 %}
     ti_sysbios_BIOS_setThreadType(ti_sysbios_BIOS_ThreadType_Main);
 
-#if defined(__ti__)
-%if (Program.$capsule._romAsm) {
+%if (Program.build.target.$name.match(/ti/)) {
+%   if (Program.$capsule._romAsm) {
     if (`mobj`->rtsGate != NULL) {
         _lock= _nop;
         _unlock = _nop;
     }
-%}
-%else {
+%   }
+%   else {
     if (`mobj`->rtsGate != NULL) {
         _register_lock(_nop);
         _register_unlock(_nop);
     }
+%   }
 %}
-#endif
 }
-#if defined(__ti__)
+%if (Program.build.target.$name.match(/ti/)) {
 
 /*
  *  ======== BIOS_rtsLock ========
@@ -163,18 +163,20 @@ Void ti_sysbios_BIOS_removeRTSLock(Void)
         _register_unlock(ti_sysbios_BIOS_nullFunc);
     }
 }
-#endif
+%}
 
 /*
  *  ======== BIOS_exitFunc ========
  */
 Void ti_sysbios_BIOS_exitFunc(Int stat)
 {
-#if defined(__ti__)
+%if (Program.build.target.$name.match(/ti/)) {
+%    if (BIOS.rtsGateType != BIOS.NoLocking) {
     /* remove the RTS lock */
     ti_sysbios_BIOS_removeRTSLock();
-#endif
 
+%    }
+%}
     /* force thread type to 'Main' */
     ti_sysbios_BIOS_setThreadType(ti_sysbios_BIOS_ThreadType_Main);
 
@@ -190,10 +192,12 @@ Void ti_sysbios_BIOS_errorRaiseHook(xdc_runtime_Error_Block *eb)
      * If this is an Assert thread, defang Gate threadtype check
      */
     if (eb->id == xdc_runtime_Assert_E_assertFailed) {
-#if defined(__ti__)
+%if (Program.build.target.$name.match(/ti/)) {
+%    if (BIOS.rtsGateType != BIOS.NoLocking) {
         /* remove the RTS lock */
         ti_sysbios_BIOS_removeRTSLock();
-#endif
+%    }
+%}
         /* force thread type to 'Main' */
         ti_sysbios_BIOS_setThreadType(ti_sysbios_BIOS_ThreadType_Main);
     }

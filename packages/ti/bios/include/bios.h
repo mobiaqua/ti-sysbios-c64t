@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,3 +49,10 @@
 #include <ti/bios/include/sys.h>
 #include <ti/bios/include/utl.h>
 #include <ti/bios/include/trc.h>
+
+#ifndef DSPBIOSSUPPORTWARNING
+#define DSPBIOSSUPPORTWARNING
+
+#warn The DSP/BIOS compatibility APIs are no longer supported. The ti/bios/include files and library can be used as-is but they will not be supported in this or future releases. We recommend that you use the native SYS/BIOS APIs.
+
+#endif

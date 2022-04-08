@@ -40,6 +40,7 @@ var Clock = null;
 var Intrinsics = null;
 var Idle = null;
 var Hwi = null;
+var Build = null;
 
 /*
  * ======== getCFiles ========
@@ -48,7 +49,7 @@ var Hwi = null;
  */
 function getCFiles(targetName)
 {
-    return (["Power.c", "Power_standbyPolicy.c", "Power_calibrateRCOSC.c", "TimerGPT.c" ]);
+    return (["Power.c", "Power_standbyPolicy.c", "Power_calibrateRCOSC.c" ]);
 }
 
 /*
@@ -79,6 +80,7 @@ function module$use()
     Clock = xdc.useModule("ti.sysbios.knl.Clock");
     Intrinsics = xdc.useModule("ti.sysbios.knl.Intrinsics");
     Hwi = xdc.useModule("ti.sysbios.family.arm.m3.Hwi");
+    Build = xdc.module("ti.sysbios.Build");
 
     if (Power.idle == true) {
         Idle = xdc.useModule('ti.sysbios.knl.Idle');
@@ -103,6 +105,24 @@ function module$static$init(mod, params)
     mod.constraintsMask = 0;
     mod.state = Power.ACTIVE;
     mod.xoscPending = false;
+    mod.calLF = false;
+    mod.hwiState = 0;
+    mod.nDeltaFreqCurr = 0;
+    mod.nCtrimCurr = 0;
+    mod.nCtrimFractCurr = 0;
+    mod.nCtrimNew = 0;
+    mod.nCtrimFractNew = 0;
+    mod.busyCal = false;
+    mod.calStep = 1;
+    mod.firstLF = true;
+    mod.constraintCounts =
+        '&ti_sysbios_family_arm_cc26xx_Power_constraintCounts';
+    mod.resourceCounts =
+        '&ti_sysbios_family_arm_cc26xx_Power_refCount';
+    mod.resourceDB =
+        '&ti_sysbios_family_arm_cc26xx_Power_db';
+    mod.resourceHandlers =
+        '&ti_sysbios_family_arm_cc26xx_Power_resourceHandlers';
 
     /* construct notification queues */
     Queue.construct(mod.notifyQ);
@@ -120,15 +140,63 @@ function module$static$init(mod, params)
     clockParams.period = 0;
     clockParams.startFlag = false;
     clockParams.arg = 0;
-    Clock.construct(mod.xoscClockObj, Power.xoscClockFunc, 0, clockParams);
+    Clock.construct(mod.xoscClockObj, Power.XOSC_HF_clockFunc, 0, clockParams);
+
+    /* if RCOSC calibration enabled construct a Clock object for delays */
+    if (Power.calibrateRCOSC == true) {
+        /* set timeout to '1' Clock tick period for the minimal delay */
+        /* object will explicitly started by Power module when appropriate */
+        clockParams.period = 0;
+        clockParams.startFlag = false;
+        clockParams.arg = 0;
+        mod.calClockHandle = Clock.create(Power.RCOSC_clockFunc,
+            1, clockParams);
+    }
+    else {
+        mod.calClockHandle = null;
+    }
 
     /* construct the Clock object for disabling LF clock quailifiers */
     /* one shot, auto start, first expires at 100 msec */
     clockParams.period = 0;
     clockParams.startFlag = true;
     clockParams.arg = 0;
-    Clock.construct(mod.lfClockObj, Power.lfClockFunc,
+    Clock.construct(mod.lfClockObj, Power.LF_clockFunc,
         (100000 / Clock.tickPeriod), clockParams);
+
+    /* generate defines for some simple configs (for more efficient runtime) */
+    Build.ccArgs.$add(
+        "-Dti_sysbios_family_arm_cc26xx_Power_calibrateRCOSC__D=" +
+            (Power.calibrateRCOSC ? "TRUE" : "FALSE"));
+    Build.ccArgs.$add(
+        "-Dti_sysbios_family_arm_cc26xx_Power_calibrateRCOSC_LF__D=" +
+            (Power.calibrateRCOSC_LF ? "TRUE" : "FALSE"));
+    Build.ccArgs.$add(
+        "-Dti_sysbios_family_arm_cc26xx_Power_calibrateRCOSC_HF__D=" +
+            (Power.calibrateRCOSC_HF ? "TRUE" : "FALSE"));
+    Build.ccArgs.$add(
+        "-Dti_sysbios_family_arm_cc26xx_Power_totalTicksSTANDBY__D=" +
+            Power.totalTicksSTANDBY);
+    Build.ccArgs.$add(
+        "-Dti_sysbios_family_arm_cc26xx_Power_wakeDelaySTANDBY__D=" +
+            Power.wakeDelaySTANDBY);
+    Build.ccArgs.$add(
+        "-Dti_sysbios_family_arm_cc26xx_Power_initialWaitXOSC_HF__D=" +
+            Power.initialWaitXOSC_HF);
+    Build.ccArgs.$add(
+        "-Dti_sysbios_family_arm_cc26xx_Power_retryWaitXOSC_HF__D=" +
+            Power.retryWaitXOSC_HF);
+}
+
+/*
+ *  ======== module$validate ========
+ */
+function module$validate()
+{
+    /* warn if RCOSC calibration is enabled and Clock.tickPeriod is not 10 us */
+    if (Power.calibrateRCOSC && (Clock.tickPeriod != 10)) {
+        Power.$logWarning("RCOSC calibration uses the Clock module for generating delays.  Clock.tickPeriod is not configured with the expected value of 10 microseconds.  RCOSC calibration latency will therefore increase accordingly.", Power, "calibrateRCOSC");
+    }
 }
 
 /*

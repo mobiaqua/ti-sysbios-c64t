@@ -27,10 +27,10 @@
 % if (!Program.$$isrom && (Program.build.rtsName !== null)) {
 %var Boot = xdc.module("ti.catalog.c2800.init.Boot");
     extern ti_catalog_c2800_init_Boot_disableWatchdog();
-    extern ti_catalog_c2800_init_Boot_configurePll280x(UInt16 pllcrDIV);
-    extern ti_catalog_c2800_init_Boot_configurePll281x(UInt16 pllcrDIV, UInt16 pllstsDIVSEL);
-    extern ti_catalog_c2800_init_Boot_configurePll2802x(UInt16 pllcrDIV, UInt16 pllstsDIVSEL);
-    extern ti_catalog_c2800_init_Boot_configurePll2834x(UInt16 pllcrDIV, UInt16 pllstsDIVSEL);
+    extern ti_catalog_c2800_init_Boot_configurePll280x(xdc_UInt16 pllcrDIV);
+    extern ti_catalog_c2800_init_Boot_configurePll281x(xdc_UInt16 pllcrDIV, xdc_UInt16 pllstsDIVSEL);
+    extern ti_catalog_c2800_init_Boot_configurePll2802x(xdc_UInt16 pllcrDIV, xdc_UInt16 pllstsDIVSEL);
+    extern ti_catalog_c2800_init_Boot_configurePll2834x(xdc_UInt16 pllcrDIV, xdc_UInt16 pllstsDIVSEL);
     extern ti_catalog_c2800_init_Boot_configEzdspXintf();
 
 #if defined(__ti__)
@@ -41,7 +41,7 @@
 /*
  *  ======== ti_catalog_c2800_init_Boot_init ========
  */
-Void ti_catalog_c2800_init_Boot_init()
+xdc_Void ti_catalog_c2800_init_Boot_init()
 {
 %if (Boot.disableWatchdog == true) {
     ti_catalog_c2800_init_Boot_disableWatchdog();
@@ -76,7 +76,7 @@ Void ti_catalog_c2800_init_Boot_init()
 /*
  *  ======== ti_catalog_c2800_init_Boot_50usDelay ========
  */
-Void ti_catalog_c2800_init_Boot_50usDelay()
+xdc_Void ti_catalog_c2800_init_Boot_50usDelay()
 {
 asm("   MOV     @AH,#`hi16`;\n                          \
         MOV     @AL,#`lo16`;\n                          \
@@ -89,7 +89,7 @@ asm("_ti_catalog_c2800_init_Boot_loop:\n                \
 /*
  *  ======== ti_catalog_c2800_init_Boot_limpAbort ========
  */
-Void ti_catalog_c2800_init_Boot_limpAbort(Void)
+xdc_Void ti_catalog_c2800_init_Boot_limpAbort(xdc_Void)
 {
 %var cname;
 %       cname = String(Boot.limpAbortFunction);

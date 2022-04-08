@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2014-2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,12 +37,15 @@
 
 #include <xdc/runtime/Types.h>
 
+#include <ti/sysbios/hal/Hwi.h>
+
 #include "package/internal/Seconds.xdc.h"
 
 /* Definitions from TivaWare SDK */
 #define HWREG(x)                (*((volatile unsigned long *)(x)))
 
 #define HIB_RTCC                0x400FC000  /* Hibernation RTC Counter */
+#define HIB_RTCSS               0x400FC028  /* Hibernation RTC Sub Seconds */
 #define HIB_CTL                 0x400FC010  /* Hibernation Control */
 #define HIB_CTL_WRC             0x80000000  /* Write Complete/Capable */
 #define HIB_CTL_CLK32EN         0x00000040  /* Clocking Enable */
@@ -58,7 +61,6 @@ static void _HibernateWriteComplete(void)
     }
 }
 
-
 /*
  *  ======== Seconds_get ========
  */
@@ -73,6 +75,31 @@ UInt32 Seconds_get(Void)
         Seconds_module->setSeconds;
 
     return (seconds);
+}
+
+/*
+ *  ======== Seconds_getTime ========
+ */
+UInt32 Seconds_getTime(Seconds_Time *ts)
+{
+    UInt32 seconds;
+    UInt32 subSeconds;
+    UInt64 nsecs;
+    UInt   key;
+
+    key = Hwi_disable();
+
+    seconds = HWREG(HIB_RTCC);
+    subSeconds = HWREG(HIB_RTCSS) & 0x7fff;
+
+    Hwi_restore(key);
+
+    nsecs = (1000000000 * (UInt64)subSeconds) / 32768;
+    ts->secs = seconds - Seconds_module->refSeconds +
+            Seconds_module->setSeconds;
+    ts->nsecs = (UInt32)nsecs;
+
+    return (0);
 }
 
 /*

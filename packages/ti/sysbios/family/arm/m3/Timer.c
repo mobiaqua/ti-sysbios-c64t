@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -593,26 +593,33 @@ UInt32 Timer_getCount(Timer_Object *obj)
 UInt32 Timer_getExpiredCounts(Timer_Object *obj)
 {
     UInt32 count1, count2;
-    UInt32 wrap;
+    UInt32 wrap, stscr;
 
     count1 = Hwi_nvic.STCVR;
-    wrap = Hwi_nvic.STCSR & 0x00010000; /* wrap? */
+    stscr = Hwi_nvic.STCSR;
     count2 = Hwi_nvic.STCVR;
 
-    /*
-     * Reading the STCSR clears the WRAP bit!
-     * bump tickCount so that subsequent Timestamp_get32()
-     * calls will behave properly
-     */
-    if (wrap) {
-        Timer_module->tickCount++;
-    }
+    wrap = stscr & 0x00010000; /* wrap? */
 
-    if ((count1 > count2) && wrap) {
-        return ((obj->period - count1) + obj->period);
+    if (stscr & 0x1) { /* if timer is running */
+        /*
+         * Reading the STCSR clears the WRAP bit!
+         * bump tickCount so that subsequent Timestamp_get32()
+         * calls will behave properly
+         */
+        if (wrap) {
+            Timer_module->tickCount++;
+        }
+
+        if ((count1 > count2) && wrap) {
+            return ((obj->period - count1) + obj->period);
+        }
+        else {
+            return (obj->period - count1);
+        }
     }
-    else {
-        return (obj->period - count1);
+    else { /* timer not running */
+        return (0);
     }
 }
 

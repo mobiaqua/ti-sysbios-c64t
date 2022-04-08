@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -275,6 +275,15 @@ module Cache inherits ti.sysbios.interfaces.ICache
      */
     config Bool branchPredictionEnabled = true;
 
+    /*!
+     *  ======== errata798870 ========
+     *  Enable workaround for ARM errata 798870.
+     *
+     *  Errata 798870 brief description:
+     *  A memory read can stall indefinitely in the L2 cache
+     */
+    config Bool errata798870 = false;
+
     /*! @_nodoc
      *  ======== getEnabled ========
      *  Get the 'type' bitmask of cache(s) enabled.
@@ -514,6 +523,21 @@ internal:
      *      2 = L2
      */
     Bits32 getCacheLevelInfo(UInt level);
+
+    /*!
+     *  ======== getL2AuxControlReg ========
+     *  Get current L2 Aux Control register contents
+     */
+    Bits32 getL2AuxControlReg();
+
+    /*
+     *  ======== setL2AuxControlReg ========
+     *  Write to L2ACTLR using ROM API
+     *
+     *  Note: This API is only for OMAP5 and J6 devices as Keystone 2
+     *  devices do not support the same ROM API interface.
+     */
+    Void setL2AuxControlReg(Bits32 arg);
 
     struct Module_State {
         Bits32  l1dInfo;

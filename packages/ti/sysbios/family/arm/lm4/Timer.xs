@@ -88,7 +88,7 @@ function module$use()
                  Program.cpu.deviceName.match(/^CC13/)) {
             xdc.useModule('ti.sysbios.family.arm.cc26xx.Power');
             Timer.enableFunc =
-                '&ti_sysbios_family_arm_cc26xx_TimerGPT_enable';
+                '&ti_sysbios_family_arm_lm4_Timer_enableCC26xx';
         }
         else {
             Timer.enableFunc = '&ti_sysbios_family_arm_lm4_Timer_enableTiva';
@@ -104,7 +104,7 @@ function module$use()
                  Program.cpu.deviceName.match(/^CC13/)) {
             xdc.useModule('ti.sysbios.family.arm.cc26xx.Power');
             Timer.disableFunc =
-                '&ti_sysbios_family_arm_cc26xx_TimerGPT_disable';
+                '&ti_sysbios_family_arm_lm4_Timer_disableCC26xx';
         }
         else {
             Timer.disableFunc = '&ti_sysbios_family_arm_lm4_Timer_disableTiva';

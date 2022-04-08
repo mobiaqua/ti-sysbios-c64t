@@ -58,6 +58,7 @@
 #include <inc/hw_aon_rtc.h>
 #include <inc/hw_memmap.h>
 #include <inc/hw_ccfg.h>
+#include <inc/hw_rfc_pwr.h>
 #include <driverlib/sys_ctrl.h>
 #include <driverlib/pwr_ctrl.h>
 #include <driverlib/prcm.h>
@@ -69,47 +70,59 @@
 #include <driverlib/osc.h>
 #include <driverlib/cpu.h>
 #include <driverlib/vims.h>
+#include <driverlib/rfc.h>
 #include <driverlib/sys_ctrl.h>
 #include <driverlib/driverlib_release.h>
 
 #include "package/internal/Power.xdc.h"
 
-/* bit defines for CUSTOMER_CFG_O_MODE_CONF:SCLK_LF_OPTION */
-#define CLK_LF_RCOSC_LF 0xC00000
-#define CLK_LF_XOSC_LF  0x800000
-#define CLK_LF_XOSC_HF  0x000000
-
-#define SUPPORT_DELAYED_COMPLETE 0
-
-extern volatile UInt8 ti_sysbios_family_arm_cc26xx_Power_constraintCounts[
-   Power_NUMCONSTRAINTS];
-
-extern UInt ti_sysbios_family_arm_cc26xx_Power_XOSC_HF (UInt action);
-extern Bool ti_sysbios_family_arm_cc26xx_Power_isDependencyActive(
-    Power_Resource resourceID);
+#define SCLK_LF_OPTION_RCOSC_LF         3  /* defined in cc26_ccfg.xls */
 
 /*
- *  ======== Power_doWFI ========
+ *  Resource database records.  Each record contains:
+ *    { flags, flags2 , driverlibID}
+ *
+ *  flags  = type : parent1
+ *  flags2 = parent2
  */
-Void Power_doWFI()
+const ti_sysbios_family_arm_cc26xx_Power_ResourceRecord
+    ti_sysbios_family_arm_cc26xx_Power_db[RESOURCE_END] =
 {
-    __asm(" wfi");
-}
+/*  type       parent1      parent2      driverlibID
+    ----      ----------   --------- ------------------- */
+ { PERIPH  | DOMAIN_PERIPH, NOPARENT, PRCM_PERIPH_TIMER0 },/* PERIPH_GPT0 */
+ { PERIPH  | DOMAIN_PERIPH, NOPARENT, PRCM_PERIPH_TIMER1 },/* PERIPH_GPT1 */
+ { PERIPH  | DOMAIN_PERIPH, NOPARENT, PRCM_PERIPH_TIMER2 },/* PERIPH_GPT2 */
+ { PERIPH  | DOMAIN_PERIPH, NOPARENT, PRCM_PERIPH_TIMER3 },/* PERIPH_GPT3 */
+ { PERIPH  | DOMAIN_SERIAL, NOPARENT, PRCM_PERIPH_SSI0 },  /* PERIPH_SSI0 */
+ { PERIPH  | DOMAIN_PERIPH, NOPARENT, PRCM_PERIPH_SSI1 },  /* PERIPH_SSI1 */
+ { PERIPH  | DOMAIN_SERIAL, NOPARENT, PRCM_PERIPH_UART0 }, /* PERIPH_UART0 */
+ { PERIPH  | DOMAIN_SERIAL, NOPARENT, PRCM_PERIPH_I2C0 },  /* PERIPH_I2C0 */
+ { PERIPH  | DOMAIN_PERIPH, NOPARENT, PRCM_PERIPH_TRNG },  /* PERIPH_TRNG */
+ { PERIPH  | DOMAIN_PERIPH, NOPARENT, PRCM_PERIPH_GPIO },  /* PERIPH_GPIO */
+ { PERIPH  | DOMAIN_PERIPH, DOMAIN_SYSBUS, PRCM_PERIPH_UDMA }, /* PERIPH_UDMA */
+ { PERIPH  | DOMAIN_PERIPH, NOPARENT, PRCM_PERIPH_CRYPTO },/* PERIPH_CRYPTO */
+ { PERIPH  | DOMAIN_PERIPH, NOPARENT, PRCM_PERIPH_I2S },   /* PERIPH_I2S */
+ { SPECIAL | DOMAIN_RFCORE, NOPARENT, 0 },                 /* PERIPH_RFCORE */
+ { SPECIAL | NOPARENT,      NOPARENT, 1 },                 /* XOSC_HF */
+ { DOMAIN  | NOPARENT,      NOPARENT, PRCM_DOMAIN_PERIPH },/* DOMAIN_PERIPH */
+ { DOMAIN  | NOPARENT,      NOPARENT, PRCM_DOMAIN_SERIAL },/* DOMAIN_SERIAL */
+ { DOMAIN  | NOPARENT,      NOPARENT, PRCM_DOMAIN_RFCORE },/* DOMAIN_RFCORE */
+ { SPECIAL | NOPARENT,      NOPARENT, 2 }                  /* DOMAIN_SYSBUS */
+};
 
-/*
- *  ======== Power_defaultClockFunc ========
- */
-Void Power_defaultClockFunc(UArg arg)
-{
-}
+/* resource reference count array */
+volatile UInt8 ti_sysbios_family_arm_cc26xx_Power_refCount[RESOURCE_END] =
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
-/*
- *  ======== Power_defaultNotifyTrapFunc ========
- */
-Void Power_defaultNotifyTrapFunc()
-{
-    while (1) {};
-}
+/* constraint counts array */
+/* careful: bitmask values index to this array, be sure they are contiguous */
+volatile UInt8 ti_sysbios_family_arm_cc26xx_Power_constraintCounts[
+    ti_sysbios_family_arm_cc26xx_Power_NUMCONSTRAINTS] =
+    { 0, 0, 0, 0, 0 };
+
+
+/* * * * * * * * * * * * * * * * * APIs * * * * * * * * * * * * * * * * * */
 
 /*
  *  ======== Power_getClockHandle ========
@@ -117,79 +130,6 @@ Void Power_defaultNotifyTrapFunc()
 Clock_Handle Power_getClockHandle()
 {
     return (Power_Module_State_clockObj());
-}
-
-/*
- *  ======== Power_LF_clockFunc ========
- */
-Void Power_LF_clockFunc(UArg arg)
-{
-    UInt32 sourceLF;
-
-     /* query LF clock source */
-    sourceLF = OSCClockSourceGet(OSC_SRC_CLK_LF);
-
-    /* is LF source either RCOSC_LF or XOSC_LF yet? */
-    if ((sourceLF == OSC_RCOSC_LF) || (sourceLF == OSC_XOSC_LF)) {
-
-        /* yes, disable the LF clock qualifiers */
-        DDI16BitfieldWrite(
-            AUX_DDI0_OSC_BASE,
-            DDI_0_OSC_O_CTL0,
-            DDI_0_OSC_CTL0_BYPASS_XOSC_LF_CLK_QUAL_M|
-                DDI_0_OSC_CTL0_BYPASS_RCOSC_LF_CLK_QUAL_M,
-            DDI_0_OSC_CTL0_BYPASS_RCOSC_LF_CLK_QUAL_S,
-            0x3
-        );
-
-        /* now finish by releasing the standby disallow constraint */
-        Power_releaseConstraint(Power_SB_DISALLOW);
-    }
-
-    /* not yet, LF still derived from HF, restart clock to check back later */
-    else {
-        /* retrigger LF Clock to fire in 100 msec */
-        Clock_setTimeout(
-            ti_sysbios_family_arm_cc26xx_Power_Module_State_lfClockObj(),
-            (100000 / Clock_tickPeriod));
-        Clock_start(
-            ti_sysbios_family_arm_cc26xx_Power_Module_State_lfClockObj());
-    }
-}
-
-/*
- *  ======== Power_Module_startup ========
- */
-Int ti_sysbios_family_arm_cc26xx_Power_Module_startup(Int status)
-{
-    DRIVERLIB_ASSERT_CURR_RELEASE();
-
-    /* enable cache (in case boot ROM doesn't because of HIB) */
-    HWREG(VIMS_BASE + VIMS_O_CTL) = ((HWREG(VIMS_BASE + VIMS_O_CTL) &
-        ~VIMS_CTL_MODE_M ) | VIMS_CTL_MODE_CACHE );
-
-    /* force AUX on and enable OSC clock */
-    OSCInterfaceEnable();
-
-    /* source the HF clock from RC_OSC */
-    OSCHF_SwitchToRcOscTurnOffXosc();
-
-    /* when in sleep, power off JTAG */
-    AONWUCJtagPowerOff();
-
-    /* allow AUX to power down */
-    AUXWUCPowerCtrl(AUX_WUC_POWER_DOWN);
-
-    /* clear PDCTL1.VIMS_MODE to power VIMS only when CPU domain is powered */
-    HWREG(PRCM_BASE + PRCM_O_PDCTL1VIMS) &= ~PRCM_PDCTL1VIMS_ON;
-
-    /* sync with AON */
-    SysCtrlAonSync();
-
-    /* set standby disallow constraint pending LF clock quailifier disabling */
-    Power_setConstraint(Power_SB_DISALLOW);
-
-    return (Startup_DONE);
 }
 
 /*
@@ -208,7 +148,7 @@ UInt32 Power_getConstraintInfo(Void)
  */
 UInt32 Power_getDependencyCount(Power_Resource resourceID)
 {
-    return (ti_sysbios_family_arm_cc26xx_Power_refCount[resourceID]);
+    return (Power_module->resourceCounts[resourceID]);
 }
 
 /*
@@ -263,6 +203,20 @@ UInt32 Power_getXoscStartupTime(UInt32 timeUntilWakeupInMs)
 }
 
 /*
+ *  ======== Power_injectCalibration ========
+ *  Explicitly trigger RCOSC calibration
+ */
+Void Power_injectCalibration(Void)
+{
+    if (Power_calibrateRCOSC) {
+        if (Power_initiateCalibration()) {
+            /* here if AUX SMPH was available, start calibration now ... */
+            Power_doCalibrate();
+         }
+     }
+}
+
+/*
  *  ======== Power_isStableXOSC_HF ========
  *  Check if XOSC_HF has stabilized.
  */
@@ -274,13 +228,8 @@ Bool Power_isStableXOSC_HF(Void)
     key = Hwi_disable();
 
     /* only query if HF source is ready if there is a pending change */
-    if (Power_module->xoscPending == TRUE) {
-        if (OSCHfSourceReady()) {
-            ready = TRUE;
-        }
-        else {
-            ready = FALSE;
-        }
+    if (Power_module->xoscPending) {
+        ready = OSCHfSourceReady();
     }
 
     Hwi_restore(key);
@@ -299,21 +248,20 @@ Void Power_releaseConstraint(Power_Constraint constraint)
 
     key = Hwi_disable();
 
-    count = ti_sysbios_family_arm_cc26xx_Power_constraintCounts[
-        Intrinsics_maxbit(constraint)];
+    count = Power_module->constraintCounts[Intrinsics_maxbit(constraint)];
 
     Assert_isTrue(count != 0, Power_A_tooManyCallsReleaseConstraint);
 
-    ti_sysbios_family_arm_cc26xx_Power_constraintCounts[
-        Intrinsics_maxbit(constraint)] = count - 1;
+    count = count - 1;
 
-    if (count == 1) {
+    Power_module->constraintCounts[Intrinsics_maxbit(constraint)] = count;
+
+    if (count == 0) {
         Power_module->constraintsMask &= ~constraint;
     }
 
     Hwi_restore(key);
 }
-
 
 /*
  *  ======== Power_releaseDependency ========
@@ -330,34 +278,37 @@ Void Power_releaseDependency(Power_Resource resourceID)
     key = Hwi_disable();
 
     /* read and decrement the reference count */
-    count = ti_sysbios_family_arm_cc26xx_Power_refCount[resourceID];
+    count = Power_module->resourceCounts[resourceID];
 
     Assert_isTrue(count != 0, Power_A_tooManyCallsReleaseDependency);
 
-    ti_sysbios_family_arm_cc26xx_Power_refCount[resourceID] = count - 1;
+    count = count - 1;
+
+    Power_module->resourceCounts[resourceID] = count;
 
     /* if this was the last dependency being released.., */
-    if (count == 1) {
+    if (count == 0) {
 
         /* deactivate this resource ... */
-        id = ti_sysbios_family_arm_cc26xx_Power_db[resourceID].driverlibID;
+        id = Power_module->resourceDB[resourceID].driverlibID;
 
         /* is resource a peripheral?... */
-        if (ti_sysbios_family_arm_cc26xx_Power_db[resourceID].flags
+        if (Power_module->resourceDB[resourceID].flags
             & PERIPH) {
             PRCMPeripheralRunDisable(id);
             PRCMPeripheralSleepDisable(id);
             PRCMPeripheralDeepSleepDisable(id);
             PRCMLoadSet();
-            while(!PRCMLoadGet()){};
+            while(!PRCMLoadGet())
+                {};
         }
 
         /* else, does resource require a special handler?... */
-        else if (ti_sysbios_family_arm_cc26xx_Power_db[resourceID].flags
+        else if (Power_module->resourceDB[resourceID].flags
             & SPECIAL) {
 
             /* call the special handler */
-            ti_sysbios_family_arm_cc26xx_Power_resourceHandlers[id](DISABLE);
+            Power_module->resourceHandlers[id](DISABLE);
         }
 
         /* else resource is a power domain */
@@ -369,7 +320,7 @@ Void Power_releaseDependency(Power_Resource resourceID)
         /* propagate release up the dependency tree ... */
 
         /* check for a first parent */
-        parent = ti_sysbios_family_arm_cc26xx_Power_db[resourceID].flags
+        parent = Power_module->resourceDB[resourceID].flags
           & PARENTMASK;
 
         /* if 1st parent, make recursive call to release that dependency */
@@ -378,7 +329,7 @@ Void Power_releaseDependency(Power_Resource resourceID)
         }
 
         /* check for a second parent */
-        parent = ti_sysbios_family_arm_cc26xx_Power_db[resourceID].flags2
+        parent = Power_module->resourceDB[resourceID].flags2
           & PARENTMASK;
 
         /* if 2nd parent, make recursive call to release that dependency */
@@ -390,7 +341,6 @@ Void Power_releaseDependency(Power_Resource resourceID)
     /* re-enable interrupts */
     Hwi_restore(key);
 }
-
 
 /*
  *  ======== Power_registerNotify ========
@@ -416,7 +366,6 @@ Power_Status Power_registerNotify(Power_NotifyObj * pNotifyObj,
     return (Power_SOK);
 }
 
-
 /*
  *  ======== Power_setDependency ========
  *  Declare a dependency upon a resource.
@@ -432,7 +381,7 @@ Bool Power_setDependency(Power_Resource resourceID)
     key = Hwi_disable();
 
     /* read and increment reference count */
-    count = ti_sysbios_family_arm_cc26xx_Power_refCount[resourceID]++;
+    count = Power_module->resourceCounts[resourceID]++;
 
     /* if resource was NOT activated previously ... */
     if (count == 0) {
@@ -440,7 +389,7 @@ Bool Power_setDependency(Power_Resource resourceID)
         /* propagate set up the dependency tree ... */
 
         /* check for a first parent */
-        parent = ti_sysbios_family_arm_cc26xx_Power_db[resourceID].flags
+        parent = Power_module->resourceDB[resourceID].flags
           & PARENTMASK;
 
         /* if first parent, make recursive call to set that dependency */
@@ -449,7 +398,7 @@ Bool Power_setDependency(Power_Resource resourceID)
         }
 
         /* check for a second parent */
-        parent = ti_sysbios_family_arm_cc26xx_Power_db[resourceID].flags2
+        parent = Power_module->resourceDB[resourceID].flags2
           & PARENTMASK;
 
         /* if second parent, make recursive call to set that dependency */
@@ -458,10 +407,10 @@ Bool Power_setDependency(Power_Resource resourceID)
         }
 
         /* now activate this resource ... */
-        id = ti_sysbios_family_arm_cc26xx_Power_db[resourceID].driverlibID;
+        id = Power_module->resourceDB[resourceID].driverlibID;
 
         /* is resource a peripheral?... */
-        if (ti_sysbios_family_arm_cc26xx_Power_db[resourceID].flags & PERIPH) {
+        if (Power_module->resourceDB[resourceID].flags & PERIPH) {
             PRCMPeripheralRunEnable(id);
             PRCMPeripheralSleepEnable(id);
             PRCMPeripheralDeepSleepEnable(id);
@@ -470,17 +419,18 @@ Bool Power_setDependency(Power_Resource resourceID)
         }
 
         /* else, does resource require a special handler?... */
-        else if (ti_sysbios_family_arm_cc26xx_Power_db[resourceID].flags
+        else if (Power_module->resourceDB[resourceID].flags
             & SPECIAL) {
 
             /* call the special handler */
-            ti_sysbios_family_arm_cc26xx_Power_resourceHandlers[id](ENABLE);
+            Power_module->resourceHandlers[id](ENABLE);
         }
 
         /* else resource is a power domain */
         else {
             PRCMPowerDomainOn(id);
-            while (PRCMPowerDomainStatus(id) != PRCM_DOMAIN_POWER_ON) {};
+            while (PRCMPowerDomainStatus(id) != PRCM_DOMAIN_POWER_ON)
+                {};
         }
     }
 
@@ -488,7 +438,7 @@ Bool Power_setDependency(Power_Resource resourceID)
     Hwi_restore(key);
 
     /* return the resource's activation status */
-    return (ti_sysbios_family_arm_cc26xx_Power_isDependencyActive(resourceID));
+    return (Power_isDependencyActive(resourceID));
 }
 
 /*
@@ -501,8 +451,7 @@ Void Power_setConstraint(Power_Constraint constraint)
 
     key = Hwi_disable();
     Power_module->constraintsMask |= constraint;
-    ti_sysbios_family_arm_cc26xx_Power_constraintCounts[
-        Intrinsics_maxbit(constraint)]++;
+    Power_module->constraintCounts[Intrinsics_maxbit(constraint)]++;
     Hwi_restore(key);
 }
 
@@ -511,118 +460,106 @@ Void Power_setConstraint(Power_Constraint constraint)
  */
 Power_Status Power_shutdown(UArg arg)
 {
-    Power_Status status = Power_EFAIL;
-    Bool exitNow = FALSE;
+    Power_Status status;
     UInt32 constraints;
     UInt hwiKey;
 
     /* make sure shutdown request doesn't violate a constraint */
     constraints = Power_getConstraintInfo();
     if ((constraints & (Power_SD_DISALLOW)) != 0) {
-        status = Power_ECHANGE_NOT_ALLOWED;
+        return (Power_ECHANGE_NOT_ALLOWED);
     }
 
-    if (status == Power_EFAIL) {
+    /* next make sure Power is not still busy with a previous transition */
+    hwiKey = Hwi_disable();
 
-        /* make sure Power is not still busy with a previous transition */
-        hwiKey = Hwi_disable();
-
-        if (Power_module->state == Power_ACTIVE) {
-            /* set new transition state to entering shutdown */
-            Power_module->state = Power_SHUTDOWN;
-        }
-        else {
-            exitNow = TRUE;
-        }
-
+    if (Power_module->state == Power_ACTIVE) {
+        /* set new transition state to entering shutdown */
+        Power_module->state = Power_SHUTDOWN;
+    }
+    else {
         Hwi_restore(hwiKey);
-
-        if (exitNow == TRUE) {
-            status = Power_EBUSY;
-        }
-
-        else {
-
-            /* disable interrupts as start the shutdown sequence */
-            Hwi_disable();
-
-            /* signal all clients registered for pre-shutdown notification */
-            status = Power_notify(Power_ENTERING_SHUTDOWN);
-
-            /* check for any error */
-            if (status != Power_SOK) {
-                Power_module->state = Power_ACTIVE;
-                CPUcpsie();
-                return (status);
-            }
-
-            /* proceed with shutdown sequence ... */
-
-            /* switch to RCOSC_HF and RCOSC_LF */
-            OSCInterfaceEnable();
-            if(OSCClockSourceGet(OSC_SRC_CLK_HF) != OSC_RCOSC_HF) {
-                OSCClockSourceSet(OSC_SRC_CLK_HF | OSC_SRC_CLK_MF,
-                    OSC_RCOSC_HF);
-                while(!OSCHfSourceReady());
-                OSCHfSourceSwitch();
-            }
-            OSCClockSourceSet(OSC_SRC_CLK_LF,OSC_RCOSC_LF);
-            while(OSCClockSourceGet(OSC_SRC_CLK_LF) != OSC_RCOSC_LF);
-            OSCInterfaceDisable();
-
-            /* make sure DMA and CRYTO clocks are off in deep-sleep */
-            PRCMPeripheralDeepSleepDisable(PRCM_PERIPH_CRYPTO);
-            PRCMPeripheralDeepSleepDisable(PRCM_PERIPH_UDMA);
-            PRCMLoadSet();
-            while(!PRCMLoadGet()){};
-
-            /* power OFF AUX and disconnect from bus */
-            AUXWUCPowerCtrl(AUX_WUC_POWER_OFF);
-
-            /* remove AUX force ON */
-            HWREG(AON_WUC_BASE + AON_WUC_O_AUXCTL) &=
-                ~AON_WUC_AUXCTL_AUX_FORCE_ON;
-
-            /*
-             * reset AON event source IDs to avoid pending events powering
-             * on MCU/AUX
-             */
-            HWREG(AON_EVENT_BASE + AON_EVENT_O_MCUWUSEL) = 0x3F3F3F3F;
-            HWREG(AON_EVENT_BASE + AON_EVENT_O_AUXWUSEL) = 0x003F3F3F;
-
-            /* sync AON */
-            HWREG(AON_RTC_BASE + AON_RTC_O_SYNC);
-
-            /*
-             * enable shutdown - this latches the IOs, so configuration of
-             * IOCFGx registers must be done prior to this
-             */
-            AONWUCShutDownEnable();
-
-            /* sync AON */
-            HWREG(AON_RTC_BASE + AON_RTC_O_SYNC);
-
-            /* wait until AUX powered off */
-            while (AONWUCPowerStatusGet() & AONWUC_AUX_POWER_ON);
-
-            /* request to power off MCU when go to deep sleep */
-            PRCMMcuPowerOff();
-
-            /* turn off power domains inside MCU VD (BUS, FL_BUS, RFC, CPU) */
-            PRCMPowerDomainOff(PRCM_DOMAIN_RFCORE | PRCM_DOMAIN_SERIAL |
-                PRCM_DOMAIN_PERIPH | PRCM_DOMAIN_CPU | PRCM_DOMAIN_VIMS);
-
-            /* deep sleep to activate shutdown */
-            PRCMDeepSleep();
-        }
+        return (Power_EBUSY);
     }
 
-    Power_module->state = Power_ACTIVE;
+    /* signal all clients registered for pre-shutdown notification */
+    status = Power_notify(Power_ENTERING_SHUTDOWN);
 
-    /* if get here failed to shutdown, return failure code */
+    /* check for any error */
+    if (status != Power_SOK) {
+        Power_module->state = Power_ACTIVE;
+        Hwi_restore(hwiKey);
+        return (status);
+    }
+
+    /* now proceed with shutdown sequence ... */
+
+    /* 1. Switch HF, MF, and LF clocks to source from RCOSC_HF */
+    OSCInterfaceEnable();
+    if(OSCClockSourceGet(OSC_SRC_CLK_HF) != OSC_RCOSC_HF) {
+        OSCClockSourceSet(OSC_SRC_CLK_HF | OSC_SRC_CLK_MF,
+            OSC_RCOSC_HF);
+        while(!OSCHfSourceReady());
+        OSCHfSourceSwitch();
+    }
+    OSCInterfaceDisable();
+
+    /* 2. Make sure DMA and CRYTO clocks are off in deep-sleep */
+    PRCMPeripheralDeepSleepDisable(PRCM_PERIPH_CRYPTO);
+    PRCMPeripheralDeepSleepDisable(PRCM_PERIPH_UDMA);
+    PRCMLoadSet();
+    while(!PRCMLoadGet())
+        {};
+
+    /* 3. Power OFF AUX and disconnect from bus */
+    AUXWUCPowerCtrl(AUX_WUC_POWER_OFF);
+
+    /* 4. Remove AUX force ON */
+    HWREG(AON_WUC_BASE + AON_WUC_O_AUXCTL) &=
+        ~AON_WUC_AUXCTL_AUX_FORCE_ON;
+
+    /*
+     * 5. Reset AON event source IDs to avoid pending events powering
+     * on MCU/AUX
+     */
+    HWREG(AON_EVENT_BASE + AON_EVENT_O_MCUWUSEL) = 0x3F3F3F3F;
+    HWREG(AON_EVENT_BASE + AON_EVENT_O_AUXWUSEL) = 0x003F3F3F;
+
+    /* sync AON */
+    SysCtrlAonSync();
+
+    /*
+     * 6. Enable shutdown - this latches the IOs, so configuration of
+     * IOCFGx registers must be done prior to this
+     */
+    AONWUCShutDownEnable();
+
+    /* 7. Sync AON */
+    SysCtrlAonSync();
+
+    /* 8. Wait until AUX powered off */
+    while (AONWUCPowerStatusGet() & AONWUC_AUX_POWER_ON);
+
+    /* 9. Request to power off MCU when go to deep sleep */
+    PRCMMcuPowerOff();
+
+    /*
+     * 10. Turn off power domains inside MCU VD (BUS, FL_BUS, RFC,
+     * CPU)
+     */
+    PRCMPowerDomainOff(PRCM_DOMAIN_RFCORE | PRCM_DOMAIN_SERIAL |
+        PRCM_DOMAIN_PERIPH | PRCM_DOMAIN_CPU | PRCM_DOMAIN_VIMS);
+
+    /* 11. Deep sleep to activate shutdown */
+    PRCMDeepSleep();
+
+    /* NOTE: if shutdown succeeded, should never get here */
+
+    /* return failure status */
+    Power_module->state = Power_ACTIVE;
+    Hwi_restore(hwiKey);
     return (Power_EFAIL);
 }
-
 
 /*
  *  ======== Power_sleep ========
@@ -633,7 +570,6 @@ Power_Status Power_sleep(Power_SleepState sleepState, UArg arg0, UArg arg1)
     UInt xosc_hf_active = FALSE;
     Power_Event postEventLate;
     UInt32 poweredDomains = 0;
-    Bool exitNow = FALSE;
     Power_Event preEvent;
     Power_Event postEvent;
     UInt32 constraints;
@@ -641,17 +577,13 @@ Power_Status Power_sleep(Power_SleepState sleepState, UArg arg0, UArg arg1)
     UInt32 modeVIMS;
     UInt taskKey;
     UInt swiKey;
-    UInt hwiKey;
 
     /* first validate the sleep code */
-    if ( sleepState != Power_STANDBY) {
+    if (sleepState != Power_STANDBY) {
         status = Power_EFAIL;
     }
 
     if (status == Power_SOK) {
-
-        /* make sure Power is not still busy with a previous transition */
-        hwiKey = Hwi_disable();
 
         if (Power_module->state == Power_ACTIVE) {
 
@@ -659,23 +591,15 @@ Power_Status Power_sleep(Power_SleepState sleepState, UArg arg0, UArg arg1)
             Power_module->state = Power_ENTERING_SLEEP;
         }
         else {
-            exitNow = TRUE;
-        }
-
-        Hwi_restore(hwiKey);
-
-        if (exitNow == TRUE) {
             status = Power_EBUSY;
         }
 
-        else {
+        if (status == Power_SOK) {
 
             /* setup sleep vars */
-            if (sleepState == Power_STANDBY) {
-                preEvent = Power_ENTERING_STANDBY;
-                postEvent = Power_AWAKE_STANDBY;
-                postEventLate = Power_AWAKE_STANDBY_LATE;
-            }
+            preEvent = Power_ENTERING_STANDBY;
+            postEvent = Power_AWAKE_STANDBY;
+            postEventLate = Power_AWAKE_STANDBY_LATE;
 
             /* disable Task scheduling; allow Swis and Hwis for notifications */
             taskKey = Task_disable();
@@ -693,160 +617,159 @@ Power_Status Power_sleep(Power_SleepState sleepState, UArg arg0, UArg arg1)
             /* now disable Swi scheduling */
             swiKey = Swi_disable();
 
-            /* freeze the IOs on the boundary between MCU and AON */
+            /* 1. Freeze the IOs on the boundary between MCU and AON */
             AONIOCFreezeEnable();
 
-            /* if XOSC_HF is active, force it off */
+            /* 2. If XOSC_HF is active, force it off */
             if(OSCClockSourceGet(OSC_SRC_CLK_HF) == OSC_XOSC_HF) {
                 xosc_hf_active = TRUE;
-                ti_sysbios_family_arm_cc26xx_Power_XOSC_HF(DISABLE);
+                Power_XOSC_HF(DISABLE);
             }
 
-            /* allow AUX to power down */
+            /* 3. Allow AUX to power down */
             AONWUCAuxWakeupEvent(AONWUC_AUX_ALLOW_SLEEP);
 
-            /* make sure writes take effect */
+            /* 4. Make sure writes take effect */
             SysCtrlAonSync();
 
-            /* invoke specific sequences to activate sleep states... */
+            /* now proceed to transition to Power_STANDBY ... */
 
-            if (sleepState == Power_STANDBY) {
-
-                /* query and save domain states before powering them off */
-                if (Power_getDependencyCount(DOMAIN_RFCORE)) {
-                    poweredDomains |= PRCM_DOMAIN_RFCORE;
-                }
-                if (Power_getDependencyCount(DOMAIN_SERIAL)){
-                    poweredDomains |= PRCM_DOMAIN_SERIAL;
-                }
-                if (Power_getDependencyCount(DOMAIN_PERIPH)) {
-                    poweredDomains |= PRCM_DOMAIN_PERIPH;
-                }
-
-                /* gate running deep sleep clocks for Crypto and DMA */
-                if (Power_getDependencyCount(PERIPH_CRYPTO)) {
-                    PRCMPeripheralDeepSleepDisable(
-                        ti_sysbios_family_arm_cc26xx_Power_db[
-                            PERIPH_CRYPTO].driverlibID);
-                }
-                if (Power_getDependencyCount(PERIPH_UDMA)) {
-                    PRCMPeripheralDeepSleepDisable(
-                        ti_sysbios_family_arm_cc26xx_Power_db[
-                            PERIPH_UDMA].driverlibID);
-                }
-                /* make sure clock settings take effect */
-                PRCMLoadSet();
-
-                /* request power off of domains in the MCU voltage domain */
-                PRCMPowerDomainOff(poweredDomains | PRCM_DOMAIN_CPU);
-
-                /* request uLDO during standby */
-                PRCMMcuUldoConfigure(true);
-
-                /* query constraints to determine if cache should be retained */
-                constraints = Power_getConstraintInfo();
-                if ((constraints & Power_SB_VIMS_CACHE_RETAIN) != 0) {
-                    retainCache = TRUE;
-                }
-
-                /* if don't want retention in standby, disable it now ... */
-                if (retainCache == FALSE) {
-                    modeVIMS = VIMSModeGet(VIMS_BASE);
-                    /* wait if invalidate in progress... */
-                    while (modeVIMS == VIMS_MODE_CHANGING) {
-                        modeVIMS = VIMSModeGet(VIMS_BASE);
-                    }
-                    PRCMCacheRetentionDisable();
-                    VIMSModeSet(VIMS_BASE, VIMS_MODE_OFF);
-                }
-
-                /* setup recharge parameters */
-                SysCtrlSetRechargeBeforePowerDown(XoscInHighPowerMode);
-
-                /* make sure all writes have taken effect */
-                SysCtrlAonSync();
-
-                /* invoke deep sleep to go to STANDBY */
-                PRCMDeepSleep();
-
-                /* if didn't retain cache in standby, re-enable retention now */
-                if (retainCache == FALSE) {
-                    VIMSModeSet(VIMS_BASE, modeVIMS);
-                    PRCMCacheRetentionEnable();
-                }
-
-                /* force power on of AUX to keep it on when system is not
-                 * sleeping; this also counts as a write to the AON interface
-                 * ensuring that a following sync of the AON interface will
-                 * force an update of all registers
-                 */
-                AONWUCAuxWakeupEvent(AONWUC_AUX_WAKEUP);
-                while(!(AONWUCPowerStatusGet() & AONWUC_AUX_POWER_ON)) {};
-
-                /* if XOSC_HF was forced off above, initiate switch back */
-                if (xosc_hf_active == TRUE) {
-                    ti_sysbios_family_arm_cc26xx_Power_XOSC_HF(ENABLE);
-                }
-
-                /* restore power domain states in effect before standby */
-                PRCMPowerDomainOn(poweredDomains);
-                while (PRCMPowerDomainStatus(poweredDomains) !=
-                    PRCM_DOMAIN_POWER_ON){};
-
-                /* restore deep sleep clocks of Crypto and DMA */
-                if (Power_getDependencyCount(PERIPH_CRYPTO)) {
-                    PRCMPeripheralDeepSleepEnable(
-                        ti_sysbios_family_arm_cc26xx_Power_db[
-                            PERIPH_CRYPTO].driverlibID);
-                }
-                if (Power_getDependencyCount(PERIPH_UDMA)) {
-                    PRCMPeripheralDeepSleepEnable(
-                        ti_sysbios_family_arm_cc26xx_Power_db[
-                            PERIPH_UDMA].driverlibID);
-                }
-                /* make sure clock settings take effect */
-                PRCMLoadSet();
+            /* 5. Query and save domain states before powering them off */
+            if (Power_getDependencyCount(DOMAIN_RFCORE)) {
+                poweredDomains |= PRCM_DOMAIN_RFCORE;
+            }
+            if (Power_getDependencyCount(DOMAIN_SERIAL)){
+                poweredDomains |= PRCM_DOMAIN_SERIAL;
+            }
+            if (Power_getDependencyCount(DOMAIN_PERIPH)) {
+                poweredDomains |= PRCM_DOMAIN_PERIPH;
             }
 
-            /* release request for uLDO */
+            /* 6. Gate running deep sleep clocks for Crypto and DMA */
+            if (Power_getDependencyCount(PERIPH_CRYPTO)) {
+                PRCMPeripheralDeepSleepDisable(
+                    Power_module->resourceDB[PERIPH_CRYPTO].driverlibID);
+            }
+            if (Power_getDependencyCount(PERIPH_UDMA)) {
+                PRCMPeripheralDeepSleepDisable(
+                    Power_module->resourceDB[PERIPH_UDMA].driverlibID);
+            }
+            /* 7. Make sure clock settings take effect */
+            PRCMLoadSet();
+
+            /* 8. Request power off of domains in the MCU voltage domain */
+            PRCMPowerDomainOff(poweredDomains | PRCM_DOMAIN_CPU);
+
+            /* 9. Request uLDO during standby */
+            PRCMMcuUldoConfigure(true);
+
+            /* query constraints to determine if cache should be retained */
+            constraints = Power_getConstraintInfo();
+            if ((constraints & Power_SB_VIMS_CACHE_RETAIN) != 0) {
+                retainCache = TRUE;
+            }
+
+            /* 10. If don't want retention in standby, disable it now ... */
+            if (retainCache == FALSE) {
+                /* 10.1 Get current VIMS mode */
+                modeVIMS = VIMSModeGet(VIMS_BASE);
+                /* 10.2 Wait if invalidate in progress... */
+                while (modeVIMS == VIMS_MODE_CHANGING) {
+                    modeVIMS = VIMSModeGet(VIMS_BASE);
+                }
+                /* 10.3 Disable cache RAM retention */
+                PRCMCacheRetentionDisable();
+                /* 10.4 Turn off the VIMS */
+                VIMSModeSet(VIMS_BASE, VIMS_MODE_OFF);
+            }
+
+            /* 11. Setup recharge parameters */
+            SysCtrlSetRechargeBeforePowerDown(XoscInHighPowerMode);
+
+            /* 12. Make sure all writes have taken effect */
+            SysCtrlAonSync();
+
+            /* 13. Invoke deep sleep to go to STANDBY */
+            PRCMDeepSleep();
+
+            /* 14. If didn't retain cache in standby, re-enable retention now */
+            if (retainCache == FALSE) {
+                VIMSModeSet(VIMS_BASE, modeVIMS);
+                PRCMCacheRetentionEnable();
+            }
+
+            /*
+             * 15. Force power on of AUX to keep it on when system is not
+             * sleeping; this also counts as a write to the AON interface
+             * ensuring that a following sync of the AON interface will
+             * force an update of all registers
+             */
+            AONWUCAuxWakeupEvent(AONWUC_AUX_WAKEUP);
+            while(!(AONWUCPowerStatusGet() & AONWUC_AUX_POWER_ON)) {};
+
+            /* 16. If XOSC_HF was forced off above, initiate switch back */
+            if (xosc_hf_active == TRUE) {
+                Power_XOSC_HF(ENABLE);
+            }
+
+            /* 17. Restore power domain states in effect before standby */
+            PRCMPowerDomainOn(poweredDomains);
+            while (PRCMPowerDomainStatus(poweredDomains) !=
+                PRCM_DOMAIN_POWER_ON){};
+
+            /* 18. Restore deep sleep clocks of Crypto and DMA */
+            if (Power_getDependencyCount(PERIPH_CRYPTO)) {
+                PRCMPeripheralDeepSleepEnable(
+                    Power_module->resourceDB[PERIPH_CRYPTO].driverlibID);
+            }
+            if (Power_getDependencyCount(PERIPH_UDMA)) {
+                PRCMPeripheralDeepSleepEnable(
+                    Power_module->resourceDB[PERIPH_UDMA].driverlibID);
+            }
+
+            /* 19. Make sure clock settings take effect */
+            PRCMLoadSet();
+
+            /* 20. Release request for uLDO */
             PRCMMcuUldoConfigure(false);
 
-            /* set transition state to EXITING_SLEEP */
+            /* 21. Set transition state to EXITING_SLEEP */
             Power_module->state = Power_EXITING_SLEEP;
 
             /*
-             * signal clients registered for early post-sleep notification;
+             * 22. Signal clients registered for early post-sleep notification;
              * this should be used to initialize any timing critical or IO
              * dependent hardware
              */
             status = Power_notify(postEvent);
 
-            /* disable IO freeze and ensure RTC shadow value is updated */
+            /* 23. Disable IO freeze and ensure RTC shadow value is updated */
             AONIOCFreezeDisable();
             SysCtrlAonSync();
 
-            /* re-enable interrupts */
+            /* 24. Re-enable interrupts */
             CPUcpsie();
 
-            /* signal all clients registered for late post-sleep notification */
+            /*
+             * 25. Signal all clients registered for late post-sleep
+             * notification
+             */
             status = Power_notify(postEventLate);
 
-            /* now clear the transition state before re-enabling scheduler */
+            /*
+             * 26. Now clear the transition state before re-enabling
+             * scheduler
+             */
             Power_module->state = Power_ACTIVE;
 
-            /* re-enable Swi scheduling */
+            /* 27. Re-enable Swi scheduling */
             Swi_restore(swiKey);
 
-            /* adjust recharge parameters */
+            /* 28. Adjust recharge parameters */
             SysCtrlAdjustRechargeAfterPowerDown();
 
             /* re-enable Task scheduling */
             Task_restore(taskKey);
-
-            /* check for any notification error */
-            if (status != Power_SOK) {
-                return (status);
-            }
         }
     }
 
@@ -856,7 +779,6 @@ Power_Status Power_sleep(Power_SleepState sleepState, UArg arg0, UArg arg1)
 /*
  *  ======== Power_switchXOSC_HF ========
  *  Switch to enable XOSC_HF.
- *
  */
 Void Power_switchXOSC_HF(Void)
 {
@@ -889,13 +811,102 @@ Void Power_unregisterNotify(Power_NotifyObj * pNotifyObj)
 }
 
 
-/* * * * * * * * * * * * internal support functions * * * * * * * * * * * */
-
+/* * * * * * * * * * * internal and support functions * * * * * * * * * * */
 
 /*
+ *  ======== Power_Module_startup ========
+ */
+Int ti_sysbios_family_arm_cc26xx_Power_Module_startup(Int status)
+{
+    UInt32 ccfgLfClkSrc;
+
+    DRIVERLIB_ASSERT_CURR_RELEASE();
+
+    /* check if should calibrate RCOSC_LF */
+    if (Power_calibrateRCOSC_LF) {
+
+        /* read the LF clock source from CCFG */
+        ccfgLfClkSrc = (HWREG(CCFG_BASE + CCFG_O_MODE_CONF) &
+            CCFG_MODE_CONF_SCLK_LF_OPTION_M) >> CCFG_MODE_CONF_SCLK_LF_OPTION_S;
+
+        /* verify RCOSC_LF is the LF clock source */
+        if (ccfgLfClkSrc == SCLK_LF_OPTION_RCOSC_LF) {
+            Power_module->calLF = true;
+        }
+    }
+
+    /* set standby disallow constraint pending LF clock quailifier disabling */
+    Power_setConstraint(Power_SB_DISALLOW);
+
+    return (Startup_DONE);
+}
+
+/*
+ *  ======== Power_defaultClockFunc ========
+ *  Clock function used by power policy to schedule early wakeups.
+ */
+Void Power_defaultClockFunc(UArg arg)
+{
+}
+
+/*
+ *  ======== Power_defaultNotifyTrapFunc ========
+ */
+Void Power_defaultNotifyTrapFunc()
+{
+    while (1) {};
+}
+
+/*
+ *  ======== Power_doWFI ========
+ */
+Void Power_doWFI()
+{
+    __asm(" wfi");
+}
+
+/*
+ *  ======== Power_LF_clockFunc ========
+ *  Clock function used for delayed disable of LF clock qualifiers.
+ */
+Void Power_LF_clockFunc(UArg arg)
+{
+    UInt32 sourceLF;
+
+     /* query LF clock source */
+    sourceLF = OSCClockSourceGet(OSC_SRC_CLK_LF);
+
+    /* is LF source either RCOSC_LF or XOSC_LF yet? */
+    if ((sourceLF == OSC_RCOSC_LF) || (sourceLF == OSC_XOSC_LF)) {
+
+        /* yes, disable the LF clock qualifiers */
+        DDI16BitfieldWrite(
+            AUX_DDI0_OSC_BASE,
+            DDI_0_OSC_O_CTL0,
+            DDI_0_OSC_CTL0_BYPASS_XOSC_LF_CLK_QUAL_M|
+                DDI_0_OSC_CTL0_BYPASS_RCOSC_LF_CLK_QUAL_M,
+            DDI_0_OSC_CTL0_BYPASS_RCOSC_LF_CLK_QUAL_S,
+            0x3
+        );
+
+        /* now finish by releasing the standby disallow constraint */
+        Power_releaseConstraint(Power_SB_DISALLOW);
+    }
+
+    /* not yet, LF still derived from HF, restart clock to check back later */
+    else {
+        /* retrigger LF Clock to fire in 100 msec */
+        Clock_setTimeout(
+            ti_sysbios_family_arm_cc26xx_Power_Module_State_lfClockObj(),
+            (100000 / Clock_tickPeriod));
+        Clock_start(
+            ti_sysbios_family_arm_cc26xx_Power_Module_State_lfClockObj());
+    }
+}
+/*
  *  ======== Power_notify ========
- *
- *  Note: When this function is called Task scheduling is disabled.
+ *  Send notifications to registered clients.
+ *  Note: Task scheduling is disabled when this function is called.
  */
 Power_Status Power_notify(Power_Event eventType)
 {
@@ -926,7 +937,6 @@ Power_Status Power_notify(Power_Event eventType)
 
 /*
  *  ======== Power_serviceNotifyQ ========
- *
  */
 Power_NotifyResponse Power_serviceNotifyQ(Power_Event eventType)
 {
@@ -967,3 +977,170 @@ Power_NotifyResponse Power_serviceNotifyQ(Power_Event eventType)
 
     return (returnStatus);
 }
+
+/*
+ *  ======== Power_RFCORECLKS ========
+ *  Special dependency function for controlling RF core clocks.
+ */
+UInt Power_RFCORECLKS (UInt action)
+{
+    if (action == ENABLE) {
+        RFCClockEnable();
+    }
+    else {
+        RFCClockDisable();
+    }
+    return (0);
+}
+
+/*
+ *  ======== Power_XOSC_HF_clockFunc ========
+ *  Clock function used for delayed switching to XOSC_HF.
+ */
+Void Power_XOSC_HF_clockFunc(UArg arg0)
+{
+    Bool readyToCal;
+    UInt32 timeout;
+    UInt key;
+
+    key = ti_sysbios_hal_Hwi_disable();
+
+    /* if pending switch has already been made, just send out notifications */
+    if (Power_module->xoscPending == FALSE) {
+
+        /* initiate RCOSC calibration */
+        if (Power_calibrateRCOSC) {
+            readyToCal = Power_initiateCalibration();
+        }
+
+        /* notify clients that were waiting for a switch notification */
+        Power_notify(Power_XOSC_HF_SWITCHED);
+
+        /* if ready to start first cal measurment, do it now */
+        if (Power_calibrateRCOSC) {
+            if (readyToCal == TRUE) {
+                Power_doCalibrate();
+            }
+        }
+    }
+
+    /* else, if HF ready to switch, do it now ... */
+    else if (OSCHF_AttemptToSwitchToXosc()) {
+
+        Power_module->xoscPending = FALSE;
+
+        /* initiate RCOSC calibration */
+        if (Power_calibrateRCOSC) {
+            readyToCal = Power_initiateCalibration();
+        }
+
+        /* now notify clients that were waiting for a switch notification */
+        Power_notify(Power_XOSC_HF_SWITCHED);
+
+        /* if ready to start first cal measurment, do it now */
+        if (Power_calibrateRCOSC) {
+            if (readyToCal == TRUE) {
+                Power_doCalibrate();
+            }
+        }
+    }
+
+    /* else, wait some more, then see if can switch ... */
+    else {
+        /* calculate wait timeout in units of ticks */
+        timeout = Power_retryWaitXOSC_HF / ti_sysbios_knl_Clock_tickPeriod;
+        if (timeout == 0) {
+            timeout = 1;   /* wait at least 1 tick */
+        }
+
+        /* re-start Clock object with retry timeout */
+        ti_sysbios_knl_Clock_setTimeout(
+            ti_sysbios_family_arm_cc26xx_Power_Module_State_xoscClockObj(),
+            timeout);
+        ti_sysbios_knl_Clock_start(
+            ti_sysbios_family_arm_cc26xx_Power_Module_State_xoscClockObj());
+    }
+
+    ti_sysbios_hal_Hwi_restore(key);
+}
+
+/*
+ *  ======== Power_XOSC_HF ========
+ */
+UInt Power_XOSC_HF (UInt action)
+{
+    UInt32 timeout;
+
+    if (action == ENABLE) {
+        if (OSCClockSourceGet(OSC_SRC_CLK_HF) != OSC_XOSC_HF) {
+            OSCHF_TurnOnXosc();
+
+            Power_module->xoscPending = TRUE;
+
+            /* calculate wait timeout in units of ticks */
+            timeout = Power_initialWaitXOSC_HF /
+                ti_sysbios_knl_Clock_tickPeriod;
+            if (timeout == 0) {
+                timeout = 1;   /* wait at least 1 tick */
+            }
+
+            /* start Clock object with initial timeout */
+            ti_sysbios_knl_Clock_stop(
+                ti_sysbios_family_arm_cc26xx_Power_Module_State_xoscClockObj());
+            ti_sysbios_knl_Clock_setTimeout(
+                ti_sysbios_family_arm_cc26xx_Power_Module_State_xoscClockObj(),
+                timeout);
+            ti_sysbios_knl_Clock_start(
+                ti_sysbios_family_arm_cc26xx_Power_Module_State_xoscClockObj());
+        }
+    }
+
+    /* when release XOSC_HF, auto switch to RCOSC_HF */
+    else {
+        OSCHF_SwitchToRcOscTurnOffXosc();
+    }
+    return (0);
+}
+
+/*
+ *  ======== Power_isDependencyActive ========
+ */
+Bool Power_isDependencyActive (Power_Resource resourceID)
+{
+    Bool status = TRUE;
+
+    /* check if the special XOSC_HF resource ...*/
+    if(resourceID == XOSC_HF) {
+
+        /* check to see if XOSC_HF is the active source */
+        if(OSCClockSourceGet(OSC_SRC_CLK_HF) != OSC_XOSC_HF) {
+            status = FALSE;
+        }
+    }
+
+    /* else, all other resources ... */
+    else {
+
+       /* resource is active if dependency count != 0 */
+        if(Power_module->resourceCounts[resourceID] == 0) {
+            status = FALSE;
+        }
+    }
+
+    return (status);
+}
+
+/*
+ *  ======== Power_NOP (UInt action) ========
+ */
+UInt Power_NOP (UInt action)
+{
+    return (0);
+}
+
+Fxn ti_sysbios_family_arm_cc26xx_Power_resourceHandlers[3] =
+{
+    (Fxn) Power_RFCORECLKS,
+    (Fxn) Power_XOSC_HF,
+    (Fxn) Power_NOP
+};

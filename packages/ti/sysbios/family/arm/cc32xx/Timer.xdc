@@ -385,7 +385,7 @@ internal:   /* not for client use */
          *  Clock object for setting the next interrupt to, when nothing else
          *  is on the clock queue.
          */
-        Clock.Object    clockObj;
+        Clock.Handle    clock;
 
         /*
          *  The value of the upper 32 bits of timer counter register

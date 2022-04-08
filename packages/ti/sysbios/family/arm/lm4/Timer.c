@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2014-2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,6 +51,11 @@
 
 #include <intrinsics.h>
 
+#endif
+
+#ifdef ti_sysbios_family_arm_cc26xx_Boot_driverlibVersion
+#include <ti/sysbios/family/arm/cc26xx/Power.h>
+#include <ti/sysbios/family/arm/cc26xx/PowerCC2650.h>
 #endif
 
 #include "package/internal/Timer.xdc.h"
@@ -1055,6 +1060,40 @@ Void Timer_masterEnable(Void)
 }
 #endif
 
+#ifdef ti_sysbios_family_arm_cc26xx_Boot_driverlibVersion
+/*
+ *  ======== Timer_enableCC26xx ========
+ */
+Void Timer_enableCC26xx(Int id)
+{
+    UInt key;
+
+    key = Hwi_disable();
+
+    switch (id) {
+        case 0: Power_setDependency(PERIPH_GPT0);
+                break;
+
+        case 1: Power_setDependency(PERIPH_GPT1);
+                break;
+
+        case 2: Power_setDependency(PERIPH_GPT2);
+                break;
+
+        case 3: Power_setDependency(PERIPH_GPT3);
+                break;
+
+        default:
+                break;
+    }
+
+    /* declare the disallow standby constraint while GP timer is in use */
+    Power_setConstraint(Power_SB_DISALLOW);
+
+    Hwi_restore(key);
+}
+#endif
+
 /*
  *  ======== Timer_enableCC3200 ========
  */
@@ -1136,6 +1175,40 @@ Void Timer_enableTiva(Int id)
 
     Hwi_restore(key);
 }
+
+#ifdef ti_sysbios_family_arm_cc26xx_Boot_driverlibVersion
+/*
+ *  ======== Timer_disableCC26xx ========
+ */
+Void Timer_disableCC26xx(Int id)
+{
+    UInt key;
+
+    key = Hwi_disable();
+
+    switch (id) {
+       case 0: Power_releaseDependency(PERIPH_GPT0);
+                break;
+
+        case 1: Power_releaseDependency(PERIPH_GPT1);
+                break;
+
+        case 2: Power_releaseDependency(PERIPH_GPT2);
+                break;
+
+        case 3: Power_releaseDependency(PERIPH_GPT3);
+                break;
+
+        default:
+                break;
+    }
+
+    /* release the disallow standby constraint when the GP timer is disabled */
+    Power_releaseConstraint(Power_SB_DISALLOW);
+
+    Hwi_restore(key);
+}
+#endif
 
 /*
  *  ======== Timer_disableCC3200 ========

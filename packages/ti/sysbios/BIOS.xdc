@@ -405,7 +405,7 @@ module BIOS
      *
      *  By default, the xdc.runtime library sources are not included in the
      *  custom SYS/BIOS library created for the application. Instead,
-     *  the pre-built xdc.runtime ibrary is provided by the respective target
+     *  the pre-built xdc.runtime library is provided by the respective target
      *  used to build the application.
      *
      *  Setting this parameter to true will cause the xdc.runtime library

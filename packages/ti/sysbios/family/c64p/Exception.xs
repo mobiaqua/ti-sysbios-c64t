@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -372,4 +372,19 @@ function viewInitException()
     obj["Exception call stack"] = excCallStack;
 
     return (obj);
+}
+
+/*
+ *  ======== viewInitModule ========
+ */ 
+function viewInitModule(view, mod)
+{
+    var Program = xdc.useModule('xdc.rov.Program');
+
+    view.exception = "none";
+   
+    if (mod.excContext != 0) {
+        view.exception = "Yes"; 
+        Program.displayError(view, "exception", "An exception has occurred!");
+    }
 }

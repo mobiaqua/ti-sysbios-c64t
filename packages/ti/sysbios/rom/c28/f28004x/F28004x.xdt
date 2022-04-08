@@ -102,7 +102,7 @@ void ti_sysbios_rom_c28_f28004x_F28004x_dataInit()
 %}
 
 %if (this.useFlash != true) {
-#define REVISION_WORD_ADDRESS  0x003fa000
+#define REVISION_WORD_ADDRESS  0x003f910a
 #define REVISION               1915367466
 
 Void ti_sysbios_rom_c28_f28004x_F28004x_checkRevision__E()

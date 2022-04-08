@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2014-2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,26 @@ interface ISeconds
      *  otherwise the value returned by Seconds_get() will be meaningless.
      */
     UInt32 get();
+
+    /*!
+     *  ======== Time ========
+     *  Structure to hold a time value in seconds plus nanoseconds.
+     */
+    struct Time {
+        UInt32 secs;    /*! Seconds */
+        UInt32 nsecs;   /*! Nanoseconds */
+    };
+
+    /*!
+     *  ======== getTime ========
+     *  Fills in a Seconds_Time structure with seconds and nanoseconds
+     *  elapsed since 1970 (the Unix epoch).
+     *
+     *  Seconds_set() must have been called before making any calls to
+     *  Seconds_getTime(), otherwise the value returned by Seconds_getTime()
+     *  will be meaningless.
+     */
+    UInt32 getTime(ISeconds.Time *ts);
 
     /*!
      *  ======== set ========

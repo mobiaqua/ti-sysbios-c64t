@@ -22,14 +22,14 @@
 % /* Don't generate Boot_init if this is a romimage */
 % if (!Program.$$isrom && (Program.build.rtsName !== null)) {
 %var Boot = xdc.module("ti.catalog.c2800.concertoInit.Boot");
-extern ti_catalog_c2800_concertoInit_Boot_initFlash(Bool configWaitStates, UInt waitStates, Bool enableProgramPrefetch, Bool enableDataCache);
+extern ti_catalog_c2800_concertoInit_Boot_initFlash(xdc_Bool configWaitStates, xdc_UInt waitStates, xdc_Bool enableProgramPrefetch, xdc_Bool enableDataCache);
 
 #pragma CODE_SECTION(ti_catalog_c2800_concertoInit_Boot_init, ".text:.bootCodeSection")
 
 /*
  *  ======== ti_catalog_c2800_concertoInit_Boot_init ========
  */
-Void ti_catalog_c2800_concertoInit_Boot_init()
+xdc_Void ti_catalog_c2800_concertoInit_Boot_init()
 {
 %if (Boot.configureFlashController == true) {
     ti_catalog_c2800_concertoInit_Boot_initFlash(`Number(Boot.configureFlashWaitStates)`, `Number(Boot.flashWaitStates)`, `Number(Boot.enableFlashProgramPrefetch)`, `Number(Boot.enableFlashDataCache)`);

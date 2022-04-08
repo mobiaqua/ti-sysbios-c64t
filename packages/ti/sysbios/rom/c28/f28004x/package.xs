@@ -64,6 +64,7 @@ function getLibs(prog)
 function getSects()
 {
     var romModName;
+    var prefix = "";
 
     switch(ROM.romName) {
         case ROM.F28004x:
@@ -75,8 +76,12 @@ function getSects()
         romModName += "_flash";
     }
 
+    if (this.F28004x.useGolden == true) {
+	prefix = "golden/";
+    }
+
     if (Build.buildROMApp == true) {
-        return (String(this.packageBase + "golden/" + romModName +
+        return (String(this.packageBase + prefix + romModName +
             "/" + romModName + "_link_ti.xdt"));
     }
     else {

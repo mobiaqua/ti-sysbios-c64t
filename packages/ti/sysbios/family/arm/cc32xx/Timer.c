@@ -272,9 +272,6 @@ Void Timer_setNextMaxTick(UArg arg)
     UInt64 r;
     UInt32 tLower, tUpper;
     UInt key;
-    Clock_Object *clockObj;
-
-    clockObj = Timer_Module_State_clockObj();
 
     key = Hwi_disable();
 
@@ -324,8 +321,8 @@ Void Timer_setNextMaxTick(UArg arg)
         Timer_module->timeUpper = tUpper + 1;
     }
 
-    Clock_setTimeout(clockObj, (UInt32)ticks);
-    Clock_start(clockObj);
+    Clock_setTimeout(Timer_module->clock, (UInt32)ticks);
+    Clock_start(Timer_module->clock);
 
 #if TESTING
     setMaxTickCount++;
@@ -374,7 +371,6 @@ Int Timer_Module_startup(Int status)
 Void Timer_startup()
 {
     Timer_Object *obj;
-    Clock_Object *clockObj;
     UInt64 t;
     UInt32 tLower, tUpper;
     UInt32 ticks;
@@ -390,21 +386,21 @@ Void Timer_startup()
         }
     }
 
-    clockObj = Timer_Module_State_clockObj();
+    if (Timer_module->clock != NULL) {
+        key = Hwi_disable();
 
-    key = Hwi_disable();
+        /* Calculate the initial timeout value */
+        t = Timer_getCount64(Timer_module->handle);
+        tLower = (UInt32)(t & LOWERMASK);
+        tUpper = (UInt32)(t >> (32 - UPPERSHIFT));
+        ticks = (ROLLOVER - (UInt64)tLower - 1) / Timer_module->period64;
+        Timer_module->timeUpper = tUpper;
 
-    /* Calculate the initial timeout value */
-    t = Timer_getCount64(Timer_module->handle);
-    tLower = (UInt32)(t & LOWERMASK);
-    tUpper = (UInt32)(t >> (32 - UPPERSHIFT));
-    ticks = (ROLLOVER - (UInt64)tLower - 1) / Timer_module->period64;
-    Timer_module->timeUpper = tUpper;
+        Clock_setTimeout(Timer_module->clock, (UInt32)ticks);
+        Clock_start(Timer_module->clock);
 
-    Clock_setTimeout(clockObj, (UInt32)ticks);
-    Clock_start(clockObj);
-
-    Hwi_restore(key);
+        Hwi_restore(key);
+    }
 }
 
 /*
@@ -518,13 +514,9 @@ UInt32 Timer_getPeriod(Timer_Object *obj)
  */
 UInt32 Timer_getCount(Timer_Object *obj)
 {
-    UInt32 count;
+    UInt64 count = Timer_getCount64(obj);
 
-    /* Latch the RTC vlaue */
-    HWREG(HIB3P3_BASE + HIB3P3_O_MEM_HIB_RTC_TIMER_READ) = 0x1;
-
-    count = HWREG(HIB3P3_BASE + HIB3P3_O_MEM_HIB_RTC_TIMER_LSW);
-    return (count);
+    return((UInt32)count);
 }
 
 /*

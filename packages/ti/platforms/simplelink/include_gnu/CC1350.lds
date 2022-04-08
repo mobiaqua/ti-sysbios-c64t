@@ -6,12 +6,12 @@
 
 MEMORY
 {
-    FLASH (RX)      : ORIGIN = 0x00000000, LENGTH = 0x0001ffb0
+    FLASH (RX)      : ORIGIN = 0x00000000, LENGTH = 0x0001ffa8
     /*
      * Customer Configuration Area and Bootloader Backdoor configuration in
      * flash, 40 bytes
      */
-    FLASH_CCFG (RX) : ORIGIN = 0x0001ffb0, LENGTH = 0x00000050
+    FLASH_CCFG (RX) : ORIGIN = 0x0001ffa8, LENGTH = 0x00000058
     SRAM (WX)       : ORIGIN = 0x20000000, LENGTH = 0x00004000
 }
 
@@ -38,6 +38,15 @@ SECTIONS {
     .vtable (_vtable_base_address) : AT (_vtable_base_address) {
         KEEP (*(.vtable))
     } > REGION_DATA
+
+    /* these hard-coded addrs are needed by the TI-RTOS SPICC26XXDMA driver
+     * and must match appropriate offsets from UDMACC26XX_CONFIG_BASE defined
+     * by ti/drivers/dma/UDMACC26XX.h
+     */
+    .dmaRxControlTableEntry0 0x20000430 : AT (0x20000430) {*(.dmaRxControlTableEntry0)} > REGION_DATA
+    .dmaTxControlTableEntry0 0x20000440 : AT (0x20000440) {*(.dmaTxControlTableEntry0)} > REGION_DATA
+    .dmaRxControlTableEntry1 0x20000500 : AT (0x20000500) {*(.dmaRxControlTableEntry1)} > REGION_DATA
+    .dmaTxControlTableEntry1 0x20000510 : AT (0x20000510) {*(.dmaTxControlTableEntry1)} > REGION_DATA
 
     .text : {
         CREATE_OBJECT_SYMBOLS

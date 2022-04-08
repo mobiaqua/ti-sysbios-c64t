@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -260,5 +260,9 @@ Void Exception_excDumpContext(UInt pc)
     System_printf ("R7 = 0x%08x  PC(R15) = 0x%08x\n", excp->r7, excp->pc);
     System_printf ("PSR = 0x%08x\n", excp->psr);
     System_printf ("DFSR = 0x%08x  IFSR = 0x%08x\n", excp->dfsr, excp->ifsr);
+#ifdef __TI_ARM_V5__ 
+    System_printf ("DFAR = 0x%08x\n", excp->dfar);
+#else
     System_printf ("DFAR = 0x%08x  IFAR = 0x%08x\n", excp->dfar, excp->ifar);
+#endif
 }

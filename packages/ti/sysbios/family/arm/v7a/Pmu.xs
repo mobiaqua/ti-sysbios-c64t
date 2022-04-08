@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,7 @@ if (xdc.om.$name == "cfg") {
     var deviceTable = {
         "ti.catalog.arm.cortexa8": {
             "TMS320DM8168": {
-                intNum  : 3,
+                intNum  : 3
             }
         },
         "ti.catalog.arm.cortexa15": {
@@ -50,14 +50,19 @@ if (xdc.om.$name == "cfg") {
              * interrupt numbering. Add 32 to account for this 32 offset
              */
             "DRA7XX": {
-                intNum  : 131 + 32,
+                intNum  : 131 + 32
             },
             "TCI6636K2H": {
-                intNum  : 20 + 32,
+                intNum  : 20 + 32
             },
             "TCI66AK2G02": {
-                intNum  : 4 + 32,
-            },
+                intNum  : 4 + 32
+            }
+        },
+        "ti.catalog.arm.cortexr5": {
+            "RM57D8XX": {
+                intNum  : 22
+            }
         }
     };
 
@@ -78,6 +83,12 @@ if (xdc.om.$name == "cfg") {
         deviceTable["ti.catalog.arm.cortexa15"]["DRA7XX"];
     deviceTable["ti.catalog.arm.cortexa15"]["OMAP5430"] =
         deviceTable["ti.catalog.arm.cortexa15"]["DRA7XX"];
+
+    deviceTable["ti.catalog.arm.cortexr5"]["TMS570DC.*"] =
+        deviceTable["ti.catalog.arm.cortexr5"]["RM57D8XX"];
+    deviceTable["ti.catalog.arm.cortexr5"]["RM57D8.*"] =
+        deviceTable["ti.catalog.arm.cortexr5"]["RM57D8XX"];
+
 }
 
 /*

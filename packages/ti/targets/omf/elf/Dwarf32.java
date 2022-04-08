@@ -472,6 +472,7 @@ public class Dwarf32
     {
         globalMap = new HashMap<String, Integer>();
         typesMap  = new HashMap<Integer, Types>();
+        lastAbbrevFound = 0;
     }
 
     /*
@@ -544,6 +545,8 @@ public class Dwarf32
         }
     }
 
+    private int lastAbbrevFound;
+
     /*
      *  ======== getAbbrevRec ========
      *  Get the abbreviation record 
@@ -551,7 +554,11 @@ public class Dwarf32
      *  Get the abbreviation for the given abbreviation code starting at the 
      *  abbreviation offset.
      *
-     *  Note: This function can be further optimized using binary search.
+     *  Note: This function is optimized using the assumption that the supplied
+     *  abbreviation offset is always the same or just a little larger than the
+     *  offset supplied in the previous call. The index where the previous
+     *  offset was found is kept in 'lastAbbrevFound' and that's the index where
+     *  the search starts in the current call.
      */
     private Dwarf32.Abbrev getAbbrevRec(int abbrevOffset, int code)
         throws Exception
@@ -561,34 +568,33 @@ public class Dwarf32
         if (abbrevRecArr == null) {
             throw new Exception("Abbreviation record array is null");
         }
-        
-        for (int j = 0; j < abbrevRecArr.length; j++) {
-            abbrevRec = abbrevRecArr[j];
-            
+
+        int i = lastAbbrevFound;
+        do {
+            abbrevRec = abbrevRecArr[i];
             /* Skip till the offset */
             if (abbrevRec.offset == abbrevOffset) {
-                /* Now lets check the code */
-                for (; j < abbrevRecArr.length; j++) {
+                lastAbbrevFound = i;
+                for (int j = i; j < abbrevRecArr.length; j++) {
                     abbrevRec = abbrevRecArr[j];
-
+                    /* Now let's keep checking the code */
                     if (abbrevRec.code == code) {
                         break;
                     }
                 }
                 break;
             }
-        }
+            i = (i < abbrevRecArr.length - 1) ? i + 1 : 0;
+        } while (i != lastAbbrevFound);
 
-        /* Something bad happened */
         if (abbrevRec == null || abbrevRec.code != code) {
             String errorMsg = "Failed to find abbrev code " + code +
                                " from offset " + abbrevOffset; 
             throw new Exception(errorMsg);
         }
-
         return (abbrevRec);
     }
-      
+
     /*
      *  ======== getAttrName ========
      *  Get the DW_AT_* string
@@ -604,7 +610,7 @@ public class Dwarf32
         else {
             return ("<unknown DW_AT value: " + Integer.toHexString(attr) + ">");
         }
-       
+
     }
 
     /*
@@ -683,7 +689,7 @@ public class Dwarf32
         }
         else {
             return ("<unknown DW_TAG value: " + Integer.toHexString(tag) + ">");
-        } 
+        }
     }
 
     /*
@@ -712,7 +718,7 @@ public class Dwarf32
 
         /* read abbrevation record into a buffer */
         readAbbrevRecArr(abbrev);
-            
+
         /* Decode the .debug_info section */
         while (info.remaining() > 0) {
             CUHeader header = new CUHeader();
@@ -727,21 +733,20 @@ public class Dwarf32
 
             /* get abbreviation code (record offset) */
             abbrevCode = this.readULEB128(info);
-                
+
             /* Get the compilation unit DIE abbreviation record */
             abbrevRec = this.getAbbrevRec(header.debug_abbrev_offset,
                                           abbrevCode);
-            
+
             /* loop through CU DIE. We don't need this info*/
-            for (int k = 0; k < abbrevRec.attrs.length; k++)
-            {
+            for (int k = 0; k < abbrevRec.attrs.length; k++) {
                 int id = abbrevRec.attrs[k].id;
                 int form = abbrevRec.attrs[k].form;
                 int size = forms[form].size;
 
                 if (size > 0) {
-                    if ((id == DW_AT_comp_dir) || (id == DW_AT_name) 
-                        || (id == DW_AT_stmt_list)){
+                    if ((id == DW_AT_comp_dir) || (id == DW_AT_name)
+                        || (id == DW_AT_stmt_list)) {
                         info.getInt();
                     }
                     else {
@@ -760,26 +765,25 @@ public class Dwarf32
                     throw new Exception("Size cannot be < 0 : " + size);
                 }
             }
-           
+
             /* Looping through all the DIEs */
             int level = 1; /* Keep track of the symbol scope */
-            for (int j = 0; 
+            for (int j = 0;
                  info.position() < (cuOffset + header.unit_length + 4); j++) {
-                   
                 /* Keep track of DIE position */
                 int dieOffset = info.position();
 
-                /* flags for info extraction */                    
+                /* flags for info extraction */
                 boolean isVar = false;
                 boolean isType = false;
-                    
+
                 /* temporary storage */
                 String atName = "";
                 String atType = "0";
                 Types typeObj = null;
 
                 abbrevCode = this.readULEB128(info);
-                   
+
                 /* if it is a null DIE, skip it */
                 if (abbrevCode == 0) {
                     if (level > 1 ) {
@@ -787,9 +791,10 @@ public class Dwarf32
                     }
                     continue;
                 }
- 
-                abbrevRec = this.getAbbrevRec(header.debug_abbrev_offset, abbrevCode);
-                    
+
+                abbrevRec = this.getAbbrevRec(header.debug_abbrev_offset,
+                                              abbrevCode);
+
                 /* Is it either a variable or type DIE? */
                 String tagName = getTagName(abbrevRec.tag);
                 if (tagName.matches("DW_TAG_variable")) {
@@ -806,7 +811,7 @@ public class Dwarf32
                     int size = forms[form].size;
                     String name = getAttrName(abbrevRec.attrs[k].id);
                     String value = "";
-                         
+
                     if (size > 0) {
                         if (form == DW_FORM_strp) {
                             if (str == null) {
@@ -858,7 +863,8 @@ public class Dwarf32
                     else if (size == 0) {
                         switch (form) {
                             case DW_FORM_string: {
-                                value = this.readStringFromBuffer(info, info.position());
+                                value = this.readStringFromBuffer(info,
+                                        info.position());
                                 break;
                             }
                             case DW_FORM_block: {
@@ -890,9 +896,10 @@ public class Dwarf32
                     }
                     else {
                         /* Should not happen! */
-                        throw new Exception(name + " has an  invalid form: " + form);
+                        throw new Exception(name + " has an  invalid form: "
+                            + form);
                     }
-                        
+
                     /* Save name and type info in temporary variables */ 
                     if (name == "DW_AT_name") {
                         atName = value;
@@ -905,7 +912,7 @@ public class Dwarf32
                 if (abbrevRec.children) {
                     level++;
                 }
-                    
+
                 /* Store variables if it is global(based on level) */
                 if (isVar && (level == 1) && atName != "") {
                     globalMap.put(atName, Integer.parseInt(atType));
@@ -921,7 +928,6 @@ public class Dwarf32
                 }
             }
         }
-
     }
 
     /*
@@ -940,8 +946,8 @@ public class Dwarf32
             ArrayList<Dwarf32.DieAttr> dieAttrList = new ArrayList<Dwarf32.DieAttr>();
 
             arec.offset = abbrev.position();
-            arec.code = this.readULEB128(abbrev);   
-                 
+            arec.code = this.readULEB128(abbrev);
+
             if (arec.code != 0 && abbrev.remaining() > 0) {
                 arec.tag = this.readULEB128(abbrev);
                 arec.children = abbrev.get() == 0 ? false : true;

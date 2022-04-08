@@ -51,7 +51,7 @@
 
 extern Void ti_sysbios_family_xxx_Hwi_switchAndRunFunc(Void (*func)());
 extern Void ti_sysbios_family_xxx_Hwi_switchAndRunDispatchC(
-Void (*dispatchC)(Hwi_Irp irp), Hwi_Irp irp);
+Hwi_Irp irp, Void (*dispatchC)(Hwi_Irp irp));
 
 #define Hwi_switchAndRunFunc ti_sysbios_family_xxx_Hwi_switchAndRunFunc
 
@@ -573,7 +573,7 @@ Void Hwi_startup()
 /*
  *  ======== ti_sysbios_family_xxx_Hwi_switchAndRunDispatchC ========
  *  ti_sysbios_family_xxx_Hwi_switchAndRunDispatchC(
- *      Void (*dispatchC)(Hwi_Irp irp), Hwi_Irp irp);
+ *      Hwi_Irp irp, Void (*dispatchC)(Hwi_Irp irp));
  *
  *  Switch to ISR stack, call the dispatchC function and then switch
  *  back to Task stack.
@@ -582,7 +582,7 @@ Void Hwi_startup()
 
 #if (ti_sysbios_BIOS_smpEnabled__D)
 Void __attribute__ ((naked)) ti_sysbios_family_xxx_Hwi_switchAndRunDispatchC(
-        Void (*dispatchC)(Hwi_Irp irp), Hwi_Irp irp)
+        Hwi_Irp irp, Void (*dispatchC)(Hwi_Irp irp))
 {
     __asm__ __volatile__ (
             "push {r4-r6, lr}\n\t"
@@ -598,7 +598,7 @@ Void __attribute__ ((naked)) ti_sysbios_family_xxx_Hwi_switchAndRunDispatchC(
             "ldr r2, [r5, #4]\n\t"            /* switch to isr Stack */
             "ldr r13, [r2, r4, lsl #2]\n\t"   /* switch to isr Stack */
             "1:\n\t"
-            "blx r0\n\t"                      /* Call dispatchC */
+            "blx r1\n\t"                      /* Call dispatchC (r0 = IRP) */
             "cmp r6, #0\n\t"                  /* Lowest order ISR? */
             "bne 2f\n\t"                      /* branch to 'exitFunc' */
             "ldr r2, [r5]\n\t"                /* if yes, restore */
@@ -610,7 +610,7 @@ Void __attribute__ ((naked)) ti_sysbios_family_xxx_Hwi_switchAndRunDispatchC(
 }
 #else /* !ti_sysbios_BIOS_smpEnabled__D */
 Void __attribute__ ((naked)) ti_sysbios_family_xxx_Hwi_switchAndRunDispatchC(
-        Void (*dispatchC)(Hwi_Irp irp), Hwi_Irp irp)
+        Hwi_Irp irp, Void (*dispatchC)(Hwi_Irp irp))
 {
     __asm__ __volatile__ (
             "push {r4-r6, lr}\n\t"
@@ -624,7 +624,7 @@ Void __attribute__ ((naked)) ti_sysbios_family_xxx_Hwi_switchAndRunDispatchC(
             "ldr r2, [r5, #4]\n\t"            /* switch to isr Stack */
             "ldr r13, [r2]\n\t"               /* switch to isr Stack */
             "1:\n\t"
-            "blx r0\n\t"                      /* Call dispatchC */
+            "blx r1\n\t"                      /* Call dispatchC (r0 = IRP) */
             "cmp r6, #0\n\t"                  /* Lowest order ISR? */
             "bne 2f\n\t"                      /* branch to 'exitFunc' */
             "ldr r2, [r5]\n\t"                /* if yes, restore */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,11 +34,12 @@
  *  ======== Cache.xs ========
  */
 
-var BIOS;
-var Cache;
-var Mmu;
-var Startup;
-var Reset;
+var BIOS = null;
+var Cache = null;
+var Mmu = null;
+var Startup = null;
+var Reset = null;
+var Build = null;
 
 /*
  * ======== getAsmFiles ========
@@ -56,6 +57,87 @@ function getAsmFiles(targetName)
             return (null);
 	    break;
     }
+}
+
+if (xdc.om.$name == "cfg") {
+    var deviceTable = {
+        "Vayu": {
+            errata798870   : true
+        },
+        "OMAP5430": {
+            errata798870   : true
+        },
+        "TCI6636K2H": {
+            errata798870   : false
+        },
+        "TCI66AK2G02": {
+            errata798870   : false
+        },
+    };
+
+    deviceTable["DRA7XX"] = deviceTable["Vayu"];
+}
+
+/*
+ *  ======== deviceSupportCheck ========
+ *  Check validity of device
+ */
+function deviceSupportCheck()
+{
+    /* look for exact match first */
+    for (device in deviceTable) {
+        if (device == Program.cpu.deviceName) {
+            return (device);
+        }
+    }
+
+    /* now look for a wildcard match */
+    for (device in deviceTable) {
+        if (Program.cpu.deviceName.match(device)) {
+            return (device);
+        }
+    }
+
+    /*
+     * no match, print all catalog devices supported
+     * and then raise an error
+     */
+    var catalog = xdc.loadPackage(Program.cpu.catalogName);
+
+    /* build associative array of supported devices */
+    var supportedDevices = new Object();
+
+    for (var i = 0; i < catalog.$modules.length; i++) {
+        catalogName = catalog.$modules[i].$name.substring(
+                Program.cpu.catalogName.length + 1);
+
+        for (device in deviceTable) {
+            if (catalogName.match(device)) {
+                supportedDevices[catalogName] = catalogName;
+            }
+        }
+    }
+
+    /* copy it into a sortable array */
+    var sd = new Array();
+
+    for (var i in supportedDevices) {
+        sd[sd.length++] = i;
+    }
+
+    /* sort it for a nicer report */
+    sd.sort();
+
+    print("The " + Program.cpu.deviceName +
+          " device is not currently supported.");
+    print("The following devices are supported for the " +
+          Program.build.target.name + " target:");
+
+    for (var i=0; i<sd.length; i++) {
+        print("\t" + sd[i]);
+    }
+
+    throw new Error ("Unsupported device!");
 }
 
 /*
@@ -89,6 +171,7 @@ function module$use()
     Mmu = xdc.useModule('ti.sysbios.family.arm.a15.Mmu');
     Startup = xdc.useModule('xdc.runtime.Startup');
     Reset = xdc.useModule('xdc.runtime.Reset');
+    Build = xdc.module('ti.sysbios.Build');
 
     if (BIOS.smpEnabled) {
         Cache.$logError("This module does not support SMP mode. Please use " +
@@ -98,6 +181,12 @@ function module$use()
     /* Enable cache early */
     Reset.fxns[Reset.fxns.length++] = Cache.startup;
     Startup.firstFxns.$add(Cache.initModuleState);
+
+    var device = deviceSupportCheck();
+
+    if (Cache.$written("errata798870") != true) {
+        Cache.errata798870 = deviceTable[device].errata798870;
+    }
 }
 
 /*
@@ -109,6 +198,10 @@ function module$static$init(mod, params)
     mod.l1pInfo = 0;
     mod.l2Info = 0;
     mod.l2WaySize = 0;
+
+    /* add -D to compile line to optimize cache code */
+    Build.ccArgs.$add("-Dti_sysbios_family_arm_a15_Cache_errata798870__D=" +
+        (Cache.errata798870 ? "TRUE" : "FALSE"));
 }
 
 /*

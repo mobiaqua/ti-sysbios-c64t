@@ -57,7 +57,8 @@ function module$use()
     var Build = xdc.module("ti.sysbios.Build");
 
     if (Boot.trimDevice == true) {
-        Reset.fxns[Reset.fxns.length++] = '&ti_sysbios_family_arm_cc26xx_Boot_trimDevice';
+        Reset.fxns[Reset.fxns.length++] =
+            '&ti_sysbios_family_arm_cc26xx_Boot_trimDevice';
     }
 
     Build.ccArgs.$add("-Dti_sysbios_family_arm_cc26xx_Boot_driverlibVersion=" + Boot.driverlibVersion);

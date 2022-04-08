@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,10 @@ function getAsmFiles(targetName)
         case "gnu.targets.arm.A9F":
         case "gnu.targets.arm.A15F":
             return (["TimestampProvider_asm_gnu.asm"]);
+            break;
+        case "ti.targets.arm.elf.R5F":
+        case "ti.targets.arm.elf.R5F_big_endian":
+            return (["TimestampProvider_asm.asm"]);
             break;
 
         default:

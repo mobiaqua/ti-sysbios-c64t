@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2014-2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@
  */
 
 #include <xdc/std.h>
+
 #include "package/internal/Seconds.xdc.h"
 
 /*
@@ -42,6 +43,14 @@
 UInt32 Seconds_get(Void)
 {
     return (Seconds_SecondsProxy_get());
+}
+
+/*
+ *  ======== Seconds_getTime ========
+ */
+UInt32 Seconds_getTime(Seconds_Time *ts)
+{
+    return (Seconds_SecondsProxy_getTime(ts));
 }
 
 /*

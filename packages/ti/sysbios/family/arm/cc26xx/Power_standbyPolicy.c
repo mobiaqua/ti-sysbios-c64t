@@ -113,7 +113,7 @@ Void Power_standbyPolicy()
         if (justIdle) {
 
             /*
-             * power off the CPU domain; VIMS will power down if SYSBUS is
+             * Power off the CPU domain; VIMS will power down if SYSBUS is
              * powered down, and SYSBUS will power down if there are no
              * dependencies
              * NOTE: if radio driver is active it must force SYSBUS enable to
@@ -121,6 +121,7 @@ Void Power_standbyPolicy()
              */
             if ((constraints & Power_IDLE_PD_DISALLOW) == 0) {
 
+                /* 1. Configure flash to remain on in IDLE or not */
                 if ((constraints & Power_NEED_FLASH_IN_IDLE) == 0) {
                     HWREG(PRCM_BASE + PRCM_O_PDCTL1VIMS) &= ~PRCM_PDCTL1VIMS_ON;
                 }
@@ -128,13 +129,17 @@ Void Power_standbyPolicy()
                     HWREG(PRCM_BASE + PRCM_O_PDCTL1VIMS) |= PRCM_PDCTL1VIMS_ON;
                 }
 
+                /* 2. Always keep cache retention ON in IDLE  */
                 PRCMCacheRetentionEnable();
+                /* 3. Turn off the CPU power domain */
                 PRCMPowerDomainOff(PRCM_DOMAIN_CPU);
+                /* 4. Ensure any possible outstanding AON writes complete */
                 SysCtrlAonSync();
 
+                /* 5. Enter IDLE */
                 PRCMDeepSleep();
 
-                /* make sure MCU and AON are in sync after wakeup */
+                /* 6. Make sure MCU and AON are in sync after wakeup */
                 SysCtrlAonUpdate();
             }
             else {

@@ -1515,7 +1515,7 @@ function viewInitCallStack()
          * If length = 2, then frames[1] probably says:
          *   "call stack parsing is not supported"
          */
-        if (frames.length > 2) {
+        if (frames.length >= 2) {
             frames.length -= 1;
         }
 

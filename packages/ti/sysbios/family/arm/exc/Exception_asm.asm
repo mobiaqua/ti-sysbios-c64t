@@ -1,5 +1,5 @@
 ;
-;  Copyright (c) 2014, Texas Instruments Incorporated
+;  Copyright (c) 2015, Texas Instruments Incorporated
 ;  All rights reserved.
 ;
 ;  Redistribution and use in source and binary forms, with or without
@@ -64,7 +64,11 @@ ti_sysbios_family_arm_exc_Exception_excHandlerAsm__I:
         stmfd   sp!, {r12}      ; save IFSR
         mrc     p15, #0, r12, c6, c0, #0 ; read DFAR into r12
         stmfd   sp!, {r12}      ; save DFAR
+    .if (__TI_ARM_V5E__ = 1)
+        mov     r12, #0         ; not supported on Arm9
+    .else
         mrc     p15, #0, r12, c6, c0, #2 ; read IFAR into r12
+    .endif
         stmfd   sp!, {r12}      ; save IFAR
 
         mrs     r12, cpsr
@@ -109,10 +113,14 @@ ti_sysbios_family_arm_exc_Exception_excHandlerDataAsm__I:
         mrc     p15, #0, r12, c5, c0, #0 ; read DFSR into r12
         stmfd   sp!, {r12}      ; save DFSR
         mrc     p15, #0, r12, c5, c0, #1 ; read IFSR into r12
-        stmfd   sp!, {r12}      ; save DFSR
+        stmfd   sp!, {r12}      ; save IFSR
         mrc     p15, #0, r12, c6, c0, #0 ; read DFAR into r12
         stmfd   sp!, {r12}      ; save DFAR
+    .if (__TI_ARM_V5E__ = 1)
+        mov     r12, #0         ; not supported on Arm9
+    .else
         mrc     p15, #0, r12, c6, c0, #2 ; read IFAR into r12
+    .endif
         stmfd   sp!, {r12}      ; save IFAR
 
         mrs     r12, cpsr

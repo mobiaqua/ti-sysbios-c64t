@@ -59,6 +59,7 @@ function module$static$init(mod, params)
     mod.count1 = 0;
     mod.count2 = 0;
     mod.c1Inc = 0;
+    mod.ticks = 0;
 
     /*
      *  Clock tickPeriod is in usec units.  Use it to compute a 1 second

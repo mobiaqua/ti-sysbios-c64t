@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,6 @@
  */
 /*
  *  ======== package.xdc ========
- *
  */
 requires ti.sysbios.interfaces;
 
@@ -47,6 +46,7 @@ requires ti.sysbios.interfaces;
 package ti.sysbios.family.arm [2,0,0,0] {
     module HwiCommon;
     module IntrinsicsSupport;
+    module Mpu;
     module Settings;
     module TaskSupport;
 }

@@ -141,9 +141,11 @@ Int Hwi_Module_startup(Int phase)
     /*
      * Initialize the pointer to the isrStack. These symbols are part of the
      * Hwi_module (instead of floating) in order to support ROM.
-     * Leave room for up to 16 32 bit Hwi_dispatchC local variables.
+     * Leave room for one 32-bit value pushed by xdc_runtime_Startup_reset()
+     * (for cases where intentionally reset as resume from power down),
+     * and maintain double word alignment.
      */
-    Hwi_module->isrStack = Hwi_getIsrStackAddress();
+    Hwi_module->isrStack = Hwi_getIsrStackAddress() - 8;
 
     Hwi_module->taskSP = (Char *)-1;/* signal that we're executing on the */
                                         /* ISR stack */

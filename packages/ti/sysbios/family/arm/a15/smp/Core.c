@@ -464,3 +464,18 @@ Void Core_unlock()
         GateSmp_leave(Core_gate, 0);
     }
 }
+
+/*
+ *  ======== Core_getRevisionNumber ========
+ */
+UInt8 __attribute__((naked)) Core_getRevisionNumber()
+{
+    __asm__ __volatile__ (
+        "mrc p15, #0, r0, c0, c0, #0\n\t"
+        "mov r1, r0, lsr #16\n\t"
+        "and r1, r1, #0xF0\n\t"
+        "and r0, r0, #0xF\n\t"
+        "orr r0, r1, r0\n\t"
+        "bx  lr"
+    );
+}

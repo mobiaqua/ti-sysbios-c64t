@@ -145,7 +145,7 @@ var deviceTable = {
             cacheDelegateSmp : "ti.sysbios.family.arm.a15.smp.Cache",
             powerDelegate : null,
             secondsDelegate : null,
-            coreDelegate : null,
+            coreDelegate : "ti.sysbios.family.arm.a15.Core",
             coreDelegateSmp : "ti.sysbios.family.arm.a15.smp.Core",
             mmuModule : "ti.sysbios.family.arm.a15.Mmu",
             bootModule : null,
@@ -165,7 +165,7 @@ var deviceTable = {
             cacheDelegateSmp : "ti.sysbios.family.arm.a15.smp.Cache",
             powerDelegate : null,
             secondsDelegate : null,
-            coreDelegate : null,
+            coreDelegate : "ti.sysbios.family.arm.a15.Core",
             coreDelegateSmp : "ti.sysbios.family.arm.a15.smp.Core",
             mmuModule : "ti.sysbios.family.arm.a15.Mmu",
             bootModule : null,
@@ -185,7 +185,7 @@ var deviceTable = {
             cacheDelegateSmp : "ti.sysbios.family.arm.a15.smp.Cache",
             powerDelegate : null,
             secondsDelegate : null,
-            coreDelegate : null,
+            coreDelegate : "ti.sysbios.family.arm.a15.Core",
             coreDelegateSmp : "ti.sysbios.family.arm.a15.smp.Core",
             mmuModule : "ti.sysbios.family.arm.a15.Mmu",
             bootModule : null,
@@ -365,7 +365,7 @@ var deviceTable = {
             intrinsicsSupportDelegate : "ti.sysbios.family.arm.m3.IntrinsicsSupport",
             mmuModule : null,
             cacheDelegate : null,
-            powerDelegate : null,
+            powerDelegate : "ti.sysbios.family.arm.cc26xx.Power",
             secondsDelegate : "ti.sysbios.family.arm.cc26xx.Seconds",
             coreDelegate : null,
             bootModule : "ti.sysbios.family.arm.cc26xx.Boot",
@@ -460,41 +460,22 @@ var deviceTable = {
             targets : [ "ti.targets.arm.elf.M4F" ]
         },
     },
-    "ti.catalog.arm.cortexr4": {
-        "TMS570PSF762": {
-            hwiDelegate : "ti.sysbios.family.arm.tms570.Hwi",
-            timerDelegate : "ti.sysbios.family.arm.tms570.Timer",
-            clockTimerDelegate : "ti.sysbios.family.arm.tms570.Timer",
-            timestampDelegate : "ti.sysbios.family.arm.tms570.TimestampProvider",
+    "ti.catalog.arm.cortexr5": {
+        "RM57D8XX": {
+            hwiDelegate : "ti.sysbios.family.arm.r5.vim.Hwi",
+            timerDelegate : "ti.sysbios.family.arm.r5.rti.Timer",
+            clockTimerDelegate : "ti.sysbios.family.arm.r5.rti.Timer",
+            timestampDelegate : "ti.sysbios.family.arm.a15.TimestampProvider",
             taskSupportDelegate : "ti.sysbios.family.arm.TaskSupport",
             intrinsicsSupportDelegate : "ti.sysbios.family.arm.IntrinsicsSupport",
-            bootModule : null,
-            mmuModule : null,
-            cacheDelegate : "ti.sysbios.hal.CacheNull",
+            bootModule : "ti.sysbios.family.arm.r5.rm57d8xx.Boot",
+            mmuModule : "ti.sysbios.family.arm.Mpu",
+            cacheDelegate : "ti.sysbios.family.arm.r5.Cache",
             powerDelegate : null,
             secondsDelegate : null,
-            coreDelegate : null,
+            coreDelegate : "ti.sysbios.family.arm.r5.rm57d8xx.Core",
             clockTickPeriod : 1000,
-            targets : [ "ti.targets.arm.R4t_big_endian", "ti.targets.arm.R4_big_endian",
-                        "ti.targets.arm.elf.R4t_big_endian", "ti.targets.arm.elf.R4_big_endian" ]
-        },
-        "TMS570LS20216": {
-            hwiDelegate : "ti.sysbios.family.arm.tms570.Hwi",
-            timerDelegate : "ti.sysbios.family.arm.tms570.Timer",
-            clockTimerDelegate : "ti.sysbios.family.arm.tms570.Timer",
-            timestampDelegate : "ti.sysbios.family.arm.tms570.TimestampProvider",
-            taskSupportDelegate : "ti.sysbios.family.arm.TaskSupport",
-            intrinsicsSupportDelegate : "ti.sysbios.family.arm.IntrinsicsSupport",
-            bootModule : null,
-            mmuModule : null,
-            cacheDelegate : "ti.sysbios.hal.CacheNull",
-            powerDelegate : null,
-            secondsDelegate : null,
-            coreDelegate : null,
-            clockTickPeriod : 1000,
-            targets : [ "ti.targets.arm.R4t_big_endian", "ti.targets.arm.R4_big_endian",
-                        "ti.targets.arm.elf.R4t_big_endian", "ti.targets.arm.elf.R4_big_endian",
-                        "ti.targets.arm.elf.R4Ft_big_endian", "ti.targets.arm.elf.R4Ft" ]
+            targets : [ "ti.targets.arm.elf.R5F" ]
         },
     },
 };
@@ -576,6 +557,10 @@ deviceTable["ti.catalog.arm.cortexm3"]["SC4F.*"]    = deviceTable["ti.catalog.ar
 
 deviceTable["ti.catalog.arm.cortexm4"]["Vayu"]      = deviceTable["ti.catalog.arm.cortexm4"]["DRA7XX"];
 deviceTable["ti.catalog.arm.cortexm4"]["TDA3XX"]    = deviceTable["ti.catalog.arm.cortexm4"]["DRA7XX"];
+
+/* Cortex-R5 devices */
+deviceTable["ti.catalog.arm.cortexr5"]["TMS570DC.*"] = deviceTable["ti.catalog.arm.cortexr5"]["RM57D8XX"];
+deviceTable["ti.catalog.arm.cortexr5"]["RM57D8.*"] = deviceTable["ti.catalog.arm.cortexr5"]["RM57D8XX"];
 
 /* MSP432 devices */
 deviceTable["ti.catalog.arm.cortexm4"]["MSP432.*"] = deviceTable["ti.catalog.arm.cortexm4"]["MSP432P401R"];

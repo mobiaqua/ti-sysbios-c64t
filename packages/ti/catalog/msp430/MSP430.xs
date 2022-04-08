@@ -6331,7 +6331,7 @@ peripheralsTable["MSP430FR594x_FR584x"] = [
         }
     },
     {
-        factory: "ti.catalog.msp430.peripherals.ref.REF",
+        factory: "ti.catalog.msp430.peripherals.ref.REF_A",
         params: {name: "ref", baseAddr: 0x01b0}
     },
     {
@@ -6663,7 +6663,7 @@ peripheralsTable["MSP430FR595x_FR585x"] = [
         }
     },
     {
-        factory: "ti.catalog.msp430.peripherals.ref.REF",
+        factory: "ti.catalog.msp430.peripherals.ref.REF_A",
         params: {name: "ref", baseAddr: 0x01b0}
     },
     {
@@ -6834,7 +6834,7 @@ peripheralsTable["MSP430FR596x_FR586x"] = [
         params: {name: "pmm", baseAddr: 0x120}
     },
     {
-        factory: "ti.catalog.msp430.peripherals.ref.REF",
+        factory: "ti.catalog.msp430.peripherals.ref.REF_A",
         params: {name: "ref", baseAddr: 0x01b0}
     },
     {

@@ -100,7 +100,7 @@ var targetOptions = {
                         deviceId: "~.*(Cortex A|TM4C|TM4E|LM3|F28M3|LM4|" +
                             "RM4|TMS570LS|ARM7|ARM11|Generic|EVMDMRX45X" +
                             "|CC13|CC25|CM25|CC26|CC32|TMS470M|DM350|DM357|" +
-                            "DM368|P401R).*",
+                            "DM368|P401R|RM57D8).*",
                     }
                 }
             },
@@ -116,102 +116,156 @@ var targetOptions = {
                     }
                 }
             },
-            "M3": {
-                cfgPrefix: "cortexm/",
+            "R5F": {
+                cfgPrefix: "default/",
+                target: "ti.targets.arm.elf.R5F",
                 compilerBuildOptions: "",
                 linkerBuildOptions: "",
+                devices: {
+                    "GENERIC": {
+                        deviceId: ".*(RM57D8).*",
+                        platform: "ti.platforms.cortexR:$DeviceId$",
+                        linkerCommandFile: "ti/platforms/cortexR/include/" +
+                            "$DeviceId$.cmd",
+                        productGroup: "RM57D8xx",
+                    }
+                }
+            },
+            "M3": {
+                cfgPrefix: "cortexm/",
+                target: "ti.targets.arm.elf.M3",
+                compilerBuildOptions:
+                    " -mv7M3 --code_state=16 --abi=eabi -me -g" +
+                    " --display_error_number --diag_warning=255" +
+                    " --diag_wrap=off --gen_func_subsections=on" +
+                    " --float_support=vfplib",
+                linkerBuildOptions:
+                    " --warn_sections --display_error_number --diag_wrap=off" +
+                    " --rom_model",
                 devices: {
                     "STELLARIS": {
                         deviceId: ".*LM3.*",
                         platform: "ti.platforms.stellaris:$DeviceId$",
                         linkerCommandFile: "ti/platforms/stellaris/include/" +
-                                           "$DeviceId$.cmd",
+                            "$DeviceId$.cmd",
                         productGroup: "",
                     },
-/* exclude CC26XX because it needs driverlib ...
+                    /* exclude CC26XX because it needs driverlib ...
                     "CC26XX": {
                         cfgPrefix: "cc26xx/",
                         deviceId: ".*(CC26|CC13).*",
                         platform: "ti.platforms.simplelink:$DeviceId$",
                         productGroup: "SimpleLink"
                     },
-*/
+                    */
                     "CONCERTO": {
                         deviceId: ".*F28M3.*",
                         platform: "ti.platforms.concertoM3:$DeviceId$",
                         linkerCommandFile: "ti/platforms/concertoM3/include/" +
-                                           "$DeviceId$.cmd",
+                            "$DeviceId$.cmd",
                         productGroup: "C2000"
                     }
                 }
             },
             "M4": {
                 cfgPrefix: "cortexm/",
-                compilerBuildOptions: "",
-                linkerBuildOptions: "",
+                target: "ti.targets.arm.elf.M4",
+                compilerBuildOptions:
+                    " -mv7M4 --code_state=16 --abi=eabi -me -g" +
+                    " --display_error_number --diag_warning=255" +
+                    " --diag_wrap=off --gen_func_subsections=on" +
+                    " --float_support=vfplib",
+                linkerBuildOptions:
+                    " --warn_sections --display_error_number --diag_wrap=off" +
+                    " --rom_model",
                 devices: {
                     "CC32XX": {
                         deviceId: ".*CC32.*",
                         platform: "ti.platforms.simplelink:$DeviceId$",
+                        linkerCommandFile:"ti/platforms/simplelink/include/" +
+                            "$DeviceId$.cmd",
                         productGroup: "SimpleLink"
                     }
                 }
             },
             "M4F": {
                 cfgPrefix: "cortexm/",
-                compilerBuildOptions: "",
-                linkerBuildOptions: "",
+                target: "ti.targets.arm.elf.M4F",
+                compilerBuildOptions:
+                    " -mv7M4 --code_state=16 --abi=eabi -me -g" +
+                    " --display_error_number --diag_warning=255" +
+                    " --diag_wrap=off --gen_func_subsections=on" +
+                    " --float_support=FPv4SPD16",
+                linkerBuildOptions:
+                    " --warn_sections --display_error_number --diag_wrap=off" +
+                    " --rom_model",
                 devices: {
                     "TIVA": {
                         deviceId: ".*(LM4|TM4C|TM4E|P401R).*",
                         platform: "ti.platforms.tiva:$DeviceId$",
                         linkerCommandFile: "ti/platforms/tiva/include/" +
-                                           "$DeviceId$.cmd",
+                            "$DeviceId$.cmd",
                         productGroup: "TivaC",
                     }
                 }
             }
         },
+        /* Family */
         "MSP432": {
-            "MSP432": {
+            /* Variant */
+            "M4F": {
                 cfgPrefix: "cortexm/",
-                compilerBuildOptions: "",
-                linkerBuildOptions: "",
+                target: "ti.targets.arm.elf.M4F",
+                compilerBuildOptions:
+                    " -mv7M4 --code_state=16 --abi=eabi -me -g" +
+                    " --display_error_number --diag_warning=255" +
+                    " --diag_wrap=off --gen_func_subsections=on" +
+                    " --float_support=FPv4SPD16",
+                linkerBuildOptions:
+                    " --warn_sections --display_error_number --diag_wrap=off" +
+                    " --rom_model",
                 productGroup: "MSP430",
                 devices: {
                     "GENERIC": {
                         deviceId: ".*MSP432.*",
-                        target: "ti.targets.arm.elf.M4F",
                         platform: "ti.platforms.msp432:$DeviceId$",
                         linkerCommandFile: "ti/platforms/msp432/include/" +
-                                           "$DeviceId$.cmd",
+                            "$DeviceId$.cmd",
                     }
                 }
             }
         },
+        /* Family */
         "C2000": {
             /* Variant */
             "C28": {
                 cfgPrefix: "c28/",
-                compilerBuildOptions: "",
-                linkerBuildOptions: "",
+                target: "ti.targets.C28_float",
+                compilerBuildOptions:
+                    " -ml --float_support=fpu32 --gen_func_subsections=on" +
+                    " --display_error_number --diag_warning=255" +
+                    " --diag_wrap=off",
+                linkerBuildOptions:
+                    " --warn_sections --display_error_number --diag_wrap=off" +
+                    " --rom_model",
                 productGroup: "C2000",
                 devices: {
                     "GENERIC": {
                         deviceId: "~.*(F28M3|Generic|G00883).*",
                         platform: "ti.platforms.tms320x28:$DeviceId$",
                         linkerCommandFile: "ti/platforms/tms320x28/include/" +
-                                           "$DeviceId$.cmd",
+                            "$DeviceId$.cmd",
                     },
                     "CONCERTO": {
                         deviceId: ".*F28M3.*",
                         platform: "ti.platforms.concertoC28:$DeviceId$",
                         linkerCommandFile: "ti/platforms/concertoC28/include/" +
-                                           "$DeviceId$.cmd"
+                            "$DeviceId$.cmd"
                     }
                 }
             }
         },
+        /* Family */
         "C6000": {
             /* Variant */
             "GENERIC": {
@@ -230,6 +284,7 @@ var targetOptions = {
                 }
             }
         },
+        /* Family */
         "EVE": {
             /* Variant */
             "ARP32": {
@@ -245,13 +300,20 @@ var targetOptions = {
                 }
             }
         },
+        /* Family */
         "MSP430": {
             /* Variant */
             "MSP430": {
-                deviceId: "", /* Array populated dynamically by a function */
                 cfgPrefix: "msp430/",
-                compilerBuildOptions: "",
-                linkerBuildOptions: "",
+                target: "ti.targets.msp430.elf.MSP430X",
+                deviceId: "", /* Array populated dynamically by a function */
+                compilerBuildOptions:
+                    " -vmspx --abi=eabi --data_model=restricted -g" +
+                    " --display_error_number --diag_warning=255" +
+                    " --diag_wrap=off",
+                linkerBuildOptions:
+                    " --warn_sections --display_error_number --diag_wrap=off" +
+                    " --rom_model",
                 productGroup: "MSP430",
                 devices: {
                     "GENERIC": {
@@ -336,27 +398,34 @@ var targetOptions = {
                 deviceId: ".*LM3.*",
                 cfgPrefix: "cortexm/",
                 target: "gnu.targets.arm.M3",
-                platform: "ti.platforms.tiva:$DeviceId$",
-                compilerBuildOptions: "-mthumb -march=armv7-m",
-                linkerBuildOptions: "-nostartfiles -static --gc-sections -lgcc"
-                + " -lc -lm -lnosys -L${xdc_find:gnu/targets/arm/"
-                + "libs/install-native/arm-none-eabi/lib/armv7-m:${ProjName}}",
+                compilerBuildOptions:
+                    " -mcpu=cortex-m3 -march=armv7-m -mthumb" +
+                    " -mfloat-abi=soft -ffunction-sections -fdata-sections" +
+                    " -g -gstrict-dwarf -Wall",
+                linkerBuildOptions:
+                    " -march=armv7e-m -mthumb -nostartfiles -static" +
+                    " -Wl,--gc-sections -L${xdc_find:gnu/targets/arm/libs" +
+                    "/install-native/arm-none-eabi/lib/armv7e-m:${ProjName}}" +
+                    " -lgcc -lc -lm -lnosys",
                 productGroup: "",
                 devices: {
                     "STELLARIS": {
+                        platform: "ti.platforms.tiva:$DeviceId$",
                         linkerCommandFile: "ti/platforms/tiva/include_gnu/" +
-                                           "$DeviceId$.lds",
+                            "$DeviceId$.lds",
                     },
                     "SEMIHOST": {
                         cfgPrefix: "cortexm_semihost/",
+                        platform: "ti.platforms.tiva:$DeviceId$",
                         linkerCommandFile: "ti/platforms/tiva/include_gnu/" +
-                                           "$DeviceId$.lds",
-                        linkerBuildOptions: "-nostartfiles -static"
-                        + " --gc-sections -lgcc -lc -lm -lrdimon "
-                        + "-L${xdc_find:gnu/targets/arm/libs/"
-                        + "install-native/arm-none-eabi/lib/armv7-m:${ProjName}}",
+                            "$DeviceId$.lds",
+                        linkerBuildOptions:
+                            " -mthumb -march=armv7e-m -nostartfiles -static" +
+                            " -Wl,--gc-sections -L${xdc_find:gnu/targets/arm" +
+                            "/libs/install-native/arm-none-eabi/lib" +
+                            "/armv7-m:${ProjName}} -lgcc -lc -lm -lrdimon",
                     },
-/* exclude CC26XX because it needs driverlib ...
+                    /* exclude CC26XX because it needs driverlib ...
                     "CC26XX": {
                         cfgPrefix: "cc26xx/",
                         deviceId: ".*(CC26|CC13).*",
@@ -375,36 +444,57 @@ var targetOptions = {
                         + "-L${xdc_find:gnu/targets/arm/libs/"
                         + "install-native/arm-none-eabi/lib/armv7-m:${ProjName}}",
                     },
-*/
+                    */
                 }
             },
             "M4": {
                 cfgPrefix: "cortexm/",
                 target: "gnu.targets.arm.M4",
-                platform: "",
-                compilerBuildOptions: "-mthumb -march=armv7e-m -mfloat-abi=soft",
-                linkerBuildOptions: "-nostartfiles -static --gc-sections -lgcc"
-                + " -lc -lm -lnosys -L${xdc_find:gnu/targets/arm/"
-                + "libs/install-native/arm-none-eabi/lib/armv7e-m:${ProjName}}",
-                productGroup: "",
+                compilerBuildOptions:
+                    " -mcpu=cortex-m4 -march=armv7e-m -mthumb" +
+                    " -mfloat-abi=soft -ffunction-sections -fdata-sections" +
+                    " -g -gstrict-dwarf -Wall",
+                linkerBuildOptions:
+                    " -march=armv7e-m -mthumb -nostartfiles -static" +
+                    " -Wl,--gc-sections -L${xdc_find:gnu/targets/arm/libs" +
+                    "/install-native/arm-none-eabi/lib/armv7e-m:${ProjName}}" +
+                    " -lgcc -lc -lm -lnosys",
                 devices: {
                     "CC32XX": {
                         deviceId: ".*CC32.*",
-                        linkerCommandFile: "ti/platforms/simplelink/include_gnu/" +
-                                           "$DeviceId$.lds",
                         platform: "ti.platforms.simplelink:$DeviceId$",
+                        linkerCommandFile: "ti/platforms/simplelink" +
+                            "/include_gnu/$DeviceId$.lds",
                         productGroup: "SimpleLink"
-                    }
+                    },
+                    "SEMIHOST": {
+                        cfgPrefix: "cortexm_semihost/",
+                        deviceId: ".*CC32.*",
+                        platform: "ti.platforms.simplelink:$DeviceId$",
+                        linkerCommandFile: "ti/platforms/simplelink" +
+                            "/include_gnu/$DeviceId$.lds",
+                        linkerBuildOptions:
+                            " -mthumb -march=armv7e-m -nostartfiles -static" +
+                            " -Wl,--gc-sections -L${xdc_find:gnu/targets/arm" +
+                            "/libs/install-native/arm-none-eabi/lib/" +
+                            "armv7e-m:${ProjName}} -lgcc -lc -lm -lrdimon",
+                        productGroup: "SimpleLink"
+                    },
                 }
             },
             "M4F": {
                 cfgPrefix: "cortexm/",
                 target: "gnu.targets.arm.M4F",
-                compilerBuildOptions: "-mthumb -march=armv7e-m -mfloat-abi=hard"
-                + " -mfpu=fpv4-sp-d16",
-                linkerBuildOptions: "-nostartfiles -static --gc-sections -lgcc"
-                + " -lc -lm -lnosys -L${xdc_find:gnu/targets/arm/"
-                + "libs/install-native/arm-none-eabi/lib/armv7e-m/fpu:${ProjName}}",
+                compilerBuildOptions:
+                    " -mcpu=cortex-m4 -march=armv7e-m -mthumb" +
+                    " -mfloat-abi=hard -mfpu=fpv4-sp-d16 -ffunction-sections" +
+                    " -fdata-sections -g -gstrict-dwarf -Wall",
+                linkerBuildOptions:
+                    " -march=armv7e-m -mthumb -mfloat-abi=hard" +
+                    " -mfpu=fpv4-sp-d16 -nostartfiles -static" +
+                    " -Wl,--gc-sections -L${xdc_find:gnu/targets/arm/libs" +
+                    "/install-native/arm-none-eabi/lib/armv7e-m/" +
+                    "fpu:${ProjName}} -lgcc -lc -lm -lnosys",
                 productGroup: "TivaC",
                 devices: {
                     "TIVA": {
@@ -414,50 +504,126 @@ var targetOptions = {
                             "$DeviceId$.lds",
                     },
                     "SEMIHOST": {
+                        cfgPrefix: "cortexm_semihost/",
                         deviceId: ".*(LM4|TM4C|TM4E|P401R).*",
                         platform: "ti.platforms.tiva:$DeviceId$",
                         linkerCommandFile: "ti/platforms/tiva/include_gnu/" +
                             "$DeviceId$.lds",
-                        cfgPrefix: "cortexm_semihost/",
-                        linkerBuildOptions: "-nostartfiles -static"
-                        + " --gc-sections -lgcc -lc -lm -lrdimon"
-                        + " -L${xdc_find:gnu/targets/arm/libs/install-native/"
-                        + "arm-none-eabi/lib/armv7e-m/fpu:${ProjName}}",
+                        linkerBuildOptions:
+                            " -march=armv7e-m -mthumb -mfloat-abi=hard" +
+                            " -mfpu=fpv4-sp-d16 -nostartfiles -static" +
+                            " -Wl,--gc-sections -L${xdc_find:gnu/targets/arm" +
+                            "/libs/install-native/arm-none-eabi/lib/armv7e-m" +
+                            "/fpu:${ProjName}} -lgcc -lc -lm -lrdimon",
                     }
                 }
             },
         },
         "MSP432": {
-	    "MSP432": {
+            "M4F": {
                 cfgPrefix: "cortexm/",
                 target: "gnu.targets.arm.M4F",
-                compilerBuildOptions: "-mthumb -march=armv7e-m -mfloat-abi=hard"
-                + " -mfpu=fpv4-sp-d16",
-                linkerBuildOptions: "-nostartfiles -static --gc-sections -lgcc"
-                + " -lc -lm -lnosys -L${xdc_find:gnu/targets/arm/libs/"
-                + "install-native/arm-none-eabi/lib/armv7e-m/fpu:${ProjName}}",
+                compilerBuildOptions:
+                    " -mcpu=cortex-m4 -march=armv7e-m -mthumb" +
+                    " -mfloat-abi=hard -mfpu=fpv4-sp-d16 -ffunction-sections" +
+                    " -fdata-sections -g -gstrict-dwarf -Wall",
+                linkerBuildOptions:
+                    " -march=armv7e-m -mthumb -mfloat-abi=hard" +
+                    " -mfpu=fpv4-sp-d16 -nostartfiles -static" +
+                    " -Wl,--gc-sections -L${xdc_find:gnu/targets/arm/libs" +
+                    "/install-native/arm-none-eabi/lib/armv7e-m/" +
+                    "fpu:${ProjName}} -lgcc -lc -lm -lnosys",
                 productGroup: "MSP430",
                 devices: {
                     "MSP432": {
                         deviceId: ".*MSP432.*",
-                        target: "gnu.targets.arm.M4F",
                         platform: "ti.platforms.msp432:$DeviceId$",
                         linkerCommandFile: "ti/platforms/msp432/include_gnu/" +
                             "$DeviceId$.lds",
                     },
-                    "MSP432_SEMIHOST": {
+                    "SEMIHOST": {
+                        cfgPrefix: "cortexm_semihost/",
                         deviceId: ".*MSP432.*",
-                        target: "gnu.targets.arm.M4F",
                         platform: "ti.platforms.msp432:$DeviceId$",
                         linkerCommandFile: "ti/platforms/msp432/include_gnu/" +
                             "$DeviceId$.lds",
-                        cfgPrefix: "cortexm_semihost/",
-                        linkerBuildOptions: "-nostartfiles -static"
-                        + " --gc-sections -lgcc -lc -lm -lrdimon"
-                        + " -L${xdc_find:gnu/targets/arm/libs/install-native/"
-                        + "arm-none-eabi/lib/armv7e-m/fpu:${ProjName}}",
+                        linkerBuildOptions:
+                            " -march=armv7e-m -mthumb -mfloat-abi=hard" +
+                            " -mfpu=fpv4-sp-d16 -nostartfiles -static" +
+                            " -Wl,--gc-sections -L${xdc_find:gnu/targets/arm" +
+                            "/libs/install-native/arm-none-eabi/lib/armv7e-m" +
+                            "/fpu:${ProjName}} -lgcc -lc -lm -lrdimon",
                     }
                 }
+            }
+        }
+    },
+    /* Toolchain */
+    "IAR": {
+        /* Family */
+        "ARM": {
+            /* Variant */
+            "M3": {
+                cfgPrefix: "cortexm/",
+                target: "iar.targets.arm.M3",
+                compilerBuildOptions:
+                    " --debug --silent",
+                linkerBuildOptions:
+                    " --silent --cpu=Cortex-M3" +
+                    " --entry=__iar_program_start" +
+                    " --redirect _Printf=_PrintfSmall" +
+                    " --redirect _Scanf=_ScanfSmall",
+            },
+            /* Variant */
+            "M4": {
+                cfgPrefix: "cortexm/",
+                target: "iar.targets.arm.M4",
+                compilerBuildOptions:
+                    " --debug --silent",
+                linkerBuildOptions:
+                    " --silent --cpu=Cortex-M4" +
+                    " --entry=__iar_program_start" +
+                    " --redirect _Printf=_PrintfSmall" +
+                    " --redirect _Scanf=_ScanfSmall",
+            },
+            /* Variant */
+            "M4F": {
+                cfgPrefix: "cortexm/",
+                target: "iar.targets.arm.M4F",
+                compilerBuildOptions:
+                    " --debug --silent",
+                linkerBuildOptions:
+                    " --silent --cpu=Cortex-M4F" +
+                    " --entry=__iar_program_start" +
+                    " --redirect _Printf=_PrintfSmall" +
+                    " --redirect _Scanf=_ScanfSmall",
+            },
+        },
+        /* Family */
+        "MSP432": {
+            /* Variant */
+            "M4F": {
+                cfgPrefix: "cortexm/",
+                target: "iar.targets.arm.M4F",
+                compilerBuildOptions:
+                    " --debug --silent",
+                linkerBuildOptions:
+                    " --silent --cpu=Cortex-M4F" +
+                    " --entry=__iar_program_start" +
+                    " --redirect _Printf=_PrintfSmall" +
+                    " --redirect _Scanf=_ScanfSmall",
+            }
+        },
+        /* Family */
+        "MSP430": {
+            /* Variant */
+            "MSP430": {
+                cfgPrefix: "msp430/",
+                target: "iar.targets.msp430.MSP430X_small",
+                compilerBuildOptions:
+                    " --debug --silent --diag_suppress=Pa050,Go005",
+                linkerBuildOptions:
+                    " -S -xens -e_PrintfSmall=_Printf -e_ScanfSmall=_Scanf",
             }
         }
     }
@@ -472,7 +638,7 @@ function populateDeviceIdMSP430()
 {
     try {
         var msp430 =
-	    xdc.loadCapsule("ti/sysbios/family/msp430/msp430Settings.xs");
+        xdc.loadCapsule("ti/sysbios/family/msp430/msp430Settings.xs");
     }
     catch (err) {
         return;

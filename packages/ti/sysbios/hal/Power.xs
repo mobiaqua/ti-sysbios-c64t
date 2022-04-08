@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2013-2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,24 +41,13 @@ var Power = null;
 function module$use()
 {
     Power = this;
+    Power.common$.fxntab = false;
 
     if ((Power.PowerProxy === undefined) || Power.PowerProxy == null) {
         var Settings = xdc.module('ti.sysbios.family.Settings');
-        var PowerDelegate = null;
+        var PowerDelegate = Settings.getDefaultPowerDelegate();
 
-        /*
-         *  Try to get the power delegate.  This is in a try/catch until
-         *  all Settings have implemented getDefaultPowerDelegate().
-         */
-        try {
-            //print("* Settings.getDefaultPowerDelegate(): " +
-            //        Settings.getDefaultPowerDelegate());
-
-            PowerDelegate = Settings.getDefaultPowerDelegate();
-        }
-        catch (e) {
-            print("***** No default Power delegate from BIOS Settings. *****");
-            Power.idle = false;  // Don't mess up Load
+       if (PowerDelegate == null) {
             PowerDelegate = "ti.sysbios.hal.PowerNull";
         }
         Power.PowerProxy = xdc.useModule(PowerDelegate, true);
@@ -66,17 +55,17 @@ function module$use()
 
     if (Power.idle == undefined) {
         if (Power.PowerProxy.idle == undefined) {
-            // Both are undefined, set them to true.
+            /* Both are undefined, set them to true. */
             Power.idle = true;
             Power.PowerProxy.idle = true;
         }
         else {
-            // User has set delegate, so use its settings.
+            /* User has set delegate, so use its settings. */
             Power.idle = Power.PowerProxy.idle;
         }
     }
     else {
-        // ti.sysbios.hal.Power settings are the master.
+        /* ti.sysbios.hal.Power settings are the master. */
         Power.PowerProxy.idle = Power.idle;
     }
 

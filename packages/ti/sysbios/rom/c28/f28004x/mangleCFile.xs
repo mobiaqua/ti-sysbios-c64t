@@ -30,7 +30,6 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 /*
  *  ======== readFile ========
  */
@@ -44,26 +43,14 @@ function readFile(filename)
 
     /* Read file */
     while ((line = file.readLine()) != null) {
-        lineArr[idx++] = line;
+        line = String(line);
+        /* suppress blank lines */
+        if (line.length != 0) {
+            lineArr[idx++] = line;
+        }
     }
 
     return lineArr;
-}
-
-/*
- *  ======== writeFile ========
- */
-function writeFile(filename, content)
-{
-    var idx = 0;
-
-    /* Open/Create file */
-    var file = new java.io.FileWriter(filename);
-
-    for(idx = 0; idx < content.length; idx++) {
-        file.write(content[idx] + "\n");
-    }
-    file.flush();
 }
 
 function main(args)
@@ -73,9 +60,7 @@ function main(args)
     var funcsFile = args[2];
     var funcs = String(args[3]);
 
-    var funcsArr;
     var funcsRegEx;
-    var srcArr;
     var srcLine;
     var matchIndex, funcType;
     var srcIdx, funcsIdx;
@@ -83,26 +68,46 @@ function main(args)
 
     var mangle;
 
-    srcArr = readFile(sourceFile);
+    var srcFile = new java.io.BufferedReader(new java.io.FileReader(sourceFile));
+    var dstFile = new java.io.FileWriter(destFile);
+
     if (args[3] === undefined) {
-        funcsArr = readFile(funcsFile);
+        var funcsArr = readFile(funcsFile);
         funcsRegEx = new RegExp(funcsArr.join("|"));
     }
     else {
-        funcsRegEx = new RegExp(funcs.replace(/ /g, "|"));
+        funcsRegEx = new RegExp(funcs);
     }
+
+    var linesProcessed = 0;  
     
-    for (srcIdx = 0; srcIdx < srcArr.length; srcIdx++) {
-        srcLine = srcArr[srcIdx].toString();
-        if ((srcLine.indexOf("extern") != 0) && (srcLine.indexOf(" ") != 0)){
+    /* Read file */
+    while ((srcLine = srcFile.readLine()) != null) {
+        srcLine = String(srcLine);
+        var firstChar = srcLine[0];
+        var firstChars = srcLine.substring(0, 2);
+        /* lines must be at least "ti_sysbios_BIOS" in length */
+        if ((srcLine.length > 14) && 
+            (firstChars != "ex") && 
+            (firstChars != "st") && 
+            (firstChars != "if") && 
+            (firstChars != "ty") && 
+            (firstChars != "# ") && 
+            (firstChars != "#l") &&
+            (firstChars != "en") &&
+            (firstChar != " ") && 
+            (firstChar != "}")) {
+            linesProcessed++;
             result = funcsRegEx.exec(srcLine);
             if (result != null) {
 		/* mangle the function name so it won't be found in the sysbios lib */
-		srcArr[srcIdx] = srcArr[srcIdx].replace(result[0], result[0]+"__mangled__");
-//print("mangling " + result[0] + ": " + srcArr[srcIdx].toString());
+		srcLine = srcLine.replace(result[0], result[0]+"__mangled__");
 	    }
         }
+        dstFile.write(srcLine + "\n");
     }
-
-    writeFile(destFile, srcArr);
+//print(sourceFile, linesProcessed);
+    dstFile.flush();
+    srcFile.close();
+    dstFile.close();
 }

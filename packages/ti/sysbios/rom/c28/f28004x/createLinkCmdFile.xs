@@ -109,10 +109,18 @@ function buildRomSegment(objDumpArray)
         virtualAddr = "0x" + String(tokens[0]);
         virtualAddr = (parseInt(virtualAddr)).toString(16);
         symbolName = String(tokens[6]);
-/* !!! hack to workaround TI linker warning regarding redefinition of memcpy and memset !!! */
-	if (symbolName != "memset" && symbolName != "memcpy") {
-	    lineArray[lineArray.length] = "_" + symbolName + " = 0x" + virtualAddr + ";";
+
+        /* !!! hack to workaround TI linker warning regarding redefinition of memcpy and memset !!! */
+	if (symbolName == "memset" || symbolName == "memcpy") {
+	    continue;
 	}
+
+        /* do not include assignment of REVISION const to avoid redefinition warning */
+	if (symbolName.match("REVISION__C")) {
+	    continue;
+	}
+
+	lineArray[lineArray.length] = "_" + symbolName + " = 0x" + virtualAddr + ";";
     }
 
     return (lineArray);

@@ -126,6 +126,18 @@ module Core inherits ti.sysbios.interfaces.ICore
 
     /*!
      *  @_nodoc
+     *  ======== getRevisionNumber ========
+     *  Returns the major and minor revision number for the Cortex-A15
+     *  processor as a 2-nibble quantity [Major revision: Minor revision]
+     *
+     *  This API is used internally by different modules to check
+     *  the ARM IP revision number and determine whether or not an
+     *  errata applies and requires a workaround.
+     */
+    UInt8 getRevisionNumber();
+
+    /*!
+     *  @_nodoc
      *  ======== notifySpinLock ========
      */
     UInt notifySpinLock();

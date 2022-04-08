@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,7 @@
 #include <ti/sysbios/family/arm/a15/smp/Core.h>
 #else
 #include <ti/sysbios/family/arm/a15/Cache.h>
-#include <ti/sysbios/hal/Core.h>
+#include <ti/sysbios/family/arm/a15/Core.h>
 #endif
 
 #include "package/internal/Mmu.xdc.h"
@@ -437,12 +437,16 @@ Void Mmu_setFirstLevelDesc(Ptr virtualAddr, UInt64 phyAddr,
     Mmu_tlbInv(virtualAddr, (SizeT)(1 << LEVEL1_TABLE_DESC_SHIFT));
 
     /* Errata 798181: do a dummy TLBIMVAIS */
-    __asm__ __volatile__ (
-            "mcr p15, #0, r0, c8, c3, #1\n\t"
-            "clrex\n\t"
-            "dmb"
-            ::: "memory"
-            );
+    if ((Mmu_errata798181 == TRUE) &&
+        (Core_getRevisionNumber() < 0x40)) {
+        __asm__ __volatile__ (
+                "mcr p15, #0, r0, c8, c3, #1\n\t"
+                "dsb\n\t"
+                "clrex\n\t"
+                "dmb"
+                ::: "memory"
+                );
+    }
 
     /* Invalidate program/instruction cache */
     Cache_invL1pAll();
@@ -518,6 +522,18 @@ Void Mmu_setFirstLevelDesc(Ptr virtualAddr, UInt64 phyAddr,
     if (enabled) {
         /* if Mmu was enabled, then re-enable it */
         Mmu_enable();
+    }
+
+    /* Errata 798181: do a dummy TLBIMVAIS */
+    if ((Mmu_errata798181 == TRUE) &&
+        (Core_getRevisionNumber() < 0x40)) {
+        __asm__ __volatile__ (
+                "mcr p15, #0, r0, c8, c3, #1\n\t"
+                "dsb\n\t"
+                "clrex\n\t"
+                "dmb"
+                ::: "memory"
+                );
     }
 #endif
 }
@@ -598,12 +614,16 @@ Void Mmu_setSecondLevelDesc(Ptr virtualAddr, UInt64 phyAddr,
     Mmu_tlbInv(virtualAddr, (SizeT)(1 << LEVEL2_BLOCK_DESC_SHIFT));
 
     /* Errata 798181: do a dummy TLBIMVAIS, clrex, dmb */
-    __asm__ __volatile__ (
-            "mcr p15, #0, r0, c8, c3, #1\n\t"
-            "clrex\n\t"
-            "dmb"
-            ::: "memory"
-            );
+    if ((Mmu_errata798181 == TRUE) &&
+        (Core_getRevisionNumber() < 0x40)) {
+        __asm__ __volatile__ (
+                "mcr p15, #0, r0, c8, c3, #1\n\t"
+                "dsb\n\t"
+                "clrex\n\t"
+                "dmb"
+                ::: "memory"
+                );
+    }
 
     /* Invalidate program/instruction cache */
     Cache_invL1pAll();
@@ -677,6 +697,18 @@ Void Mmu_setSecondLevelDesc(Ptr virtualAddr, UInt64 phyAddr,
     if (enabled) {
         /* if Mmu was enabled, then re-enable it */
         Mmu_enable();
+    }
+
+    /* Errata 798181: do a dummy TLBIMVAIS */
+    if ((Mmu_errata798181 == TRUE) &&
+        (Core_getRevisionNumber() < 0x40)) {
+        __asm__ __volatile__ (
+                "mcr p15, #0, r0, c8, c3, #1\n\t"
+                "dsb\n\t"
+                "clrex\n\t"
+                "dmb"
+                ::: "memory"
+                );
     }
 #endif
 }

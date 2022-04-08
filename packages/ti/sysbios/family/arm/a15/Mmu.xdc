@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -466,6 +466,16 @@ module Mmu
      *  Configuration parameter to enable MMU.
      */
     config Bool enableMMU = true;
+
+    /*!
+     *  ======== errata798181 ========
+     *  Enable workaround for ARM errata 798181.
+     *
+     *  Errata 798181 brief description:
+     *  Moving a virtual page that is being accessed by an active process
+     *  can lead to unexpected behavior.
+     */
+    config Bool errata798181 = true;
 
     /*!
      *  ======== cachePlatformMemory ========

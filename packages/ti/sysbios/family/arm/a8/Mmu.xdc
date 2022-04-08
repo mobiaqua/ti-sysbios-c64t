@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -87,7 +87,8 @@ import xdc.runtime.Assert;
  *    // Enable the MMU (Required for L1/L2 data caching)
  *    Mmu.enableMMU = true;
  *
- *    // descriptor attribute structure
+ *    // descriptor attribute structure for marking the memory region
+ *    // as normal cacheable memory (write-back and write-allocate)
  *    var attrs = {
  *        type: Mmu.FirstLevelDesc_SECTION,  // SECTION descriptor
  *        tex: 0x1,
@@ -160,6 +161,45 @@ import xdc.runtime.Assert;
  *                              peripheralBaseAddr,
  *                              peripheralAttrs);
  *  @p
+ *
+ *  @a(Memory region attributes)
+ *  Memory regions can be configured as different memory types by setting
+ *  the {@link #FirstLevelDescAttrs bufferable},
+ *  {@link #FirstLevelDescAttrs cacheable} and {@link #FirstLevelDescAttrs tex}
+ *  (type extension) fields of the {@link #FirstLevelDescAttrs} structure
+ *  which is passed as an argument to {@link #setFirstLevelDesc}. The three
+ *  memory types supported by the hardware are "Normal" (cacheable), "Device"
+ *  and "Strongly-ordered" memory. "Device" and "Strongly-ordered" memory
+ *  types are recommended for mapping peripheral address space like
+ *  memory-mapped registers. These two types ensure that the memory accesses
+ *  to the peripheral memory are not performed speculatively, are not repeated
+ *  and are performed in order. The "Normal" memory type is recommended for
+ *  mapping memory regions storing application code and data.
+ *
+ *  Here are some common settings for the
+ *  {@link #FirstLevelDescAttrs bufferable},
+ *  {@link #FirstLevelDescAttrs cacheable} and {@link #FirstLevelDescAttrs tex}
+ *  fields to define different memory region types:
+ *
+ *  @p(code)
+ *  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ *  + Memory Type                             | bufferable | cacheable | tex +
+ *  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ *  + Shareable Strongly-ordered memory       |    false   |   false   |  0  +
+ *  +-----------------------------------------+------------+-----------+-----+
+ *  + Shareable Device memory                 |    true    |   false   |  0  +
+ *  +-----------------------------------------+------------+-----------+-----+
+ *  + Outer & Inner Non-cacheable             |    false   |   false   |  1  +
+ *  +-----------------------------------------+------------+-----------+-----+
+ *  + Outer & Inner Write-back Write-allocate |    true    |   true    |  1  +
+ *  + cacheable                               |            |           |     +
+ *  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ *  @p
+ *
+ *  For an exhaustive list of all different memory type settings and a
+ *  detailed explanation of the memory region attributes, please read the
+ *  'Short-descriptor translation table format' section of the ARM v7-AR
+ *  Architecture Reference Manual issue C.
  *
  *  Notes:
  *  @p(blist)

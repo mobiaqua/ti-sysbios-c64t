@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2014-2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -347,9 +347,19 @@ internal:   /* not for client use */
     config Int numTimerDevices;
 
     /*!
+     *  ======== enableCC26xx ========
+     */
+    Void enableCC26xx(Int id);
+
+    /*!
      *  ======== enableCC3200 ========
      */
     Void enableCC3200(Int id);
+
+    /*!
+     *  ======== disableCC26xx ========
+     */
+    Void disableCC26xx(Int id);
 
     /*!
      *  ======== disableCC3200 ========

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@ requires ti.sysbios.interfaces;
  *  Contains specifications for the a15 family-specific SYS/BIOS functions.
  */
 package ti.sysbios.family.arm.a15 [2,0,0,0] {
+    module Core;
     module Cache;
     module Mmu;
     module TimerSupport;

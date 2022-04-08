@@ -67,9 +67,9 @@ function getAsmFiles(targetName)
             return (["Hwi_asm_iar.sv7M", "Hwi_asm_switch_iar.sv7M"]);
             break;
 
-	default:
-	    return (null);
-	    break;
+    default:
+        return (null);
+        break;
     }
 }
 
@@ -350,7 +350,7 @@ function module$use()
 
     BIOS = xdc.useModule("ti.sysbios.BIOS");
     Build = xdc.module("ti.sysbios.Build");
-    
+
     if (BIOS.smpEnabled == true) {
         Core = xdc.module("ti.sysbios.hal.Core");
     }
@@ -448,12 +448,12 @@ function module$use()
      * hasn't been set by the user
      */
     if (Hwi.$written("excHandlerFunc") == false) {
-	if (Hwi.enableException) {
-	    Hwi.excHandlerFunc = Hwi.excHandlerMax;
-	}
-	else {
-	    Hwi.excHandlerFunc = Hwi.excHandlerMin;
-	}
+        if (Hwi.enableException) {
+            Hwi.excHandlerFunc = Hwi.excHandlerMax;
+        }
+        else {
+            Hwi.excHandlerFunc = Hwi.excHandlerMin;
+        }
     }
 
     /*
@@ -558,7 +558,7 @@ function module$static$init(mod, params)
     mod.isrStackSize = Program.stack;
 
     mod.dispatchTable = $externPtr('ti_sysbios_family_arm_m3_Hwi_dispatchTable[0]');
-    
+
     Hwi.ccr = (params.nvicCCR.STKALIGN << 9) |
               (params.nvicCCR.BFHFNMIGN << 8) |
               (params.nvicCCR.DIV_0_TRP << 4) |
@@ -616,16 +616,16 @@ function module$static$init(mod, params)
     /* Initialize the NVIC early */
     if ((Hwi.resetVectorAddress != 0) && (Build.buildROMApp == true)) {
         /* Fix for SDOCM00114681: broken Hwi_initNVIC() function. */
-	var ROM = xdc.module('ti.sysbios.rom.ROM');
+    var ROM = xdc.module('ti.sysbios.rom.ROM');
         switch (ROM.romName) {
             case ROM.CC1350:
             case ROM.CC2650:
                 Startup.firstFxns.$add(Hwi.cc26xxRomInitNVIC);
                 break;
 
-	    default:
+            default:
                 Startup.firstFxns.$add(Hwi.initNVIC);
-	}
+        }
     }
     else {
         Startup.firstFxns.$add(Hwi.initNVIC);
@@ -637,7 +637,7 @@ function module$static$init(mod, params)
         Hwi.$logError("Vector Table must be placed at or below 0x3FFFFC00",
                     this);
     }
-    
+
     if (Hwi.dispatchTableSize < Hwi.NUM_INTERRUPTS) {
         Hwi.numSparseInterrupts = Hwi.dispatchTableSize;
         if (Hwi.dispatchTableSize > Hwi.NUM_INTERRUPTS) {
@@ -653,26 +653,26 @@ function module$static$init(mod, params)
              this, "dispatchTableSize");
         }
 
-	/* place msp432's sparse dispatchTable in SRAM_CODE */
-	if (Program.platformName.match(/ti\.platforms\.msp432/)) {
-	     Build.ccArgs.$add("-Dti_sysbios_family_arm_m3_Hwi_FIX_MSP432_DISPATCH_TABLE_ADDRESS");
-	}
+        /* place msp432's sparse dispatchTable in SRAM_CODE */
+        if (Program.platformName.match(/ti\.platforms\.msp432/)) {
+            Build.ccArgs.$add("-Dti_sysbios_family_arm_m3_Hwi_FIX_MSP432_DISPATCH_TABLE_ADDRESS");
+        }
     }
 
     /* add -D to compile line to optimize exception code */
-    Build.ccArgs.$add("-Dti_sysbios_family_arm_m3_Hwi_enableException__D=" + 
+    Build.ccArgs.$add("-Dti_sysbios_family_arm_m3_Hwi_enableException__D=" +
         (Hwi.enableException ? "TRUE" : "FALSE"));
 
     if (BIOS.buildingAppLib == true) {
         /* add -D to compile line to optimize exception code */
-        Build.ccArgs.$add("-Dti_sysbios_family_arm_m3_Hwi_disablePriority__D=" + 
+        Build.ccArgs.$add("-Dti_sysbios_family_arm_m3_Hwi_disablePriority__D=" +
             Hwi.disablePriority + "U");
 
         if (Build.buildROM == false) {
-	    /* add -D to compile line to optimize sparse interrupt handling code */
-	    Build.ccArgs.$add("-Dti_sysbios_family_arm_m3_Hwi_numSparseInterrupts__D=" + 
+            /* add -D to compile line to optimize sparse interrupt handling code */
+            Build.ccArgs.$add("-Dti_sysbios_family_arm_m3_Hwi_numSparseInterrupts__D=" +
                 Hwi.numSparseInterrupts + "U");
-	}
+        }
     }
 }
 
@@ -681,7 +681,6 @@ function module$static$init(mod, params)
  */
 function instance$static$init(obj, intNum, fxn, params)
 {
-
     var mod = this.$module.$object;
 
     if (intNum < 15) {
@@ -806,6 +805,84 @@ function instance_validate(instance)
     }
 }
 
+/*
+ *  ======== viewScanDispatchTable ========
+ *  Scans dispatch table for constructed Hwis to add them to the Hwi ROV view.
+ *
+ *  The Hwi dispatch table is scanned for handles that are not in
+ *  the raw instance view. These Hwi objects are then manually added to
+ *   ROV's scanned object list.
+ *
+ *  This function does not perform any error handling because it has nowhere
+ *  to display an error. If any of the APIs called within this function throw
+ *  an exception, it will propagate up and be displayed to the user in ROV.
+ */
+function viewScanDispatchTable(data, viewLevel)
+{
+    var Program = xdc.useModule('xdc.rov.Program');
+    var Hwi = xdc.useModule('ti.sysbios.family.arm.m3.Hwi');
+
+    /* Check if the constructed tasks have already been scanned. */
+    if (data.scannedConstructedHwis) {
+        return;
+    }
+
+    /*
+     * Set the flag to true now to prevent recursive calls of this function
+     * when we scan the constructed tasks.
+     */
+    data.scannedConstructedHwis = true;
+
+    /* Get the Task module config to get the number of constructed tasks. */
+    var modCfg = Program.getModuleConfig('ti.sysbios.family.arm.m3.Hwi');
+
+    /* sparse dispatchTable not supported yet */
+    if (modCfg.numSparseInterrupts != 0) return;
+
+    var numHwis = modCfg.NUM_INTERRUPTS;
+
+    /*
+     * Retrieve the raw view to get at the module state.
+     * This should just return, we don't need to catch exceptions.
+     */
+    var rawView = Program.scanRawView('ti.sysbios.family.arm.m3.Hwi');
+
+    var dispatchTableAddr = rawView.modState.dispatchTable;
+
+    var ScalarStructs = xdc.useModule('xdc.rov.support.ScalarStructs');
+
+    /* Retrieve the dispatchTable array of handles */
+    var hwiHandles = Program.fetchArray(ScalarStructs.S_Ptr$fetchDesc,
+                                         dispatchTableAddr, numHwis);
+
+    /*
+     * Scan the dispatchTable for non-zero Hwi handles
+     */
+    for (var i=15; i < numHwis; i++) {
+        var hwiHandle = hwiHandles[i];
+        if (Number(hwiHandle.elem) != 0) {
+            var alreadyScanned = false;
+            /* skip Hwis that are already known to ROV */
+            for (var j in rawView.instStates) {
+                rawInstance = rawView.instStates[j];
+                if (Number(rawInstance.$addr) == Number(hwiHandle.elem)) {
+                    alreadyScanned = true;
+                    break;
+                }
+            }
+            if (alreadyScanned == false) {
+                /* Retrieve the embedded instance */
+                var obj = Program.fetchStruct(Hwi.Instance_State$fetchDesc, hwiHandle.elem);
+                /*
+                * Retrieve the view for the object. This will automatically add the
+                * object to the instance list.
+                */
+                Program.scanObjectView('ti.sysbios.family.arm.m3.Hwi', obj, viewLevel);
+            }
+        }
+    }
+}
+
 var modView = null;
 
 /*
@@ -900,6 +977,9 @@ function viewInitBasic(view, obj)
         }
     }
 
+    /* Add constructed Hwis to ROV object list */
+    viewScanDispatchTable(this, 'Basic');
+
     var pri = viewGetPriority(this, Math.abs(obj.intNum));
 
     mask = numPriTable[hwiModCfg.NUM_PRIORITIES].mask;
@@ -916,7 +996,6 @@ function viewInitBasic(view, obj)
     }
 
     view.subPriority = (pri & subPriMasks[hwiModCfg.priGroup]) >> shift;
-
     view.halHwiHandle =  halHwi.viewGetHandle(obj.$addr);
     view.label = Program.getShortName(obj.$label);
     view.intNum = Math.abs(obj.intNum);
@@ -1028,13 +1107,13 @@ function viewGetStackInfo()
                 size = Program.getSymbolValue("CSTACK$$Limit")
                            - Program.getSymbolValue("CSTACK$$Base");
             }
-            var stackBase = Program.getSymbolValue("CSTACK$$Base");            
+            var stackBase = Program.getSymbolValue("CSTACK$$Base");
         }
         else {
             var size = Program.getSymbolValue("__STACK_SIZE");
-	    if (size == -1) {
-		size = Program.getSymbolValue("__TI_STACK_SIZE");
-	    }
+        if (size == -1) {
+        size = Program.getSymbolValue("__TI_STACK_SIZE");
+        }
             var stackBase = Program.getSymbolValue("__stack");
         }
         var stackData = Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UChar', isScalar: true}, stackBase, size);
@@ -1382,37 +1461,37 @@ function viewCallStack(excContext) {
  */
 function viewFillExceptionContext(excContext)
 {
-   var Program = xdc.useModule('xdc.rov.Program');
-   var CallStack = xdc.useModule('xdc.rov.CallStack');
-   CallStack.fetchRegisters(["R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10", "R11", "R12", "R13", "R14", "PC", "xPSR"]);
+    var Program = xdc.useModule('xdc.rov.Program');
+    var CallStack = xdc.useModule('xdc.rov.CallStack');
+    CallStack.fetchRegisters(["R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10", "R11", "R12", "R13", "R14", "PC", "xPSR"]);
 
-   excContext.r0 = String(CallStack.getRegister("R0"));
-   excContext.r1 = CallStack.getRegister("R1");
-   excContext.r2 = CallStack.getRegister("R2");
-   excContext.r3 = CallStack.getRegister("R3");
-   excContext.r4 = CallStack.getRegister("R4");
-   excContext.r5 = CallStack.getRegister("R5");
-   excContext.r6 = CallStack.getRegister("R6");
-   excContext.r7 = CallStack.getRegister("R7");
-   excContext.r8 = CallStack.getRegister("R8");
-   excContext.r9 = CallStack.getRegister("R9");
-   excContext.r10 = CallStack.getRegister("R10");
-   excContext.r11 = CallStack.getRegister("R11");
-   excContext.r12 = CallStack.getRegister("R12");
-   excContext.sp = CallStack.getRegister("R13");
-   excContext.lr = CallStack.getRegister("R14");
-   excContext.pc = CallStack.getRegister("PC");
-   excContext.psr = CallStack.getRegister("xPSR");
+    excContext.r0 = String(CallStack.getRegister("R0"));
+    excContext.r1 = CallStack.getRegister("R1");
+    excContext.r2 = CallStack.getRegister("R2");
+    excContext.r3 = CallStack.getRegister("R3");
+    excContext.r4 = CallStack.getRegister("R4");
+    excContext.r5 = CallStack.getRegister("R5");
+    excContext.r6 = CallStack.getRegister("R6");
+    excContext.r7 = CallStack.getRegister("R7");
+    excContext.r8 = CallStack.getRegister("R8");
+    excContext.r9 = CallStack.getRegister("R9");
+    excContext.r10 = CallStack.getRegister("R10");
+    excContext.r11 = CallStack.getRegister("R11");
+    excContext.r12 = CallStack.getRegister("R12");
+    excContext.sp = CallStack.getRegister("R13");
+    excContext.lr = CallStack.getRegister("R14");
+    excContext.pc = CallStack.getRegister("PC");
+    excContext.psr = CallStack.getRegister("xPSR");
 
-   excContext.ICSR = Program.ptrToHex(Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UInt', isScalar: true}, 0xe000ed04, 1, false));
-   excContext.MMFSR = Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UInt', isScalar: true}, 0xe000ed04, 1, false);
-   excContext.BFSR = Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UChar', isScalar: true}, 0xe000ed29, 1, false);
-   excContext.UFSR = Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UInt16', isScalar: true}, 0xe000ed2a, 1, false);
-   excContext.HFSR = Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UInt', isScalar: true}, 0xe000ed2c, 1, false);
-   excContext.DFSR = Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UInt', isScalar: true}, 0xe000ed30, 1, false);
-   excContext.MMAR = Program.ptrToHex(Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UInt', isScalar: true}, 0xe000ed34, 1, false));
-   excContext.BFAR = Program.ptrToHex(Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UInt', isScalar: true}, 0xe000ed38, 1, false));
-   excContext.AFSR = Program.ptrToHex(Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UInt', isScalar: true}, 0xe000ed3c, 1, false));
+    excContext.ICSR = Program.ptrToHex(Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UInt', isScalar: true}, 0xe000ed04, 1, false));
+    excContext.MMFSR = Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UInt', isScalar: true}, 0xe000ed04, 1, false);
+    excContext.BFSR = Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UChar', isScalar: true}, 0xe000ed29, 1, false);
+    excContext.UFSR = Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UInt16', isScalar: true}, 0xe000ed2a, 1, false);
+    excContext.HFSR = Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UInt', isScalar: true}, 0xe000ed2c, 1, false);
+    excContext.DFSR = Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UInt', isScalar: true}, 0xe000ed30, 1, false);
+    excContext.MMAR = Program.ptrToHex(Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UInt', isScalar: true}, 0xe000ed34, 1, false));
+    excContext.BFAR = Program.ptrToHex(Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UInt', isScalar: true}, 0xe000ed38, 1, false));
+    excContext.AFSR = Program.ptrToHex(Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UInt', isScalar: true}, 0xe000ed3c, 1, false));
 }
 
 /*
@@ -1459,22 +1538,21 @@ function viewInitException()
 
     for (coreId = 0; coreId < numCores; coreId++) {
         if (excActive[coreId] != 0) {
-	
-	    if (hwiModConfig.excHandlerFunc == null) {
-		var excContext = Program.fetchStruct(Hwi.ExcContext$fetchDesc,
-                             hwiModConfig.vectorTableAddress, false);
-		viewFillExceptionContext(excContext);
-	    }
-	    else {
-                try {
-                    var excContext = Program.fetchStruct(Hwi.ExcContext$fetchDesc,
-                             excContexts[coreId], false);
-                }
-                catch (e) {
-                    print(e);
-                    return null;
-                }
-	    }
+            if (hwiModConfig.excHandlerFunc == null) {
+                var excContext = Program.fetchStruct(Hwi.ExcContext$fetchDesc,
+                                     hwiModConfig.vectorTableAddress, false);
+                viewFillExceptionContext(excContext);
+            }
+            else {
+                    try {
+                        var excContext = Program.fetchStruct(Hwi.ExcContext$fetchDesc,
+                                 excContexts[coreId], false);
+                    }
+                    catch (e) {
+                        print(e);
+                        return null;
+                    }
+            }
 
             var excDecode = {};
             excDecode["Decoded"] = {};
@@ -1492,7 +1570,6 @@ function viewInitException()
             }
 
             obj["Exception call stack"] = excCallStack;
-
         }
     }
 
@@ -1514,6 +1591,7 @@ function viewInitModule(view, mod)
 
     if ((view.activeInterrupt > 0) && (view.activeInterrupt < 14)) {
         view.exception = "Yes";
+        Program.displayError(view, "exception", "An exception has occurred!");
     }
     else {
         view.exception = "none";
@@ -1564,14 +1642,14 @@ function viewInitModule(view, mod)
 function _enableExceptionSet(field, val)
 {
     if (val == true) {
-	if (Hwi.excHandlerFunc == Hwi.excHandlerMin) {
-	    Hwi.excHandlerFunc = Hwi.excHandlerMax;
-	}
+        if (Hwi.excHandlerFunc == Hwi.excHandlerMin) {
+            Hwi.excHandlerFunc = Hwi.excHandlerMax;
+        }
     }
     else {
-	if (Hwi.excHandlerFunc == Hwi.excHandlerMax) {
-	    Hwi.excHandlerFunc = Hwi.excHandlerMin;
-	}
+        if (Hwi.excHandlerFunc == Hwi.excHandlerMax) {
+            Hwi.excHandlerFunc = Hwi.excHandlerMin;
+        }
     }
 }
 

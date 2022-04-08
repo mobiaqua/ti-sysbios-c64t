@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,6 +51,7 @@ function getAsmFiles(targetName)
         case "ti.targets.arm.elf.Arm9":
         case "ti.targets.arm.elf.A8Fnv":
         case "ti.targets.arm.elf.A8F":
+        case "ti.targets.arm.elf.R5F":
             return (["Exception_asm.asm"]);
             break;
 
@@ -319,9 +320,7 @@ function viewInitBasic()
             }
 
             var excDecode = {};
-
             excDecode["Decoded"] = {};
-
             excDecode.Decoded = viewGetType(excContext.type);
 
             var excCallStack = viewCallStack(excContext);
@@ -340,4 +339,29 @@ function viewInitBasic()
     }
 
     return (obj);
+}
+
+/*
+ *  ======== viewInitModule ========
+ */ 
+function viewInitModule(view, mod)
+{
+    var Program = xdc.useModule('xdc.rov.Program');
+    var ScalarStructs = xdc.useModule('xdc.rov.support.ScalarStructs');
+    var Core = xdc.useModule('ti.sysbios.hal.Core');
+    var coreModConfig = Program.getModuleConfig(Core.$name);
+
+    numCores = coreModConfig.numCores;
+    var excActive = Program.fetchArray({type:'xdc.rov.support.ScalarStructs.S_UInt16', isScalar:true},
+                            mod.excActive,
+                            numCores);
+
+    view.exception = "none";
+    
+    for (var i = 0; i < numCores; i++) {
+        if (excActive[i] != 0) {
+            view.exception = "Yes"; 
+            Program.displayError(view, "exception", "An exception has occurred!");
+        }
+    }
 }

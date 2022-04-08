@@ -1,5 +1,5 @@
 @
-@  Copyright (c) 2014, Texas Instruments Incorporated
+@  Copyright (c) 2015, Texas Instruments Incorporated
 @  All rights reserved.
 @
 @  Redistribution and use in source and binary forms, with or without
@@ -106,17 +106,17 @@ ti_sysbios_family_arm_gic_Hwi_dispatchIRQ__I:
         ldr     r1, [r1]
         cmp     r1, #0
         blxne   r1              @ call Task_disable()
-        push    {r0}            @ save tskKey
+        push    {r0-r1}         @ save tskKey
 
         @ switch to isr stack and run dispatchIRQC function. After returning
         @ from dispatchIRQC, switch back to task stack if not a nested IRQ
-        movw    r0, #:lower16:ti_sysbios_family_arm_gic_Hwi_dispatchIRQC__I
-        movt    r0, #:upper16:ti_sysbios_family_arm_gic_Hwi_dispatchIRQC__I
-        mov     r1, r5          @ pass IRP as argument to dispatchIRQC()
+        movw    r1, #:lower16:ti_sysbios_family_arm_gic_Hwi_dispatchIRQC__I
+        movt    r1, #:upper16:ti_sysbios_family_arm_gic_Hwi_dispatchIRQC__I
+        mov     r0, r5          @ pass IRP as argument to dispatchIRQC()
         movw    r2, #:lower16:ti_sysbios_family_xxx_Hwi_switchAndRunDispatchC
         movt    r2, #:upper16:ti_sysbios_family_xxx_Hwi_switchAndRunDispatchC
         blx     r2
-        pop     {r0}            @ restore tskKey
+        pop     {r0-r1}         @ restore tskKey
 
         @ run task scheduler
         movw    r1, #:lower16:ti_sysbios_family_arm_gic_Hwi_taskRestoreHwi__C

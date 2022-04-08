@@ -79,6 +79,12 @@ function module$static$init(mod, params)
 {
     mod.availMask = 1;
 
+    /*
+     * plug Timer.startup into BIOS.startupFxns array
+     */
+    var BIOS = xdc.module('ti.sysbios.BIOS');
+    BIOS.addUserStartupFunction(Timer.startup);
+
     if (params.anyMask > mod.availMask) {
         Timer.$logError("Incorrect anyMask (" + params.anyMask
             + "). Should be <= " + mod.availMask + ".", Timer);
@@ -86,12 +92,8 @@ function module$static$init(mod, params)
 
     mod.handle = null;
     mod.timeUpper = 0;
-
-    /*
-     * plug Timer.startup into BIOS.startupFxns array
-     */
-    var BIOS = xdc.module('ti.sysbios.BIOS');
-    BIOS.addUserStartupFunction(Timer.startup);
+    mod.period64 = Timer.MAX_PERIOD;
+    mod.clock = null;
 }
 
 /*
@@ -160,27 +162,30 @@ function instance$static$init(obj, id, tickFxn, params)
         obj.hwi = null;
     }
 
-    var clockParams = new Clock.Params();
-    clockParams.period = 0;
-    clockParams.startFlag = false;
-    clockParams.arg = null;
+    if (BIOS.clockEnabled) {
+        /* If Clock is using this timer, start this Clock object */
+        if (Clock.TimerProxy.delegate$.$name.match(/ti.sysbios.family.arm.cc32xx.Timer/)) {
+            var clockParams = new Clock.Params();
+            clockParams.period = 0;
+            clockParams.startFlag = false;
+            clockParams.arg = null;
 
-    var timeout = 0;
+            var timeout = 0;
 
-    /* If Clock is using this timer, start this Clock object */
-    if (Clock.TimerProxy.delegate$.$name.match(/ti.sysbios.family.arm.cc32xx.Timer/)) {
-        clockParams.startFlag = false;
+            clockParams.startFlag = false;
 
-        /*
-         *  The first timeout will be the last tick before the first
-         *  half of the timer counter rolls over.  The timeout will
-         *  be re-adjusted in Timer_startup(), but we need to set it
-         *  to something non-zero for now.
-         */
-        timeout = (0x100000000 - 1) / obj.period64;
+            /*
+             *  The first timeout will be the last tick before the first
+             *  half of the timer counter rolls over.  The timeout will
+             *  be re-adjusted in Timer_startup(), but we need to set it
+             *  to something non-zero for now.
+             */
+            timeout = (0x100000000 - 1) / obj.period64;
+
+            /* Construct the Clock object */
+            modObj.clock =  Clock.create(Timer.setNextMaxTick, timeout, clockParams);
+        }
     }
-
-    Clock.construct(modObj.clockObj, Timer.setNextMaxTick, timeout, clockParams);
 
     modObj.period64 = obj.period64;
     modObj.handle = this;

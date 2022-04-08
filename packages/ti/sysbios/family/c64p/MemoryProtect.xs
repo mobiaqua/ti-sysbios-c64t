@@ -116,7 +116,7 @@ if (xdc.om.$name == "cfg") {
     var deviceTable = {
         "TMS320CDM6446": {
             PMC_R0_SIZE:    0x3,    // 32KB ROM
-            PMC_R1_SIZE:    0x3,    // 32KB 
+            PMC_R1_SIZE:    0x3,    // 32KB
             PMC_R0_ADJ:     0x1,    // 16KB hole at 0x00E04000
             PMC_R1_ADJ:     0x0,
             DMC_R0_SIZE:    0x4,    // 64KB
@@ -129,9 +129,9 @@ if (xdc.om.$name == "cfg") {
             UMC_P1_ADJ:     0x0,
         },
         "TMS320CDM6437": {
-            PMC_R0_SIZE:    0x0,    
+            PMC_R0_SIZE:    0x0,
             PMC_R1_SIZE:    0x3,    // 32KB
-            PMC_R0_ADJ:     0x0,    
+            PMC_R0_ADJ:     0x0,
             PMC_R1_ADJ:     0x0,
             DMC_R0_SIZE:    0x4,    // 64KB
             DMC_R1_SIZE:    0x3,    // 32KB
@@ -143,9 +143,9 @@ if (xdc.om.$name == "cfg") {
             UMC_P1_ADJ:     0x0,
         },
         "TMS320CDM6467": {
-            PMC_R0_SIZE:    0x0,    
+            PMC_R0_SIZE:    0x0,
             PMC_R1_SIZE:    0x3,    // 32KB
-            PMC_R0_ADJ:     0x0,    
+            PMC_R0_ADJ:     0x0,
             PMC_R1_ADJ:     0x0,
             DMC_R0_SIZE:    0x0,
             DMC_R1_SIZE:    0x3,    // 32KB
@@ -157,9 +157,9 @@ if (xdc.om.$name == "cfg") {
             UMC_P1_ADJ:     0x0,
         },
         "TMS320CTCI6482": {
-            PMC_R0_SIZE:    0x0,    
+            PMC_R0_SIZE:    0x0,
             PMC_R1_SIZE:    0x3,    // 32KB
-            PMC_R0_ADJ:     0x0,    
+            PMC_R0_ADJ:     0x0,
             PMC_R1_ADJ:     0x0,
             DMC_R0_SIZE:    0x0,
             DMC_R1_SIZE:    0x3,    // 32KB
@@ -171,9 +171,9 @@ if (xdc.om.$name == "cfg") {
             UMC_P1_ADJ:     0x0,
         },
         "TMS320C6452": {
-            PMC_R0_SIZE:    0x0,    
+            PMC_R0_SIZE:    0x0,
             PMC_R1_SIZE:    0x3,    // 32KB
-            PMC_R0_ADJ:     0x0,    
+            PMC_R0_ADJ:     0x0,
             PMC_R1_ADJ:     0x0,
             DMC_R0_SIZE:    0x0,
             DMC_R1_SIZE:    0x3,    // 32KB
@@ -186,9 +186,9 @@ if (xdc.om.$name == "cfg") {
             UMC_P0_BADDR:   0x0000000A,
         },
         "TMS320CDM647": {
-            PMC_R0_SIZE:    0x0,    
+            PMC_R0_SIZE:    0x0,
             PMC_R1_SIZE:    0x3,    // 32KB
-            PMC_R0_ADJ:     0x0,    
+            PMC_R0_ADJ:     0x0,
             PMC_R1_ADJ:     0x0,
             DMC_R0_SIZE:    0x0,
             DMC_R1_SIZE:    0x3,    // 32KB
@@ -201,9 +201,9 @@ if (xdc.om.$name == "cfg") {
             UMC_P0_BADDR:   0x0000000A,
         },
         "TMS320CDM648": {
-            PMC_R0_SIZE:    0x0,    
+            PMC_R0_SIZE:    0x0,
             PMC_R1_SIZE:    0x3,    // 32KB
-            PMC_R0_ADJ:     0x0,    
+            PMC_R0_ADJ:     0x0,
             PMC_R1_ADJ:     0x0,
             DMC_R0_SIZE:    0x0,
             DMC_R1_SIZE:    0x3,    // 32KB
@@ -216,9 +216,9 @@ if (xdc.om.$name == "cfg") {
             UMC_P0_BADDR:   0x0000000A,
         },
         "TMS320CTCI6486": {
-            PMC_R0_SIZE:    0x0,    
+            PMC_R0_SIZE:    0x0,
             PMC_R1_SIZE:    0x3,    // 32KB
-            PMC_R0_ADJ:     0x0,    
+            PMC_R0_ADJ:     0x0,
             PMC_R1_ADJ:     0x0,
             DMC_R0_SIZE:    0x0,
             DMC_R1_SIZE:    0x3,    // 32KB
@@ -230,9 +230,9 @@ if (xdc.om.$name == "cfg") {
             UMC_P1_ADJ:     0x0,
         },
         "TMS320CTCI6488": {
-            PMC_R0_SIZE:    0x0,    
+            PMC_R0_SIZE:    0x0,
             PMC_R1_SIZE:    0x3,    // 32KB
-            PMC_R0_ADJ:     0x0,    
+            PMC_R0_ADJ:     0x0,
             PMC_R1_ADJ:     0x0,
             DMC_R0_SIZE:    0x0,
             DMC_R1_SIZE:    0x3,    // 32KB
@@ -244,9 +244,9 @@ if (xdc.om.$name == "cfg") {
             UMC_P1_ADJ:     0x0,
         },
         "TMS320C6670": {
-            PMC_R0_SIZE:    0x0,    
+            PMC_R0_SIZE:    0x0,
             PMC_R1_SIZE:    0x3,    // 32KB
-            PMC_R0_ADJ:     0x0,    
+            PMC_R0_ADJ:     0x0,
             PMC_R1_ADJ:     0x0,
             DMC_R0_SIZE:    0x0,
             DMC_R1_SIZE:    0x3,    // 32KB
@@ -272,9 +272,9 @@ if (xdc.om.$name == "cfg") {
             UMC_P1_ADJ:     0x0,
         },
         "TMS320DA830": {
-            PMC_R0_SIZE:    0x0,    
+            PMC_R0_SIZE:    0x0,
             PMC_R1_SIZE:    0x3,    // 32KB
-            PMC_R0_ADJ:     0x0,    
+            PMC_R0_ADJ:     0x0,
             PMC_R1_ADJ:     0x0,
             DMC_R0_SIZE:    0x0,
             DMC_R1_SIZE:    0x3,    // 32KB
@@ -286,9 +286,9 @@ if (xdc.om.$name == "cfg") {
             UMC_P1_ADJ:     0x0,
         },
         "TMS320C3430": {
-            PMC_R0_SIZE:    0x0,    
+            PMC_R0_SIZE:    0x0,
             PMC_R1_SIZE:    0x3,    // 32KB
-            PMC_R0_ADJ:     0x0,    
+            PMC_R0_ADJ:     0x0,
             PMC_R1_ADJ:     0x0,
             DMC_R0_SIZE:    0x4,    // 64KB
             DMC_R1_SIZE:    0x3,    // 32KB
@@ -302,7 +302,7 @@ if (xdc.om.$name == "cfg") {
         "TMS320CDRA442": {
             PMC_R0_SIZE:    0x3,    // 32KB
             PMC_R1_SIZE:    0x3,    // 32KB
-            PMC_R0_ADJ:     0x0,    
+            PMC_R0_ADJ:     0x0,
             PMC_R1_ADJ:     0x0,
             DMC_R0_SIZE:    0x4,    // 64KB
             DMC_R1_SIZE:    0x3,    // 32KB
@@ -314,16 +314,30 @@ if (xdc.om.$name == "cfg") {
             UMC_P1_ADJ:     0x0,
         },
         "TMS320TI816X": {
-            PMC_R0_SIZE:    0x0,    
+            PMC_R0_SIZE:    0x0,
             PMC_R1_SIZE:    0x3,    // 32KB
-            PMC_R0_ADJ:     0x0,    
+            PMC_R0_ADJ:     0x0,
             PMC_R1_ADJ:     0x0,
-            DMC_R0_SIZE:    0x0,    
+            DMC_R0_SIZE:    0x0,
             DMC_R1_SIZE:    0x3,    // 32KB
             DMC_R0_ADJ:     0x0,
             DMC_R1_ADJ:     0x0,
             UMC_P0_SIZE:    0x8,    // 256KB
             UMC_P1_SIZE:    0x0,    //
+            UMC_P0_ADJ:     0x0,
+            UMC_P1_ADJ:     0x0,
+        },
+        "DRA7XX": {
+            PMC_R0_SIZE:    0x0,
+            PMC_R1_SIZE:    0x3,    // 32KB
+            PMC_R0_ADJ:     0x0,
+            PMC_R1_ADJ:     0x0,
+            DMC_R0_SIZE:    0x0,
+            DMC_R1_SIZE:    0x3,    // 32KB
+            DMC_R0_ADJ:     0x0,
+            DMC_R1_ADJ:     0x0,
+            UMC_P0_SIZE:    0x9,    // 512KB
+            UMC_P1_SIZE:    0x0,
             UMC_P0_ADJ:     0x0,
             UMC_P1_ADJ:     0x0,
         },
@@ -397,7 +411,7 @@ if (xdc.om.$name == "cfg") {
     deviceTable["TMS320C6745"]   = deviceTable["TMS320DA830"];
     deviceTable["TMS320C6743"]   = deviceTable["TMS320DA830"];
     deviceTable["OMAPL137"]      = deviceTable["TMS320DA830"];
-    
+
     deviceTable["OMAPL108"]      = deviceTable["TMS320DA830"];
     deviceTable["OMAPL118"]      = deviceTable["TMS320DA830"];
     deviceTable["OMAPL138"]      = deviceTable["TMS320DA830"];
@@ -407,7 +421,7 @@ if (xdc.om.$name == "cfg") {
     deviceTable["TMS320C6746"]   = deviceTable["TMS320DA830"];
     deviceTable["TMS320C6748"]   = deviceTable["TMS320DA830"];
     deviceTable["Arctic"]        = deviceTable["TMS320DA830"];
-    
+
     deviceTable["TMS320CDRA402"]   = deviceTable["TMS320CDRA442"];
     deviceTable["TMS320CDRA404"]   = deviceTable["TMS320CDRA442"];
     deviceTable["TMS320CDRA414"]   = deviceTable["TMS320CDRA442"];
@@ -422,6 +436,9 @@ if (xdc.om.$name == "cfg") {
     deviceTable["TMS320DM8148"]   = deviceTable["TMS320TI816X"];
     deviceTable["TMS320DM8168"]   = deviceTable["TMS320TI816X"];
     deviceTable["TMS320C6A8149"]  = deviceTable["TMS320TI816X"];
+
+    deviceTable["Vayu"]           = deviceTable["DRA7XX"];
+    deviceTable["TDA3XX"]         = deviceTable["DRA7XX"];
 }
 
 /*
@@ -444,7 +461,7 @@ function module$meta$init()
 function module$use()
 {
     MemoryProtect = this;
-    
+
     /* set fxntab default */
     MemoryProtect.common$.fxntab = false;
 
@@ -519,7 +536,7 @@ function setControllerValues()
     else {
         PMC_R1_START = (PMC_R0_START + (0x1000 << device.PMC_R0_SIZE));
     }
-    
+
     PMC_R0_END = (PMC_R1_START - (device.PMC_R0_ADJ << 14));
     PMC_R1_END = (PMC_R1_START + (0x1000 << device.PMC_R1_SIZE) -
                  (device.PMC_R1_ADJ << 14));
@@ -530,7 +547,7 @@ function setControllerValues()
     else {
         PMC_R0_PS = (0x0100 << device.PMC_R0_SIZE);
     }
-    
+
     PMC_R1_PS = (0x0100 << device.PMC_R1_SIZE);
 
     /* set DMC variables */
@@ -541,18 +558,18 @@ function setControllerValues()
     else {
         DMC_R1_START = (DMC_R0_START + (0x1000 << device.DMC_R0_SIZE));
     }
-    
+
     DMC_R0_END = (DMC_R1_START - (device.DMC_R0_ADJ << 14));
     DMC_R1_END = (DMC_R1_START + (0x1000 << device.DMC_R1_SIZE) -
                  (device.DMC_R1_ADJ << 14));
-    
+
     if (device.DMC_R0_SIZE == 0) {
         DMC_R0_PS = 0;
     }
     else {
         DMC_R0_PS = (0x0100 << device.DMC_R0_SIZE);
     }
-    
+
     DMC_R1_PS = (0x0100 << device.DMC_R1_SIZE);
 
     /* set UMC variables */
@@ -564,7 +581,7 @@ function setControllerValues()
     /* adjust start to top or bottom of UMAP0's 1MB address range */
     UMC_P1_START = ((UMC_P1_BADDR << 20) + ((0x00100000 -
                    (0x0400 << device.UMC_P1_SIZE)) * device.UMC_P1_ADJ));
-        
+
     UMC_P1_END = (UMC_P1_START + (0x0400 << device.UMC_P1_SIZE));
     UMC_P1_PS = (0x0020 << device.UMC_P1_SIZE);
 }
@@ -578,7 +595,7 @@ function module$static$init(mod, params)
 
     /* call to set controller values */
     setControllerValues();
-    
+
     /* set the regionCompare values */
     MemoryProtect.regionCompare[0] = 0xffffffff;
     MemoryProtect.regionCompare[1] = 0xffffffff;
@@ -594,7 +611,7 @@ function module$static$init(mod, params)
                            ((device.UMC_P1_END >>> 15) & 31) - 1;
     MemoryProtect.regionEnd[2] = ((device.DMC_R1_END >>> 15) & 31) - 1;
     MemoryProtect.regionEnd[3] = ((device.PMC_R1_END >>> 15) & 31) - 1;
-    
+
     /* set the region extract masks */
     MemoryProtect.regExtMasks[0][0].msb = device.UMC_P0_SIZE + UMC_RGN_MSB;
     MemoryProtect.regExtMasks[0][0].lsb = device.UMC_P0_SIZE + UMC_RGN_LSB;
@@ -612,12 +629,12 @@ function module$static$init(mod, params)
     MemoryProtect.regExtMasks[2][1].lsb = device.DMC_R1_SIZE + DMC_RGN_LSB;
     MemoryProtect.regExtMasks[3][1].msb = device.PMC_R1_SIZE + PMC_RGN_MSB;
     MemoryProtect.regExtMasks[3][1].lsb = device.PMC_R1_SIZE + PMC_RGN_LSB;
-    
+
     /* set the MegaByte to MemoryProtect array */
     for (var i = 0; i < 16; i++) {
         MemoryProtect.megaByte2MPC[i] = mb2mpcIndex(i);
     }
-    
+
     /* set the control struct for PMC */
     MemoryProtect.pmcCtrl.mpFault = $addr(0x0184A400);
     MemoryProtect.pmcCtrl.mpLck = $addr(0x0184A500);
@@ -625,7 +642,7 @@ function module$static$init(mod, params)
     MemoryProtect.pmcCtrl.mpCfg = null;                 /* no cfg for internal MemoryProtects */
     MemoryProtect.pmcCtrl.nPages = 32;
     MemoryProtect.pmcCtrl.evtNum = Exception.EVTPMCCMPA;
-    
+
     /* set the control struct for DMC */
     MemoryProtect.dmcCtrl.mpFault = $addr(0x0184AC00);
     MemoryProtect.dmcCtrl.mpLck = $addr(0x0184AD00);
@@ -633,7 +650,7 @@ function module$static$init(mod, params)
     MemoryProtect.dmcCtrl.mpCfg = null;                 /* no cfg for internal MemoryProtects */
     MemoryProtect.dmcCtrl.nPages = 32;
     MemoryProtect.dmcCtrl.evtNum = Exception.EVTDMCCMPA;
-    
+
     /* set the control struct for UMC */
     MemoryProtect.umcCtrl.mpFault = $addr(0x0184A000);
     MemoryProtect.umcCtrl.mpLck = $addr(0x0184A100);
@@ -645,12 +662,15 @@ function module$static$init(mod, params)
     /* On C66 devices there is only one common set of Lock registers */
     if ((Program.cpu.deviceName.match(/TCI66/)) ||
         (Program.cpu.deviceName.match(/C66/))   ||
+        (Program.cpu.deviceName.match(/Vayu/))   ||
+        (Program.cpu.deviceName.match(/DRA7XX/))   ||
+        (Program.cpu.deviceName.match(/TDA3XX/))   ||
         (Program.cpu.deviceName.match(/Kepler/))) {
         MemoryProtect.pmcCtrl.mpLck = $addr(0x0184AD00);
         MemoryProtect.dmcCtrl.mpLck = $addr(0x0184AD00);
         MemoryProtect.umcCtrl.mpLck = $addr(0x0184AD00);
     }
-    
+
     /*  The module state controller array is init'ed in Module_startup */
     mod.controllers.length = 4;
     mod.controllers[0] = null;

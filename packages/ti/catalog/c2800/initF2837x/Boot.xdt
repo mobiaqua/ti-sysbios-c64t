@@ -22,11 +22,11 @@
 % /* Don't generate Boot funcs if this is a romimage */
 % if (!Program.$$isrom && (Program.build.rtsName !== null)) {
 %var Boot = xdc.module("ti.catalog.c2800.initF2837x.Boot");
-    extern ti_catalog_c2800_initF2837x_Boot_disableWatchdog(Void);
-    extern ti_catalog_c2800_initF2837x_Boot_initSharedRAMs(UInt sharedRamMask);
-    extern ti_catalog_c2800_initF2837x_Boot_configurePllDivs(UInt iMult, UInt fMult, UInt sysDiv);
-    extern ti_catalog_c2800_initF2837x_Boot_bootCPU2(Void);
-    extern ti_catalog_c2800_initF2837x_Boot_initFlash(Bool configWaitStates, UInt waitStates, Bool enableProgramCache, Bool enableDataCache);
+    extern ti_catalog_c2800_initF2837x_Boot_disableWatchdog(xdc_Void);
+    extern ti_catalog_c2800_initF2837x_Boot_initSharedRAMs(xdc_UInt sharedRamMask);
+    extern ti_catalog_c2800_initF2837x_Boot_configurePllDivs(xdc_UInt iMult, xdc_UInt fMult, xdc_UInt sysDiv);
+    extern ti_catalog_c2800_initF2837x_Boot_bootCPU2(xdc_Void);
+    extern ti_catalog_c2800_initF2837x_Boot_initFlash(xdc_Bool configWaitStates, xdc_UInt waitStates, xdc_Bool enableProgramCache, xdc_Bool enableDataCache);
 
 #if defined(__ti__)
 #pragma CODE_SECTION(ti_catalog_c2800_initF2837x_Boot_init, ".text:.bootCodeSection")
@@ -38,7 +38,7 @@
  *  ======== ti_catalog_arm_cortexm3_concertoInit_Boot_init ========
  *  Boot initialization run as an xdc.runtime.Reset function.
  */
-Void ti_catalog_c2800_initF2837x_Boot_init(Void)
+xdc_Void ti_catalog_c2800_initF2837x_Boot_init(xdc_Void)
 {
 %if (Boot.disableWatchdog == true) {
     ti_catalog_c2800_initF2837x_Boot_disableWatchdog();
@@ -59,7 +59,7 @@ Void ti_catalog_c2800_initF2837x_Boot_init(Void)
  *  ======== ti_catalog_c2800_initF2837x_Boot_initStartup ========
  *  Boot initialization run as an xdc.runtime.Startup first function.
  */
-Void ti_catalog_c2800_initF2837x_Boot_initStartup(Void)
+xdc_Void ti_catalog_c2800_initF2837x_Boot_initStartup(xdc_Void)
 {
 %if (Boot.configureFlashController == true) {
     ti_catalog_c2800_initF2837x_Boot_initFlash(`Number(Boot.configureFlashWaitStates)`, `Number(Boot.flashWaitStates)`, `Number(Boot.enableFlashProgramCache)`, `Number(Boot.enableFlashDataCache)`);
@@ -69,7 +69,7 @@ Void ti_catalog_c2800_initF2837x_Boot_initStartup(Void)
 /*
  *  ======== ti_catalog_c2800_initF2837x_Boot_limpAbort ========
  */
-Void ti_catalog_c2800_initF2837x_Boot_limpAbort(Void)
+xdc_Void ti_catalog_c2800_initF2837x_Boot_limpAbort(xdc_Void)
 {
 %var cname;
 %       cname = String(Boot.limpAbortFunction);

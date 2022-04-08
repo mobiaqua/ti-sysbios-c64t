@@ -8,13 +8,23 @@ var KnlBuild = xdc.loadCapsule('xdc/runtime/knl/build.xs');
 
 Pkg.makePrologue = RtsBuild.makePrologue;
 
-/* autoinit.c in 4.0 and 3.3 is same, so for now we keep only one copy */
-SRCS = ["boot.c", "pre_init.c", "autoinit.c"];
+var SRCS = ["boot.c", "boot_special.c", "pre_init.c", "autoinit.c", "autoinit_wdt.c"];
 
 /* define additional sources provided by this package */
-BOOTFILES = [
-    "boot_3.2.c", "boot_2.1.c", "boot_4.0.c",
-    "autoinit_2.1.c", "autoinit_4.2.c"
+var BOOTFILES = [
+    "autoinit.h",
+    "autoinit_2.1.c",
+    "autoinit_4.2.c",
+    "autoinit_4.4.c",
+
+    "boot.h",
+    "boot_2.1.c",
+    "boot_3.2.c",
+    "boot_3.3.c",
+    "boot_4.0.c",
+    "boot_4.3.c",
+    "boot_4.4.c",
+    "boot_special_4.4.c"
 ];
 
 Pkg.otherSrcs = SRCS.concat(BOOTFILES);
@@ -36,7 +46,10 @@ for (var i = 0; i < Build.targets.length; i++) {
     var targ = Build.targets[i];
     if (targ.rts == Pkg.name) {
         Pkg.addLibrary("lib/" + Pkg.name, targ, attrs).addObjects(cobjs);
+
+        attrs.defs = "-D__TI_RTS_BUILD=1";
         Pkg.addLibrary("lib/boot", targ, attrs).addObjects(SRCS);
+        attrs.defs = undefined;
     }
 }
 

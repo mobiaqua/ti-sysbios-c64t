@@ -37,6 +37,8 @@
 #include <ti/sysbios/BIOS.h>
 #include <ti/sysbios/family/arm/cc26xx/Power.h>
 #include <ti/sysbios/family/arm/cc26xx/PowerCC2650.h>
+#include <ti/sysbios/knl/Clock.h>
+#include <ti/sysbios/hal/Hwi.h>
 
 #include <driverlib/ddi.h>
 #include <driverlib/ioc.h>
@@ -51,6 +53,8 @@
 #include <inc/hw_ddi_0_osc.h>
 #include <inc/hw_ddi.h>
 #include <inc/hw_ccfg.h>
+
+#include "package/internal/Power.xdc.h"
 
 #define AUX_TDC_SEMAPHORE_NUMBER        1  /* semaphore 1 protects TDC */
 #define NUM_RCOSC_LF_PERIODS_TO_MEASURE 32 /* x RCOSC_LF periods vs XOSC_HF */
@@ -72,54 +76,77 @@
 #define CAL_RCOSC_HF1   2   /* just finished 1st RCOSC_HF, start 2nd */
 #define CAL_RCOSC_HF2   3   /* just finished 2nd RCOSC_HF, decide best */
 
+/* calibration steps */
+#define STEP_TDC_INIT_1    1
+#define STEP_TDC_INIT_2    2
+#define STEP_CAL_LF_1      3
+#define STEP_CAL_LF_2      4
+#define STEP_CAL_LF_3      5
+#define STEP_CAL_HF1_1     6
+#define STEP_CAL_HF1_2     7
+#define STEP_CAL_HF1_3     8
+#define STEP_CAL_HF2_1     9
+#define STEP_CAL_HF2_2     10
+#define STEP_CLEANUP_1     11
+#define STEP_CLEANUP_2     12
+
 /* macros */
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
-
-/* forward declarations */
-static Int abs(Int i);
-static Void calibrateRcoscHf1(Int32 tdcResult);
-static Void calibrateRcoscHf2(Int32 tdcResult);
-static Void cleanupAfterMeasurements(Void);
-static Bool getTdcSemaphore(Void);
-static Int32 scaleRndInf(Int32 x);
-static Void tdcInit();
-static Void tdcPerformRcOscMeasurement(UInt32 refClkSrc,
-    UInt32 numEdgesToCount);
-static Void updateSubSecInc(UInt32 tdcResult);
-
-/* static globals */
-static UInt32 calibrateStep;
-static Bool doLF = FALSE;
-static Bool firstLF = TRUE;
-static Int32 nDeltaFreqCurr;
-static Int32 nCtrimCurr;
-static Int32 nCtrimFractCurr;
-static Int32 nCtrimNew;
-static Int32 nCtrimFractNew;
 
 #define INSTRUMENT 0
 
 #if INSTRUMENT
 volatile UInt gotSEM = 0;
-volatile UInt calLF = 0;
-volatile UInt calHF1 = 0;
-volatile UInt calHF2 = 0;
+volatile UInt calLFi = 0;
+volatile UInt calHF1i = 0;
+volatile UInt calHF2i = 0;
+volatile Bool doneCal = FALSE;
 UInt tdcResult_LF = 0;
 UInt tdcResult_HF1 = 0;
 UInt tdcResult_HF2 = 0;
 UInt numISRs = 0;
+UInt calClocks = 0;
 #endif
 
 /*
- *  ======== calibrateRCOSCs ========
+ *  ======== initiateCalibration ========
  *  Initiate calibration of RCOSC_LF and RCOSCHF
  */
 Bool Power_initiateCalibration()
 {
+    UInt hwiKey;
+    Bool busy = FALSE;
     Bool status;
     Bool gotSem;
-    UInt32 ccfgLfClkSrc;
+
+    if ((Power_module->calLF != TRUE) && (Power_calibrateRCOSC_HF != TRUE)) {
+        return (FALSE);
+    }
+
+    /* make sure calibration is not already in progress */
+    hwiKey = Hwi_disable();
+
+    if (Power_module->busyCal == FALSE) {
+        Power_module->busyCal = TRUE;
+    }
+    else {
+        busy = TRUE;
+    }
+
+    Hwi_restore(hwiKey);
+
+    if (busy == TRUE) {
+        return (FALSE);
+    }
+
+#if INSTRUMENT
+    gotSEM = 0;
+    calLFi = 0;
+    calHF1i = 0;
+    calHF2i = 0;
+    doneCal = FALSE;
+#endif
 
     /* set contraints to prohibit powering down during calibration sequence */
     Power_setConstraint(Power_SB_DISALLOW);
@@ -128,24 +155,12 @@ Bool Power_initiateCalibration()
     /* set dependency to keep XOSC_HF active during calibration sequence */
     Power_setDependency(XOSC_HF);
 
-    /* read the LF clock source from CCFG */
-    ccfgLfClkSrc = (HWREG(CCFG_BASE + CCFG_O_MODE_CONF) &
-        CCFG_MODE_CONF_SCLK_LF_OPTION_M) >> CCFG_MODE_CONF_SCLK_LF_OPTION_S;
-
-    /* check to see if should do RCOSC_LF calibration,  */
-    if (ccfgLfClkSrc == SCLK_LF_OPTION_RCOSC_LF) {
-        doLF = TRUE;
-    }
-    else {
-        doLF = FALSE;
-    }
-
     /* initiate acquisition of semaphore protecting TDC */
-    gotSem = getTdcSemaphore();
+    gotSem = Power_getTdcSemaphore();
 
     /* if didn't acquire semaphore, must wait for autotake ISR */
     if (gotSem == FALSE) {
-        calibrateStep = WAIT_SMPH;
+        Power_module->hwiState = WAIT_SMPH;
         status = FALSE;  /* FALSE: don't do anything else until acquire SMPH */
     }
 
@@ -161,43 +176,8 @@ Bool Power_initiateCalibration()
 }
 
 /*
- *  ======== startFirstMeasurment ========
- *  Start the first RCOSC measurement
- */
-Void Power_startFirstMeasurement()
-{
-    /* setup TDC */
-    tdcInit();
-
-    /* if LF clock is from RCOSC_LF then do compensation */
-    if (doLF == TRUE) {
-        /* clear UPD_REQ, new sub-second increment is NOT available */
-        HWREG(AUX_WUC_BASE + AUX_WUC_O_RTCSUBSECINCCTL) = 0;
-
-        /* initiate measurement of RCOSC_LF */
-        tdcPerformRcOscMeasurement(ACLK_REF_SRC_RCOSC_LF,
-            NUM_RCOSC_LF_PERIODS_TO_MEASURE);
-
-        /* next state is RCOSC_LF measurement */
-        calibrateStep = CAL_RCOSC_LF;
-
-    }
-
-    /* else, if LF clock is from XOSC_LF, start XOSC_HF calibration */
-    else {
-        /* initiate first measurement of RCOSC_HF */
-        tdcPerformRcOscMeasurement(ACLK_REF_SRC_RCOSC_HF,
-            NUM_RCOSC_HF_PERIODS_TO_MEASURE);
-
-        /* next state is RCOSC_HF meas. #1 */
-        calibrateStep = CAL_RCOSC_HF1;
-    }
-
-}
-
-/*
  *  ======== Power_auxISR ========
- *  ISR for the AUX combo interrupt event.  Implements state machine to
+ *  ISR for the AUX combo interrupt event.  Implements Hwi state machine to
  *  step through the RCOSC calibration steps.
  */
 Void ti_sysbios_family_arm_cc26xx_Power_auxISR(UArg arg)
@@ -218,84 +198,351 @@ Void ti_sysbios_family_arm_cc26xx_Power_auxISR(UArg arg)
     HWREG(AUX_EVCTL_BASE + AUX_EVCTL_O_EVTOMCUFLAGSCLR) = auxEvent;
 
     /* ****** state = WAIT_SMPH: arrive here if just took the SMPH ****** */
-    if (calibrateStep == WAIT_SMPH) {
+    if (Power_module->hwiState == WAIT_SMPH) {
 #if INSTRUMENT
         gotSEM = 1;
 #endif
-        Power_startFirstMeasurement();
     }
 
     /* **** state = CAL_RCOSC_LF: here when just finished LF counting **** */
-    else if (calibrateStep == CAL_RCOSC_LF) {
-        calibrateStep = CAL_RCOSC_HF1;    /* next state is RCOSC_HF meas. #1 */
+    else if (Power_module->hwiState == CAL_RCOSC_LF) {
+
         tdcResult = HWREG(AUX_TDCIF_BASE + AUX_TDC_O_RESULT);
 
 #if INSTRUMENT
         tdcResult_LF = tdcResult;
 #endif
         /* update the RTC SUBSECINC register based on LF measurement result */
-        updateSubSecInc(tdcResult);
-
+        Power_updateSubSecInc(tdcResult);
 #if INSTRUMENT
-        calLF = 1;
+        calLFi = 1;
 #endif
-        /* initiate first measurement of RCOSC_HF */
-        tdcPerformRcOscMeasurement(ACLK_REF_SRC_RCOSC_HF,
-            NUM_RCOSC_HF_PERIODS_TO_MEASURE);
+        /* if doing HF calibration initiate it now */
+        if (Power_calibrateRCOSC_HF) {
+            Power_module->calStep = STEP_CAL_LF_3;  /* next: trigger LF */
+        }
+
+        /* else, start cleanup */
+        else {
+            Power_module->calStep = STEP_CLEANUP_1; /* next: cleanup */
+        }
     }
 
     /* ****** state = CAL_RCOSC_HF1: here when just finished 1st RCOSC_HF */
-    else if (calibrateStep == CAL_RCOSC_HF1) {
+    else if (Power_module->hwiState == CAL_RCOSC_HF1) {
+
         tdcResult = HWREG(AUX_TDCIF_BASE + AUX_TDC_O_RESULT);
 
 #if INSTRUMENT
         tdcResult_HF1 = tdcResult;
+        calHF1i = 1;
 #endif
-        if (tdcResult == 1536)
-        {
-            /* settings perfect, nothing more to do, calibration is done.*/
-            calibrateStep = WAIT_SMPH;
-            cleanupAfterMeasurements();
+        /* if HF setting perfect, nothing more to do, calibration is done */
+        if (tdcResult == 1536) {
+            Power_module->calStep = STEP_CLEANUP_1;  /* next: cleanup */
         }
-        else
-        {
-            /* next state is RCOSC_HF meas. #2 */
-            calibrateStep = CAL_RCOSC_HF2;
+
+        /* else, tweak trims, initiate another HF measurement */
+        else {
+
             /* use first HF measurement to setup new trim values */
-            calibrateRcoscHf1(tdcResult);
-            /* initiate second measurement of RCOSC_HF */
-            tdcPerformRcOscMeasurement(ACLK_REF_SRC_RCOSC_HF,
-                                       NUM_RCOSC_HF_PERIODS_TO_MEASURE);
+            Power_calibrateRcoscHf1(tdcResult);
+
+            Power_module->calStep = STEP_CAL_HF1_3;  /* next: HF meas. #2 */
         }
-
-#if INSTRUMENT
-        calHF1 = 1;
-#endif
-
     }
 
     /* ****** state = just finished second RCOSC_HF measurement ****** */
-    else if (calibrateStep == CAL_RCOSC_HF2) {
-        calibrateStep = WAIT_SMPH;  /* restart state will be for re-take SMPH */
+    else if (Power_module->hwiState == CAL_RCOSC_HF2) {
+
         tdcResult = HWREG(AUX_TDCIF_BASE + AUX_TDC_O_RESULT);
 
 #if INSTRUMENT
         tdcResult_HF2 = tdcResult;
 #endif
         /* look for improvement on #2, else revert to previous trim values */
-        calibrateRcoscHf2(tdcResult);
+        Power_calibrateRcoscHf2(tdcResult);
 
-        /* done with this cal sequence, cleanup */
-        cleanupAfterMeasurements();
+        Power_module->calStep = STEP_CLEANUP_1;    /* next: cleanup */
+    }
 
+    /* do the next calibration step... */
+    Power_doCalibrate();
+}
+
+/*
+ *  ======== Power_doCalibrate ========
+ */
+Void Power_doCalibrate(Void)
+{
+    switch (Power_module->calStep) {
+
+        case STEP_TDC_INIT_1:
+
+            /* turn on clock to TDC module */
+            AUXWUCClockEnable(AUX_WUC_TDCIF_CLOCK);
+
+            /* set saturation config to 2^24 */
+            HWREG(AUX_TDCIF_BASE + AUX_TDC_O_SATCFG) =
+                AUX_TDC_SATCFG_LIMIT_ROVF;
+
+            /* set start and stop trigger sources and polarity */
+            HWREG(AUX_TDCIF_BASE + AUX_TDC_O_TRIGSRC) =
+                (AUX_TDC_TRIGSRC_STOP_SRC_ACLK_REF |
+                 AUX_TDC_TRIGSRC_STOP_POL_HIGH) |
+                (AUX_TDC_TRIGSRC_START_SRC_ACLK_REF |
+                 AUX_TDC_TRIGSRC_START_POL_HIGH);
+
+            /* set TDC_SRC clock to be XOSC_HF/2 = 24 MHz */
+            DDI16BitfieldWrite(AUX_DDI0_OSC_BASE, DDI_0_OSC_O_CTL0,
+                DDI_0_OSC_CTL0_ACLK_TDC_SRC_SEL_M,
+                DDI_0_OSC_CTL0_ACLK_TDC_SRC_SEL_S, 2);
+
+            /* set AUX_WUC:TDCCLKCTL.REQ... */
+            HWREG(AUX_WUC_BASE + AUX_WUC_O_TDCCLKCTL) = AUX_WUC_TDCCLKCTL_REQ;
+
+            /* set next state */
+            Power_module->calStep = STEP_TDC_INIT_2;
+
+            /* start Clock object to delay while wait for ACK */
+            Clock_start(Power_module->calClockHandle);
+
+            break;
+
+        case STEP_TDC_INIT_2:
+
+            /* Enable trig count */
+            HWREG(AUX_TDCIF_BASE + AUX_TDC_O_TRIGCNTCFG) =
+                AUX_TDC_TRIGCNTCFG_EN;
+
+            /* if LF calibration enabled start LF measurement */
+            if (Power_module->calLF) {
+
+               /* clear UPD_REQ, new sub-second increment is NOT available */
+                HWREG(AUX_WUC_BASE + AUX_WUC_O_RTCSUBSECINCCTL) = 0;
+
+                /* set next Swi state */
+                Power_module->calStep = STEP_CAL_LF_1;
+            }
+
+            /* else, start first HF measurement */
+            else {
+                /* set next Swi state */
+                Power_module->calStep = STEP_CAL_HF1_1;
+            }
+
+            /* abort TDC */
+            HWREG(AUX_TDCIF_BASE + AUX_TDC_O_CTL) = AUX_TDC_CTL_CMD_ABORT;
+
+            /* clear AUX_WUC:REFCLKCTL.REQ... */
+            HWREG(AUX_WUC_BASE + AUX_WUC_O_REFCLKCTL) = 0;
+
+            /* if not ready, start Clock object to delay while wait for ACK */
+            if (HWREG(AUX_WUC_BASE + AUX_WUC_O_REFCLKCTL) &
+                AUX_WUC_REFCLKCTL_ACK) {
+
+                /* start Clock object to delay while wait for ACK */
+                Clock_start(Power_module->calClockHandle);
+
+                break;
+            }
+
+            /* else, if ready now, fall thru to next step ... */
+
+
+        case STEP_CAL_LF_1:
+        case STEP_CAL_HF1_1:
+        case STEP_CAL_HF2_1:
+
+            if (Power_module->calStep == STEP_CAL_LF_1) {
+
+                /* set the ACLK reference clock */
+                DDI16BitfieldWrite(AUX_DDI0_OSC_BASE, DDI_0_OSC_O_CTL0,
+                           DDI_0_OSC_CTL0_ACLK_REF_SRC_SEL_M,
+                           DDI_0_OSC_CTL0_ACLK_REF_SRC_SEL_S,
+                           ACLK_REF_SRC_RCOSC_LF);
+
+                /* set next Swi state */
+                Power_module->calStep = STEP_CAL_LF_2;
+            }
+            else {
+
+                /* set the ACLK reference clock */
+                DDI16BitfieldWrite(AUX_DDI0_OSC_BASE, DDI_0_OSC_O_CTL0,
+                       DDI_0_OSC_CTL0_ACLK_REF_SRC_SEL_M,
+                       DDI_0_OSC_CTL0_ACLK_REF_SRC_SEL_S,
+                       ACLK_REF_SRC_RCOSC_HF);
+
+                /* set next Swi state */
+                if (Power_module->calStep == STEP_CAL_HF1_1) {
+                    Power_module->calStep = STEP_CAL_HF1_2;
+                }
+                else {
+                    Power_module->calStep = STEP_CAL_HF2_2;
+                }
+            }
+
+            /* set AUX_WUC:REFCLKCTL.REQ */
+            HWREG(AUX_WUC_BASE + AUX_WUC_O_REFCLKCTL) = AUX_WUC_REFCLKCTL_REQ;
+
+            /* start Clock object to delay while wait for ACK */
+            Clock_start(Power_module->calClockHandle);
+
+            break;
+
+        case STEP_CAL_LF_2:
+        case STEP_CAL_HF1_2:
+        case STEP_CAL_HF2_2:
+
+            if (Power_module->calStep == STEP_CAL_LF_2) {
+
+                /* Set number of periods of ACLK to count */
+                HWREG(AUX_TDCIF_BASE + AUX_TDC_O_TRIGCNTLOAD) =
+                    NUM_RCOSC_LF_PERIODS_TO_MEASURE;
+
+                /* set next Hwi state before triggering TDC */
+                Power_module->hwiState = CAL_RCOSC_LF;
+            }
+            else {
+
+                /* Set number of periods of ACLK to count */
+                HWREG(AUX_TDCIF_BASE + AUX_TDC_O_TRIGCNTLOAD) =
+                    NUM_RCOSC_HF_PERIODS_TO_MEASURE;
+
+                /* set next Hwi state before triggering TDC */
+                if (Power_module->calStep == STEP_CAL_HF2_2) {
+                    Power_module->hwiState = CAL_RCOSC_HF2;
+                }
+                else {
+                    Power_module->hwiState = CAL_RCOSC_HF1;
+                }
+            }
+
+            /* Reset/clear result of TDC */
+            HWREG(AUX_TDCIF_BASE + AUX_TDC_O_CTL) = AUX_TDC_CTL_CMD_CLR_RESULT;
+
+            /* Clear possible pending interrupt source */
+            HWREG(AUX_EVCTL_BASE + AUX_EVCTL_O_EVTOMCUFLAGSCLR) =
+                AUX_EVCTL_EVTOMCUFLAGSCLR_TDC_DONE;
+
+            /* Enable TDC done interrupt as part of AUX_COMBINED interrupt */
+            HWREG(AUX_EVCTL_BASE + AUX_EVCTL_O_COMBEVTOMCUMASK) =
+                AUX_EVCTL_COMBEVTOMCUMASK_TDC_DONE;
+
+            /* Run TDC (start synchronously) */
+            HWREG(AUX_TDCIF_BASE + AUX_TDC_O_CTL) =
+                AUX_TDC_CTL_CMD_RUN_SYNC_START;
+
+            break;
+
+        case STEP_CAL_LF_3:
+        case STEP_CAL_HF1_3:
+
+            /* set next Swi state */
+            if (Power_module->calStep == STEP_CAL_LF_3) {
+                Power_module->calStep = STEP_CAL_HF1_1;
+            }
+            else {
+                Power_module->calStep = STEP_CAL_HF2_1;
+            }
+
+            /* clear AUX_WUC:REFCLKCTL.REQ... */
+            HWREG(AUX_WUC_BASE + AUX_WUC_O_REFCLKCTL) = 0;
+
+            /* start Clock object to delay while wait for ACK */
+            Clock_start(Power_module->calClockHandle);
+
+            break;
+
+        case STEP_CLEANUP_1:
+
+            /* disable TDC counter clock source */
+            HWREG(AUX_WUC_BASE + AUX_WUC_O_TDCCLKCTL) = 0;
+
+            /* set next state */
+            Power_module->calStep = STEP_CLEANUP_2;
+
+            /* start Clock object to delay while wait for ACK */
+            Clock_start(Power_module->calClockHandle);
+
+            break;
+
+        case STEP_CLEANUP_2:
+
+            /* release the TDC clock request */
+            HWREG(AUX_WUC_BASE + AUX_WUC_O_TDCCLKCTL) = 0;
+
+            /* relese the TDC reference clock request */
+            HWREG(AUX_WUC_BASE + AUX_WUC_O_REFCLKCTL) = 0;
+
+            /* release AUX semaphore */
+            HWREG(AUX_SMPH_BASE + AUX_SMPH_O_SMPH1) = 1;
+
+            /* release the power down constraints and XOSC_HF dependency */
+            Power_releaseDependency(XOSC_HF);
+            Power_releaseConstraint(Power_IDLE_PD_DISALLOW);
+            Power_releaseConstraint(Power_SB_DISALLOW);
+
+            /* set next state */
+            Power_module->calStep = STEP_TDC_INIT_1;
+
+#if INSTRUMENT
+            doneCal = TRUE;
+            calHF2i = 1;
+#endif
+            Power_module->busyCal = FALSE;
+            break;
     }
 }
 
 /*
- *  ======== getTdcSemaphore ========
+ *  ======== Power_RCOSC_clockFunc ========
+ */
+Void ti_sysbios_family_arm_cc26xx_Power_RCOSC_clockFunc(UArg arg)
+{
+#if INSTRUMENT
+    calClocks++;
+#endif
+
+    switch (Power_module->calStep) {
+
+        case STEP_TDC_INIT_2:
+            /* finish wait for AUX_WUC:TDCCLKCTL.ACK to be set ... */
+            while(!(HWREG(AUX_WUC_BASE + AUX_WUC_O_TDCCLKCTL) &
+                AUX_WUC_TDCCLKCTL_ACK));
+            break;
+
+        case STEP_CAL_LF_1:
+        case STEP_CAL_HF1_1:
+        case STEP_CAL_HF2_1:
+            /* finish wait for AUX_WUC:REFCLKCTL.ACK to be cleared ... */
+            while(HWREG(AUX_WUC_BASE + AUX_WUC_O_REFCLKCTL) &
+                AUX_WUC_REFCLKCTL_ACK);
+            break;
+
+        case STEP_CAL_LF_2:
+        case STEP_CAL_HF1_2:
+        case STEP_CAL_HF2_2:
+            /* finish wait for AUX_WUC:REFCLKCTL.ACK to be set ... */
+            while(!(HWREG(AUX_WUC_BASE + AUX_WUC_O_REFCLKCTL) &
+                AUX_WUC_REFCLKCTL_ACK));
+            break;
+
+        case STEP_CLEANUP_2:
+            /* finish wait for AUX_WUC:TDCCLKCTL.ACK to be cleared ... */
+            while ((HWREG(AUX_WUC_BASE + AUX_WUC_O_TDCCLKCTL) &
+                AUX_WUC_TDCCLKCTL_ACK));
+            break;
+    }
+
+    Power_doCalibrate();
+}
+
+/*
+ *  ======== Power_getTdcSemaphore ========
  *  Get TDC semaphore (number 1)
  */
-static Bool getTdcSemaphore()
+Bool Power_getTdcSemaphore()
 {
     UInt own;
 
@@ -321,97 +568,10 @@ static Bool getTdcSemaphore()
 }
 
 /*
- *  ======== tdcInit ========
- *  Initialize the TDC
- */
-static Void tdcInit()
-{
-    /* Turn on clock to TDC module */
-    AUXWUCClockEnable(AUX_WUC_TDCIF_CLOCK);
-
-    /* Set saturation config to 2^24 */
-    HWREG(AUX_TDCIF_BASE + AUX_TDC_O_SATCFG) = AUX_TDC_SATCFG_LIMIT_ROVF;
-
-    /* Set start and stop trigger sources and polarity */
-    HWREG(AUX_TDCIF_BASE + AUX_TDC_O_TRIGSRC) =
-        (AUX_TDC_TRIGSRC_STOP_SRC_ACLK_REF | AUX_TDC_TRIGSRC_STOP_POL_HIGH) |
-        (AUX_TDC_TRIGSRC_START_SRC_ACLK_REF | AUX_TDC_TRIGSRC_START_POL_HIGH);
-
-    /* Set TDC_SRC clock to be XOSC_HF/2 = 24 MHz */
-    DDI16BitfieldWrite(AUX_DDI0_OSC_BASE, DDI_0_OSC_O_CTL0,
-                           DDI_0_OSC_CTL0_ACLK_TDC_SRC_SEL_M,
-                           DDI_0_OSC_CTL0_ACLK_TDC_SRC_SEL_S,
-                           2);
-
-    /* Set AUX_WUC:TDCCLKCTL.REQ... */
-    HWREG(AUX_WUC_BASE + AUX_WUC_O_TDCCLKCTL) = AUX_WUC_TDCCLKCTL_REQ;
-
-    /* Wait for AUX_WUC:TDCCLKCTL.ACK to be set... */
-    while(!(HWREG(AUX_WUC_BASE + AUX_WUC_O_TDCCLKCTL) & AUX_WUC_TDCCLKCTL_ACK));
-
-    /* Enable trig count */
-    HWREG(AUX_TDCIF_BASE + AUX_TDC_O_TRIGCNTCFG) = AUX_TDC_TRIGCNTCFG_EN;
-}
-
-/*
- *  ======== tdcPerformRcOscMeasurement ========
- *  Initiate counting of clock edges versus XOSC_HF clock source
- *
- *  refClkSrc: The reference clock source:
- *      0 = RCOSC_HF (divided by 1536) = 31.25 kHz
- *      2 = RCOSC_LF
- *
- *  numEdgesToCount: Number of edges to count
- *
- *  Returns: The 32-bit TDC result count value
- *
- */
-static Void tdcPerformRcOscMeasurement(UInt32 refClkSrc, UInt32 numEdgesToCount)
-{
-    /* Abort TDC */
-    HWREG(AUX_TDCIF_BASE + AUX_TDC_O_CTL) = AUX_TDC_CTL_CMD_ABORT;
-
-    /* Clear AUX_WUC:REFCLKCTL.REQ... */
-    HWREG(AUX_WUC_BASE + AUX_WUC_O_REFCLKCTL) = 0;
-
-    /* ...and wait for AUX_WUC:REFCLKCTL.ACK to be cleared */
-    while(HWREG(AUX_WUC_BASE + AUX_WUC_O_REFCLKCTL) & AUX_WUC_REFCLKCTL_ACK);
-
-    /* Set the ACLK reference clock */
-    DDI16BitfieldWrite(AUX_DDI0_OSC_BASE, DDI_0_OSC_O_CTL0,
-                           DDI_0_OSC_CTL0_ACLK_REF_SRC_SEL_M,
-                           DDI_0_OSC_CTL0_ACLK_REF_SRC_SEL_S,
-                           refClkSrc);
-
-    /* ...and AUX_WUC:REFCLKCTL.REQ */
-    HWREG(AUX_WUC_BASE + AUX_WUC_O_REFCLKCTL) = AUX_WUC_REFCLKCTL_REQ;
-
-    /* Wait for AUX_WUC:REFCLKCTL.ACK to be set... */
-    while(!(HWREG(AUX_WUC_BASE + AUX_WUC_O_REFCLKCTL) & AUX_WUC_REFCLKCTL_ACK));
-
-    /* Set number of periods of ACLK to count */
-    HWREG(AUX_TDCIF_BASE + AUX_TDC_O_TRIGCNTLOAD) = numEdgesToCount;
-
-    /* Reset/clear result of TDC */
-    HWREG(AUX_TDCIF_BASE + AUX_TDC_O_CTL) = AUX_TDC_CTL_CMD_CLR_RESULT;
-
-    /* Clear possible pending interrupt source */
-    HWREG(AUX_EVCTL_BASE + AUX_EVCTL_O_EVTOMCUFLAGSCLR) =
-        AUX_EVCTL_EVTOMCUFLAGSCLR_TDC_DONE;
-
-    /* Enable TDC done interrupt as part of AUX_COMBINED interrupt */
-    HWREG(AUX_EVCTL_BASE + AUX_EVCTL_O_COMBEVTOMCUMASK) =
-        AUX_EVCTL_COMBEVTOMCUMASK_TDC_DONE;
-
-    /* Run TDC (start synchronously) */
-    HWREG(AUX_TDCIF_BASE + AUX_TDC_O_CTL) = AUX_TDC_CTL_CMD_RUN_SYNC_START;
-}
-
-/*
- *  ======== updateSubSecInc ========
+ *  ======== Power_updateSubSecInc ========
  *  Update the SUBSECINC register based on measured RCOSC_LF frequency
  */
-static Void updateSubSecInc(UInt32 tdcResult)
+Void Power_updateSubSecInc(UInt32 tdcResult)
 {
     UInt32 newSubSecInc;
     UInt32 oldSubSecInc;
@@ -424,11 +584,11 @@ static Void updateSubSecInc(UInt32 tdcResult)
     newSubSecInc = (45813 * tdcResult) / 256;
 
     /* Apply filter, but not for first calibration */
-    if (firstLF) {
+    if (Power_module->firstLF) {
         /* Don't apply filter first time, to converge faster */
         subSecInc = newSubSecInc;
         /* No longer first measurement */
-        firstLF = FALSE;
+        Power_module->firstLF = FALSE;
     }
     else {
         /* Read old SUBSECINC value */
@@ -447,17 +607,19 @@ static Void updateSubSecInc(UInt32 tdcResult)
 }
 
 /*
- *  ======== calibrateRcoscHf1 ========
+ *  ======== Power_calibrateRcoscHf1 ========
  *  Calibrate RCOSC_HF agains XOSC_HF: compute and setup new trims
  */
-static Void calibrateRcoscHf1(Int32 tdcResult)
+Void Power_calibrateRcoscHf1(Int32 tdcResult)
 {
     /* read current trims */
-    nCtrimCurr = (DDI32RegRead(AUX_DDI0_OSC_BASE, DDI_0_OSC_O_RCOSCHFCTL) &
+    Power_module->nCtrimCurr =
+        (DDI32RegRead(AUX_DDI0_OSC_BASE, DDI_0_OSC_O_RCOSCHFCTL) &
         DDI_0_OSC_RCOSCHFCTL_RCOSCHF_CTRIM_M) >>
         DDI_0_OSC_RCOSCHFCTL_RCOSCHF_CTRIM_S;
 
-    nCtrimFractCurr = (DDI32RegRead(AUX_DDI0_OSC_BASE, DDI_0_OSC_O_CTL1_LOCAL)
+    Power_module->nCtrimFractCurr =
+        (DDI32RegRead(AUX_DDI0_OSC_BASE, DDI_0_OSC_O_CTL1_LOCAL)
         & DDI_0_OSC_CTL1_RCOSCHFCTRIMFRACT_LOCAL_M) >>
         DDI_0_OSC_CTL1_RCOSCHFCTRIMFRACT_LOCAL_S;
 
@@ -467,27 +629,28 @@ static Void calibrateRcoscHf1(Int32 tdcResult)
      *   Negative value => RCOSC_HF runs fast, CTRIM(FRACT) should be decreased
      * Resolution: 31.25 kHz; CTRIMFRACT resolution ~30 kHz
      */
-    nDeltaFreqCurr = (Int32) tdcResult - 1536;
+    Power_module->nDeltaFreqCurr = (Int32) tdcResult - 1536;
 
     /*
      * Calculate change to CTRIMFRACT with safe assumptions of gain,
      * apply delta to current CTRIMFRACT and convert to valid CTRIM/CTRIMFRACT
      */
-    nCtrimFractNew = nCtrimFractCurr + scaleRndInf(nDeltaFreqCurr);
-    nCtrimNew = nCtrimCurr;
+    Power_module->nCtrimFractNew = Power_module->nCtrimFractCurr +
+        Power_scaleRndInf(Power_module->nDeltaFreqCurr);
+    Power_module->nCtrimNew = Power_module->nCtrimCurr;
 
     /* One step of CTRIM is about 500 kHz, so limit to one CTRIM step */
-    if (nCtrimFractNew < 2)
+    if (Power_module->nCtrimFractNew < 2)
     {
         /* Below sweet spot of current CTRIM => decrease CTRIM */
-        nCtrimNew = MAX(-0x40, nCtrimNew-1);
-        nCtrimFractNew = MAX(0, nCtrimFractNew+16);
+        Power_module->nCtrimNew = MAX(-0x40, Power_module->nCtrimNew - 1);
+        Power_module->nCtrimFractNew = MAX(0, Power_module->nCtrimFractNew+16);
     }
-    else if (nCtrimFractNew > 29)
+    else if (Power_module->nCtrimFractNew > 29)
     {
         /* Above sweet spot of current CTRIM => increase CTRIM */
-        nCtrimNew = MIN(0x3F, nCtrimNew+1);
-        nCtrimFractNew = MIN(31, nCtrimFractNew-16);
+        Power_module->nCtrimNew = MIN(0x3F, Power_module->nCtrimNew + 1);
+        Power_module->nCtrimFractNew = MIN(31, Power_module->nCtrimFractNew-16);
     }
     else
     {
@@ -498,7 +661,7 @@ static Void calibrateRcoscHf1(Int32 tdcResult)
     DDI16BitfieldWrite(AUX_DDI0_OSC_BASE, DDI_0_OSC_O_RCOSCHFCTL,
                            DDI_0_OSC_RCOSCHFCTL_RCOSCHF_CTRIM_M,
                            DDI_0_OSC_RCOSCHFCTL_RCOSCHF_CTRIM_S,
-                           nCtrimNew);
+                           Power_module->nCtrimNew);
 
     /* Enable RCOSCHFCTRIMFRACT_EN */
     DDI16BitfieldWrite(AUX_DDI0_OSC_BASE, DDI_0_OSC_O_CTL1_LOCAL,
@@ -510,14 +673,14 @@ static Void calibrateRcoscHf1(Int32 tdcResult)
     DDI16BitfieldWrite(AUX_DDI0_OSC_BASE, DDI_0_OSC_O_CTL1_LOCAL,
                            DDI_0_OSC_CTL1_RCOSCHFCTRIMFRACT_LOCAL_M,
                            DDI_0_OSC_CTL1_RCOSCHFCTRIMFRACT_LOCAL_S,
-                           nCtrimFractNew);
+                           Power_module->nCtrimFractNew);
 }
 
 /*
- *  ======== calibrateRcoscHf2 ========
+ *  ======== Power_calibrateRcoscHf2 ========
  *  Calibrate RCOSC_HF agains XOSC_HF: determine better result, set new trims
  */
-static Void calibrateRcoscHf2(Int32 tdcResult)
+Void Power_calibrateRcoscHf2(Int32 tdcResult)
 {
     Int32 nDeltaFreqNew;
 
@@ -525,7 +688,7 @@ static Void calibrateRcoscHf2(Int32 tdcResult)
     nDeltaFreqNew = (Int32) tdcResult - 1536;
 
     /* Determine whether the new settings are better or worse */
-    if (abs(nDeltaFreqNew) <= abs(nDeltaFreqCurr))
+    if (Power_abs(nDeltaFreqNew) <= Power_abs(Power_module->nDeltaFreqCurr))
     {
         /* new settings are better or same, keep them in registers */
     }
@@ -535,9 +698,10 @@ static Void calibrateRcoscHf2(Int32 tdcResult)
          * Current setting were better, check whether we are getting fooled
          * by non-monotonicity in CTRIM
          */
-        nCtrimFractNew += scaleRndInf(nDeltaFreqNew);
-        if (nCtrimCurr != nCtrimNew && abs(nCtrimFractCurr - 16) >
-            abs(nCtrimFractNew - 16)) {
+        Power_module->nCtrimFractNew += Power_scaleRndInf(nDeltaFreqNew);
+        if (Power_module->nCtrimCurr != Power_module->nCtrimNew &&
+            Power_abs(Power_module->nCtrimFractCurr - 16) >
+            Power_abs(Power_module->nCtrimFractNew - 16)) {
 
             /*
              * New settings updated based on frequency measurements are more
@@ -547,7 +711,7 @@ static Void calibrateRcoscHf2(Int32 tdcResult)
             DDI16BitfieldWrite(AUX_DDI0_OSC_BASE, DDI_0_OSC_O_CTL1_LOCAL,
                            DDI_0_OSC_CTL1_RCOSCHFCTRIMFRACT_LOCAL_M,
                            DDI_0_OSC_CTL1_RCOSCHFCTRIMFRACT_LOCAL_S,
-                           nCtrimFractNew);
+                           Power_module->nCtrimFractNew);
         }
         else {
             /* New settings updated based on frequency measurements are less
@@ -557,60 +721,29 @@ static Void calibrateRcoscHf2(Int32 tdcResult)
             DDI16BitfieldWrite(AUX_DDI0_OSC_BASE, DDI_0_OSC_O_RCOSCHFCTL,
                            DDI_0_OSC_RCOSCHFCTL_RCOSCHF_CTRIM_M,
                            DDI_0_OSC_RCOSCHFCTL_RCOSCHF_CTRIM_S,
-                           nCtrimCurr);
+                           Power_module->nCtrimCurr);
             DDI16BitfieldWrite(AUX_DDI0_OSC_BASE, DDI_0_OSC_O_CTL1_LOCAL,
                            DDI_0_OSC_CTL1_RCOSCHFCTRIMFRACT_LOCAL_M,
                            DDI_0_OSC_CTL1_RCOSCHFCTRIMFRACT_LOCAL_S,
-                           nCtrimFractCurr);
+                           Power_module->nCtrimFractCurr);
         }
     }
 }
 
 /*
- *  ======== abs ========
+ *  ======== Power_abs ========
  *  Absolute value
  */
-static Int abs(Int i)
+Int Power_abs(Int i)
 {
     /* compute absolute value of int argument */
     return (i < 0 ? -i : i);
 }
 
 /*
- *  ======== scaleRndInf ========
+ *  ======== Power_scaleRndInf ========
  */
-static Int32 scaleRndInf(Int32 x)
+Int32 Power_scaleRndInf(Int32 x)
 {
     return (2*x + ((x<0) ? -2 : 2))/3;
-}
-
-/*
- *  ======== cleanupAfterMeasurements ========
- */
-static Void cleanupAfterMeasurements(Void)
-{
-    /* disable TDC counter clock source */
-    HWREG(AUX_WUC_BASE + AUX_WUC_O_TDCCLKCTL) = 0;
-
-    /* wait for AUX_WUC:TDCCLKCTL.ACK to be set... */
-    while ((HWREG(AUX_WUC_BASE + AUX_WUC_O_TDCCLKCTL) &
-        AUX_WUC_TDCCLKCTL_ACK));
-
-    /* release the TDC clock request */
-    HWREG(AUX_WUC_BASE + AUX_WUC_O_TDCCLKCTL) = 0;
-
-    /* relese the TDC reference clock request */
-    HWREG(AUX_WUC_BASE + AUX_WUC_O_REFCLKCTL) = 0;
-
-    /* release AUX semaphore */
-    HWREG(AUX_SMPH_BASE + AUX_SMPH_O_SMPH1) = 1;
-
-    /* release the power down constraints and XOSC_HF dependency */
-    Power_releaseDependency(XOSC_HF);
-    Power_releaseConstraint(Power_IDLE_PD_DISALLOW);
-    Power_releaseConstraint(Power_SB_DISALLOW);
-
-#if INSTRUMENT
-        calHF2 = 1;
-#endif
 }

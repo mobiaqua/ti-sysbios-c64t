@@ -38,16 +38,64 @@
 var ROM = xdc.useModule('ti.sysbios.rom.ROM');
 
 ROM.generatedFuncs.$add("xdc_runtime_Startup_getState__I");
-ROM.generatedFuncs.$add("xdc_runtime_System_SupportProxy_Module__startupDone__S");
-ROM.generatedFuncs.$add("xdc_runtime_System_SupportProxy_abort__E");
-ROM.generatedFuncs.$add("xdc_runtime_System_SupportProxy_exit__E");
-ROM.generatedFuncs.$add("xdc_runtime_System_SupportProxy_flush__E");
-ROM.generatedFuncs.$add("xdc_runtime_System_SupportProxy_putch__E");
-ROM.generatedFuncs.$add("xdc_runtime_System_SupportProxy_ready__E");
+
+/* proxy module APIs invoked from within ROM */
+ROM.generatedFuncs.$add("ti_sysbios_hal_Timer_TimerProxy_create");
+ROM.generatedFuncs.$add("ti_sysbios_hal_Timer_TimerProxy_delete");
+ROM.generatedFuncs.$add("ti_sysbios_hal_Timer_TimerProxy_getCount__E");
+ROM.generatedFuncs.$add("ti_sysbios_hal_Timer_TimerProxy_getCurrentTick__E");
+ROM.generatedFuncs.$add("ti_sysbios_hal_Timer_TimerProxy_getExpiredCounts__E");
+ROM.generatedFuncs.$add("ti_sysbios_hal_Timer_TimerProxy_getExpiredTicks__E");
+ROM.generatedFuncs.$add("ti_sysbios_hal_Timer_TimerProxy_getFreq__E");
+ROM.generatedFuncs.$add("ti_sysbios_hal_Timer_TimerProxy_getFunc__E");
+ROM.generatedFuncs.$add("ti_sysbios_hal_Timer_TimerProxy_getMaxTicks__E");
+ROM.generatedFuncs.$add("ti_sysbios_hal_Timer_TimerProxy_getNumTimers__E");
+ROM.generatedFuncs.$add("ti_sysbios_hal_Timer_TimerProxy_getPeriod__E");
+ROM.generatedFuncs.$add("ti_sysbios_hal_Timer_TimerProxy_getStatus__E");
+ROM.generatedFuncs.$add("ti_sysbios_hal_Timer_TimerProxy_Module__startupDone__S");
+ROM.generatedFuncs.$add("ti_sysbios_hal_Timer_TimerProxy_Object__create__S");
+ROM.generatedFuncs.$add("ti_sysbios_hal_Timer_TimerProxy_Object__delete__S");
+ROM.generatedFuncs.$add("ti_sysbios_hal_Timer_TimerProxy_setFunc__E");
+ROM.generatedFuncs.$add("ti_sysbios_hal_Timer_TimerProxy_setNextTick__E");
+ROM.generatedFuncs.$add("ti_sysbios_hal_Timer_TimerProxy_setPeriod__E");
+ROM.generatedFuncs.$add("ti_sysbios_hal_Timer_TimerProxy_setPeriodMicroSecs__E");
+ROM.generatedFuncs.$add("ti_sysbios_hal_Timer_TimerProxy_start__E");
+ROM.generatedFuncs.$add("ti_sysbios_hal_Timer_TimerProxy_startup__E");
+ROM.generatedFuncs.$add("ti_sysbios_hal_Timer_TimerProxy_stop__E");
+ROM.generatedFuncs.$add("ti_sysbios_hal_Timer_TimerProxy_trigger__E");
+
+ROM.generatedFuncs.$add("ti_sysbios_knl_Clock_TimerProxy_getCurrentTick__E");
+ROM.generatedFuncs.$add("ti_sysbios_knl_Clock_TimerProxy_getMaxTicks__E");
+ROM.generatedFuncs.$add("ti_sysbios_knl_Clock_TimerProxy_getNumTimers__E");
+ROM.generatedFuncs.$add("ti_sysbios_knl_Clock_TimerProxy_getPeriod__E");
+ROM.generatedFuncs.$add("ti_sysbios_knl_Clock_TimerProxy_getStatus__E");
+ROM.generatedFuncs.$add("ti_sysbios_knl_Clock_TimerProxy_Module__startupDone__S");
+ROM.generatedFuncs.$add("ti_sysbios_knl_Clock_TimerProxy_Object__delete__S");
+ROM.generatedFuncs.$add("ti_sysbios_knl_Clock_TimerProxy_setNextTick__E");
+ROM.generatedFuncs.$add("ti_sysbios_knl_Clock_TimerProxy_setPeriodMicroSecs__E");
+ROM.generatedFuncs.$add("ti_sysbios_knl_Clock_TimerProxy_start__E");
+ROM.generatedFuncs.$add("ti_sysbios_knl_Clock_TimerProxy_stop__E");
+ROM.generatedFuncs.$add("ti_sysbios_knl_Clock_TimerProxy_startup__E");
+
+/* c28 Hwi module generated APIs */
 ROM.generatedFuncs.$add("ti_sysbios_family_c28_Hwi_startup__E");
 ROM.generatedFuncs.$add("ti_sysbios_family_c28_Hwi_enableIER__E");
 ROM.generatedFuncs.$add("ti_sysbios_family_c28_Hwi_disableIER__E");
 ROM.generatedFuncs.$add("ti_sysbios_family_c28_Hwi_restoreIER__E");
+
+/* xdc runtime APIs invoked within ROM */
+ROM.generatedFuncs.$add("xdc_runtime_Error_check__E");
+ROM.generatedFuncs.$add("xdc_runtime_Error_raiseX__E");
+ROM.generatedFuncs.$add("xdc_runtime_Memory_alloc__E");
+ROM.generatedFuncs.$add("xdc_runtime_Memory_calloc__E");
+ROM.generatedFuncs.$add("xdc_runtime_Memory_free__E");
+ROM.generatedFuncs.$add("xdc_runtime_Memory_getMaxDefaultTypeAlign__E");
+ROM.generatedFuncs.$add("xdc_runtime_System_exit__E");
+ROM.generatedFuncs.$add("xdc_runtime_Core_assignLabel__I"); 
+ROM.generatedFuncs.$add("xdc_runtime_Core_assignParams__I"); 
+ROM.generatedFuncs.$add("xdc_runtime_Core_constructObject__I"); 
+ROM.generatedFuncs.$add("xdc_runtime_Core_createObject__I"); 
+ROM.generatedFuncs.$add("xdc_runtime_Core_deleteObject__I");
 
 /* surgically excluded funcs */
 ROM.excludedFuncs.$add("ti_sysbios_family_c28_Timer_setPeriodMicroSecs__E"); /* calls rts lib uldiv */

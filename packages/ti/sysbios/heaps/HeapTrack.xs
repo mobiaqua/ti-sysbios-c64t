@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,6 +75,8 @@ function instance$static$init(obj, params)
     obj.internalHeap = params.heap;
     obj.size = 0;
     obj.peak = 0;
+    obj.sizeWithoutTracker = 0;
+    obj.peakWithoutTracker = 0;
 }
 
 /*
@@ -87,8 +89,10 @@ function viewInitBasic(view, obj)
     var Program = xdc.useModule('xdc.rov.Program');
 
     view.heapHandle = obj.internalHeap;
-    view.heapSize = "0x" + Number(obj.size).toString(16);
-    view.heapPeak = "0x" + Number(obj.peak).toString(16);
+    view.inUse = "0x" + Number(obj.size).toString(16);
+    view.inUsePeak = "0x" + Number(obj.peak).toString(16);
+    view.inUseWithoutTracker = "0x" + Number(obj.sizeWithoutTracker).toString(16);
+    view.inUsePeakWithoutTracker = "0x" + Number(obj.peakWithoutTracker).toString(16);
 }
 
 /*
@@ -171,7 +175,7 @@ function viewInitTask()
                Number(modHeapTrack.instStates[index].internalHeap).toString(16);
             heapView.blockAddr = "0x" +
                         Number(tracker.$addr - tracker.size - rem).toString(16);
-            heapView.size = "0x" + Number(tracker.size).toString(16);
+            heapView.requestedSize = "0x" + Number(tracker.size).toString(16);
             heapView.clockTick = Number(tracker.tick).toString();
 
             /* Check scribble */
@@ -263,7 +267,7 @@ function viewInitHeapList(view, obj)
         listView.heapHandle = "0x" + Number(obj.internalHeap).toString(16);
         listView.blockAddr = "0x" +
                         Number(tracker.$addr - tracker.size - rem).toString(16);
-        listView.size = "0x" + Number(tracker.size).toString(16);
+        listView.requestedSize = "0x" + Number(tracker.size).toString(16);
         listView.clockTick = Number(tracker.tick).toString();
         /* Check scribble */
         if (tracker.scribble == HeapTrack.STARTSCRIBBLE) {

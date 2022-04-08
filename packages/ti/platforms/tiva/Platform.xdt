@@ -54,7 +54,7 @@
 %    ((Program.build.target.name == "M3") || 
 %     (Program.build.target.name == "M4") ||
 %     (Program.build.target.name == "M4F"))) {
-UChar ti_platforms_tiva_stack[`Program.stack`] __attribute__ ((aligned(8), section (".stack")));
+xdc_UChar ti_platforms_tiva_stack[`Program.stack`] __attribute__ ((aligned(8), section (".stack")));
 % }
 %%{
 /*

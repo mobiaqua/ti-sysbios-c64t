@@ -34,13 +34,8 @@
  */
 
 #include <xdc/std.h>
-#include <xdc/runtime/Assert.h>
-#include <xdc/runtime/Diags.h>
-#include <xdc/runtime/Error.h>
-#include <xdc/runtime/Memory.h>
 
 #include <ti/sysbios/BIOS.h>
-#include <ti/sysbios/hal/Hwi.h>
 #include <ti/sysbios/knl/Clock.h>
 #include <ti/sysbios/knl/Queue.h>
 #include <ti/sysbios/knl/Semaphore.h>
@@ -49,25 +44,13 @@
 #include <ti/sysbios/posix/pthread.h>
 #include <ti/sysbios/posix/_pthread_error.h>
 
-#define _PTHREAD_DEBUG 1
 
-/*
- *
- */
 typedef struct CondElem {
     Queue_Elem       qElem;
     Semaphore_Struct sem;
 } CondElem;
 
-
-/*
- *  ======== pthread_cond_Obj ========
- */
-typedef struct pthread_Cond_Obj {
-    Queue_Struct     waitList;
-} pthread_cond_Obj;
-
-static int condWait(pthread_cond_Obj *cond, pthread_mutex_t *mutex,
+static int condWait(pthread_cond_t *cond, pthread_mutex_t *mutex,
         UInt32 timeout);
 
 /*
@@ -84,37 +67,12 @@ int pthread_condattr_destroy(pthread_condattr_t *attr)
 }
 
 /*
- *  ======== pthread_condattr_getpshared ========
- */
-int pthread_condattr_getpshared(const pthread_condattr_t *attr, int *pshared)
-{
-    *pshared = attr->pshared;
-    return (0);
-}
-
-/*
  *  ======== pthread_condattr_init ========
  */
 int pthread_condattr_init(pthread_condattr_t * attr)
 {
-    attr->pshared = PTHREAD_PROCESS_PRIVATE;
     return (0);
 }
-
-/*
- *  ======== pthread_condattr_setpshared ========
- */
-int pthread_condattr_setpshared(pthread_condattr_t *attr, int pshared)
-{
-    if ((pshared != PTHREAD_PROCESS_PRIVATE) &&
-            (pshared != PTHREAD_PROCESS_SHARED)) {
-        return (EINVAL);
-    }
-
-    attr->pshared = pshared;
-    return (0);
-}
-
 
 /*
  *************************************************************************
@@ -126,16 +84,21 @@ int pthread_condattr_setpshared(pthread_condattr_t *attr, int pshared)
  */
 int pthread_cond_broadcast(pthread_cond_t *cond)
 {
-    pthread_cond_Obj  *condObj = (pthread_cond_Obj *)*cond;
-    CondElem          *condElem;
+    CondElem     *condElem;
+    UInt          key;
 
-    /* Calling thread is holding the mutex */
+    /*
+     *  The calling thread is not required to hold the mutex when
+     *  calling pthread_cond_broadcast() or pthread_cond_signal().
+     */
+    key = Task_disable();
 
-    while (!Queue_empty(Queue_handle(&(condObj->waitList)))) {
-        condElem = (CondElem *)Queue_dequeue(Queue_handle(&(condObj->waitList)));
+    while (!Queue_empty(Queue_handle(&(cond->waitList)))) {
+        condElem = (CondElem *)Queue_dequeue(Queue_handle(&(cond->waitList)));
 
         Semaphore_post(Semaphore_handle(&condElem->sem));
     }
+    Task_restore(key);
 
     return (0);
 }
@@ -145,13 +108,7 @@ int pthread_cond_broadcast(pthread_cond_t *cond)
  */
 int pthread_cond_destroy(pthread_cond_t *cond)
 {
-    pthread_cond_Obj *condObj = (pthread_cond_Obj *)*cond;
-
-    Queue_destruct(&condObj->waitList);
-
-    Memory_free(Task_Object_heap(), condObj, sizeof(pthread_cond_Obj));
-
-    *cond = PTHREAD_COND_INITIALIZER;
+    Queue_destruct(&cond->waitList);
 
     return (0);
 }
@@ -161,23 +118,7 @@ int pthread_cond_destroy(pthread_cond_t *cond)
  */
 int pthread_cond_init(pthread_cond_t *cond, const pthread_condattr_t *attr)
 {
-    pthread_cond_Obj   *condObj;
-    Error_Block         eb;
-
-    Error_init(&eb);
-
-    *cond = PTHREAD_COND_INITIALIZER;
-
-    // TODO: Is Task_Object_heap() ok to use?
-    condObj = (pthread_cond_Obj *)Memory_alloc(Task_Object_heap(),
-            sizeof(pthread_cond_Obj), 0, &eb);
-
-    if (condObj == NULL) {
-        return (ENOMEM);
-    }
-
-    Queue_construct(&(condObj->waitList), NULL);
-    *cond = (pthread_cond_t)condObj;
+    Queue_construct(&(cond->waitList), NULL);
 
     return (0);
 }
@@ -187,13 +128,23 @@ int pthread_cond_init(pthread_cond_t *cond, const pthread_condattr_t *attr)
  */
 int pthread_cond_signal(pthread_cond_t *cond)
 {
-    pthread_cond_Obj  *condObj = (pthread_cond_Obj *)*cond;
-    CondElem          *condElem;
+    CondElem  *elem;
+    UInt          key;
 
-    /* The calling thread is holding the mutex */
-    condElem = (CondElem *)Queue_dequeue(Queue_handle(&(condObj->waitList)));
+    /*
+     *  The calling thread is not required to hold the mutex when
+     *  calling pthread_cond_broadcast() or pthread_cond_signal().
+     */
+    key = Task_disable();
 
-    Semaphore_post(Semaphore_handle(&condElem->sem));
+    if (!Queue_empty(Queue_handle(&(cond->waitList)))) {
+        /* The calling thread is holding the mutex */
+        elem = (CondElem *)Queue_dequeue(Queue_handle(&(cond->waitList)));
+        Queue_elemClear(&(elem->qElem));
+
+        Semaphore_post(Semaphore_handle(&elem->sem));
+    }
+    Task_restore(key);
 
     return (0);
 }
@@ -204,18 +155,34 @@ int pthread_cond_signal(pthread_cond_t *cond)
 int pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
         const struct timespec *abstime)
 {
-    pthread_cond_Obj  *condObj = (pthread_cond_Obj *)*cond;
+    struct timespec    curtime;
     UInt32             timeout;
-    long               usecs;
+    long               usecs = 0;
+    time_t             secs = 0;
 
-    if ((abstime->tv_nsec < 0) || (1000000000 < abstime->tv_nsec)) {
+    if ((abstime->tv_nsec < 0) || (1000000000 <= abstime->tv_nsec)) {
         return (EINVAL);
     }
 
-    usecs = abstime->tv_sec * 1000000 + abstime->tv_nsec / 1000;
-    timeout = usecs / Clock_tickPeriod;
+    clock_gettime(0, &curtime);
+    secs = abstime->tv_sec - curtime.tv_sec;
 
-    return (condWait(condObj, mutex, timeout));
+    if ((abstime->tv_sec < curtime.tv_sec) ||
+            ((secs == 0) && (abstime->tv_nsec <= curtime.tv_nsec))) {
+        timeout = 0;
+    }
+    else {
+        usecs = (abstime->tv_nsec - curtime.tv_nsec) / 1000;
+
+        if (usecs < 0) {
+            usecs += 1000000;
+            secs--;
+        }
+        usecs += (long)secs * 1000000;
+        timeout = (UInt32)(usecs / Clock_tickPeriod);
+    }
+
+    return (condWait(cond, mutex, timeout));
 }
 
 /*
@@ -223,24 +190,25 @@ int pthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
  */
 int pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex)
 {
-    pthread_cond_Obj *condObj = (pthread_cond_Obj *)*cond;
-
-    return (condWait(condObj, mutex, BIOS_WAIT_FOREVER));
+    return (condWait(cond, mutex, BIOS_WAIT_FOREVER));
 }
 
 /*
- *  ======== pthread_cond_wait ========
+ *  ======== condWait ========
  */
-static int condWait(pthread_cond_Obj *cond, pthread_mutex_t *mutex,
+static int condWait(pthread_cond_t *cond, pthread_mutex_t *mutex,
         UInt32 timeout)
 {
     CondElem          condElem;
     Semaphore_Params  semParams;
     int               ret = 0;
+    UInt              key;
 
     /*
-     *  The calling thread is holding mutex so we don't need to call
-     *  Task_disable() to protect the condition variable's waitList.
+     *  The calling thread is holding mutex but threads signalling
+     *  the condition variable are not required to hold the mutex.
+     *  Therefore, we need to call Task_disable() to protect the
+     *  condition variable's waitList.
      */
 
     Queue_elemClear(&(condElem.qElem));
@@ -249,11 +217,17 @@ static int condWait(pthread_cond_Obj *cond, pthread_mutex_t *mutex,
     semParams.mode = Semaphore_Mode_BINARY;
     Semaphore_construct(&(condElem.sem), 0, &semParams);
 
+    key = Task_disable();
     Queue_enqueue(Queue_handle(&(cond->waitList)), (Queue_Elem *)&condElem);
+    Task_restore(key);
 
     pthread_mutex_unlock(mutex);
 
     if (!Semaphore_pend(Semaphore_handle(&condElem.sem), timeout)) {
+        key = Task_disable();
+        Queue_remove((Queue_Elem *)&condElem);
+        Task_restore(key);
+
         ret = ETIMEDOUT;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,10 +55,10 @@ function init()
         );
     }
 
-    Program.$logWarning("Support for the legacy DSP/BIOS 5.x APIs " +
-        "has been deprecated. " +
-        "These APIs may not be supported in a future release of SYS/BIOS. " +
-        "Please update your code to use the equivalent SYS/BIOS APIs.", this);
+    Program.$logWarning("The DSP/BIOS compatibility APIs are no longer " +
+       "supported. The ti/bios/include files and library can be used as-is " +
+       "but they will not be supported in this or future releases. We " +
+       "recommend that you use the native SYS/BIOS APIs.", this);
 
     /* function to return the instance with the specified name */
     function inst(name)
@@ -445,12 +445,4 @@ function validate()
         }
 
     }
-}
-
-/*
- *  ======== Package.getSects ========
- */
-function getSects()
-{
-    return "ti/bios/linkcmd.xdt";
 }

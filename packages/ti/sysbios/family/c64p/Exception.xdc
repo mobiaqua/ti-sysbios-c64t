@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -101,6 +101,11 @@ import xdc.runtime.Log;
 @DirectCall
 module Exception
 {
+    /*! @_nodoc */
+    metaonly struct ModuleView {
+        String      exception;      /* Summary Exception */
+    };
+
     /*!
      *  ======== rovViewInfo ========
      *  @_nodoc
@@ -114,6 +119,13 @@ module Exception
                         type: ViewInfo.TREE,
                         viewInitFxn: 'viewInitException',
                         structName: 'Context'
+                    }
+                ],
+                ['Module',
+                    {
+                        type: ViewInfo.MODULE,
+                        viewInitFxn: 'viewInitModule',
+                        structName: 'ModuleView'
                     }
                 ]
             ]

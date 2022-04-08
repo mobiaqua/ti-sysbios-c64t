@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2014-2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,10 +46,10 @@ module Seconds inherits ti.sysbios.interfaces.ISeconds
 internal:
 
     /*!
-     *  ======== getSeconds ========
+     *  ======== getCount ========
      *  Helper function for reading RTC registers.
      */
-    UInt32 getSeconds();
+    UInt64 getCount();
 
     struct Module_State {
         UInt32        setSeconds;

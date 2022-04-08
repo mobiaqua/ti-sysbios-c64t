@@ -27,11 +27,11 @@
 % /* Don't generate Boot funcs if this is a romimage */
 % if (!Program.$$isrom && (Program.build.rtsName !== null)) {
 %var Boot = xdc.module("ti.catalog.arm.cortexm3.concertoInit.Boot");
-    extern ti_catalog_arm_cortexm3_concertoInit_Boot_configurePllDivs(UInt iMult, UInt fMult, UInt sysDiv, UInt m3Div);
-    extern ti_catalog_arm_cortexm3_concertoInit_Boot_stepDelay(Void);
-    extern ti_catalog_arm_cortexm3_concertoInit_Boot_initC28RAMs(Void);
-    extern ti_catalog_arm_cortexm3_concertoInit_Boot_bootC28(Void);
-    extern ti_catalog_arm_cortexm3_concertoInit_Boot_initFlash(Bool configWaitStates, UInt waitStates, Bool enableProgramCache, Bool enableDataCache);
+    extern ti_catalog_arm_cortexm3_concertoInit_Boot_configurePllDivs(xdc_UInt iMult, xdc_UInt fMult, xdc_UInt sysDiv, xdc_UInt m3Div);
+    extern ti_catalog_arm_cortexm3_concertoInit_Boot_stepDelay(xdc_Void);
+    extern ti_catalog_arm_cortexm3_concertoInit_Boot_initC28RAMs(xdc_Void);
+    extern ti_catalog_arm_cortexm3_concertoInit_Boot_bootC28(xdc_Void);
+    extern ti_catalog_arm_cortexm3_concertoInit_Boot_initFlash(xdc_Bool configWaitStates, xdc_UInt waitStates, xdc_Bool enableProgramCache, xdc_Bool enableDataCache);
 
 #if defined(__ti__)
 #pragma CODE_SECTION(ti_catalog_arm_cortexm3_concertoInit_Boot_init, ".text:.bootCodeSection")
@@ -41,7 +41,7 @@
 #endif
 
 %if (Boot.configSharedRAMs == true) {
-#define REG(x)  (*(volatile UInt *)(x))
+#define REG(x)  (*(volatile xdc_UInt *)(x))
 
 /* M3 protect register and value */
 #define SYSCTL_MWRALLOW 0x400FB980
@@ -56,9 +56,9 @@
 /*
  *  ======== ti_catalog_arm_cortexm3_concertoInit_Boot_initSharedRams ========
  */
-Void ti_catalog_arm_cortexm3_concertoInit_Boot_initSharedRAMs(Void)
+xdc_Void ti_catalog_arm_cortexm3_concertoInit_Boot_initSharedRAMs(xdc_Void)
 {
-    UInt allow;
+    xdc_UInt allow;
 
     /* enable M3 access to protected registers */
     allow = REG(SYSCTL_MWRALLOW);
@@ -88,7 +88,7 @@ Void ti_catalog_arm_cortexm3_concertoInit_Boot_initSharedRAMs(Void)
  *  ======== ti_catalog_arm_cortexm3_concertoInit_Boot_init ========
  *  Boot initialization run as an xdc.runtime.Reset function.
  */
-Void ti_catalog_arm_cortexm3_concertoInit_Boot_init()
+xdc_Void ti_catalog_arm_cortexm3_concertoInit_Boot_init()
 {
 %if (Boot.configureClocks == true) {
     ti_catalog_arm_cortexm3_concertoInit_Boot_configurePllDivs(`Boot.SPLLIMULT`, `Boot.SPLLFMULT`, `Boot.SYSDIVSEL`, `Boot.M3SSDIVSEL`);
@@ -111,7 +111,7 @@ Void ti_catalog_arm_cortexm3_concertoInit_Boot_init()
  *  ======== ti_catalog_arm_cortexm3_concertoInit_Boot_initStartup ========
  *  Boot initialization run as an xdc.runtime.Startup first function.
  */
-Void ti_catalog_arm_cortexm3_concertoInit_Boot_initStartup()
+xdc_Void ti_catalog_arm_cortexm3_concertoInit_Boot_initStartup()
 {
 %if (Boot.configureFlashController == true) {
     ti_catalog_arm_cortexm3_concertoInit_Boot_initFlash(`Number(Boot.configureFlashWaitStates)`, `Number(Boot.flashWaitStates)`, `Number(Boot.enableFlashProgramCache)`, `Number(Boot.enableFlashDataCache)`);
@@ -121,7 +121,7 @@ Void ti_catalog_arm_cortexm3_concertoInit_Boot_initStartup()
 /*
  *  ======== ti_catalog_arm_cortexm3_concertoInit_Boot_limpAbort ========
  */
-Void ti_catalog_arm_cortexm3_concertoInit_Boot_limpAbort(Void)
+xdc_Void ti_catalog_arm_cortexm3_concertoInit_Boot_limpAbort(xdc_Void)
 {
 %var cname;
 %       cname = String(Boot.limpAbortFunction);

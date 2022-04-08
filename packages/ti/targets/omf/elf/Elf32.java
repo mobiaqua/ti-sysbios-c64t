@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 
 /*
  *  ======== Elf32 ========
@@ -36,7 +37,7 @@ public class Elf32 implements xdc.rta.IOFReader, xdc.rov.ISymbolTable
     static final int EI_VERSION = 6;      /* File version */
     static final int EI_PAD = 7;          /* Start of padding bytes */
     static final int EI_NIDENT = 16;      /* Size of e_ident[] */
-    
+
     static final int ELFDATANONE = 0;  /* Invalid data encoding */
     static final int ELFDATA2LSB = 1;  /* Little-endian data    */
     static final int ELFDATA2MSB = 2;  /* Big-endian data       */
@@ -228,7 +229,7 @@ public class Elf32 implements xdc.rta.IOFReader, xdc.rov.ISymbolTable
                 + (char)e_ident[1] + (char)e_ident[2] + (char)e_ident[3]);
         }
     }
-    
+
     /*
      *  ======== SectHeader ========
      */
@@ -477,7 +478,7 @@ public class Elf32 implements xdc.rta.IOFReader, xdc.rov.ISymbolTable
                 if (addr >= start && addr < end) {
                     long offset = unsToLong(header.sh_offset)
                         + target.mausize * (addr - start);
-                    
+
                     result = readStringFromFile(offset, target.charsize);
                     
                     /* Add the string to the cache. */
@@ -894,6 +895,7 @@ public class Elf32 implements xdc.rta.IOFReader, xdc.rov.ISymbolTable
         strHeader = findSectionHeader(".debug_str");
         if (strHeader != null) {
             str = readSectionBytes(strHeader);
+
             if (fileHeader.swapped) {
                 str.order(java.nio.ByteOrder.LITTLE_ENDIAN);
             }
@@ -901,11 +903,12 @@ public class Elf32 implements xdc.rta.IOFReader, xdc.rov.ISymbolTable
 
         Dwarf32 dw = new Dwarf32();
         dw.parse(info, abbrev, str);
-         
+
         Dwarf32.Variable[] varArr = dw.getGlobalVariablesByType(typeRegEx);
         ArrayList<Dwarf32.Variable> varList = new ArrayList<Dwarf32.Variable>();
 
         parseSymbols();
+
         /* Filter out all the non existent dwarf variables */
         for (int i = 0; i < varArr.length; i++) {
             if (getSymbolValue(varArr[i].name) != -1) {
@@ -915,43 +918,55 @@ public class Elf32 implements xdc.rta.IOFReader, xdc.rov.ISymbolTable
 
         return (varList.toArray(new Dwarf32.Variable[varList.size()]));
     }
-    
+
     public static String strPad(String msg, int pad)
     {
         while (msg.length() < pad) {
             msg += " ";
         }
-        
         return (msg);
     }
-    
+
     /*
      *  ======== readSectionBytes ========
-     *  Reads an entire section from the elf file, and returns it as a 
+     *  Reads an entire section from the elf file, and returns it as a
      *  ByteBuffer.
+     *
+     *  The file is read in sections of 10MB max to avoid OutOfMemoryErrors for
+     *  large files.
      */
     public ByteBuffer readSectionBytes(SectHeader hdr)
         throws java.io.IOException
-    {        
-        /* Allocate a byte[] to hold the entire section. */
-        byte[] byteArr = new byte[hdr.sh_size];
-        
+    {
+        byte[] byteArr = new byte[0x800000];
+        FileChannel fc = file.getChannel();
+
         /* Seek to the section. */
         file.seek(hdr.sh_offset);
-        
-        /* Read the entire section into the byteArr. */
-        file.read(byteArr);
-        
-        /* Create a ByteBuffer for storing and accessing the section. */
-        ByteBuffer byteBuf = ByteBuffer.allocate(byteArr.length);
-        
-        /* Copy the bytes into the ByteBuffer. */
-        byteBuf.put(byteArr);
-        
-        /* Put the ByteBuffer position back at 0 for reading. */
-        byteBuf.position(0);
-        
-        return (byteBuf);
+
+        ByteBuffer smallBuffer = ByteBuffer.wrap(byteArr);
+        ByteBuffer largeBuffer = ByteBuffer.allocate(hdr.sh_size);
+
+        int counter = 0;
+        do {
+            smallBuffer.position(0);
+            fc.read(smallBuffer);
+            if (smallBuffer.position() > 0) {
+                /* read from a small buffer to a large buffer */
+                smallBuffer.flip();
+
+                /* have to be careful not to go over the size of the section */
+                int limit = smallBuffer.limit();
+                if (counter + limit > hdr.sh_size) {
+                    limit = hdr.sh_size - counter;
+                }
+                largeBuffer.put(byteArr, 0, limit);
+                counter = counter + limit;
+            }
+        } while (counter < hdr.sh_size);
+
+        largeBuffer.position(0);
+        return (largeBuffer);
     }
 
     /*
@@ -968,11 +983,11 @@ public class Elf32 implements xdc.rta.IOFReader, xdc.rov.ISymbolTable
 
         return (len);
     }
-    
+
     /*
      *  ======== readStringFromBuffer ========
      *  Reads the string from 'buffer' starting at 'offset'.
-     *  
+     *
      *  This function is simpler than 'readStringFromFile' because all of the
      *  characters have already been read into memory. 
      */

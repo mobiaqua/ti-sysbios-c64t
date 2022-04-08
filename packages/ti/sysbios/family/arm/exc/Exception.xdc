@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -122,6 +122,15 @@ module Exception
         Ptr     ifar;
     }
 
+    /*! @_nodoc */
+    metaonly struct ModuleView {
+        String      exception;      /* Summary Exception */
+    };
+
+    /*!
+     *  ======== rovViewInfo ========
+     *  @_nodoc
+     */
     @Facet
     metaonly config ViewInfo.Instance rovViewInfo =
         ViewInfo.create({
@@ -131,6 +140,13 @@ module Exception
                         type: ViewInfo.TREE,
                         viewInitFxn: 'viewInitBasic',
                         structName: 'ExcContext'
+                    }
+                ],
+                ['Module',
+                    {
+                        type: ViewInfo.MODULE,
+                        viewInitFxn: 'viewInitModule',
+                        structName: 'ModuleView'
                     }
                 ]
             ]

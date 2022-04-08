@@ -34,30 +34,13 @@
  */
 
 #include <xdc/std.h>
-#include <xdc/runtime/Assert.h>
-#include <xdc/runtime/Diags.h>
-#include <xdc/runtime/Error.h>
-#include <xdc/runtime/Memory.h>
 
 #include <ti/sysbios/BIOS.h>
-#include <ti/sysbios/hal/Hwi.h>
-#include <ti/sysbios/knl/Clock.h>
 #include <ti/sysbios/knl/Semaphore.h>
 #include <ti/sysbios/knl/Task.h>
 
 #include <ti/sysbios/posix/pthread.h>
 #include <ti/sysbios/posix/_pthread_error.h>
-
-#define _PTHREAD_DEBUG 1
-
-/*
- *  ======== pthread_barrier_Obj ========
- */
-typedef struct pthread_barrier_Obj {
-    Semaphore_Struct  sem;
-    int               count;
-    int               pendCount;
-} pthread_barrier_Obj;
 
 /*
  *************************************************************************
@@ -73,34 +56,10 @@ int pthread_barrierattr_destroy(pthread_barrierattr_t *attr)
 }
 
 /*
- *  ======== pthread_barrierattr_getpshared ========
- */
-int pthread_barrierattr_getpshared(const pthread_barrierattr_t *attr, int *pshared)
-{
-    *pshared = attr->pshared;
-    return (0);
-}
-
-/*
  *  ======== pthread_barrierattr_init ========
  */
 int pthread_barrierattr_init(pthread_barrierattr_t * attr)
 {
-    attr->pshared = PTHREAD_PROCESS_PRIVATE;
-    return (0);
-}
-
-/*
- *  ======== pthread_barrierattr_setpshared ========
- */
-int pthread_barrierattr_setpshared(pthread_barrierattr_t *attr, int pshared)
-{
-    if ((pshared != PTHREAD_PROCESS_PRIVATE) &&
-            (pshared != PTHREAD_PROCESS_SHARED)) {
-        return (EINVAL);
-    }
-
-    attr->pshared = pshared;
     return (0);
 }
 
@@ -115,12 +74,7 @@ int pthread_barrierattr_setpshared(pthread_barrierattr_t *attr, int pshared)
  */
 int pthread_barrier_destroy(pthread_barrier_t *barrier)
 {
-    pthread_barrier_Obj *barrierObj = (pthread_barrier_Obj *)*barrier;
-
-    Semaphore_destruct(&(barrierObj->sem));
-
-    Memory_free(Task_Object_heap(), barrierObj, sizeof(pthread_barrier_Obj));
-    *barrier = NULL;
+    Semaphore_destruct(&(barrier->sem));
 
     return (0);
 }
@@ -131,29 +85,11 @@ int pthread_barrier_destroy(pthread_barrier_t *barrier)
 int pthread_barrier_init(pthread_barrier_t *barrier,
         const pthread_barrierattr_t *attr, unsigned count)
 {
-    pthread_barrier_Obj *barrierObj;
-    Semaphore_Params    semParams;
-    Error_Block         eb;
+    barrier->count = count;
+    barrier->pendCount = 0;
 
-    Error_init(&eb);
-
-    // TODO: Is Task_Object_heap() ok to use?
-    barrierObj = (pthread_barrier_Obj *)Memory_alloc(Task_Object_heap(),
-            sizeof(pthread_barrier_Obj), 0, &eb);
-
-    if (barrierObj == NULL) {
-        return (ENOMEM);
-    }
-
-    barrierObj->count = count;
-    barrierObj->pendCount = 0;
-
-    Semaphore_Params_init(&semParams);
-    semParams.mode = Semaphore_Mode_COUNTING;
-
-    Semaphore_construct(&(barrierObj->sem), 0, &semParams);
-
-    *barrier = (void *)barrierObj;
+    /* Default Semaphore mode is Semaphore_Mode_COUNTING */
+    Semaphore_construct(&(barrier->sem), 0, NULL);
 
     return (0);
 }
@@ -163,35 +99,34 @@ int pthread_barrier_init(pthread_barrier_t *barrier,
  */
 int pthread_barrier_wait(pthread_barrier_t *barrier)
 {
-    pthread_barrier_Obj *barrierObj = (pthread_barrier_Obj *)*barrier;
     UInt                 key;
     int                  i;
 
     key = Task_disable();
 
-    if (++barrierObj->pendCount < barrierObj->count) {
+    if (++barrier->pendCount < barrier->count) {
         Task_restore(key);
-        Semaphore_pend(Semaphore_handle(&(barrierObj->sem)),
+        Semaphore_pend(Semaphore_handle(&(barrier->sem)),
                 BIOS_WAIT_FOREVER);
+
+        return (0);
     }
     else {
-        for (i = 0; i < barrierObj->count - 1; i++) {
-            Semaphore_post(Semaphore_handle(&(barrierObj->sem)));
+        for (i = 0; i < barrier->count - 1; i++) {
+            Semaphore_post(Semaphore_handle(&(barrier->sem)));
         }
 
         /* Re-initialize the barrier */
-        barrierObj->pendCount = 0;
+        barrier->pendCount = 0;
 
         Task_restore(key);
 
         /*
-         *  pthread_barrier_wait() returs PTHREAD_BARRIER_SERIAL_THREAD
+         *  pthread_barrier_wait() returns PTHREAD_BARRIER_SERIAL_THREAD
          *  for one arbitrarily chosen thread, so we'll choose the
          *  last one to wait.  The return value for all other threads
          *  is 0.
          */
         return (PTHREAD_BARRIER_SERIAL_THREAD);
     }
-
-    return (0);
 }

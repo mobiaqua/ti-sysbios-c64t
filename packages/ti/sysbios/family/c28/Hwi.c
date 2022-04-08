@@ -969,6 +969,15 @@ Bool Hwi_getStackInfo(Hwi_StackInfo *stkInfo, Bool computeStackDepth)
     return stackOverflow;
 }
 
+/* 
+ *  ======== Hwi_getCoreStackInfo ========
+ *  Used to get Hwi stack usage info.
+ */
+Bool Hwi_getCoreStackInfo(Hwi_StackInfo *stkInfo, Bool computeStackDepth, UInt coreId)
+{
+    return (Hwi_getStackInfo(stkInfo, computeStackDepth));
+}
+
 /*
  *  ======== Hwi_plug ========
  */

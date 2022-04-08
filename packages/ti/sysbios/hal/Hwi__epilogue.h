@@ -455,6 +455,29 @@ static inline Void ti_sysbios_hal_Hwi_restore(UInt key)
 
 #else
 
+#if defined(xdc_target__isaCompatible_v7R)
+
+#if defined(__ti__)
+
+/*
+ *  ======== Hwi_disable ========
+ */
+#define ti_sysbios_hal_Hwi_disable() _disable_IRQ()
+
+/*
+ *  ======== Hwi_enable ========
+ */
+#define ti_sysbios_hal_Hwi_enable() _enable_IRQ()
+
+/*
+ *  ======== Hwi_restore ========
+ */
+#define ti_sysbios_hal_Hwi_restore(key) _restore_interrupts(key)
+
+#endif
+
+#else
+
 /*
  *  ======== Hwi_disable ========
  */
@@ -469,6 +492,8 @@ static inline Void ti_sysbios_hal_Hwi_restore(UInt key)
  *  ======== Hwi_restore ========
  */
 #define ti_sysbios_hal_Hwi_restore(key) ti_sysbios_hal_Hwi_HwiProxy_restore(key)
+
+#endif
 
 #endif
 

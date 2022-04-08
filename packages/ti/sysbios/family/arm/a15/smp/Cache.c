@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,7 @@
 #include <ti/sysbios/hal/Hwi.h>
 #include <ti/sysbios/knl/Intrinsics.h>
 #include <ti/sysbios/family/arm/a15/Mmu.h>
+#include <ti/sysbios/family/arm/a15/smp/Core.h>
 
 #include "package/internal/Cache.xdc.h"
 
@@ -75,6 +76,15 @@ Void Cache_initModuleState()
  */
 Void Cache_startup()
 {
+    UInt32 reg;
+
+    if ((Cache_errata798870 == TRUE) &&
+        (Core_getRevisionNumber() < 0x30)) {
+        reg = Cache_getL2AuxControlReg();
+        reg |= 0x80;
+        Cache_setL2AuxControlReg(reg);
+    }
+
     /* enable Branch Prediction */
     if (Cache_branchPredictionEnabled == TRUE) {
         Cache_enableBP();

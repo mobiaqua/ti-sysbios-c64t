@@ -1,14 +1,13 @@
 
 MEMORY
 {
-    RTOS_FLASH  : origin = 0x081010, length = 0x0004f0
-    RTOS_ROM    : origin = 0x3F7902, length = 0x0027fe
-    RTOS_SRAM   : origin = 0x000780, length = 0x000080
+    RTOS_FLASH  : origin = 0x00081010, length = 0x000003df
+    RTOS_ROM    : origin = 0x003f7200, length = 0x00001f0b
+    RTOS_SRAM   : origin = 0x00000780, length = 0x0000006a
 }
 
 SECTIONS
 {
-    sysbios_1: = 0x3f7902
-    sysbios_2: = 0x3f9e98
-    sysbios_3: = 0x3fa000
+    sysbios_1: = 0x3f7200
+    sysbios_2: = 0x3f910a
 }

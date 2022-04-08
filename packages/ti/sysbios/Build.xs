@@ -79,6 +79,8 @@ var ccOptsList = {
     "ti.targets.arm.elf.M3"                     : customArmOpts,
     "ti.targets.arm.elf.M4"                     : customArmOpts,
     "ti.targets.arm.elf.M4F"                    : customArmOpts,
+    "ti.targets.arm.elf.R5F"                    : customArmOpts,
+    "ti.targets.arm.elf.R5F_big_endian"         : customArmOpts,
     "gnu.targets.arm.M3"                        : customGnuArmM3Opts,
     "gnu.targets.arm.M4"                        : customGnuArmM4Opts,
     "gnu.targets.arm.M4F"                       : customGnuArmM4FOpts,
@@ -298,6 +300,10 @@ var biosPackages = [
     "ti.sysbios.family.arm.msp432",
     "ti.sysbios.family.arm.msp432.init",
     "ti.sysbios.family.arm.omap1030",
+    "ti.sysbios.family.arm.r5",
+    "ti.sysbios.family.arm.r5.rm57d8xx",
+    "ti.sysbios.family.arm.r5.rti",
+    "ti.sysbios.family.arm.r5.vim",
     "ti.sysbios.family.arm.sim1030",
     "ti.sysbios.family.arm.tms570",
     "ti.sysbios.family.arm.v7a",
@@ -318,6 +324,7 @@ var biosPackages = [
     "ti.sysbios.family.c64p.ti81xx",
     "ti.sysbios.family.c66",
     "ti.sysbios.family.c66.tci66xx",
+    "ti.sysbios.family.c66.vayu",
     "ti.sysbios.family.c67p",
     "ti.sysbios.family.c674",
     "ti.sysbios.family.msp430",
@@ -387,6 +394,11 @@ function getDefaultCustomCCOpts()
     else {
         /* ti targets do program level compile */
         customCCOpts += " --program_level_compile -o3 -g --optimize_with_debug ";
+        var tiDevice = Program.cpu.deviceName.toUpperCase();
+        /* optimize for size with cc13xx and cc26xx devices */
+        if (tiDevice.match(/CC26/) || tiDevice.match(/CC13/)) {
+            customCCOpts = customCCOpts.replace("opt_for_speed=2","opt_for_speed=0");
+        }
     }
 
     /* undo optimizations if this is a Debug build */

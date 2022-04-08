@@ -45,7 +45,6 @@ var objList = [
     "Seconds.c",
     "Timer.c",
     "TimestampProvider.c",
-    "TimerGPT.c",
 ];
 
 var trgFilter = {
@@ -56,7 +55,7 @@ var trgFilter = {
 /* generate makefiles */
 BiosBuild.buildLibs(objList, undefined, trgFilter, arguments);
 
-Pkg.otherFiles = [ "package.bld", "Power.xdt",
+Pkg.otherFiles = [ "package.bld",
 		   "PowerCC2650.h", "Boot.xdt", "Boot.xml",
 		   "Alarm.xml", "TimestampProvider.xml",
 		   "Power_calibrateRCOSC.c",

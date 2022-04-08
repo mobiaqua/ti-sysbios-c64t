@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2014-2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,5 +64,6 @@ internal:
         Int32         c1Inc;
         UInt32        count1;
         UInt32        count2;
+        UInt32        ticks;
     }
 }

@@ -78,4 +78,10 @@ internal:   /* not for client use */
      *  of the ROM made to be placed in FLASH memory.
      */
     metaonly config Bool useFlash = false;
+
+    /*
+     *  when set to false, an application will be linked against an image of
+     *  the ROM from the work build area.
+     */
+    metaonly config Bool useGolden = true;
 }

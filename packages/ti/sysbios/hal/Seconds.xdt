@@ -1,6 +1,6 @@
 %%{
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2014-2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -85,4 +85,20 @@ time_t ATTRIBUTE time(time_t *tout)
     return (t);
 }
 
+#include <ti/sysbios/posix/_time.h>
+
+/*
+ *  ======== clock_gettime ========
+ */
+int ATTRIBUTE clock_gettime(clockid_t clockId, struct timespec *ts)
+{
+    ti_sysbios_hal_Seconds_Time t;
+
+    ti_sysbios_hal_Seconds_getTime(&t);
+
+    ts->tv_sec = t.secs;
+    ts->tv_nsec = t.nsecs;
+
+    return (0);
+}
 %}

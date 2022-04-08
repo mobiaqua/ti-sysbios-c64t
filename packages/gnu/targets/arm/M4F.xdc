@@ -1,5 +1,5 @@
 /* 
- *  Copyright (c) 2008 Texas Instruments and others.
+ *  Copyright (c) 2008-2015 Texas Instruments and others.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -13,8 +13,6 @@ import xdc.bld.ITarget2;
 
 /*!
  *  ======== M4F.xdc ========
- *  @_nodoc
- *
  *  Embedded Cortex M4F, little endian, bare metal target
  *
  *  This module defines an embedded bare metal target on Cortex M4F. The target

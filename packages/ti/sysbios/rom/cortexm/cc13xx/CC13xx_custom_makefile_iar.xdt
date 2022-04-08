@@ -179,12 +179,11 @@ CC = `CMDPREFIX` `CGEN`/bin/`TARGET.cc.cmd` $(CCOPTS)
 ASM = `CMDPREFIX` `CGEN`/bin/`TARGET.asm.cmd` `TARGET.asm.opts` -S
 AR = `CMDPREFIX` `CGEN`/bin/`TARGET.ar.cmd` `TARGET.ar.opts`
 
-%var CCOPTS_LIB = BIOS.getCCOpts(TARGET.name).toString().replace("--opt_for_speed=0","--opt_for_speed=2");
+%var CCOPTS_LIB = BIOS.getCCOpts(TARGET.name).toString();
 CC_LIB = `CGEN`/bin/`TARGET.cc.cmd` `CCOPTS_LIB` -I `CGEN`/include
 
-%var CCOPTS_PP = BIOS.getCCOpts(TARGET.name).toString().replace(/\-o3/," ");
-%CCOPTS_PP = CCOPTS_PP.toString().replace("-Ohs","");
-%CCOPTS_PP = CCOPTS_PP.toString().replace("-Ohz","");
+%var CCOPTS_PP = BIOS.getCCOpts(TARGET.name).toString();
+%CCOPTS_PP = CCOPTS_PP.toString().replace(/\-Oh./,"");
 %CCOPTS_PP = CCOPTS_PP.toString().replace("-Dti_sysbios_family_arm_m3_Hwi_enableException__D=FALSE","");
 %CCOPTS_PP = CCOPTS_PP.toString().replace("-Dti_sysbios_family_arm_m3_Hwi_disablePriority__D=32U","");
 %CCOPTS_PP = CCOPTS_PP.toString().replace("\$(rootDir)",CGEN);
@@ -252,15 +251,14 @@ mangled_`libPP`: `s`
 
 %}
 
-%var BIOS_lib_obj = LIBPPS[0].substring(0, LIBPPS[0].lastIndexOf('.')) + ".obj";
-`BIOS_lib_obj`: `LIBPPS.join(" ")`
+sysbios.obj: `LIBPPS.join(" ")`
 	@echo Creating the SYS/BIOS library that contains the APIs not included in the ROM ...
-	@$(CC) -o `BIOS_lib_obj` $(BIOS_DEFS) $(XOPTS) $(INCS) \
+	@$(CC) -o sysbios.obj $(BIOS_DEFS) $(XOPTS) $(INCS) \
 %for each (var s in LIBPPS) {
 	`s` \
 %}
 
-`LIB`: intro `BIOS_lib_obj` `LIBASMOBJS.join(" ")`
+`LIB`: intro sysbios.obj `LIBASMOBJS.join(" ")`
 	@-$(call RM, $@)
 	@$(AR) $@ $(filter-out intro,$^)
 	@echo Library build complete.

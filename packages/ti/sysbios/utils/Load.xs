@@ -400,34 +400,28 @@ function isPowerEnabled()
 
     /*
      * See if the Power delegate was used and initialize
-     * powerEnabled to the delegate's setting.  This is
-     * in a try/catch until all family Settings.xs implement
-     * getDefaultPowerDelegate().
+     * powerEnabled to the delegate's setting.
      */
-    try {
-        PowerProxy = xdc.module(Settings.getDefaultPowerDelegate());
-        powerName = Settings.getDefaultPowerDelegate();
-
-	/*
-         * If hal Power is in the config, but not the delegate,
-	 * hal.Power.module$use() may not have been called yet to set
-         * hal.Power.idle, so save the value of the delegate's idle,
-	 * in case this is the situation.
-	 */
-        powerProxyIdle = PowerProxy.idle;
-        if (PowerProxy.$used) {
-	    /*
-             * The user config'd the delegate or hal.Power.module$use() has
-             * been called.
-	     */
-            powerEnabled = PowerProxy.idle;
-        }
+    powerName = Settings.getDefaultPowerDelegate();
+    if (powerName == null) {
+        powerName = "ti.sysbios.hal.PowerNull";
     }
-    catch (e) {
-        var Program = xdc.module('xdc.cfg.Program');
-        print("Load.xs: No getDefaultPowerDelegate() for " +
-                Program.cpu.deviceName);
-        PowerProxy = null;
+
+    PowerProxy = xdc.module(powerName);
+
+    /*
+     * If hal Power is in the config, but not the delegate,
+     * hal.Power.module$use() may not have been called yet to set
+     * hal.Power.idle, so save the value of the delegate's idle,
+     * in case this is the situation.
+     */
+    powerProxyIdle = PowerProxy.idle;
+    if (PowerProxy.$used) {
+        /*
+         * The user config'd the delegate or hal.Power.module$use() has
+         * been called.
+         */
+        powerEnabled = PowerProxy.idle;
     }
 
     if (Power.$used) {

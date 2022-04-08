@@ -86,6 +86,7 @@ function module$use()
 {
     if (!Program.platformName.match(/ti\.platforms\.cc26xx/) &&
         !Program.platformName.match(/ti\.platforms\.simplelink/) &&
+        !Program.platformName.match(/ti\.platforms\.emt26xx/) &&
          Build.buildROMApp == true) {
         this.$logError(
                 "CC26xx ROM Applications only support the cc26xx or simplelink platforms",
@@ -206,22 +207,22 @@ function module$validate()
 
     if (BIOS.assertsEnabled == true) {
         this.$logError(
-            "BIOS.assertsEnabled must be set to 'false' when using rom", BIOS, "assertsEnabled");
+            "BIOS.assertsEnabled must be set to 'false' when using ROM", BIOS, "assertsEnabled");
     }
 
     if (BIOS.logsEnabled == true) {
         this.$logError(
-            "BIOS.logsEnabled must be set to 'false' when using rom", BIOS, "logsEnabled");
+            "BIOS.logsEnabled must be set to 'false' when using ROM", BIOS, "logsEnabled");
     }
 
     if (BIOS.taskEnabled == false) {
         this.$logError(
-            "BIOS.taskEnabled must be set to 'true' when using rom", BIOS, "taskEnabled");
+            "BIOS.taskEnabled must be set to 'true' when using ROM", BIOS, "taskEnabled");
     }
 
     if (BIOS.swiEnabled == false) {
         this.$logError(
-            "BIOS.swiEnabled must be set to 'true' when using rom", BIOS, "swiEnabled");
+            "BIOS.swiEnabled must be set to 'true' when using ROM", BIOS, "swiEnabled");
     }
 
     if (BIOS.runtimeCreatesEnabled == false) {
@@ -233,13 +234,13 @@ function module$validate()
 
     if (BIOS.RtsGateProxy.delegate$.$name != "ti.sysbios.gates.GateMutex") { 
        this.$logError(
-            "The BIOS.RtsGateProxy must be GateMutex when using rom",
+            "The BIOS.RtsGateProxy must be GateMutex when using ROM",
             BIOS, "RtsGateProxy");
     }
 
     if (Clock.tickSource != Clock.TickSource_TIMER) {
         this.$logError(
-            "Clock.tickSource must be set to Clock.TickSource_TIMER when using rom", 
+            "Clock.tickSource must be set to Clock.TickSource_TIMER when using ROM", 
                 Clock, "tickSource");
     }
 
@@ -251,92 +252,92 @@ function module$validate()
     }
 
     if (Swi.hooks.length != 0) {
-        this.$logError("Swi hooks are not supported when using rom", Swi);
+        this.$logError("Swi hooks are not supported when using ROM", Swi);
     }
 
     if (Swi.common$.namedInstance == true) {
-        this.$logError("Swi.common$.namedInstance must be set to false when using rom",
+        this.$logError("Swi.common$.namedInstance must be set to false when using ROM",
                 Swi, "common$.namedInstance");
     }
 
     if (Task.hooks.length != 0) {
-        this.$logError("Task hooks are not supported when using rom", Task);
+        this.$logError("Task hooks are not supported when using ROM", Task);
     }
 
     if (Task.deleteTerminatedTasks == true) {
-        this.$logError("Task.deleteTerminatedTasks must be set to false when using rom", 
+        this.$logError("Task.deleteTerminatedTasks must be set to false when using ROM", 
                 Task, "deleteTerminatedTasks");
     }
 
     if (Task.checkStackFlag == true) {
-        this.$logError("Task.checkStackFlag must be set to false when using rom", 
+        this.$logError("Task.checkStackFlag must be set to false when using ROM", 
                 Task, "checkStackFlag");
     }
 
     if (Task.common$.namedInstance == true) {
-        this.$logError("Task.common$.namedInstance must be set to false when using rom",
+        this.$logError("Task.common$.namedInstance must be set to false when using ROM",
                 Task, "common$.namedInstance");
     }
 
     if ((Hwi.numHooks != 0) || (HwiDelegate.hooks.length != 0)) {
-        this.$logError("Hwi hooks are not supported when using rom", Hwi);
+        this.$logError("Hwi hooks are not supported when using ROM", Hwi);
     }
 
     if (Semaphore.supportsEvents == true) {
         this.$logError(
-            "Semaphore.supportEvents must be set to 'false' when using rom",
+            "Semaphore.supportEvents must be set to 'false' when using ROM",
             Semaphore, "supportsEvents");
     }
 
     if (Semaphore.supportsPriority == true) {
         this.$logError(
-            "Semaphore.supportPriority must be set to 'false' when using rom",
+            "Semaphore.supportPriority must be set to 'false' when using ROM",
             Semaphore, "supportsPriority");
     }
 
     if (Semaphore.common$.namedInstance == true) {
-        this.$logError("Semaphore.common$.namedInstance must be set to false when using rom",
+        this.$logError("Semaphore.common$.namedInstance must be set to false when using ROM",
                 Semaphore, "common$.namedInstance");
     }
 
     if (HeapMem.common$.gate.$module.$name != "ti.sysbios.gates.GateMutex") {
 	this.$logError(
-	    "HeapMem must use GateMutex as its module gate when using rom",
+	    "HeapMem must use GateMutex as its module gate when using ROM",
 	    HeapMem, "common$.gate");
     }
 
     if (m3Hwi.disablePriority != 0x20) {
         this.$logError(
-            "Hwi.disablePriority must be set to 0x20 when using rom",
+            "Hwi.disablePriority must be set to 0x20 when using ROM",
             m3Hwi, "disablePriority");
     }
 
     if (m3Hwi.dispatcherIrpTrackingSupport == false) {
         this.$logError(
-            "Hwi.dispatcherIrpTrackingSupport must be set to 'true' when using rom",
+            "Hwi.dispatcherIrpTrackingSupport must be set to 'true' when using ROM",
             m3Hwi);
     }
 
     if (m3Hwi.dispatcherTaskSupport == false) {
         this.$logError(
-            "Hwi.dispatcherTaskSupport must be set to 'true' when using rom",
+            "Hwi.dispatcherTaskSupport must be set to 'true' when using ROM",
             m3Hwi);
     }
 
     if (m3Hwi.dispatcherSwiSupport == false) {
         this.$logError(
-            "Hwi.dispatcherSwiSupport must be set to 'true' when using rom",
+            "Hwi.dispatcherSwiSupport must be set to 'true' when using ROM",
             m3Hwi);
     }
 
     if (m3Hwi.dispatcherAutoNestingSupport == false) {
         this.$logError(
-            "Hwi.dispatcherAutoNestingSupport must be set to 'true' when using rom",
+            "Hwi.dispatcherAutoNestingSupport must be set to 'true' when using ROM",
             m3Hwi);
     }
 
     if (m3Hwi.common$.namedInstance == true) {
-        this.$logError("m3Hwi.common$.namedInstance must be set to false when using rom",
+        this.$logError("m3Hwi.common$.namedInstance must be set to false when using ROM",
              m3Hwi, "common$.namedInstance");
     }
 
@@ -350,7 +351,7 @@ function module$validate()
     if ((Memory.defaultHeapInstance.$module.$name != "ti.sysbios.heaps.HeapMem") && (Program.heap != 0)) {
 	this.$logError(
 	    "Memory.defaultHeapInstance must be of type \"ti.sysbios.heaps.HeapMem\"" +
-	    " when using rom. Use BIOS.heapSize to configure the default heap size.",
+	    " when using ROM. Use BIOS.heapSize to configure the default heap size.",
 	Memory, "defaultHeapInstance");
     }
 
@@ -363,7 +364,7 @@ function module$validate()
 
     if (System.common$.gate.$module.$name != "ti.sysbios.gates.GateHwi") {
         this.$logError(
-            "System must use GateHwi as its module gate when using rom",
+            "System must use GateHwi as its module gate when using ROM",
             System, "common$.gate");
     }
 }

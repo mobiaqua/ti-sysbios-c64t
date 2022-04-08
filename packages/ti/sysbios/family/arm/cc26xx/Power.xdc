@@ -86,7 +86,6 @@ import ti.sysbios.knl.Clock;
  */
 
 @ModuleStartup            /* Initialize Power */
-@Template("./Power.xdt")  /* Template for contitional initiatialization calls */
 
 module Power inherits ti.sysbios.interfaces.IPower
 {
@@ -143,6 +142,13 @@ module Power inherits ti.sysbios.interfaces.IPower
     enum NotifyResponse {
         NOTIFYDONE = 0,/*! success, done processing the notification */
         NOTIFYERROR   /*! an error occurred while processing the notification */
+    };
+
+    /*! @_nodoc ResourceRecord structure */
+    struct ResourceRecord {
+        UInt8 flags;          /* resource type : first parent */
+        UInt8 flags2;         /* second parent */
+        UInt16 driverlibID;   /* driverlib ID for the resource */
     };
 
     /*!
@@ -265,27 +271,29 @@ module Power inherits ti.sysbios.interfaces.IPower
     /*!
      *  @_nodoc
      *  ======== calibrateRCOSC ========
-     *  Enable calibration of RCOSC_LF and RCOSC_HF?
+     *  Enable RCOSC calibration?   Default is true.
      */
     config Bool calibrateRCOSC = true;
+
+    /*!
+     *  @_nodoc
+     *  ======== calibrateRCOSC_LF ========
+     *  Enable RCOSC_LF calibration?  Default is true;
+     */
+    config Bool calibrateRCOSC_LF = true;
+
+    /*!
+     *  @_nodoc
+     *  ======== calibrateRCOSC_HF ========
+     *  Enable RCOSC_HF calibration?  Default is true;
+     */
+    config Bool calibrateRCOSC_HF = true;
 
     /*!
      *  @_nodoc
      *   Wakeup Clock object's function.  Default is Power_defaultClockFunc.
      */
     config Clock.FuncPtr clockFunc = Power.defaultClockFunc;
-
-    /*!
-     *  @_nodoc
-     *   LF Clock object's function.  Default is Power_lfClockFunc.
-     */
-    config Clock.FuncPtr lfClockFunc = Power.LF_clockFunc;
-
-    /*!
-     *  @_nodoc
-     *  XOSC_HF Clock object's function.
-     */
-    config Clock.FuncPtr xoscClockFunc = Power.XOSC_HF_clockFunc;
 
     /*! Policy function.  Default is Power_doWFI. */
     metaonly config FuncPtr policyFunc = Power.doWFI;
@@ -344,33 +352,11 @@ module Power inherits ti.sysbios.interfaces.IPower
     Void defaultNotifyTrapFunc();
 
     /*!
-     * @_nodoc
-     *  ======== LF_clockFunc ========
-     *  Function for the Clock object dedicated for disabling the LF clock
-     *  qualifiers.
-     */
-    Void LF_clockFunc(UArg arg);
-
-    /*!
-     *  @_nodoc
-     *  ======== XOSC_HF_xoscClockFunc ========
-     *  Function for the Clock object dedicated for XOSC_HF switching.
-     */
-    Void XOSC_HF_clockFunc(UArg arg);
-
-    /*!
-     *  @_nodoc
-     *  ======== initateCalibration ========
-     *  Initiates RCOSC_LF and RCOSC_HF calibration.
-     */
-    Bool initiateCalibration();
-
-    /*!
      *  @_nodoc
      *  ======== startFirstMeasurement ========
      *  Start the first RCOSC calibration measurement
      */
-    Void startFirstMeasurement();
+    Void injectCalibration();
 
     /*!
      *  @_nodoc
@@ -849,9 +835,69 @@ module Power inherits ti.sysbios.interfaces.IPower
 internal:
 
     /*
+     *  ======== abs ========
+     */
+    Int abs(Int i);
+
+    /*
+     *  ======== calibrateRcoscHf1 ========
+     */
+    Void calibrateRcoscHf1(Int32 tdcResult);
+
+    /*
+     *  ======== calibrateRcoscHf2 ========
+     */
+    Void calibrateRcoscHf2(Int32 tdcResult);
+
+    /*
+     *  ======== doCalibrate ========
+     */
+    Void doCalibrate();
+
+    /*
+     *  ======== getTdcSemaphore ========
+     */
+    Bool getTdcSemaphore();
+
+    /*
+     *  ======== initateCalibration ========
+     */
+    Bool initiateCalibration();
+
+    /*
+     *  ======== isDependencyActive ========
+     */
+    Bool isDependencyActive(UInt8 resourceID);
+
+    /*
+     *  ======== LF_clockFunc ========
+     */
+    Void LF_clockFunc(UArg arg);
+
+    /*
+     *  ======== NOP ========
+     */
+    UInt NOP(UInt action);
+
+    /*
      *  ======== notify ========
      */
     Status notify(Event eventType);
+
+    /*
+     *  ======== RCOSC_clockFunc ========
+     */
+    Void RCOSC_clockFunc(UArg arg);
+
+    /*
+     *  ======== RFCORECLKS ========
+     */
+    UInt RFCORECLKS(UInt action);
+
+    /*
+     *  ======== scaleRndInf ========
+     */
+    Int32 scaleRndInf(Int32 x);
 
     /*
      *  ======== serviceNotifyQ ========
@@ -859,15 +905,45 @@ internal:
     NotifyResponse serviceNotifyQ(Event eventType);
 
     /*
+     *  ======== updateSubSecInc ========
+     */
+    Void updateSubSecInc(UInt32 tdcResult);
+
+    /*
+     *  ======== XOSC_HF ========
+     */
+    UInt XOSC_HF(UInt action);
+
+    /*
+     *  ======== XOSC_HF_xoscClockFunc ========
+     */
+    Void XOSC_HF_clockFunc(UArg arg);
+
+    /*
      *  ======== Module_State ========
      */
     struct Module_State {
         UInt32 constraintsMask;
-        Queue.Object notifyQ;       /* event notification queue */
-        Clock.Object clockObj;      /* Clock object for scheduling wakeups */
-        Clock.Object xoscClockObj;  /* Clock object for XOSC_HF switching */
-        Clock.Object lfClockObj;    /* Clock object for LF clock check */
-        TransitionState state;
-        Bool xoscPending;           /* is XOSC_HF activation in progress? */
+        Queue.Object notifyQ;        /* event notification queue */
+        Clock.Object clockObj;       /* Clock object for scheduling wakeups */
+        Clock.Object xoscClockObj;   /* Clock object for XOSC_HF switching */
+        Clock.Object lfClockObj;     /* Clock object for LF clock check */
+        Clock.Handle calClockHandle; /* Clock object for RCOSC calibration */
+        Int32 nDeltaFreqCurr;        /* RCOSC calibration variable */
+        Int32 nCtrimCurr;            /* RCOSC calibration variable */
+        Int32 nCtrimFractCurr;       /* RCOSC calibration variable */
+        Int32 nCtrimNew;             /* RCOSC calibration variable */
+        Int32 nCtrimFractNew;        /* RCOSC calibration variable */
+        TransitionState state;       /* current transition state */
+        Bool xoscPending;            /* is XOSC_HF activation in progress? */
+        Bool calLF;                  /* calibrate RCOSC_LF? */
+        UInt8 hwiState;              /* calibration AUX ISR state */
+        Bool busyCal;                /* already busy calibrating */
+        UInt8 calStep;               /* current calibration step */
+        Bool firstLF;                /* is this first LF calibration? */
+        volatile UInt8 * constraintCounts; /* constraint counts array */
+        volatile UInt8 * resourceCounts;   /* to resource ref counts array */
+        ResourceRecord * resourceDB;/* resource database */
+        Fxn * resourceHandlers;     /* resource special handler functions */
     }
 }

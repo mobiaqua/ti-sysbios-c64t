@@ -91,14 +91,16 @@ function module$use()
                 this);
     }
 
-    var rtsLib = xdc.loadPackage(Program.build.target.$orig.rts);
-    if ('Settings' in rtsLib) {
-        rtsLib.Settings.bootOnly = true;
-    }
-    else {
-        this.$logError(
+    if (BIOS.includeXdcRuntime == true) {
+        var rtsLib = xdc.loadPackage(Program.build.target.$orig.rts);
+        if ('Settings' in rtsLib) {
+            rtsLib.Settings.bootOnly = true;
+        }
+        else {
+            this.$logError(
                 "Must use xdctools 3.26.00.19 or newer",
                 this);
+        }
     }
 
     /* install revision check reset function */ 
@@ -180,30 +182,26 @@ function module$validate()
     var c28Hwi = xdc.module('ti.sysbios.family.c28.Hwi');
     var Task = xdc.module('ti.sysbios.knl.Task');
     var Semaphore = xdc.module('ti.sysbios.knl.Semaphore');
-    var HeapMem = xdc.module('ti.sysbios.heaps.HeapMem');
     var HwiDelegate = xdc.module(Settings.getDefaultHwiDelegate());
-    var Memory = xdc.module('xdc.runtime.Memory');
-    var Timestamp = xdc.module('xdc.runtime.Timestamp');
-    var System = xdc.module('xdc.runtime.System');
 
     if (BIOS.assertsEnabled == true) {
         this.$logError(
-            "BIOS.assertsEnabled must be set to 'false' when using rom", BIOS, "assertsEnabled");
+            "BIOS.assertsEnabled must be set to 'false' when using ROM", BIOS, "assertsEnabled");
     }
 
     if (BIOS.logsEnabled == true) {
         this.$logError(
-            "BIOS.logsEnabled must be set to 'false' when using rom", BIOS, "logsEnabled");
+            "BIOS.logsEnabled must be set to 'false' when using ROM", BIOS, "logsEnabled");
     }
 
     if (BIOS.taskEnabled == false) {
         this.$logError(
-            "BIOS.taskEnabled must be set to 'true' when using rom", BIOS, "taskEnabled");
+            "BIOS.taskEnabled must be set to 'true' when using ROM", BIOS, "taskEnabled");
     }
 
     if (BIOS.swiEnabled == false) {
         this.$logError(
-            "BIOS.swiEnabled must be set to 'true' when using rom", BIOS, "swiEnabled");
+            "BIOS.swiEnabled must be set to 'true' when using ROM", BIOS, "swiEnabled");
     }
 
     if (BIOS.runtimeCreatesEnabled == false) {
@@ -215,126 +213,92 @@ function module$validate()
 
     if (BIOS.RtsGateProxy.delegate$.$name != "ti.sysbios.gates.GateMutex") { 
        this.$logError(
-            "The BIOS.RtsGateProxy must be GateMutex when using rom",
+            "The BIOS.RtsGateProxy must be GateMutex when using ROM",
             BIOS, "RtsGateProxy");
     }
 
     if (Clock.tickSource != Clock.TickSource_TIMER) {
         this.$logError(
-            "Clock.tickSource must be set to Clock.TickSource_TIMER when using rom", 
+            "Clock.tickSource must be set to Clock.TickSource_TIMER when using ROM", 
                 Clock, "tickSource");
     }
 
-    if (Clock.TimerProxy.delegate$.$name != "ti.sysbios.family.c28.Timer") {
-        this.$logError(
-            "The Clock module must use the " +
-            "\"ti.sysbios.family.c28.Timer\" module as its TimerProxy when using the rom.",
-        Clock, "TimerProxy");
-    }
-
     if (Swi.hooks.length != 0) {
-        this.$logError("Swi hooks are not supported when using rom", Swi);
+        this.$logError("Swi hooks are not supported when using ROM", Swi);
     }
 
     if (Swi.common$.namedInstance == true) {
-        this.$logError("Swi.common$.namedInstance must be set to false when using rom",
+        this.$logError("Swi.common$.namedInstance must be set to false when using ROM",
                 Swi, "common$.namedInstance");
     }
 
     if (Task.hooks.length != 0) {
-        this.$logError("Task hooks are not supported when using rom", Task);
+        this.$logError("Task hooks are not supported when using ROM", Task);
     }
 
     if (Task.deleteTerminatedTasks == true) {
-        this.$logError("Task.deleteTerminatedTasks must be set to false when using rom", 
+        this.$logError("Task.deleteTerminatedTasks must be set to false when using ROM", 
                 Task, "deleteTerminatedTasks");
     }
 
     if (Task.checkStackFlag == true) {
-        this.$logError("Task.checkStackFlag must be set to false when using rom", 
+        this.$logError("Task.checkStackFlag must be set to false when using ROM", 
                 Task, "checkStackFlag");
     }
 
     if (Task.common$.namedInstance == true) {
-        this.$logError("Task.common$.namedInstance must be set to false when using rom",
+        this.$logError("Task.common$.namedInstance must be set to false when using ROM",
                 Task, "common$.namedInstance");
     }
 
     if ((Hwi.numHooks != 0) || (HwiDelegate.hooks.length != 0)) {
-        this.$logError("Hwi hooks are not supported when using rom", Hwi);
+        this.$logError("Hwi hooks are not supported when using ROM", Hwi);
     }
 
     if (Semaphore.supportsEvents == true) {
         this.$logError(
-            "Semaphore.supportEvents must be set to 'false' when using rom",
+            "Semaphore.supportEvents must be set to 'false' when using ROM",
             Semaphore, "supportsEvents");
     }
 
     if (Semaphore.supportsPriority == true) {
         this.$logError(
-            "Semaphore.supportPriority must be set to 'false' when using rom",
+            "Semaphore.supportPriority must be set to 'false' when using ROM",
             Semaphore, "supportsPriority");
     }
 
     if (Semaphore.common$.namedInstance == true) {
-        this.$logError("Semaphore.common$.namedInstance must be set to false when using rom",
+        this.$logError("Semaphore.common$.namedInstance must be set to false when using ROM",
                 Semaphore, "common$.namedInstance");
     }
 
-    if (HeapMem.common$.gate.$module.$name != "ti.sysbios.gates.GateMutex") {
-	this.$logError(
-	    "HeapMem must use GateMutex as its module gate when using rom",
-	    HeapMem, "common$.gate");
-    }
-
-
     if (c28Hwi.dispatcherIrpTrackingSupport == false) {
         this.$logError(
-            "Hwi.dispatcherIrpTrackingSupport must be set to 'true' when using rom",
+            "Hwi.dispatcherIrpTrackingSupport must be set to 'true' when using ROM",
             c28Hwi);
     }
 
     if (c28Hwi.dispatcherTaskSupport == false) {
         this.$logError(
-            "Hwi.dispatcherTaskSupport must be set to 'true' when using rom",
+            "Hwi.dispatcherTaskSupport must be set to 'true' when using ROM",
             c28Hwi);
     }
 
     if (c28Hwi.dispatcherSwiSupport == false) {
         this.$logError(
-            "Hwi.dispatcherSwiSupport must be set to 'true' when using rom",
+            "Hwi.dispatcherSwiSupport must be set to 'true' when using ROM",
             c28Hwi);
     }
 
     if (c28Hwi.dispatcherAutoNestingSupport == false) {
         this.$logError(
-            "Hwi.dispatcherAutoNestingSupport must be set to 'true' when using rom",
+            "Hwi.dispatcherAutoNestingSupport must be set to 'true' when using ROM",
             c28Hwi);
     }
 
     if (c28Hwi.common$.namedInstance == true) {
-        this.$logError("c28Hwi.common$.namedInstance must be set to false when using rom",
+        this.$logError("c28Hwi.common$.namedInstance must be set to false when using ROM",
                 c28Hwi, "common$.namedInstance");
-    }
-
-    if ((Memory.defaultHeapInstance.$module.$name != "ti.sysbios.heaps.HeapMem") && (Program.heap != 0)) {
-	this.$logError(
-	    "Memory.defaultHeapInstance must be of type \"ti.sysbios.heaps.HeapMem\"" +
-	    " when using rom. Use BIOS.heapSize to configure the default heap size.",
-	Memory, "defaultHeapInstance");
-    }
-
-    if (Timestamp.SupportProxy.delegate$.$name != "ti.sysbios.family.c28.f2837x.TimestampProvider") {
-	this.$logError(
-	    "The xdc.runtime.Timestamp module must use the " +
-	    "\"ti.sysbios.family.c28.f2837x.TimestampProvider\" module as its SupportProxy when using the rom.",
-	Timestamp, "SupportProxy");
-    }
-
-    if (System.common$.gate.$module.$name != "ti.sysbios.gates.GateHwi") {
-        this.$logError(
-            "System must use GateHwi as its module gate when using rom",
-            System, "common$.gate");
     }
 }
 

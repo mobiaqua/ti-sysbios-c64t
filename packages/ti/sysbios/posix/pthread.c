@@ -40,54 +40,38 @@
 #include <xdc/runtime/Memory.h>
 
 #include <ti/sysbios/BIOS.h>
-#include <ti/sysbios/hal/Hwi.h>
 #include <ti/sysbios/knl/Queue.h>
-#include <ti/sysbios/knl/Task.h>
 #include <ti/sysbios/knl/Semaphore.h>
+#include <ti/sysbios/knl/Task.h>
+
+/*
+ *  For custom builds, this will always be defined, but it will
+ *  not be defined when building just the library.  Make sure
+ *  this goes ahead of _pthread.h.
+ */
+#ifndef ti_sysbios_posix_Settings_supportsMutexPriority__D
+#define ti_sysbios_posix_Settings_supportsMutexPriority__D TRUE
+#endif
 
 #include <ti/sysbios/posix/pthread.h>
 #include <ti/sysbios/posix/_pthread.h>
 #include <ti/sysbios/posix/_pthread_error.h>
 
-typedef void *(*pthread_RunFxn)(void *);
+static void _pthread_runStub(UArg arg0, UArg arg1);
 
 /*
- *  ======== pthread_Obj ========
+ *  Default pthread attributes.  These are implementation
+ *  dependent.
  */
-typedef struct pthread_Obj {
-    Task_Handle       task;
-    Semaphore_Struct  joinSem;
-    Semaphore_Struct  doneSem;
-#if defined(_POSIX_THREAD_PRIO_PROTECT)
-    /*
-     *  When a thread acquires a PTHREAD_PRIO_PROTECT mutex, the thread's
-     *  priority will be bumped to the priority ceiling of the mutex, if
-     *  that is higher than the thread's priority.  When the thread
-     *  releases the mutex, its priority will be set to the max of the
-     *  priority ceilings of the mutexes it still owns, and its original
-     *  priority.  So we need to keep track of its acquired mutexes and
-     *  original priority before acquiring any mutexes.
-     */
-    Queue_Struct      mutexList;
-    int               priority;
-#endif
-
-    pthread_t         joinThread;
-
-    int               detached;
-    pthread_RunFxn    fxn;
-    void             *arg;
-    int               detachstate;
-    int               cancelState;
-    int               cancelType;
-    int               cancelPending;
-
-    /* Thread function return value */
-    void             *ret;
-} pthread_Obj;
-
-static int _pthread_getMaxPrioCeiling(pthread_Obj *thread);
-static void _pthread_runStub(UArg arg0, UArg arg1);
+static pthread_attr_t defaultPthreadAttrs = {
+    1,       /* priority */
+    NULL,    /* stack */
+    0,       /* stacksize - would use Task_defaultStackSize but get compile
+              *  error "expression must have a constant value"
+              */
+    0,       /*  guardsize */
+    PTHREAD_CREATE_JOINABLE /* detachstate */
+};
 
 /*
  *************************************************************************
@@ -142,15 +126,6 @@ int pthread_attr_getstack (const pthread_attr_t *attr, void **stackaddr,
 }
 
 /*
- *  ======== pthread_attr_getstackaddr ========
- */
-int pthread_attr_getstackaddr(const pthread_attr_t *attr, void ** stackaddr)
-{
-    *stackaddr = attr->stack;
-    return (0);
-}
-
-/*
  *  ======== pthread_attr_getstacksize ========
  */
 int pthread_attr_getstacksize(const pthread_attr_t *attr, size_t *stacksize)
@@ -164,11 +139,8 @@ int pthread_attr_getstacksize(const pthread_attr_t *attr, size_t *stacksize)
  */
 int pthread_attr_init(pthread_attr_t *attr)
 {
-    attr->priority = 1;
-    attr->stack = NULL;
+    *attr = defaultPthreadAttrs;
     attr->stacksize = Task_defaultStackSize;
-    attr->guardsize = 0;
-    attr->detachstate = PTHREAD_CREATE_JOINABLE;
 
     return (0);
 }
@@ -178,6 +150,11 @@ int pthread_attr_init(pthread_attr_t *attr)
  */
 int pthread_attr_setdetachstate(pthread_attr_t *attr, int detachstate)
 {
+    if ((detachstate != PTHREAD_CREATE_JOINABLE) &&
+            (detachstate != PTHREAD_CREATE_DETACHED)) {
+        return (EINVAL);
+    }
+
     attr->detachstate = detachstate;
     return (0);
 }
@@ -185,19 +162,26 @@ int pthread_attr_setdetachstate(pthread_attr_t *attr, int detachstate)
 /*
  *  ======== pthread_attr_setguardsize ========
  */
-int   pthread_attr_setguardsize(pthread_attr_t *attr, size_t guardsize)
+int pthread_attr_setguardsize(pthread_attr_t *attr, size_t guardsize)
 {
     attr->guardsize = guardsize;
     return (0);
 }
 
 /*
- *  ======== pthread_attr_setguardsize ========
+ *  ======== pthread_attr_setschedparam ========
  */
 int pthread_attr_setschedparam(pthread_attr_t *attr,
         const struct sched_param *schedparam)
 {
-    attr->priority = schedparam->sched_priority;
+    int     priority = schedparam->sched_priority;
+
+    if ((priority >= Task_numPriorities) || (priority == 0) ||
+            (priority < -1)) {
+        /* Bad priority value */
+        return (EINVAL);
+    }
+    attr->priority = priority;
     return (0);
 }
 
@@ -207,24 +191,19 @@ int pthread_attr_setschedparam(pthread_attr_t *attr,
 int pthread_attr_setstack (pthread_attr_t *attr, void *stackaddr,
         size_t stacksize)
 {
+    /*
+     *  Don't return an error if stack is not aligned. Task_create()
+     *  will adjust the stack address to be aligned.
+     */
     attr->stack = stackaddr;
     attr->stacksize = stacksize;
     return (0);
 }
 
 /*
- *  ======== pthread_attr_setstackaddr ========
- */
-int pthread_attr_setstackaddr(pthread_attr_t *attr, void *stackaddr)
-{
-    attr->stack = stackaddr;
-    return (0);
-}
-
-/*
  *  ======== pthread_attr_setstacksize ========
  */
-int   pthread_attr_setstacksize(pthread_attr_t *attr, size_t stacksize)
+int pthread_attr_setstacksize(pthread_attr_t *attr, size_t stacksize)
 {
     attr->stacksize = stacksize;
     return (0);
@@ -238,40 +217,56 @@ int   pthread_attr_setstacksize(pthread_attr_t *attr, size_t stacksize)
 
 /*
  *  ======== pthread_cancel ========
+ *  The specification of this API is that it be used as a means for one thread
+ *  to termintate the execution of another thread.  There is no mention of
+ *  returning an error if the argument, pthread, is the same thread as the
+ *  calling thread.
  */
 int pthread_cancel(pthread_t pthread)
 {
-    pthread_Obj *thread = (pthread_Obj *)pthread;
-    UInt key;
+    pthread_Obj  *thread = (pthread_Obj *)pthread;
+    UInt          key;
 
     /*
-     *  Send cancellation request to the thread.
-     *  If the thread's cancelability is enabled, then if the cancelability
-     *  type is asynchronous, the system can cancel the thread at any
-     *  time (usually immediately, but system doesn't have to guarantee this).
-     *
-     *  If the cancelability type is deferred, the thread cannot be
-     *  cancelled until it calls a cancellation point (e.g.,
-     *  pthread_testcancel()).
+     *  Cancel the thread.  Only asynchronous cancellation is supported,
+     *  since functions that would normally be cancellation points (eg,
+     *  printf()), are not cancellation points for BIOS.
      */
-    key = Hwi_disable();
+    key = Task_disable();
 
     /* Indicate that cancellation is requested. */
     thread->cancelPending = 1;
 
     if (thread->cancelState == PTHREAD_CANCEL_ENABLE) {
-        if (thread->cancelType == PTHREAD_CANCEL_ASYNCHRONOUS) {
-            /*
-             *  Asynchronous cancellation type.
-             *
-             *  TODO: Set the thread->ret to PTHREAD_CANCELED
-             *  Pop the cleanup handlers.
-             *  Terminate the thread.
-             */
+        /* Set this task's priority to -1 to stop it from running. */
+        Task_setPri(thread->task, -1);
+
+        Task_restore(key);
+
+        /* Pop and execute the cleanup handlers */
+        while (thread->cleanupList != NULL) {
+            _pthread_cleanup_pop(thread->cleanupList, 1);
+        }
+
+        if (thread->detached) {
+            /* Free memory */
+#if ti_sysbios_posix_Settings_supportsMutexPriority__D
+            Queue_destruct(&(thread->mutexList));
+#endif
+            Semaphore_destruct(&(thread->joinSem));
+            Task_delete(&(thread->task));
+
+            Memory_free(Task_Object_heap(), thread, sizeof(pthread_Obj));
+        }
+        else {
+            /* pthread_join() will clean up. */
+            thread->ret = PTHREAD_CANCELED;
+            Semaphore_post(Semaphore_handle(&(thread->joinSem)));
         }
     }
-
-    Hwi_restore(key);
+    else {
+        Task_restore(key);
+    }
 
     return (0);
 }
@@ -285,72 +280,68 @@ int pthread_create(pthread_t *newthread, const pthread_attr_t *attr,
     Semaphore_Params  semParams;
     Task_Params       taskParams;
     pthread_Obj      *thread = NULL;
-    int               detachstate = PTHREAD_CREATE_JOINABLE;
     Error_Block       eb;
-    int               failedStatus = 0;
+    pthread_attr_t   *pAttr;
 
     Error_init(&eb);
     Task_Params_init(&taskParams);
 
-    if (attr) {
-        taskParams.priority = attr->priority;
-        taskParams.stack = attr->stack;
-        taskParams.stackSize = attr->stacksize;
-        detachstate = attr->detachstate;
-    }
+    *newthread = NULL;
 
     thread = (pthread_Obj *)Memory_alloc(Task_Object_heap(),
             sizeof(pthread_Obj), 0, &eb);
 
-    if (thread != NULL) {
-        thread->detached = (detachstate == PTHREAD_CREATE_JOINABLE) ? 0 : 1;
-        thread->fxn = startroutine;
-        thread->joinThread = (pthread_t)NULL;
-        thread->arg = arg;
-        thread->cancelState = PTHREAD_CANCEL_ENABLE;
-        thread->cancelType = PTHREAD_CANCEL_DEFERRED;
-        thread->cancelPending = 0;
-        thread->priority = taskParams.priority;
+    if (thread == NULL) {
+        return (ENOMEM);
+    }
 
-#if defined(_POSIX_THREAD_PRIO_PROTECT)
-        Queue_construct(&(thread->mutexList), NULL);
+    pAttr = (attr == NULL) ? &defaultPthreadAttrs : (pthread_attr_t *)attr;
+
+    taskParams.priority = pAttr->priority;
+    taskParams.stack = pAttr->stack;
+    taskParams.stackSize = pAttr->stacksize + pAttr->guardsize;
+
+    taskParams.arg0 = (UArg)arg;
+    taskParams.arg1 = (UArg)thread;
+    taskParams.priority = -1;
+
+    thread->detached = (pAttr->detachstate == PTHREAD_CREATE_JOINABLE) ? 0 : 1;
+    thread->fxn = startroutine;
+    thread->joinThread = NULL;
+    thread->cancelState = PTHREAD_CANCEL_ENABLE;
+    thread->cancelPending = 0;
+    thread->priority = pAttr->priority;
+    thread->cleanupList = NULL;
+
+#if ti_sysbios_posix_Settings_supportsMutexPriority__D
+    thread->blockedMutex = NULL;
+    Queue_elemClear((Queue_Elem *)thread);
+    Queue_construct(&(thread->mutexList), NULL);
 #endif
-        Semaphore_Params_init(&semParams);
-        semParams.mode = Semaphore_Mode_BINARY;
 
-        Semaphore_construct(&(thread->joinSem), 0, &semParams);
-        Semaphore_construct(&(thread->doneSem), 0, &semParams);
+    Semaphore_Params_init(&semParams);
+    semParams.mode = Semaphore_Mode_BINARY;
 
-        taskParams.arg0 = (UArg)thread;
-        thread->task = Task_create((Task_FuncPtr)_pthread_runStub,
-                &taskParams, &eb);
+    Semaphore_construct(&(thread->joinSem), 0, &semParams);
 
-        if (thread->task == NULL) {
-            failedStatus = 1;
-        }
-    }
-    else {
-        failedStatus = ENOMEM;
-    }
+    thread->task = Task_create((Task_FuncPtr)_pthread_runStub,
+            &taskParams, &eb);
 
-    /* Failure */
-    if (failedStatus) {
-        if (thread) {
-            Semaphore_destruct(&(thread->joinSem));
-            Semaphore_destruct(&(thread->doneSem));
+    if (thread->task == NULL) {
+        Semaphore_destruct(&(thread->joinSem));
 
-            if (thread->task) {
-                Task_delete(&thread->task);
-            }
+#if ti_sysbios_posix_Settings_supportsMutexPriority__D
+        Queue_destruct(&(thread->mutexList));
+#endif
+        Memory_free(Task_Object_heap(), thread, sizeof(pthread_Obj));
 
-            Memory_free(Task_Object_heap(), thread, sizeof(pthread_Obj));
-            thread = NULL;
-        }
+        return (ENOMEM);
     }
 
     *newthread = (pthread_t)thread;
+    Task_setPri(thread->task, pAttr->priority);
 
-    return (failedStatus);
+    return (0);
 }
 
 /*
@@ -358,25 +349,19 @@ int pthread_create(pthread_t *newthread, const pthread_attr_t *attr,
  */
 int pthread_detach(pthread_t pthread)
 {
-    pthread_Obj *thread = (pthread_Obj *)pthread;
-    UInt         key;
+    pthread_Obj  *thread = (pthread_Obj *)pthread;
+    UInt          key;
 
-    key = Hwi_disable();
+    key = Task_disable();
 
-    if (thread->detachstate != PTHREAD_CREATE_JOINABLE) {
-        Hwi_restore(key);
-        /* Only threads created in the joinable state can be detached. */
-        return (EINVAL);
-    }
-
-    if ((thread->joinThread != (pthread_t)NULL) || (thread->detached)) {
-        Hwi_restore(key);
+    if ((thread->joinThread != NULL) || (thread->detached)) {
+        Task_restore(key);
 
         /*
          *  A thread has already called pthread_join() or
-         *  pthread_detach() for this thread.
+         *  the thread is already detached.
          */
-        return (2);  // TODO: Find error code.
+        return (EINVAL);
     }
 
     /*
@@ -387,7 +372,7 @@ int pthread_detach(pthread_t pthread)
      */
     thread->detached = 1;
 
-    Hwi_restore(key);
+    Task_restore(key);
 
     return (0);
 }
@@ -404,32 +389,46 @@ void pthread_exit(void *retval)
      *  a value via retval that (if the thread is joinable) is available to
      *  another thread that calls pthread_join().
      *
-     *  Any clean-up handlers established by pthread_cleanup_push() that
-     *  have not yet been popped, are popped (in the reverse of the order in
-     *  which they were pushed) and executed.
+     *  Any clean-up handlers that have not yet been popped, are popped
+     *  (in the reverse of the order in which they were pushed) and executed.
      */
     thread->ret = retval;
 
-    if (!thread->detached) {
-        Semaphore_post(Semaphore_handle(&(thread->joinSem)));
-        Semaphore_pend(Semaphore_handle(&(thread->doneSem)), BIOS_WAIT_FOREVER);
+    /*
+     *  Don't bother disabling the Task scheduler while the thread
+     *  is exiting.  It will be up to the application to not make
+     *  such calls as pthread_cancel() or pthread_detach() while the
+     *  thread is exiting.
+     */
+
+    /* Pop and execute the cleanup handlers */
+    while (thread->cleanupList != NULL) {
+        _pthread_cleanup_pop(thread->cleanupList, 1);
     }
 
-    /* TODO: Pop cleanup handlers */
+    if (!thread->detached) {
+        Semaphore_post(Semaphore_handle(&(thread->joinSem)));
 
-    /* The Task_Object will be freed in the Idle loop. */
-    Memory_free(Task_Object_heap(), thread, sizeof(pthread_Obj));
-    Task_exit();
-}
+        /* Set this task's priority to -1 to stop it from running. */
+        Task_setPri(thread->task, -1);
+    }
+    else {
+        /* Free memory */
+#if ti_sysbios_posix_Settings_supportsMutexPriority__D
+        Queue_destruct(&(thread->mutexList));
+#endif
+        Semaphore_destruct(&(thread->joinSem));
 
-/*
- *  ======== pthread_getcpuclockid ========
- */
-int pthread_getcpuclockid (pthread_t __pthread_id,
-        clockid_t *__clock_id)
-{
-    /* TODO */
-    return (1);
+        Memory_free(Task_Object_heap(), thread, sizeof(pthread_Obj));
+
+        /*
+         *  Don't call Task_delete on the calling thread.  Task_exit()
+         *  will put the task on the terminated queue, and if
+         *  Task_deleteTerminatedTasks is TRUE, the task will be cleaned
+         *  up automatically.
+         */
+        Task_exit();
+    }
 }
 
 /*
@@ -441,21 +440,15 @@ int pthread_getschedparam(pthread_t pthread, int *policy,
     pthread_Obj      *thread = (pthread_Obj *)pthread;
 
     *policy = SCHED_OTHER;
-    param->sched_priority = Task_getPri(thread->task);
 
-    //  TODO: If the task priority is higher because of holding
-    //  a PTHREAD_PRIO_PROTECT mutex, which priority do we return?
+    /*
+     *  Note: This may not be the priority that the task is running
+     *  at (eg, if it is holding a mutex with a higher priority
+     *  ceiling).
+     */
+    param->sched_priority = thread->priority;
 
     return (0);
-}
-
-/*
- *  ======== pthread_getspecific ========
- */
-void *pthread_getspecific(pthread_key_t key)
-{
-    /* TODO */
-    return (NULL);
 }
 
 /*
@@ -470,61 +463,63 @@ void *pthread_getspecific(pthread_key_t key)
  */
 int pthread_join(pthread_t pthread, void **thread_return)
 {
-    pthread_Obj      *thread = (pthread_Obj *)pthread;
-    UInt              key;
+    pthread_Obj  *thread = (pthread_Obj *)pthread;
+    UInt          key;
 
-    key = Hwi_disable();
+    key = Task_disable();
 
-    if ((thread->joinThread != (pthread_t)NULL) || (thread->detached != 0)) {
+    if ((thread->joinThread != NULL) || (thread->detached != 0)) {
         /*
          *  Error - Another thread has already called pthread_join()
          *  for this thread, or the thread is in the detached state.
          */
-        Hwi_restore(key);
-        return (1);       // TODO: Find error code.
+        Task_restore(key);
+        return (EINVAL);
     }
 
-    thread->joinThread = pthread_self();
+    /*
+     *  Allow pthread_join() to be called from a BIOS Task.  If we
+     *  set joinThread to pthread_self(), we could get NULL if the
+     *  Task arg1 is 0.  All we need is a non-NULL value for joinThread.
+     */
+    thread->joinThread = Task_self();
 
-    Hwi_restore(key);
+    Task_restore(key);
 
     Semaphore_pend(Semaphore_handle(&(thread->joinSem)), BIOS_WAIT_FOREVER);
 
     if (thread_return) {
-        /*
-         *  Must be set to PTHREAD_CANCELED if the thread was
-         *  canceled.
-         */
         *thread_return = thread->ret;
     }
 
-    /* Post the thread's doneSem to allow it the be freed. */
-    Semaphore_post(Semaphore_handle(&(thread->doneSem)));
+#if ti_sysbios_posix_Settings_supportsMutexPriority__D
+    Queue_destruct(&(thread->mutexList));
+#endif
+    Semaphore_destruct(&(thread->joinSem));
 
+    Task_delete(&(thread->task));
+
+    Memory_free(Task_Object_heap(), thread, sizeof(pthread_Obj));
     return (0);
 }
 
 /*
- *  ======== pthread_key_create ========
+ *  ======== pthread_once ========
  */
-int pthread_key_create(pthread_key_t *key,
-        void (*__destructor)(void *))
+int pthread_once(pthread_once_t *once, void (*initFxn)(void))
 {
-    /*
-     *  TODO:  Do we want to implement this for BIOS?  Would
-     *  need to allocate a table for mapping of thread Id's to
-     *  key values.
-     */
-    return (1);
-}
+    UInt    key;
 
-/*
- *  ======== pthread_key_delete ========
- */
-int pthread_key_delete(pthread_key_t key)
-{
-   /* TODO - May not want to implement this for BIOS. */
-    return (1);
+    key = Task_disable();
+
+    if (*once == PTHREAD_ONCE_INIT) {
+        (*initFxn)();
+        *once = ~PTHREAD_ONCE_INIT;
+    }
+
+    Task_restore(key);
+
+    return (0);
 }
 
 /*
@@ -532,11 +527,7 @@ int pthread_key_delete(pthread_key_t key)
  */
 pthread_t pthread_self(void)
 {
-    pthread_Obj *thread;
-    Task_Handle  task = Task_self();
-
-    thread = (pthread_Obj *)Task_getArg0(task);
-    return ((pthread_t)thread);
+    return ((pthread_t)(xdc_uargToPtr(Task_getArg1(Task_self()))));
 }
 
 /*
@@ -545,43 +536,21 @@ pthread_t pthread_self(void)
 int pthread_setcancelstate(int state, int *oldstate)
 {
     pthread_Obj *thread = (pthread_Obj *)pthread_self();
-    UInt         key;
 
-    key = Hwi_disable();
+    if ((state != PTHREAD_CANCEL_ENABLE) &&
+            (state != PTHREAD_CANCEL_DISABLE)) {
+        return (EINVAL);
+    }
 
     *oldstate = thread->cancelState;
+
     thread->cancelState = state;
 
-    Hwi_restore(key);
+    if ((state == PTHREAD_CANCEL_ENABLE) && thread->cancelPending) {
+        pthread_exit((void *)PTHREAD_CANCELED);
+    }
 
     return (0);
-}
-
-/*
- *  ======== pthread_setcanceltype ========
- */
-int pthread_setcanceltype(int canceltype, int *oldtype)
-{
-    pthread_Obj *thread = (pthread_Obj *)pthread_self();
-    UInt         key;
-
-    key = Hwi_disable();
-
-    *oldtype = thread->cancelType;
-    thread->cancelType = canceltype;
-
-    Hwi_restore(key);
-
-    return (0);
-}
-
-/*
- *  ======== pthread_setconcurrency ========
- */
-int pthread_setconcurrency(int concurrency)
-{
-    /* Not applicable to BIOS */
-    return (1);
 }
 
 /*
@@ -594,32 +563,30 @@ int pthread_setschedparam(pthread_t pthread, int policy,
     Task_Handle         task = thread->task;
     UInt                oldPri;
     int                 priority = param->sched_priority;
-#if defined(_POSIX_THREAD_PRIO_PROTECT)
-    int                 maxPri;
     UInt                key;
+#if ti_sysbios_posix_Settings_supportsMutexPriority__D
+    int                 maxPri;
 #endif
 
-    if ((priority >= Task_numPriorities) ||
-            ((priority == 0) && (Task_getIdleTask() != NULL)) ||
+    if ((priority >= Task_numPriorities) || ((priority == 0)) ||
             (priority < -1)) {
         /* Bad priority value */
         return (EINVAL);
     }
 
-#if defined(_POSIX_THREAD_PRIO_PROTECT)
-
-    /*
-     *  If the thread is holding a PTHREAD_PRIO_PROTECT mutex and
-     *  running at its ceiling, we don't want to set its priority
-     *  to a lower value.  Instead, we save the new priority to set
-     *  it to, once the mutexes of higher priority ceilings are
-     *  released.
-     */
     key = Task_disable();
 
     oldPri = Task_getPri(task);
     thread->priority = priority;
 
+#if ti_sysbios_posix_Settings_supportsMutexPriority__D
+    /*
+     *  If the thread is holding a PTHREAD_PRIO_PROTECT or
+     *  PTHREAD_PRIO_INHERIT mutex and running at its ceiling, we don't
+     *  want to set its priority to a lower value.  Instead, we save the
+     *  new priority to set it to, once the mutexes of higher priority
+     *  ceilings are released.
+     */
     if (!Queue_empty(Queue_handle(&(thread->mutexList)))) {
         maxPri = _pthread_getMaxPrioCeiling(thread);
 
@@ -628,14 +595,13 @@ int pthread_setschedparam(pthread_t pthread, int policy,
         }
     }
     else {
-        Task_setPri(task, priority);
+        /* The thread owns no mutexes */
+        oldPri = Task_setPri(task, priority);
     }
-
-    Task_restore(key);
-
 #else
     oldPri = Task_setPri(task, priority);
 #endif
+    Task_restore(key);
 
     /* Suppress warning about oldPri not being used. */
     (void)oldPri;
@@ -643,152 +609,83 @@ int pthread_setschedparam(pthread_t pthread, int policy,
     return (0);
 }
 
-/*
- *  ======== pthread_setspecific ========
- */
-int pthread_setspecific(pthread_key_t key, const void *value)
-{
-    /* TODO - May not want to implement this for BIOS. */
-    return (1);
-}
 
 /*
- *  ======== pthread_testcancel ========
+ *************************************************************************
+ *              internal functions
+ *************************************************************************
  */
-void pthread_testcancel(void)
+
+/*
+ *  ======== _pthread_cleanup_pop ========
+ */
+void _pthread_cleanup_pop(struct _pthread_cleanup_context *context,
+        int execute)
 {
-    pthread_Obj *thread = (pthread_Obj *)pthread_self();
+    pthread_Obj    *thread = (pthread_Obj *)pthread_self();
 
-    /* Act on a cancellation request. */
+    thread->cleanupList = context->next;
 
-    if (thread->cancelPending) {
-        thread->ret = PTHREAD_CANCELED;
-
-        if (thread->detachstate == PTHREAD_CREATE_JOINABLE) {
-            Semaphore_post(Semaphore_handle(&(thread->joinSem)));
-            Semaphore_pend(Semaphore_handle(&(thread->doneSem)),
-                    BIOS_WAIT_FOREVER);
-        }
-
-        /* TODO: pop and run the cleanup handlers */
-
-        Memory_free(Task_Object_heap(), thread, sizeof(pthread_Obj));
-
-        Task_exit();
+    if (execute) {
+        (*(context->fxn))(context->arg);
     }
 }
 
-#if defined(_POSIX_THREAD_PRIO_PROTECT)
-
 /*
- *  ======== _pthread_addMutex ========
- *  Add a PTHREAD_PRIO_PROTECT mutex to the queue and bump the thread's
- *  priority, if necessary.
+ *  ======== _pthread_cleanup_push ========
  */
-void _pthread_addMutex(pthread_mutex_t *mutex)
+void _pthread_cleanup_push(struct _pthread_cleanup_context *context,
+        void (*fxn)(void *), void *arg)
 {
-    pthread_Obj        *thread = (pthread_Obj *)pthread_self();
-    int                 priority;
-    int                 prioceiling;
-    int                 key;
+    pthread_Obj    *thread = (pthread_Obj *)pthread_self();
 
-    key = Task_disable();
-
-    Queue_enqueue(Queue_handle(&(thread->mutexList)), (Queue_Elem *)mutex);
-
-    pthread_mutex_getprioceiling(mutex, &prioceiling);
-
-    priority = Task_getPri(thread->task);
-    if (priority < prioceiling) {
-        Task_setPri(thread->task, prioceiling);
-    }
-
-    Task_restore(key);
+    context->fxn = fxn;
+    context->arg = arg;
+    context->next = thread->cleanupList;
+    thread->cleanupList = context;
 }
-
-/*
- *  ======== _pthread_getMaxPrioCeiling ========
- *  Return the maximum of the priority ceilings of the PTHREAD_PRIO_PROTECT
- *  mutexes owned by the thread.
- */
-static int _pthread_getMaxPrioCeiling(pthread_Obj *thread)
-{
-    pthread_mutex_t    *mutex;
-    int                 maxPri = 0;
-    int                 pri;
-    UInt                key;
-
-    /*
-     *  If the thread is holding a PTHREAD_PRIO_PROTECT mutex and
-     *  running at its ceiling, we don't want to set its priority
-     *  to a lower value.  Instead, we save the new priority to set
-     *  it to, once the mutexes of higher priority ceilings are
-     *  released.
-     */
-    key = Task_disable();
-
-    mutex = Queue_head(Queue_handle(&(thread->mutexList)));
-
-    while (mutex != (pthread_mutex_t *)Queue_handle(&thread->mutexList)) {
-        pthread_mutex_getprioceiling(mutex, &pri);
-        maxPri = (pri > maxPri) ? pri : maxPri;
-    }
-
-    Task_restore(key);
-
-    return (maxPri);
-}
-
-/*
- *  ======== _pthread_removeMutex ========
- *  Remove a PTHREAD_PRIO_PROTECT mutex from the queue and restore
- *  priority, if necessary.
- */
-void _pthread_removeMutex(pthread_mutex_t *mutex)
-{
-    pthread_Obj        *thread = (pthread_Obj *)pthread_self();
-    int                 maxPri;
-    int                 priority;
-    int                 key;
-
-    key = Task_disable();
-
-    Queue_remove((Queue_Elem *)mutex);
-    maxPri = _pthread_getMaxPrioCeiling(thread);
-    priority = thread->priority;
-
-    /*
-     *  Take the larger of the thread's priority and the ceilings of
-     *  the remaining mutexes it owns.
-     */
-    priority = (priority > maxPri) ? priority : maxPri;
-
-    Task_setPri(thread->task, priority);
-
-    Task_restore(key);
-}
-
-#endif
 
 /*
  *  ======== _pthread_runStub ========
  */
 static void _pthread_runStub(UArg arg0, UArg arg1)
 {
-    pthread_Obj *thread = (pthread_Obj *)arg0;
+    UInt         key;
+    pthread_Obj *thread = (pthread_Obj *)(xdc_uargToPtr(arg1));
 
-    thread->ret = thread->fxn((void *)thread->arg);
+    thread->ret = thread->fxn(xdc_uargToPtr(Task_getArg0(thread->task)));
+
+    /* Pop and execute the cleanup handlers */
+    while (thread->cleanupList != NULL) {
+        _pthread_cleanup_pop(thread->cleanupList, 1);
+    }
+
+    key = Task_disable();
 
     if (!thread->detached) {
         Semaphore_post(Semaphore_handle(&(thread->joinSem)));
-        Semaphore_pend(Semaphore_handle(&(thread->doneSem)), BIOS_WAIT_FOREVER);
-    }
 
-#if defined(_POSIX_THREAD_PRIO_PROTECT)
+        /*
+         * Set this task's priority to -1 to prevent it from being put
+         * on the terminated queue (and deleted if Task.deleteTerminatedTasks
+         * is true). pthread_join() will delete the Task object.
+         */
+        Task_setPri(thread->task, -1);
+        Task_restore(key);
+    }
+    else {
+        Task_restore(key);
+
+        /* Free memory */
+#if ti_sysbios_posix_Settings_supportsMutexPriority__D
         Queue_destruct(&(thread->mutexList));
 #endif
-    /*
-     *  The Task_Object will be freed in the Idle loop.
-     */
-    Memory_free(Task_Object_heap(), thread, sizeof(pthread_Obj));
+        Semaphore_destruct(&(thread->joinSem));
+
+        Memory_free(Task_Object_heap(), thread, sizeof(pthread_Obj));
+
+        /* The system will have to clean up the Task object */
+    }
+
+    /* Task_exit() is called when returning from this function */
 }

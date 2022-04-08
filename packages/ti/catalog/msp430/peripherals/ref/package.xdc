@@ -20,6 +20,7 @@ requires ti.catalog.msp430.peripherals.special_function;
 package ti.catalog.msp430.peripherals.ref [1, 0, 0] {
     interface IREF;
     module  REF;
+    module  REF_A;
 }
 /*
  */

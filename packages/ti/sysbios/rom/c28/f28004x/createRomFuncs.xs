@@ -50,6 +50,20 @@ function readFile(filename)
 }
 
 /*
+ *  ======== writeRegExFile ========
+ */
+function writeRegExFile(filename, content)
+{
+    var idx = 0;
+
+    /* Open/Create file */
+    var file = new java.io.FileWriter(filename);
+
+    file.write(String(content.join("|")));
+    file.flush();
+}
+
+/*
  *  ======== writeFile ========
  */
 function writeFile(filename, content)
@@ -85,6 +99,6 @@ function main(args)
         funcsArr[funcsArr.length] = symbolName;
     }
 
-    writeFile(funcsFile, funcsArr);
+    writeRegExFile(funcsFile, funcsArr);
     writeFile(funcsFile1, funcsArr);
 }
