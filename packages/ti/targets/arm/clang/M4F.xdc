@@ -79,7 +79,7 @@ metaonly module M4F inherits ti.targets.arm.elf.IArm {
      */
     override config xdc.bld.ITarget2.Options ccOpts = {
         prefix: "",
-        suffix: ""
+        suffix: " -Wno-builtin-requires-header "  /* TIRTOS-1906 */
     };
 
     /*!
