@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2018, Texas Instruments Incorporated
+ * Copyright (c) 2015-2018, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,34 +30,19 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 /*
- *  ======== package.bld ========
- *
+ *  ======== ReentSupport_stub.c ========
  */
 
-var BiosBuild = xdc.loadCapsule("ti/sysbios/Build.xs");
+#include <xdc/std.h>
 
-var objList = [
-    "ReentSupport",
-    "SemiHostSupport"
-];
+#include <xdc/runtime/Startup.h>
 
-/* build for all ARM GNU targets */
-var trgFilter = {
-    field: "$name",
-    list: [ "gnu.targets.arm.M3",
-            "gnu.targets.arm.M4",
-            "gnu.targets.arm.M4F",
-            "gnu.targets.arm.A8F",
-            "gnu.targets.arm.A9F",
-            "gnu.targets.arm.A15F"
-          ]
-};
+#include "package/internal/ReentSupport.xdc.h"
 
-/* generate makefiles */
-BiosBuild.buildLibs(objList, undefined, trgFilter, arguments);
-
-Pkg.otherFiles = [ "package.bld", "ReentSupport_stub.c", "SemiHostSupport.xml" ];
-
-/* include source files in the release package */
-Pkg.attrs.exportSrc = true;
-Pkg.attrs.exportCfg = true;
+/*
+ *  ======== ReentSupport_Module_startup ========
+ */
+Int ReentSupport_Module_startup (Int phase)
+{
+    return (Startup_DONE);
+}

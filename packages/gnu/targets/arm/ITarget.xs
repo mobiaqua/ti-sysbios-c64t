@@ -4,7 +4,7 @@
  */
 
 /*
- * Copyright (c) 2017 Texas Instruments Incorporated - http://www.ti.com
+ * Copyright (c) 2017-2018 Texas Instruments Incorporated - http://www.ti.com
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -296,6 +296,18 @@ function initVers()
     target.$seal("BINVERS");
 
     target.$private.vers = true;
+
+    /*
+     * Special case for a customer that wants to use gcc-arm-none-eabi-4_7_2012q4.
+     * We need to get the target's custom library off the compile and link lines.
+     * We also remove the 'nano.specs' file so the these old complier users get the
+     * traditional newlib library (as they were using previously).
+     */
+    if (target.name == "A15F" && target.GCCVERS.match(/^4.7/)) {
+        target.includeOpts = target.includeOpts.replace(/\S+install-native\S+/g, "");
+        target.lnkOpts.suffix = target.lnkOpts.suffix.replace(/\S+install-native\S+/g, "");
+        target.lnkOpts.suffix = target.lnkOpts.suffix.replace(/--specs=nano.specs/, "");
+    }
 }
 /*
 
