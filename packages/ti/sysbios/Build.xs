@@ -158,46 +158,46 @@ function module$use()
     /* inform getLibs() about location of library */
     switch (BIOS.libType) {
         case BIOS.LibType_Instrumented:
-	    if ((BIOS.$written("assertsEnabled") == true) &&
-		(BIOS.assertsEnabled == false)) {
-		BIOS.$logWarning(
-		    "Asserts are enabled when BIOS.libType " +
-		    "is set to BIOS.LibType_Instrumented",
+            if ((BIOS.$written("assertsEnabled") == true) &&
+                (BIOS.assertsEnabled == false)) {
+                BIOS.$logWarning(
+                    "Asserts are enabled when BIOS.libType " +
+                    "is set to BIOS.LibType_Instrumented",
                     BIOS, "assertsEnabled"
-		);
-	    }
-	    BIOS.assertsEnabled = true;
-	    
-	    if ((BIOS.$written("logsEnabled") == true) &&
-		(BIOS.logsEnabled == false)) {
-		BIOS.$logWarning(
-		    "Logs are enabled when BIOS.libType " +
-		    "is set to BIOS.LibType_Instrumented",
+                );
+            }
+            BIOS.assertsEnabled = true;
+
+            if ((BIOS.$written("logsEnabled") == true) &&
+                (BIOS.logsEnabled == false)) {
+                BIOS.$logWarning(
+                    "Logs are enabled when BIOS.libType " +
+                    "is set to BIOS.LibType_Instrumented",
                     BIOS, "logsEnabled"
-		);
-	    }
-	    BIOS.logsEnabled = true;
+                );
+            }
+            BIOS.logsEnabled = true;
             break;
 
         case BIOS.LibType_NonInstrumented:
-	    if ((BIOS.$written("assertsEnabled") == true) &&
-		(BIOS.assertsEnabled == true)) {
-		BIOS.$logWarning(
-		    "Asserts are disabled when BIOS.libType " +
-		    "is set to BIOS.LibType_NonInstrumented",
+            if ((BIOS.$written("assertsEnabled") == true) &&
+                (BIOS.assertsEnabled == true)) {
+                BIOS.$logWarning(
+                    "Asserts are disabled when BIOS.libType " +
+                    "is set to BIOS.LibType_NonInstrumented",
                     BIOS, "assertsEnabled"
-		);
-	    }
-	    BIOS.assertsEnabled = false;
-	    if ((BIOS.$written("logsEnabled") == true) &&
-		(BIOS.logsEnabled == true)) {
-		BIOS.$logWarning(
-		    "Logs are disabled when BIOS.libType " +
-		    "is set to BIOS.LibType_NonInstrumented",
+                );
+            }
+            BIOS.assertsEnabled = false;
+            if ((BIOS.$written("logsEnabled") == true) &&
+                (BIOS.logsEnabled == true)) {
+                BIOS.$logWarning(
+                    "Logs are disabled when BIOS.libType " +
+                    "is set to BIOS.LibType_NonInstrumented",
                     BIOS, "logsEnabled"
-		);
-	    }
-	    BIOS.logsEnabled = false;
+                );
+            }
+            BIOS.logsEnabled = false;
             break;
 
         case BIOS.LibType_Debug:
@@ -597,6 +597,8 @@ function getDefs()
         defs += " -Dxdc_runtime_Log_DISABLE_ALL";
     }
 
+    defs += Build.getCommandLineDefs();
+
     return (defs);
 }
 
@@ -797,20 +799,48 @@ function getAsmFiles(target)
                 var modstr = mn.substr(mn.lastIndexOf(".")+1);
                 prefix = prefix.substring(0, prefix.lastIndexOf('.')+1);
                 prefix = prefix.replace(/\./g, "/");
-		var modAsmFiles = mod.$private.getAsmFiles(target);
-		for (var j in modAsmFiles) {
-		    asmSources += prefix + modAsmFiles[j] + " ";
-		}
+                var modAsmFiles = mod.$private.getAsmFiles(target);
+                for (var j in modAsmFiles) {
+                    asmSources += prefix + modAsmFiles[j] + " ";
+                }
             }
-	}
+        }
     }
 
     if (asmSources.length != 0) {
-	/* remove trailing " " */
-	asmSources = asmSources.substring(0, asmSources.length-1);
-    }	
+        /* remove trailing " " */
+        asmSources = asmSources.substring(0, asmSources.length-1);
+    }
 
     return (asmSources.split(' '));
+}
+
+/*
+ *  ======== getCommandLineDefs ========
+ *  get the -D's and --define's from the compiler command line
+ */
+function getCommandLineDefs()
+{
+    var defs = " ";
+    var type = 0; /* 1: quotes */
+    var prefix = Program.build.target.ccOpts.prefix;
+
+    var tokens = prefix.split(" ");
+
+    /*
+     * absorb all the "-Dxyz"'s and "--define"'s in the compiler command line
+     */
+    for (i = 0; i < tokens.length; i++) {
+        if (tokens[i].match(/-D/) || tokens[i].match(/--define/)) {
+            defs += tokens[i];
+            if (tokens[i] == "-D") {
+                defs += tokens[++i];  /* intentionally removes spaces for IAR Assembler */
+            }
+            defs += " ";
+        }
+    }
+
+    return (defs);
 }
 
 /*
@@ -884,7 +914,7 @@ function getIncludePaths()
                 for (;i < prefix.length; i++) {
                      incs += prefix[i];
                      if (((type == 1) && (prefix[i] == '"')) ||
-		             ((type == 0) && (prefix[i] == ' '))) {
+                         ((type == 0) && (prefix[i] == ' '))) {
                          type = 0;
                          incs += " ";
                          break;
@@ -1086,7 +1116,7 @@ function buildLibs(objList, relList, filter, xdcArgs, incs)
                                 copts: ccopts,
                                 aopts: asmopts,
                                 releases: relList,
-				incs: incs,
+                                incs: incs,
                                 });
                 lib.addObjects(objList);
                 /* suppress debug libs from exports */

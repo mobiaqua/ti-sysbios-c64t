@@ -44,6 +44,14 @@
 
     var XDCROOT = String(environment['xdc.rootDir'] + '/packages/').replace(/\\/g, "/");
 
+    /* collect xdc include paths */
+    var xdcpath =  String(environment['xdc.path'] + '/packages/').replace(/\\/g, "/");
+    var xdcincs = xdcpath.split(';');
+    var XDC_PATH_INCS = "";
+    for each (var inc in xdcincs) {
+        XDC_PATH_INCS += "-I\"" + inc + "/\" ";
+    }
+
     var XOPTS = '-I "' + XDCROOT + '"'
 	+ " -Dxdc_target_types__=" + File.getDOSPath(TARGET.$package.packageRepository) + TARGET.stdInclude
 	+ " -Dxdc_target_name__=" + TARGET.name;
@@ -75,9 +83,7 @@ BIOS_DEFS = `Build.getDefs() + ROM.getConfigDefs()`
 
 BIOS_INC  = -I"`File.getDOSPath(this.$package.packageRepository)`"
 
-TARGET_INC = -I"`File.getDOSPath(xdc.loadPackage('ti.targets').packageRepository)`"
-
-INCS = $(BIOS_INC) $(TARGET_INC) `Build.getIncludePaths()`
+INCS =  $(BIOS_INC) `XDC_PATH_INCS`
 
 GCCTARG = `GCCTARG`
 

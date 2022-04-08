@@ -1,6 +1,6 @@
 %%{
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,14 @@
     var TARGET = $args[0];
 
     var XDCROOT = String(environment['xdc.rootDir'] + '/packages/').replace(/\\/g, "/");
+
+    /* collect xdc include paths */
+    var xdcpath =  String(environment['xdc.path'] + '/packages/').replace(/\\/g, "/");
+    var xdcincs = xdcpath.split(';');
+    var XDC_PATH_INCS = "";
+    for each (var inc in xdcincs) {
+        XDC_PATH_INCS += "-I\"" + inc + "/\" ";
+    }
 
     var XDCRUNTIME = xdc.loadPackage('xdc.runtime').packageRepository;
     
@@ -124,8 +132,7 @@
 					 + libsArray[i].match(/[^\;]*/) + "\" ";
     }
 
-    var driverlibPath = environment['CC26XX_DRIVERLIB'];
-    var driverlib = "-l " + driverlibPath + "/driverlib/bin/ccs/driverlib.lib";
+    var driverlib = "-l " + xdc.findFile("ti/devices/cc13x0/driverlib/bin/ccs/driverlib.lib");
     print(driverlib);
 
     if (!java.io.File(RomModule.libDir).exists()) {
@@ -170,9 +177,7 @@ INTERN_FUNCS =
 
 BIOS_INC  = -I"`File.getDOSPath(this.$package.packageRepository)`"
 
-TARGET_INC = -I"`File.getDOSPath(xdc.loadPackage('ti.targets').packageRepository)`"
-
-INCS = $(BIOS_INC) $(TARGET_INC) `Build.getIncludePaths()`
+INCS =  $(BIOS_INC) `XDC_PATH_INCS`
 
 CC = `CGEN`/bin/`TARGET.cc.cmd` $(CCOPTS) -I `CGEN`/include
 ASM = `CGEN`/bin/`TARGET.asm.cmd` $(CCOPTS) -I `CGEN`/include
@@ -186,7 +191,7 @@ OBJDUMP = /db/vendors/linaro/gcc-arm-none-eabi-4_8-2014q3/bin/arm-none-eabi-objd
 % * APIs together and having unwanted symbols defined in the ROM, the big.c file
 % * must be built without optimizations here.
 % */
-%var CCOPTS_BIGC = BIOS.getCCOpts(TARGET.name).toString().replace(/\-o3/," ");
+%var CCOPTS_BIGC = BIOS.getCCOpts(TARGET.name).toString().replace(/\-o3/," ") + Build.getCommandLineDefs();
 %CCOPTS_BIGC = CCOPTS_BIGC.toString().replace(/\-\-program_level_compile/,"");
 %CCOPTS_BIGC = CCOPTS_BIGC.toString().replace(/\-\-optimize_with_debug/,"");
 %CCOPTS_BIGC = CCOPTS_BIGC.toString().replace(/\-\-opt_for_speed=2/,"");

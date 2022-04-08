@@ -118,7 +118,8 @@ int timer_create(clockid_t clockid, struct sigevent *evp, timer_t *timerid)
             sizeof(TimerObj), 0, &eb);
 
     if (timer == NULL) {
-        return (ENOMEM);
+        /* ENOMEM */
+        return (-1);
     }
 
     Clock_Params_init(&params);
@@ -140,7 +141,8 @@ int timer_create(clockid_t clockid, struct sigevent *evp, timer_t *timerid)
 
         if (timer->sem == NULL) {
             timer_delete((timer_t)timer);
-            return (ENOMEM);
+            /* ENOMEM */
+            return (-1);
         }
 
         /* Save the priority since we'll create the thread with priority -1 */
@@ -157,7 +159,8 @@ int timer_create(clockid_t clockid, struct sigevent *evp, timer_t *timerid)
 
         if (retc != 0) {
             timer_delete((timer_t)timer);
-            return (ENOMEM);
+            /* ENOMEM */
+            return (-1);
         }
     }
 
@@ -171,7 +174,8 @@ int timer_create(clockid_t clockid, struct sigevent *evp, timer_t *timerid)
 
         if (retc != 0) {
             timer_delete((timer_t)timer);
-            return (EINVAL);
+            /* EINVAL */
+            return (-1);
         }
     }
 
@@ -255,12 +259,14 @@ int timer_settime(timer_t timerid, int flags,
 
     if ((value->it_interval.tv_nsec < 0) ||
             (value->it_interval.tv_nsec >= 1000000000)) {
-        return (EINVAL);
+        /* EINVAL */
+        return (-1);
     }
 
     if ((value->it_value.tv_nsec < 0) ||
             (value->it_value.tv_nsec >= 1000000000)) {
-        return (EINVAL);
+        /* EINVAL */
+        return (-1);
     }
 
     /*

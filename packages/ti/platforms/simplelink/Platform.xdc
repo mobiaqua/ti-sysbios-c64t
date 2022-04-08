@@ -50,6 +50,17 @@ package ti.platforms.simplelink;
  *  @p(code)
  *  Pkg.addExecutable("test", target, "ti.platforms.simplelink:CC3200");
  *  @p
+ *
+ *  @a(Note)
+ *  The 'simplelink' platform provides support for allowing the user to
+ *  specify the application's C stack size within their linker command
+ *  file. If the user sets 'Program.stack = 0' in their configuration
+ *  file, then it is up to the user to add the necessary content to their
+ *  linker command file to define the size and placment of the C stack.
+ *  Additionally, if GNU tools are being used, then the user must define
+ *  'STACKSIZE' in their linker command file and have its value be the
+ *  size of the C stack in bytes. The 'STACKSIZE' symbol is used
+ *  internally to initialize other symbols that must be provided to SYS/BIOS.
  */
 @Template ("./Platform.xdt")
 metaonly module Platform inherits xdc.platform.IPlatform

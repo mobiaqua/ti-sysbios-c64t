@@ -1,3 +1,4 @@
+%%{
 /*
  * Copyright (c) 2016, Texas Instruments Incorporated
  * All rights reserved.
@@ -28,60 +29,48 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+ *
+*/
+%%}
+%/*
+% *  ======== Settings.xdt ========
+% */
+
+
+%if (Program.build.target.$name.match(/gnu/)) {
+#include <xdc/std.h>
+
+#include <ti/sysbios/posix/pthread.h>
+#include <ti/sysbios/posix/mqueue.h>
+#include <ti/sysbios/posix/sched.h>
+#include <ti/sysbios/posix/semaphore.h>
+#include <ti/sysbios/posix/unistd.h>
+
+%/*
+% *  The function below is a work-around for a GCC link order
+% *  problem.  See SYSBIOS-292 for a description.
+% */
+%
 /*
- *  ======== sched.h ========
+ *  ======== ti_sysbios_posix_dummyFxn ========
+ *  This function will ensure that posix functions will be linked in
+ *  if they are used.  It calls one function from each posix source file.
+ *  This function should never be called.
  */
-
-#ifndef ti_sysbios_posix_sched__include
-#define ti_sysbios_posix_sched__include
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include <stdint.h>
-
-#include <ti/sysbios/knl/Task.h>
-
-/*
- *  These defines would be in a sched.h, which TI and IAR
- *  toolchains don't have.
- */
-#ifndef SCHED_FIFO
-#define SCHED_FIFO 0
-#endif
-
-#ifndef SCHED_RR
-#define SCHED_RR 0
-#endif
-
-#ifndef SCHED_OTHER
-#define SCHED_OTHER 0
-#endif
-
-/*
- *  ======== sched_param ========
- *  This was taken from sys/sched.h
- */
-struct sched_param {
-  int sched_priority; /* Thread execution priority */
-};
-
-/*
- *  GNU sched.h declares sched_get_priority_min(),
- *  sched_get_priority_max(), and sched_yield() inside an
- *      #if defined(_POSIX_PRIORITY_SCHEDULING)
- *  block.
- */
-
-#define sched_get_priority_min() 1
-#define sched_get_priority_max() (ti_sysbios_knl_Task_numPriorities - 1)
-
-extern int sched_yield(void);
-
-#ifdef __cplusplus
+void ti_sysbios_posix_dummyFxn(void)
+{
+    /* Call one function from each posix source file */
+    clock_gettime((clockid_t)0, NULL);       /* clock.c */
+    mq_close((mqd_t)NULL);                   /* mqueue.c */
+    pthread_attr_destroy(NULL);              /* pthread.c */
+    pthread_barrierattr_init(NULL);          /* pthread_barrier.c */
+    pthread_condattr_init(NULL);             /* pthread_cond.c */
+    pthread_key_delete(NULL);                /* pthread_key.c */
+    pthread_mutexattr_destroy(NULL);         /* pthread_mutex.c */
+    pthread_rwlockattr_destroy(NULL);        /* pthread_rwlock.c */
+    sched_yield();                           /* sched.c */
+    sem_destroy(NULL);                       /* semaphore.c */
+    sleep(0);                                /* sleep.c */
+    timer_delete((timer_t)NULL);             /* timer.c */
 }
-#endif
-
-#endif
+%}

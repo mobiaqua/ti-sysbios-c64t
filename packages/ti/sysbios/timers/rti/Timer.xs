@@ -37,6 +37,7 @@ var Hwi = null;
 var BIOS = null;
 var Core = null;
 var Timer = null;
+var device;
 var catalogName = null;
 
 if (xdc.om.$name == "cfg" || typeof(genCdoc) != "undefined") {

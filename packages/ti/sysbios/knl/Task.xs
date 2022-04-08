@@ -1176,7 +1176,7 @@ function viewInitModule(view, mod)
     else {
         if (HwiCfg.initStackFlag) {
             view.hwiStackPeak = String(stackInfo.hwiStackPeak);
-            if (view.hwiStackPeak == view.hwiStackSize) {
+            if (stackInfo.hwiStackPeak == stackInfo.hwiStackSize) {
                 Program.displayError(view, "hwiStackPeak", "Overrun!  ");
                 /*                                                  ^^  */
                 /* (extra spaces to overcome right justify)             */

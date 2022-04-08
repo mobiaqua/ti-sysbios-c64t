@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -104,7 +104,8 @@ int sem_timedwait(sem_t *semaphore, const struct timespec *abstime)
     int                retc = 0;
 
     if ((abstime->tv_nsec < 0) || (1000000000 <= abstime->tv_nsec)) {
-        return (EINVAL);
+        /* EINVAL */
+        return (-1);
     }
 
     clock_gettime(0, &curtime);
@@ -128,7 +129,8 @@ int sem_timedwait(sem_t *semaphore, const struct timespec *abstime)
     retVal = Semaphore_pend(Semaphore_handle(&(semaphore->sem)), timeout);
 
     if (!retVal) {
-        retc = ETIMEDOUT;
+        /* ETIMEDOUT */
+        retc = -1;
     }
 
     return (retc);
@@ -145,7 +147,8 @@ int sem_trywait(sem_t *semaphore)
     retVal = Semaphore_pend(Semaphore_handle(&(semaphore->sem)), 0);
 
     if (!retVal) {
-        return (EAGAIN);
+        /* EAGAIN */
+        return (-1);
     }
 
     return (0);

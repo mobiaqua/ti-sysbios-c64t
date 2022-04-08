@@ -994,9 +994,18 @@ module Hwi inherits ti.sysbios.interfaces.IHwi
     metaonly Bool inUseMeta(UInt intNum);
 
     /*!
-     *  @_nodoc
      *  ======== plug ========
      *  Plug a non dispatched interrupt vector with an ISR address.
+     *
+     *  Used internally by Hwi_create() and Hwi_construct().
+     *
+     *  This API is provided for external use primarily to allow users
+     *  to plug the NMI vector (interrupt #2) at runtime.
+     *
+     *  @a(Note)
+     *  Interrupt vectors plugged using Hwi_plug() are NOT managed by
+     *  the Hwi interrupt dispatcher. Consequently, it is not safe to
+     *  call SYS/BIOS APIs from within these ISRs.
      *
      *  @param(intNum)  interrupt number
      *  @param(fxn)     pointer to ISR function

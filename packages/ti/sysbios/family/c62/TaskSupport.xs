@@ -43,10 +43,8 @@ function getAsmFiles(targetName)
 {
     switch(targetName) {
         case "ti.targets.C64P":
-        case "ti.targets.C64P_big_endian":
         case "ti.targets.C674":
         case "ti.targets.elf.C64P":
-        case "ti.targets.elf.C64P_big_endian":
         case "ti.targets.elf.C674":
             return (["TaskSupport_asm.s62"]);
             break;

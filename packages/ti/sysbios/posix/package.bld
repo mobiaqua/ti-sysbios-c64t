@@ -36,6 +36,12 @@
 
 var BiosBuild = xdc.loadCapsule("ti/sysbios/Build.xs");
 
+/*
+ *  When adding source files to this list, please also remember to add
+ *  the file to the getCFiles() function in Settings.xs.  Also, choose
+ *  one of the functions in the .c file to add to the dummy function
+ *  in Settings.xdt.
+ */
 var objList = [
     "pthread.c",
     "pthread_barrier.c",
@@ -84,6 +90,7 @@ Pkg.otherFiles = [
     "types.h",
     "unistd.h",
     "Settings.xdc",
+    "Settings.xdt",
     "Settings.xs",
     "Settings.h"
     ];

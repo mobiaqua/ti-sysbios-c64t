@@ -106,7 +106,7 @@ function buildUndefSegment(objDumpArray)
 /*
  *  ======== buildRomSegment ========
  */
-function buildRomSegment(objDumpArray)
+function buildRomSegment(romTextArray)
 {
     var idx = 0;
     var virtualAddr, symbolName;
@@ -116,8 +116,8 @@ function buildRomSegment(objDumpArray)
 
     lineArray[lineArray.length] = "";
 
-    for (idx = 0; idx < objDumpArray.length; idx++) {
-        tokens = String(objDumpArray[idx]).split(/\s+/);
+    for (idx = 0; idx < romTextArray.length; idx++) {
+        tokens = String(romTextArray[idx]).split(/\s+/);
         virtualAddr = "0x" + String(tokens[0]);
 
         if(tokens[4] == 0) {
@@ -136,6 +136,7 @@ function buildRomSegment(objDumpArray)
         }
         symbolName = String(tokens[6]);
         if (isIAR) {
+            /* only place function definitions in IAR linker commenad file */
             if (isFunc == true) {
                 lineArray[lineArray.length] = "--define_symbol " + symbolName + "=0x" + virtualAddr;
             }

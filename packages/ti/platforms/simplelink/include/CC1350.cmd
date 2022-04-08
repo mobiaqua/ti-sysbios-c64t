@@ -49,7 +49,7 @@
 #define FLASH_BASE              0x0
 #define FLASH_SIZE              0x20000
 #define RAM_BASE                0x20000000
-#define RAM_SIZE                0x4000
+#define RAM_SIZE                0x5000
 
 /* System memory map */
 

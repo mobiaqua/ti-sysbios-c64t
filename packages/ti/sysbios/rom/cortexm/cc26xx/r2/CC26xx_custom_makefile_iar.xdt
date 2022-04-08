@@ -44,6 +44,14 @@
 
     var XDCROOT = String(environment['xdc.rootDir'] + '/packages/').replace(/\\/g, "/");
 
+    /* collect xdc include paths */
+    var xdcpath =  String(environment['xdc.path'] + '/packages/').replace(/\\/g, "/");
+    var xdcincs = xdcpath.split(';');
+    var XDC_PATH_INCS = "";
+    for each (var inc in xdcincs) {
+        XDC_PATH_INCS += "-I\"" + inc + "/\" ";
+    }
+
     var XDCRUNTIME = xdc.loadPackage('xdc.runtime').packageRepository;
     
     var CGEN = TARGET.rootDir.replace(/\\/g, "/");
@@ -122,20 +130,11 @@
 
     var RomModule = this;
 
-    var BIOSROOT = File.getDOSPath(BIOS.$package.packageRepository) + "ti/sysbios/"
-    var romModuleLibDir = File.getDOSPath(RomModule.$package.packageRepository) + RomModule.$name.replace(/\./g, "/") + "/";
+    var romModuleDir = File.getDOSPath(RomModule.$package.packageBase);
     var modName = RomModule.$name.substr(RomModule.$name.lastIndexOf(".")+1);
-    var goldenDir = romModuleLibDir.replace(modName, "golden/"+modName);
+    var goldenDir = romModuleDir + "golden/" + modName + "/";
     
-    var RTS = xdc.loadPackage(TARGET.rts);
-
-    var Libs = RTS.getLibs(xdc.module("xdc.cfg.Program"));
-    var libsArray = Libs.split(';');
-    var XDC_LIB = "";
-    for (i in libsArray) {
-	XDC_LIB += "-l \"" + XDCROOT + TARGET.rts.replace(/\./g,"/") + "/"
-					 + libsArray[i].match(/[^\;]*/) + "\" ";
-    }
+    var BIOSROOT = File.getDOSPath(BIOS.$package.packageRepository) + "ti/sysbios/"
 
     /* determine IAR lib config header type: normal or full */
     var profile = Program.build.profile;
@@ -150,10 +149,6 @@
 
 MAKEFLAGS = -j8
 
-RTSLIB = -i`CGEN`/lib/ -llibc.a
-
-XDCLIB = `XDC_LIB`
-
 XOPTS = `'-I"' + XDCRUNTIME + '" ' + '-I"' + XDCROOT + '"' + " -Dxdc_target_types__=" + File.getDOSPath(TARGET.$package.packageRepository) + TARGET.stdInclude + " -Dxdc_target_name__=" + TARGET.name`
 
 vpath % `File.getDOSPath(this.$package.packageRepository) + "ti/sysbios/"`
@@ -167,13 +162,13 @@ BIOS_ROOT = `BIOSROOT`
 
 BIOS_DEFS = `Build.getDefs() + ROM.getConfigDefs()`
 
+ASM_DEFS = `(Build.getDefs() + ROM.getConfigDefs()).replace(Build.getCommandLineDefs(), '')`
+
 INTERN_FUNCS = ""
 
 BIOS_INC  = -I"`File.getDOSPath(this.$package.packageRepository)`"
 
-TARGET_INC = -I"`File.getDOSPath(xdc.loadPackage('ti.targets').packageRepository)`"
-
-INCS = $(BIOS_INC) $(TARGET_INC) `Build.getIncludePaths()`
+INCS = $(BIOS_INC) `XDC_PATH_INCS`
 
 CC = `CMDPREFIX` `CGEN`/bin/`TARGET.cc.cmd` $(CCOPTS)
 ASM = `CMDPREFIX` `CGEN`/bin/`TARGET.asm.cmd` `TARGET.asm.opts` -S
@@ -202,10 +197,6 @@ define RM
 	$(if $(wildcard $1),$(DEL) $1,:)
 endef
 
-define ASSEMBLE
-	@echo asm`TARGET.suffix` $< ...
-	@$(ASM) $(BIOS_DEFS) $(XOPTS) $(INCS) $<
-endef
 %var LIB = "rom_sysbios.a" + TARGET.suffix;
 %var ROM_EXEC = "rtos_rom.x" + TARGET.suffix;
 %var CFG_OBJ = "rom_sysbios_config.obj";
@@ -226,45 +217,27 @@ include `goldenDir``SYMBOL_MAP_FILE`
 %   var asmDir = packageDir(s);
 %   LIBASMOBJS.push(libAsmObj)
 `libAsmObj`: `s` makefile
-	@$(XDC_ROOT)/../xs -c `romModuleLibDir`../../mangleAsmFile.xs $(BIOS_ROOT)`s` `libAsmFile` romInternFuncs.txt
-	@$(ASM) -o `libAsmObj` -I$(BIOS_ROOT)`asmDir` $(BIOS_DEFS) $(XOPTS) $(INCS) `libAsmFile`
+	@$(XDC_ROOT)/../xs -c `romModuleDir`../mangleAsmFile.xs $(BIOS_ROOT)`s` `libAsmFile` romInternFuncs.txt
+	@$(ASM) -o `libAsmObj` -I$(BIOS_ROOT)`asmDir` $(ASM_DEFS) $(XOPTS) $(INCS) `libAsmFile`
 
 %}
 
-%
-%/* 
-% * build ALL C files for sysbios.lib
-% * and mangle the names of the ROM'd APIs in the non-ROM lib.
-% */
-%var printPreprocessingStarted = true;
-%for each (var s in sourcesLIB) {
-%   if (s.match(/_config.c/)) {
-%       var libPP = baseName(s) + "_lib.pp";
-%   }
-%   else {
-%       var libPP = packageName(s) + "_" + baseName(s) + "_lib.pp";
-%   }
-%   LIBPPS.push("rom_" + libPP);
-rom_`libPP`: `s` makefile
-%/* 
-% * print "Preprocessing" banner on first generated config.c
-% * file rule to make sure it gets printed after a clean.
-% */
-%if (printPreprocessingStarted == true) {
-	@echo Preprocessing library source files ...
-%   printPreprocessingStarted = false;
-%}
-	@$(CC_PP) --preprocess=nl `libPP` $(BIOS_DEFS) $(XOPTS) $(INCS) \
-	`srcName(s)`
-	@$(XDC_ROOT)/../xs -c `romModuleLibDir`../../mangleCFile.xs `libPP` rom_`libPP` romInternFuncs.txt  "$(`libPP`_SYMS)"
-
-%}
-
-rom_sysbios.obj: `LIBPPS.join(" ")` makefile
+rom_sysbios.obj: `Build.getCFiles(TARGET.$name)` makefile
 	@echo Creating the SYS/BIOS library that contains the APIs not included in the ROM ...
-	@$(CC) -o rom_sysbios.obj $(BIOS_DEFS) $(XOPTS) $(INCS) \
-%for each (var s in LIBPPS) {
+	@$(CC) -o rom_sysbios.obj $(BIOS_DEFS) $(XOPTS) $(INCS) --make_all_definitions_weak \
+%var sources = Build.getCFiles(TARGET.$name).split(' ');
+%for each (var s in sources) {
+%    if (s.substring(0,4) == "xdc/") {
+	$(XDC_ROOT)`s` \
+%    } else if (s.substring(0,2) == "./") {
 	`s` \
+%    } else if (s.substring(0,1) == "/") { /* full unix path provided */
+	`s` \
+%    } else if (s.match(":/") != null) { /* full windows path provided */
+	`s` \
+%    } else {
+	$(BIOS_ROOT)`s` \
+%    }
 %}
 
 `LIB`: rom_sysbios.obj `LIBASMOBJS.join(" ")`

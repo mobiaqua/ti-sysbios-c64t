@@ -64,7 +64,7 @@ typedef struct pthread_Obj {
      *  waiting on the mutex, so it can adjust its priority ceiling
      *  when pthread_mutex_timedlock() times out.
      */
-    Queue_Elem        qElem;
+    ti_sysbios_knl_Queue_Elem        qElem;
     /*
      *  When a thread acquires a PTHREAD_PRIO_PROTECT mutex, the thread's
      *  priority will be boosted to the priority ceiling of the mutex, if
@@ -76,15 +76,15 @@ typedef struct pthread_Obj {
      *  its original priority.  So we need to keep track of its acquired
      *  mutexes and original priority before acquiring any mutexes.
      */
-    Queue_Struct      mutexList;
+    ti_sysbios_knl_Queue_Struct      mutexList;
 
     /* PTHREAD_PRIO_INHERIT mutex the thread is blocked on */
     pthread_mutex_t   blockedMutex;
 #endif
     int               priority;
 
-    Task_Handle       task;
-    Semaphore_Struct  joinSem;
+    ti_sysbios_knl_Task_Handle       task;
+    ti_sysbios_knl_Semaphore_Struct  joinSem;
 
     pthread_t         joinThread;
 
@@ -100,17 +100,17 @@ typedef struct pthread_Obj {
     struct _pthread_cleanup_context *cleanupList;
 
     /* List of keys that the thread has called pthread_setspecific() on */
-    Queue_Struct      keyList;
+    ti_sysbios_knl_Queue_Struct      keyList;
 } pthread_Obj;
 
 #define _pthread_getRunningPriority(pthread) \
-    (Task_getPri(((pthread_Obj *)(pthread))->task))
+    (ti_sysbios_knl_Task_getPri(((pthread_Obj *)(pthread))->task))
 
 #define _pthread_getTaskHandle(pthread) \
     (((pthread_Obj *)(pthread))->task)
 
 #define _pthread_setRunningPriority(pthread, pri) \
-    (Task_setPri(((pthread_Obj *)(pthread))->task, (pri)))
+    (ti_sysbios_knl_Task_setPri(((pthread_Obj *)(pthread))->task, (pri)))
 
 #if ti_sysbios_posix_Settings_supportsMutexPriority__D
 extern int _pthread_getMaxPrioCeiling(pthread_Obj *thread);

@@ -43,13 +43,15 @@
 #include <ti/sysbios/BIOS.h>
 #include <ti/sysbios/hal/Hwi.h>
 
-#include <inc/hw_types.h>
-#include <inc/hw_memmap.h>
-#include <inc/hw_aon_rtc.h>
-#include <inc/hw_ints.h>
-#include <driverlib/aon_rtc.h>
-#include <driverlib/aon_event.h>
-#include <driverlib/interrupt.h>
+#ifdef DEVICE_FAMILY
+#define DEVICE_FAMILY_PREFIX(x) <ti/devices/DEVICE_FAMILY/x>
+#else
+#define DEVICE_FAMILY_PREFIX(x) <x>
+#endif
+
+#include DEVICE_FAMILY_PREFIX(driverlib/aon_rtc.h)
+#include DEVICE_FAMILY_PREFIX(driverlib/aon_event.h)
+#include DEVICE_FAMILY_PREFIX(driverlib/interrupt.h)
 
 #include "package/internal/Timer.xdc.h"
 

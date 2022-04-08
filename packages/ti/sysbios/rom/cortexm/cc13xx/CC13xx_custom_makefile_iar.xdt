@@ -1,6 +1,6 @@
 %%{
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,14 @@
     var TARGET = $args[0];
 
     var XDCROOT = String(environment['xdc.rootDir'] + '/packages/').replace(/\\/g, "/");
+
+    /* collect xdc include paths */
+    var xdcpath =  String(environment['xdc.path'] + '/packages/').replace(/\\/g, "/");
+    var xdcincs = xdcpath.split(';');
+    var XDC_PATH_INCS = "";
+    for each (var inc in xdcincs) {
+        XDC_PATH_INCS += "-I\"" + inc + "/\" ";
+    }
 
     var XDCRUNTIME = xdc.loadPackage('xdc.runtime').packageRepository;
     
@@ -122,11 +130,12 @@
 
     var RomModule = this;
 
-    var BIOSROOT = File.getDOSPath(BIOS.$package.packageRepository) + "ti/sysbios/"
-    var romModuleLibDir = File.getDOSPath(RomModule.$package.packageRepository) + RomModule.$name.replace(/\./g, "/") + "/";
+    var romModuleDir = File.getDOSPath(RomModule.$package.packageBase);
     var modName = RomModule.$name.substr(RomModule.$name.lastIndexOf(".")+1);
-    var goldenDir = romModuleLibDir.replace(modName, "golden/"+modName);
+    var goldenDir = romModuleDir + "golden/" + modName + "/";
     
+    var BIOSROOT = File.getDOSPath(BIOS.$package.packageRepository) + "ti/sysbios/"
+
     var RTS = xdc.loadPackage(TARGET.rts);
 
     var Libs = RTS.getLibs(xdc.module("xdc.cfg.Program"));
@@ -167,13 +176,13 @@ BIOS_ROOT = `BIOSROOT`
 
 BIOS_DEFS = `Build.getDefs() + ROM.getConfigDefs()`
 
+ASM_DEFS = `(Build.getDefs() + ROM.getConfigDefs()).replace(Build.getCommandLineDefs(), '')`
+
 INTERN_FUNCS = ""
 
 BIOS_INC  = -I"`File.getDOSPath(this.$package.packageRepository)`"
 
-TARGET_INC = -I"`File.getDOSPath(xdc.loadPackage('ti.targets').packageRepository)`"
-
-INCS = $(BIOS_INC) $(TARGET_INC) `Build.getIncludePaths()`
+INCS = $(BIOS_INC) `XDC_PATH_INCS`
 
 CC = `CMDPREFIX` `CGEN`/bin/`TARGET.cc.cmd` $(CCOPTS)
 ASM = `CMDPREFIX` `CGEN`/bin/`TARGET.asm.cmd` `TARGET.asm.opts` -S
@@ -202,10 +211,6 @@ define RM
 	$(if $(wildcard $1),$(DEL) $1,:)
 endef
 
-define ASSEMBLE
-	@echo asm`TARGET.suffix` $< ...
-	@$(ASM) $(BIOS_DEFS) $(XOPTS) $(INCS) $<
-endef
 %var LIB = "rom_sysbios.a" + TARGET.suffix;
 %var ROM_EXEC = "rtos_rom.x" + TARGET.suffix;
 %var CFG_OBJ = "rom_sysbios_config.obj";
@@ -226,8 +231,8 @@ include `goldenDir``SYMBOL_MAP_FILE`
 %   var asmDir = packageDir(s);
 %   LIBASMOBJS.push(libAsmObj)
 `libAsmObj`: `s` makefile
-	@$(XDC_ROOT)/../xs -c `romModuleLibDir`../mangleAsmFile.xs $(BIOS_ROOT)`s` `libAsmFile` romInternFuncs.txt
-	@$(ASM) -o `libAsmObj` -I$(BIOS_ROOT)`asmDir` $(BIOS_DEFS) $(XOPTS) $(INCS) `libAsmFile`
+	@$(XDC_ROOT)/../xs -c `romModuleDir`mangleAsmFile.xs $(BIOS_ROOT)`s` `libAsmFile` romInternFuncs.txt
+	@$(ASM) -o `libAsmObj` -I$(BIOS_ROOT)`asmDir` $(ASM_DEFS) $(XOPTS) $(INCS) `libAsmFile`
 
 %}
 
@@ -256,7 +261,7 @@ rom_`libPP`: `s` makefile
 %}
 	@$(CC_PP) --preprocess=nl `libPP` $(BIOS_DEFS) $(XOPTS) $(INCS) \
 	`srcName(s)`
-	@$(XDC_ROOT)/../xs -c `romModuleLibDir`../mangleCFile.xs `libPP` rom_`libPP` romInternFuncs.txt  "$(`libPP`_SYMS)"
+	@$(XDC_ROOT)/../xs -c `romModuleDir`mangleCFile.xs `libPP` rom_`libPP` romInternFuncs.txt  "$(`libPP`_SYMS)"
 
 %}
 

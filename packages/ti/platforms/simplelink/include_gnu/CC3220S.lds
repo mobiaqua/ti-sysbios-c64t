@@ -32,9 +32,11 @@
 
 MEMORY
 {
-    SRAM (RWX)  : ORIGIN = 0x20000000, LENGTH = 0x00040000
+    SRAM0     (RWX) : ORIGIN = 0x20000000, LENGTH = 0x00004000
+    SRAM      (RWX) : ORIGIN = 0x20004000, LENGTH = 0x0003c000
 }
 
+REGION_ALIAS("REGION_RAM_VECS", SRAM0);
 REGION_ALIAS("REGION_TEXT", SRAM);
 REGION_ALIAS("REGION_BSS", SRAM);
 REGION_ALIAS("REGION_DATA", SRAM);
@@ -50,7 +52,7 @@ SECTIONS {
 
     .vtable (_vtable_base_address) (NOLOAD) : {
         KEEP (*(.vtable))
-    } > REGION_DATA
+    } > REGION_RAM_VECS
 
     PROVIDE (_intvecs_base_address =
         DEFINED(_intvecs_base_address) ? _intvecs_base_address : 0x20004000);

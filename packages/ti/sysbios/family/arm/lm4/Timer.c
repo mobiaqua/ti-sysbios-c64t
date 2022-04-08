@@ -54,7 +54,15 @@
 #endif
 
 #ifdef ti_sysbios_family_arm_cc26xx_Boot_driverlibVersion
-#include <driverlib/prcm.h>
+
+#ifdef DEVICE_FAMILY
+#define DEVICE_FAMILY_PREFIX(x) <ti/devices/DEVICE_FAMILY/x>
+#else
+#define DEVICE_FAMILY_PREFIX(x) <x>
+#endif
+
+#include DEVICE_FAMILY_PREFIX(driverlib/prcm.h)
+
 #endif
 
 #include "package/internal/Timer.xdc.h"

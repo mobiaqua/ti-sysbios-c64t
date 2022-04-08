@@ -36,11 +36,17 @@
 %%}
 %var Boot = xdc.module("ti.sysbios.family.arm.cc26xx.Boot");
 
-#include <inc/hw_types.h>
+#ifdef DEVICE_FAMILY
+#define DEVICE_FAMILY_PREFIX(x) <ti/devices/DEVICE_FAMILY/x>
+#else
+#define DEVICE_FAMILY_PREFIX(x) <x>
+#endif
+
+#include DEVICE_FAMILY_PREFIX(inc/hw_types.h)
 
 %if (Boot.customerConfig == true) {
 /* pull default CCFG from driverlib */
-#include "startup_files/ccfg.c"
+#include DEVICE_FAMILY_PREFIX(startup_files/ccfg.c)
 %}
 
 %if (Program.build.target.$name.match(/ti/)) {

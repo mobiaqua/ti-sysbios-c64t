@@ -33,8 +33,14 @@
  *  ======== Boot.c ========
  */
 
-#include <driverlib/sys_ctrl.h>
-#include <driverlib/setup.h>
+#ifdef DEVICE_FAMILY
+#define DEVICE_FAMILY_PREFIX(x) <ti/devices/DEVICE_FAMILY/x>
+#else
+#define DEVICE_FAMILY_PREFIX(x) <x>
+#endif
+
+#include DEVICE_FAMILY_PREFIX(driverlib/sys_ctrl.h)
+#include DEVICE_FAMILY_PREFIX(driverlib/setup.h)
 
 #include "package/internal/Boot.xdc.h"
 
