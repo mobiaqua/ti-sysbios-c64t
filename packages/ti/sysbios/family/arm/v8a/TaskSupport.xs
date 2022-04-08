@@ -122,8 +122,8 @@ function getCallStack$view(taskRawView, taskState, threadType)
 
     var CallStack = xdc.useModule('xdc.rov.CallStack');
 
-    var stackData = Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UInt', isScalar: true}, taskRawView.context, 32, false);
-
+    var stackData = Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UInt', isScalar: true}, taskRawView.context, 40, false);
+    
     var sp = 0;
     var pc = 0;
     var lr = 0;
@@ -135,22 +135,31 @@ function getCallStack$view(taskRawView, taskState, threadType)
     switch (Program.build.target.name) {
         case "A53F":
         default:
-            var contextStackOffset = 8;
+            var contextStackOffset = 0;   /* only floating point target is supported so there is no "contextStackOffset" */
             break;
     }
 
-    pc = stackData[contextStackOffset + 8];  /* set pc to saved lr */
-    sp = Number(taskRawView.context) + 4 * (contextStackOffset + 9);
+    pc = stackData[contextStackOffset + 18];  /* set pc to saved lr */
+    sp = Number(taskRawView.context) + 4 * (contextStackOffset + 40);
 
+    CallStack.fetchRegisters(["'Control Registers'.SP_EL0"]);
+    var sp_el0 = CallStack.getRegister("'Control Registers'.SP_EL0");
+    print(sp_el0);
+    
     if (taskState == Task.Mode_RUNNING) {
         switch (threadType) {
             /* The program has called BIOS_exit(), use live registers */
             case "Main":
             /* This is the current thread, use live registers */
             case "Task":
-                CallStack.fetchRegisters(["R13", "R14", "PC", "R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10", "R11", "R12"]);
-                sp = CallStack.getRegister("R13");
-                lr = CallStack.getRegister("R14");
+                CallStack.fetchRegisters([
+                             "SP", "PC",
+                             "X0", "X1", "X2", "X3", "X4", "X5", "X6", "X7",
+                             "X8", "X9", "X10", "X11", "X12", "X13", "X14", "X15",
+                             "X16", "X17", "X18", "X19", "X20", "X21", "X22", "X23",
+                             "X24", "X25", "X26", "X27", "X28", "X29", "X30"]);
+                sp = CallStack.getRegister("SP");
+                lr = CallStack.getRegister("X30");
                 pc = CallStack.getRegister("PC");
                 break;
 
@@ -165,7 +174,14 @@ function getCallStack$view(taskRawView, taskState, threadType)
                     var HwiProxy = Program.$modules['ti.sysbios.hal.Hwi'].HwiProxy.$name;
                     var hwiRawView = Program.scanRawView(HwiProxy);
                     pc = hwiRawView.modState.irp;
-                    var taskSP = hwiRawView.modState.taskSP;
+// To Do: add taskSP array to Hwi module state and have dispatchIRQC initialize it
+//                    var taskSP = hwiRawView.modState.taskSP;
+                    if (sp_el0 != -1) {
+                        var taskSP = sp_el0;
+                    }
+                    else {
+                        var taskSP = sp;
+                    }
                     var stackTaskSP = Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UInt', isScalar: true}, taskSP, 512);
                 }
                 catch (e) {
@@ -174,13 +190,14 @@ function getCallStack$view(taskRawView, taskState, threadType)
 
                 /*
                  * search for saved IRP on task stack
+// To Do. Determine this experimentally to be precise.
                  * pc = IRP
-                 * sp = &IRP + 2 words
+                 * sp = &IRP + 172 + 4 words
                  * lr = one word before saved IRP on task stack
                  */
                 for (var i = 32; i < 512; i++) {
                     if (stackTaskSP[i] == pc) {
-                        sp = taskSP + i*4 + 2*4;
+                        sp = taskSP + i*4 + 688 + 16;
                         lr = stackTaskSP[i-1];
                         break;
                     }
@@ -190,21 +207,22 @@ function getCallStack$view(taskRawView, taskState, threadType)
         }
     }
     else {
-        CallStack.setRegister("R11", stackData[contextStackOffset + 7]);
-        CallStack.setRegister("R10", stackData[contextStackOffset + 6]);
-        CallStack.setRegister("R9", stackData[contextStackOffset + 5]);
-        CallStack.setRegister("R8", stackData[contextStackOffset + 4]);
-        CallStack.setRegister("R7", stackData[contextStackOffset + 3]);
-        CallStack.setRegister("R6", stackData[contextStackOffset + 2]);
-        CallStack.setRegister("R5", stackData[contextStackOffset + 1]);
-        CallStack.setRegister("R4", stackData[contextStackOffset + 0]);
+        CallStack.setRegister("X28", stackData[contextStackOffset + 38]);
+        CallStack.setRegister("X27", stackData[contextStackOffset + 36]);
+        CallStack.setRegister("X26", stackData[contextStackOffset + 34]);
+        CallStack.setRegister("X25", stackData[contextStackOffset + 32]);
+        CallStack.setRegister("X24", stackData[contextStackOffset + 30]);
+        CallStack.setRegister("X23", stackData[contextStackOffset + 28]);
+        CallStack.setRegister("X22", stackData[contextStackOffset + 26]);
+        CallStack.setRegister("X21", stackData[contextStackOffset + 24]);
+        CallStack.setRegister("X20", stackData[contextStackOffset + 22]);
+        CallStack.setRegister("X19", -1);
     }
 
     CallStack.setRegister("PC", pc);
-    CallStack.setRegister("R13", sp);
     CallStack.setRegister("SP", sp);
-    CallStack.setRegister("FP", sp);
-    CallStack.setRegister("R14", lr);
+    CallStack.setRegister("X29", sp);
+    CallStack.setRegister("X30", lr);
 
     var bts = "";
 
@@ -214,10 +232,8 @@ function getCallStack$view(taskRawView, taskState, threadType)
     bts += ", PC = 0x" + pc.toString(16);
     bts += ", SP = 0x" + sp.toString(16);
     bts += ", LR = 0x" + lr.toString(16);
-
     bts += "\n";
 
     bts += CallStack.toText();
-
     return (bts);
 }

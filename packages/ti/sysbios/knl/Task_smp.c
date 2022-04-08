@@ -384,7 +384,7 @@ readyTasksLoop:
 /*
  *  ======== Task_setPri ========
  */
-UInt Task_setPri(Task_Object *tsk, Int priority)
+Int Task_setPri(Task_Object *tsk, Int priority)
 {
     Int oldPri;
     UInt newMask, tskKey, hwiKey, tskAffinity;
@@ -1220,7 +1220,9 @@ Void Task_exit()
 {
     UInt tskKey, hwiKey;
     Task_Object *tsk;
+#ifndef ti_sysbios_knl_Task_DISABLE_ALL_HOOKS
     Int i;
+#endif
 
     tsk = Task_self();
 

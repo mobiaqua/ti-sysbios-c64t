@@ -44,15 +44,15 @@
  * |                                             |
  * TI                                           GCC           <- Toolchain
  * |                                             |
- * |------|------|-------|------|             |-----|
- * ARM  C2000  C6000   MSP430  EVE           ARM  MSP430      <- Family
- * |                                          |
- * |---|---|--- ...                      |----|----|--- ...
- * A8  A9  M3                           M3   M4   M4F         <- Variant
- *         |                                  |
- *      |--------|--- ...                |---------|-- ...    <- Devices
- *   Generic   CC26xx                 Generic   CC32xx
- * (Stellaris)                        (Tiva)
+ * |------|------|-------|                       |
+ * ARM  C2000  C6000    EVE                     ARM           <- Family
+ * |                                             |
+ * |---|---|--- ...                         |----|----|--- ...
+ * A8  A9  M3                              M3   M4   M4F      <- Variant
+ *         |                                     |
+ *      |--------|--- ...                   |---------|-- ... <- Devices
+ *   Generic   CC26xx                    Generic   CC32xx
+ * (Stellaris)                           (Tiva)
  *
  *
  * !!!MUST READ!!!
@@ -403,29 +403,6 @@ var targetOptions = {
                     }
                 }
             }
-        },
-        /* Family */
-        "MSP430": {
-            /* Variant */
-            "MSP430": {
-                cfgPrefix: "msp430/",
-                target: "ti.targets.msp430.elf.MSP430X",
-                deviceId: "", /* Array populated dynamically by a function */
-                compilerBuildOptions:
-                    " -vmspx --abi=eabi --data_model=restricted -g" +
-                    " --display_error_number --diag_warning=255" +
-                    " --diag_wrap=off" +
-                    " --include_path=${xdc_find:ti/posix/ccs:${ProjName}} ",
-                linkerBuildOptions:
-                    " --warn_sections --display_error_number --diag_wrap=off" +
-                    " --rom_model",
-                productGroup: "MSP430",
-                devices: {
-                    "GENERIC": {
-                        platform: "ti.platforms.msp430:$DeviceId$",
-                    }
-                }
-            }
         }
     },
     /* Toolchain */
@@ -439,13 +416,13 @@ var targetOptions = {
                 target: "gnu.targets.arm.A8F",
                 linkerCommandFile: "",
                 compilerBuildOptions: "-std=c99 -mfloat-abi=hard"
-                + " -I${xdc_find:gnu/targets/arm/libs/install-native/"
-                + "arm-none-eabi/include/newlib-nano:${ProjName}}"
-                + " -I${xdc_find:ti/posix/gcc:${ProjName}} ",
+                    + " -I${xdc_find:gnu/targets/arm/libs/install-native/"
+                    + "arm-none-eabi/include/newlib-nano:${ProjName}}"
+                    + " -I${xdc_find:ti/posix/gcc:${ProjName}} ",
                 linkerBuildOptions: "-nostartfiles -static --gc-sections -lgcc"
-                + " -lc -lm -lnosys -L${xdc_find:gnu/targets/"
-                + "arm/libs/install-native/arm-none-eabi/lib/hard:${ProjName}}"
-                + " --specs=nano.specs",
+                    + " -lc -lm -lnosys -L${xdc_find:gnu/targets/"
+                    + "arm/libs/install-native/arm-none-eabi/lib/hard:${ProjName}}"
+                    + " --specs=nano.specs",
                 productGroup: "Sitara",
                 devices: {
                     "GENERIC": {
@@ -453,10 +430,10 @@ var targetOptions = {
                     "SEMIHOST": {
                         cfgPrefix: "cortexa_semihost/",
                         linkerBuildOptions: "-nostartfiles -static"
-                        + " --gc-sections -lgcc -lc -lm -lrdimon"
-                        + " -L${xdc_find:gnu/targets/arm/libs/i"
-                        + "install-native/arm-none-eabi/lib/hard:${ProjName}}"
-                        + " --specs=nano.specs"
+                            + " --gc-sections -lgcc -lc -lm -lrdimon"
+                            + " -L${xdc_find:gnu/targets/arm/libs/i"
+                            + "install-native/arm-none-eabi/lib/hard:${ProjName}}"
+                            + " --specs=nano.specs"
                     }
                 }
             },
@@ -466,13 +443,13 @@ var targetOptions = {
                 target: "gnu.targets.arm.A9F",
                 linkerCommandFile: "",
                 compilerBuildOptions: "-std=c99 -mfloat-abi=hard"
-                + " -I${xdc_find:gnu/targets/arm/libs/install-native/"
-                + "arm-none-eabi/include/newlib-nano:${ProjName}}"
-                + " -I${xdc_find:ti/posix/gcc:${ProjName}} ",
+                    + " -I${xdc_find:gnu/targets/arm/libs/install-native/"
+                    + "arm-none-eabi/include/newlib-nano:${ProjName}}"
+                    + " -I${xdc_find:ti/posix/gcc:${ProjName}} ",
                 linkerBuildOptions: "-nostartfiles -static --gc-sections -lgcc"
-                + " -lc -lm -lnosys -L${xdc_find:gnu/targets/arm/"
-                + "libs/install-native/arm-none-eabi/lib/hard:${ProjName}}"
-                + " --specs=nano.specs",
+                    + " -lc -lm -lnosys -L${xdc_find:gnu/targets/arm/"
+                    + "libs/install-native/arm-none-eabi/lib/hard:${ProjName}}"
+                    + " --specs=nano.specs",
                 productGroup: "Sitara",
                 devices: {
                     "GENERIC": {
@@ -480,10 +457,10 @@ var targetOptions = {
                     "SEMIHOST": {
                         cfgPrefix: "cortexa_semihost/",
                         linkerBuildOptions: "-nostartfiles -static"
-                        + " --gc-sections -lgcc -lc -lm -lrdimon"
-                        + " -L${xdc_find:gnu/targets/arm/libs/"
-                        + "install-native/arm-none-eabi/lib/hard:${ProjName}}"
-                        + " --specs=nano.specs"
+                            + " --gc-sections -lgcc -lc -lm -lrdimon"
+                            + " -L${xdc_find:gnu/targets/arm/libs/"
+                            + "install-native/arm-none-eabi/lib/hard:${ProjName}}"
+                            + " --specs=nano.specs"
                     }
                 }
             },
@@ -493,13 +470,13 @@ var targetOptions = {
                 target: "gnu.targets.arm.A15F",
                 linkerCommandFile: "",
                 compilerBuildOptions: "-std=c99 -mfloat-abi=hard"
-                + " -I${xdc_find:gnu/targets/arm/libs/install-native/"
-                + "arm-none-eabi/include/newlib-nano:${ProjName}}"
-                + " -I${xdc_find:ti/posix/gcc:${ProjName}} ",
+                    + " -I${xdc_find:gnu/targets/arm/libs/install-native/"
+                    + "arm-none-eabi/include/newlib-nano:${ProjName}}"
+                    + " -I${xdc_find:ti/posix/gcc:${ProjName}} ",
                 linkerBuildOptions: "-nostartfiles -static --gc-sections -lgcc"
-                + " -lc -lm -lnosys -L${xdc_find:gnu/targets/arm/"
-                + "libs/install-native/arm-none-eabi/lib/hard:${ProjName}}"
-                + " --specs=nano.specs",
+                    + " -lc -lm -lnosys -L${xdc_find:gnu/targets/arm/"
+                    + "libs/install-native/arm-none-eabi/lib/hard:${ProjName}}"
+                    + " --specs=nano.specs",
                 productGroup: "Sitara",
                 devices: {
                     "GENERIC": {
@@ -507,10 +484,37 @@ var targetOptions = {
                     "SEMIHOST": {
                         cfgPrefix: "cortexa_semihost/",
                         linkerBuildOptions: "-nostartfiles -static"
-                        + " --gc-sections -lgcc -lc -lm -lrdimon"
-                        + " -L${xdc_find:gnu/targets/arm/libs/"
-                        + "install-native/arm-none-eabi/lib/hard:${ProjName}}"
-                        + " --specs=nano.specs"
+                            + " --gc-sections -lgcc -lc -lm -lrdimon"
+                            + " -L${xdc_find:gnu/targets/arm/libs/"
+                            + "install-native/arm-none-eabi/lib/hard:${ProjName}}"
+                            + " --specs=nano.specs"
+                    }
+                }
+            },
+            "A53": {
+                deviceVariant: "CortexA53",
+                cfgPrefix: "default/",
+                target: "gnu.targets.arm.A53F",
+                linkerCommandFile: "",
+                compilerBuildOptions: " -mcpu=cortex-a53+fp+simd -std=c99 "
+                    + " -mabi=lp64 -mcmodel=large -mstrict-align "
+                    + " -mfix-cortex-a53-835769 -mfix-cortex-a53-843419 "
+                    + " -I${xdc_find:ti/posix/gcc:${ProjName}} ",
+                linkerBuildOptions: "-nostartfiles "
+                    + " -Wl,-static -Wl,--gc-sections "
+                    + " -Wl,--start-group -lgcc -lc -lm -Wl,--end-group "
+                    + " --specs=rdimon.specs",
+                productGroup: "Sitara",
+                devices: {
+                    "GENERIC": {
+                    },
+                    "SEMIHOST": {
+                        cfgPrefix: "cortexa_semihost/",
+                        linkerBuildOptions: "-nostartfiles "
+                            + " -Wl,-static -Wl,--gc-sections "
+                            + " -Wl,--start-group -lgcc -lc -lm -Wl,--end-group "
+                            + " -lrdimon"
+                            + " --specs=rdimon.specs"
                     }
                 }
             },
@@ -746,42 +750,6 @@ var targetOptions = {
                     " --redirect _Printf=_PrintfSmall" +
                     " --redirect _Scanf=_ScanfSmall",
             }
-        },
-        /* Family */
-        "MSP430": {
-            /* Variant */
-            "MSP430": {
-                cfgPrefix: "msp430/",
-                target: "iar.targets.msp430.MSP430X_small",
-                compilerBuildOptions:
-                    " --debug --silent --diag_suppress=Pa050,Go005",
-                linkerBuildOptions:
-                    " -S -xens -e_PrintfSmall=_Printf -e_ScanfSmall=_Scanf",
-            }
         }
     }
-}
-
-/*
- *  ======== populateDeviceIdMSP430 ========
- *  Generate a deviceId list for MSP430 based on the devices listed in
- *  msp430Settings.xs and populate the deviceId array in targetOptions.
- */
-function populateDeviceIdMSP430()
-{
-    try {
-        var msp430 =
-        xdc.loadCapsule("ti/sysbios/family/msp430/msp430Settings.xs");
-    }
-    catch (err) {
-        return;
-    }
-
-    var devices = msp430.devices[0];
-
-    for (var i = 1; i < msp430.devices.length; i++) {
-        devices += "|" + msp430.devices[i];
-    }
-
-    targetOptions["TI"]["MSP430"]["MSP430"].deviceId = devices;
 }

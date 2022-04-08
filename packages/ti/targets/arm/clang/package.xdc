@@ -50,6 +50,9 @@ requires ti.targets.arm.elf;
  */
 package ti.targets.arm.clang [1,0,0] {
     module M33F;
+    module M4F;
+    module M4;
+    module M3;
 }
 /*
 

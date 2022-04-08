@@ -67,6 +67,7 @@ if (xdc.om.$name == "cfg") {
 
     deviceTable["SIMMAXWELL"] = deviceTable["SIMFLEMING"];
     deviceTable["AM65X"] = deviceTable["SIMMAXWELL"];
+    deviceTable["J7.*"] = deviceTable["SIMMAXWELL"];
 }
 
 /*

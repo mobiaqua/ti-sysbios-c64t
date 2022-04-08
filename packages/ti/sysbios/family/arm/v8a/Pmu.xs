@@ -68,6 +68,8 @@ if (xdc.om.$name == "cfg") {
         deviceTable["ti.catalog.arm.cortexa53"]["SIMMAXWELL"];
     deviceTable["ti.catalog.arm.cortexa53"]["AM65X"] =
         deviceTable["ti.catalog.arm.cortexa53"]["SIMMAXWELL"];
+    deviceTable["ti.catalog.arm.cortexa53"]["J7ES"] =
+        deviceTable["ti.catalog.arm.cortexa53"]["SIMMAXWELL"];
 }
 
 /*

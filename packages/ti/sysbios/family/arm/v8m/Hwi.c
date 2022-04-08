@@ -1377,10 +1377,13 @@ Void Hwi_excDumpRegs(UInt lr)
     excp = Hwi_module->excContext;
 
     switch (lr) {
+        case 0xffffffe1:
         case 0xfffffff1:
             System_printf("Exception occurred in ISR thread at PC = 0x%08x.\n", excp->pc);
             break;
+        case 0xffffffe9:
         case 0xfffffff9:
+        case 0xffffffed:
         case 0xfffffffd:
             System_printf("Exception occurred in background thread at PC = 0x%08x.\n", excp->pc);
             break;

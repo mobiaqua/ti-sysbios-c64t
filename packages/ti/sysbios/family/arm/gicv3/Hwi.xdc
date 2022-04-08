@@ -310,9 +310,9 @@ module Hwi inherits ti.sysbios.interfaces.IHwi
         Ptr         halHwiHandle;
         String      label;
         Int         intNum;
-        String      absolutePriority;
-        UInt        relativeGrpPriority;
-        UInt        relativeSubPriority;
+        String      absPri;
+        UInt        relGrpPri;
+        UInt        relSubPri;
         String      fxn;
         UArg        arg;
     };
@@ -325,14 +325,15 @@ module Hwi inherits ti.sysbios.interfaces.IHwi
         Ptr         halHwiHandle;
         String      label;
         Int         intNum;
-        String      absolutePriority;
-        UInt        relativeGrpPriority;
-        UInt        relativeSubPriority;
+        String      absPri;
+        UInt        relGrpPri;
+        UInt        relSubPri;
         String      fxn;
         UArg        arg;
         Ptr         irp;
-        Bool        enabled;
-        Bool        pending;
+        String      enabled;
+        String      pending;
+        String      active;
         String      triggerSensitivity;
     };
 
@@ -543,10 +544,6 @@ module Hwi inherits ti.sysbios.interfaces.IHwi
         UInt32 IGRPMODR0;       /*! 0x0D00 Interrupt Group Modifier Register */
         UInt32 hole10[63];      /*! 0x0D04-0x0DFC */
         UInt32 NSACR;           /*! 0x0E00 NonSecure Access Control Register */
-        UInt32 hole11[11391];   /*! 0x0E04-0xBFFC */
-        UInt32 MISCSTATUSR;     /*! 0xC000 Miscellaneous Status Register */
-        UInt32 hole12[31];      /*! 0xC004-0xC07C */
-        UInt32 PPISR;           /*! 0xC080 PPI Status Register */
     };
 
     /*!
@@ -854,6 +851,12 @@ module Hwi inherits ti.sysbios.interfaces.IHwi
     Void init();
 
     /*!
+     *  @_nodoc
+     *  ======== initIntControllerCoreX ========
+     */
+    Void initIntControllerCoreX();
+
+    /*!
      *  ======== intAffinity ========
      *  SMP Interrupt affinity mappings
      *
@@ -1039,7 +1042,7 @@ internal:   /* not for client use */
     /*
      *  ======== initIntController ========
      */
-    Void initIntController();
+    Void initIntControllerCore0();
 
     /*
      *  ======== initStacks ========

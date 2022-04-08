@@ -48,6 +48,7 @@ if (xdc.om.$name == "cfg") {
     };
 
     deviceTable["AM65X"] = deviceTable["SIMMAXWELL"];
+    deviceTable["J7ES"] = deviceTable["SIMMAXWELL"];
 }
 
 /*

@@ -44,6 +44,7 @@ var Settings = null;
 var Clock = null;
 var Core = null;
 var Swi = null;
+var Build = null;
 
 /*
  * ======== getCFiles ========

@@ -20,30 +20,9 @@
  */
 
 /*
- *  ======== MSP430 ========
- */
-#if defined(__MSP430__)
-#  if defined(__MSP430X__)
-     /* --silicon_version=mspx is specified */
-#    if defined(__LARGE_CODE_MODEL__)
-       /* --code_model=large is specified */
-#      define xdc_target_name__ MSP430X
-#    else
-#      define xdc_target_name__ MSP430X_small
-#    endif
-#  else
-#    define xdc_target_name__ MSP430
-#  endif
-#  if __TI_EABI__ == 1
-#    define xdc_target_types__ ti/targets/msp430/elf/std.h
-#  else
-#    define xdc_target_types__ ti/targets/msp430/std.h
-#  endif
-
-/*
  *  ======== TMS320C6X ========
  */
-#elif defined(_TMS320C6X)
+#if defined(_TMS320C6X)
 #  if __TI_EABI__ == 1
      /* set to 1 if compiling for EABI (ELF) and is set to 0 otherwise. */
 #    define xdc_target_types__ ti/targets/elf/std.h

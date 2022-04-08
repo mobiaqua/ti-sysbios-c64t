@@ -62,7 +62,7 @@ metaonly module A53F inherits gnu.targets.arm.ITarget {
 
     override config string GCCTARG = "aarch64-elf";
 
-    override config String binaryParser = "ti.targets.omf.elf.Elf";
+    override config String binaryParser = "xdc.targets.omf.Elf";
 
     override readonly config String stdInclude = "gnu/targets/arm/std.h";
 
