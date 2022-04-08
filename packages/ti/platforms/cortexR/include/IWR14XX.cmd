@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/* IR16XX.cmd                                                                 */
+/* IWR14XX.cmd                                                                */
 /*                                                                            */
 /* (c) Texas Instruments 2016-2017, All rights reserved.                      */
 /*                                                                            */
@@ -16,9 +16,9 @@
 /* Memory Map                                                                 */
 MEMORY{
     VECTORS  (X)  : origin=0x00000000 length=0x00000100
-    PROG_RAM (RX) : origin=0x00000100 length=0x0003FF00
-    DATA_RAM (RW) : origin=0x08000000 length=0x00030000
-    L3_RAM   (RW) : origin=0x51000000 length=0x000A0000
+    PROG_RAM (RX) : origin=0x00000100 length=0x0001FF00
+    DATA_RAM (RW) : origin=0x08000000 length=0x00010000
+    L3_RAM (RW)   : origin=0x51020000 length=0x00040000
 }
 
 /*----------------------------------------------------------------------------*/

@@ -191,10 +191,10 @@ function instance$meta$init(name)
             this.CPU.clockRate = 300;
         }
 
-        if (this.deviceName.match(/^AR14/) ||
-            this.deviceName.match(/^AR16/) ||
-            this.deviceName.match(/^IR14/) ||
-            this.deviceName.match(/^IR16/)) {
+        if (this.deviceName.match(/^AWR14/) ||
+            this.deviceName.match(/^AWR16/) ||
+            this.deviceName.match(/^IWR14/) ||
+            this.deviceName.match(/^IWR16/)) {
             this.CPU.catalogName = "ti.catalog.arm.cortexr4";
             this.CPU.deviceName = "CortexR";
             this.CPU.clockRate = 200;

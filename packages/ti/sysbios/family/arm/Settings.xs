@@ -406,7 +406,7 @@ var deviceTable = {
             clockTickPeriod : 1000,
             targets : [ "ti.targets.arm.elf.R4F" ]
         },
-        "AR14XX": {
+        "AWR14XX": {
             hwiDelegate : "ti.sysbios.family.arm.v7r.vim.Hwi",
             timerDelegate : "ti.sysbios.timers.rti.Timer",
             clockTimerDelegate : "ti.sysbios.timers.rti.Timer",
@@ -498,9 +498,9 @@ deviceTable["ti.catalog.arm.cortexm4"]["CC26.*"]    = deviceTable["ti.catalog.ar
 /* Cortex-R5 devices */
 deviceTable["ti.catalog.arm.cortexr5"]["RM57D8.*"] = deviceTable["ti.catalog.arm.cortexr5"]["RM57D8XX"];
 deviceTable["ti.catalog.arm.cortexr5"]["RM57L8.*"] = deviceTable["ti.catalog.arm.cortexr5"]["RM57D8XX"];
-deviceTable["ti.catalog.arm.cortexr4"]["AR16XX"] = deviceTable["ti.catalog.arm.cortexr4"]["AR14XX"];
-deviceTable["ti.catalog.arm.cortexr4"]["IR14XX"] = deviceTable["ti.catalog.arm.cortexr4"]["AR14XX"];
-deviceTable["ti.catalog.arm.cortexr4"]["IR16XX"] = deviceTable["ti.catalog.arm.cortexr4"]["AR14XX"];
+deviceTable["ti.catalog.arm.cortexr4"]["AWR16XX"] = deviceTable["ti.catalog.arm.cortexr4"]["AWR14XX"];
+deviceTable["ti.catalog.arm.cortexr4"]["IWR14XX"] = deviceTable["ti.catalog.arm.cortexr4"]["AWR14XX"];
+deviceTable["ti.catalog.arm.cortexr4"]["IWR16XX"] = deviceTable["ti.catalog.arm.cortexr4"]["AWR14XX"];
 
 /* MSP432 devices */
 deviceTable["ti.catalog.arm.cortexm4"]["MSP432.*"] = deviceTable["ti.catalog.arm.cortexm4"]["MSP432P401R"];

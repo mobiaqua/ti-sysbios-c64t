@@ -114,7 +114,7 @@ var settings = {
             clockTickPeriod : 1000,
             targets : [ "ti.targets.elf.C66" ]
         },
-        "AR16XX": {
+        "AWR16XX": {
             hwiDelegate : "ti.sysbios.family.c64p.Hwi",
             timerDelegate : "ti.sysbios.timers.rti.Timer",
             clockTimerDelegate : "ti.sysbios.timers.rti.Timer",
@@ -188,7 +188,7 @@ settings.device["TMS320C6748"]    = settings.device["TMS320DA830"];
 settings.device["Vayu"]           = settings.device["DRA7XX"];
 settings.device["TDA3XX"]         = settings.device["DRA7XX"];
 
-settings.device["IR16XX"]         = settings.device["AR16XX"];
+settings.device["IWR16XX"]        = settings.device["AWR16XX"];
 
 /*
  *  ======== deviceSupportCheck ========

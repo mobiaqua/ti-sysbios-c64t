@@ -68,7 +68,7 @@ if (xdc.om.$name == "cfg" || typeof(genCdoc) != "undefined") {
         "RM57L8xx": {
             numCores  : 1
         },
-        "AR14XX": {
+        "AWR14XX": {
             numCores  : 1
         }
     };
@@ -76,9 +76,9 @@ if (xdc.om.$name == "cfg" || typeof(genCdoc) != "undefined") {
     deviceTable["RM57D8[a-zA-Z0-9]+"] = deviceTable["RM57D8xx"];
     deviceTable["RM57L8[a-zA-Z0-9]+"] = deviceTable["RM57L8xx"];
     deviceTable["RM48L.*"] = deviceTable["RM57L8xx"];
-    deviceTable["AR16XX"] = deviceTable["AR14XX"];
-    deviceTable["IR14XX"] = deviceTable["AR14XX"];
-    deviceTable["IR16XX"] = deviceTable["AR14XX"];
+    deviceTable["AWR16XX"] = deviceTable["AWR14XX"];
+    deviceTable["IWR14XX"] = deviceTable["AWR14XX"];
+    deviceTable["IWR16XX"] = deviceTable["AWR14XX"];
 }
 
 /*

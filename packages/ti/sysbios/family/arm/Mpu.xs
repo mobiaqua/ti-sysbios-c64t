@@ -65,7 +65,7 @@ if (xdc.om.$name == "cfg" || typeof(genCdoc) != "undefined") {
             isMemoryMapped  : false,
             numRegions      : 16
         },
-        "AR16XX": {
+        "AWR16XX": {
             isMemoryMapped  : false,
             numRegions      : 12
         },
@@ -76,10 +76,10 @@ if (xdc.om.$name == "cfg" || typeof(genCdoc) != "undefined") {
     };
 
     /* Cortex-R devices */
-    deviceTable["AR14XX"]        = deviceTable["AR16XX"];
-    deviceTable["IR14XX"]        = deviceTable["AR16XX"];
-    deviceTable["IR16XX"]        = deviceTable["AR16XX"];
-    deviceTable["RM48L.*"]       = deviceTable["AR16XX"];
+    deviceTable["AWR14XX"]       = deviceTable["AWR16XX"];
+    deviceTable["IWR14XX"]       = deviceTable["AWR16XX"];
+    deviceTable["IWR16XX"]       = deviceTable["AWR16XX"];
+    deviceTable["RM48L.*"]       = deviceTable["AWR16XX"];
     deviceTable["RM57D8.*"]      = deviceTable["RM57D8XX"];
     deviceTable["RM57L8XX"]      = deviceTable["RM57D8XX"];
     deviceTable["RM57L8.*"]      = deviceTable["RM57D8XX"];

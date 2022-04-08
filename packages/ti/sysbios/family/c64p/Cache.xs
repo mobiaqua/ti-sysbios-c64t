@@ -88,7 +88,7 @@ if (xdc.om.$name == "cfg") {
             emifCBase:   0x0,
             emifCLength: 0x0,
         },
-        "AR16XX": {
+        "AWR16XX": {
             emifACfg: $addr(0x0),
             emifABase:   0x0,
             emifALength: 0x0,
@@ -139,7 +139,7 @@ if (xdc.om.$name == "cfg") {
     deviceTable["TMS320DM8168"]   = deviceTable["TMS320TI816X"];
     deviceTable["TMS320C6A8149"]  = deviceTable["TMS320TI816X"];
 
-    deviceTable["IR16XX"]        = deviceTable["AR16XX"];
+    deviceTable["IWR16XX"]        = deviceTable["AWR16XX"];
 }
 
 /*
