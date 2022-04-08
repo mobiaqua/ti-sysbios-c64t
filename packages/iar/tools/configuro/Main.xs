@@ -91,9 +91,15 @@ function run(cmdr, args)
 
     /* execute xdc.tools.configuro */
     var configuro = xdc.useModule('xdc.tools.configuro.Main');
-    configuro.exec(["-o",  opts["output"], "-t", opts["t"], "-p",  opts["p"],
-        "-r", opts["profile"], "-c", opts["rootDir"], "--compileOptions",
-        cOpts, "--linkOptions", opts["linkOptions"], cfg]);
+    var optArray = ["-o",  opts["output"], "-t", opts["t"], "-p", opts["p"],
+        "-r", opts["profile"], "-c", opts["rootDir"], "--compileOptions", cOpts,
+        "--linkOptions", opts["linkOptions"], cfg]
+    if (opts["cfgArgs"] != "") {
+        /* add these two right after opts["rootDir"] */
+        optArray.splice(10, 0, "--cfgArgs", opts["cfgArgs"]);
+    }
+
+    configuro.exec(optArray);
 }
 
 /*

@@ -3956,7 +3956,7 @@ __o = __obj[320]  // ti.sysbios.BIOS
     __o['swiEnabled'] = true
     __o['taskEnabled'] = true
     __o['useSK'] = false
-    __o['version'] = 410880
+    __o['version'] = 410881
     __o['viewNameMap$'] = __obj[360.0]
 
 __o = __obj[321]  // ti.sysbios.BIOS/$instances
@@ -4349,7 +4349,7 @@ __o = __obj[361]  // ti.sysbios.rom.cortexm.cc13xx.CC13xx
     __o['REVISION'] = 57
     __o['common$'] = __obj[363.0]
     __o['configNameMap$'] = __obj[364.0]
-    __o['libDir'] = String(java.net.URLDecoder.decode('%2Fdb%2Fvtree%2Flibrary%2Ftrees%2Favala%2Favala-y20%2Fsrc%2Fti%2Fsysbios%2From%2Fcortexm%2Fcc13xx%2FCC13xx%2F', 'UTF-8'))
+    __o['libDir'] = String(java.net.URLDecoder.decode('%2Fdb%2Fvtree%2Flibrary%2Ftrees%2Favala%2Favala-y27%2Fsrc%2Fti%2Fsysbios%2From%2Fcortexm%2Fcc13xx%2FCC13xx%2F', 'UTF-8'))
     __o['otherLibFuncs'] = __obj[377.0]
     __o['rovShowRawTab$'] = true
     __o['templateName'] = String(java.net.URLDecoder.decode('CC13xx_rom_makefile.xdt', 'UTF-8'))
@@ -10413,7 +10413,7 @@ __o = __obj[940]
     __o['profile'] = String(java.net.URLDecoder.decode('release', 'UTF-8'))
     __o['releases'] = __obj[941.0]
     __o['target'] = __obj[946.0]
-    __o['xsopts'] = String(java.net.URLDecoder.decode('-DCC26XX_DRIVERLIB%3D%2Fdb%2Fvendors%2Fti%2FCCWare%2Fcc26xxware_2_23_00_16374', 'UTF-8'))
+    __o['xsopts'] = String(java.net.URLDecoder.decode('-DCC26XX_DRIVERLIB%3D%2Fdb%2Fvendors%2Fti%2FCCWare%2Fcc26xxware_2_23_01_16780', 'UTF-8'))
 
 __o = __obj[941]  
     __o['0'] = __obj[942.0]
@@ -10523,7 +10523,7 @@ __o = __obj[953]  // ti.targets.arm.elf.M3/ccConfigOpts
 __o = __obj[954]  // ti.targets.arm.elf.M3/ccOpts
     __o['$category'] = String(java.net.URLDecoder.decode('Struct', 'UTF-8'))
     __o['$name'] = String(java.net.URLDecoder.decode('ti.targets.arm.elf.M3%2FccOpts', 'UTF-8'))
-    __o['prefix'] = String(java.net.URLDecoder.decode('-qq+-pdsw225+-ms+-g++-I+%2Fdb%2Fvendors%2Fti%2FCCWare%2Fcc26xxware_2_23_00_16374+-I+%2Fdb%2Fvendors%2Fti%2FCCWare%2Fcc26xxware_2_23_00_16374%2Finc+', 'UTF-8'))
+    __o['prefix'] = String(java.net.URLDecoder.decode('-qq+-pdsw225+-ms+-g++-I+%2Fdb%2Fvendors%2Fti%2FCCWare%2Fcc26xxware_2_23_01_16780+-I+%2Fdb%2Fvendors%2Fti%2FCCWare%2Fcc26xxware_2_23_01_16780%2Finc+', 'UTF-8'))
     __o['suffix'] = String(java.net.URLDecoder.decode('', 'UTF-8'))
 
 __o = __obj[955]  // ti.targets.arm.elf.M3/compatibleSuffixes

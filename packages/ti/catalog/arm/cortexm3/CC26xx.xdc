@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2015 by Texas Instruments and others.
+ *  Copyright (c) 2016 by Texas Instruments and others.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -14,7 +14,7 @@
  *  ======== CC26xx.xdc ========
  *  Generic CC26xx Cpu definition
  *
- *  This device represents all CC26xx devices independent.
+ *  This definition represents all CC26xx devices.
  */
 
 metaonly module CC26xx inherits ti.catalog.ICpuDataSheet
