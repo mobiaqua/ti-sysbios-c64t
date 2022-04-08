@@ -79,7 +79,7 @@ metaonly module M3 inherits ti.targets.arm.elf.IArm {
      */
     override config xdc.bld.ITarget2.Options ccOpts = {
         prefix: "",
-        suffix: " -Wno-builtin-requires-header "  /* TIRTOS-1906 */
+        suffix: ""
     };
 
     /*!

@@ -221,7 +221,7 @@ Void Mmu_enable()
  */
 Void Mmu_enableI()
 {
-    asm("\t mvk64.l1    0x8000000000000001LL, a2 \n"
+    asm("\t mvk64.l1    0x80000000000000C1LL, a2 \n"
         "\t mvc.s1      SCR, a3                  \n"
         "\t nop                                  \n"
         "\t ord.l1      a2, a3, a3               \n"
