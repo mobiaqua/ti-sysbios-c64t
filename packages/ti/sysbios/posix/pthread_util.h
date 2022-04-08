@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Texas Instruments Incorporated
+ * Copyright (c) 2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,56 +30,29 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 /*
- *  ======== Swi_andn.c ========
+ *  ======== pthread_util.h ========
  */
 
-#include <xdc/std.h>
+#ifndef ti_sysbios_posix_pthread_util__include
+#define ti_sysbios_posix_pthread_util__include
 
-#include <ti/sysbios/hal/Hwi.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "package/internal/Swi.xdc.h"
+#include <stdint.h>
 
-
-/*!
- *  ======== Swi_andn ========
- */
-Void Swi_andn(Swi_Object *swi, UInt mask)
-{
-    UInt hwiKey;
-
-    hwiKey = Hwi_disable();
-
-    if (swi->trigger != 0) {
-        swi->trigger &= ~mask;
-        if (swi->trigger == 0) {
-            Hwi_restore(hwiKey);
-            Swi_post(swi);
-            return;
-        }
-    }
-
-    Hwi_restore(hwiKey);
-}
+#include "time.h"
 
 /*
- *  ======== Swi_dec ========
+ *  Function for obtaining a timeout in Clock ticks from the difference of
+ *  an absolute time and the current time.
  */
-Void Swi_dec(Swi_Object *swi)
-{
-    UInt hwiKey;
+extern int _pthread_abstime2ticks(clockid_t clockId,
+        const struct timespec *abstime, uint32_t *ticks);
 
-    hwiKey = Hwi_disable();
-
-    if (swi->trigger != 0) {
-        swi->trigger -= 1;
-        if (swi->trigger == 0) {
-            Hwi_restore(hwiKey);
-            Swi_post(swi);
-            return;
-        }
-    }
-
-    Hwi_restore(hwiKey);
+#ifdef __cplusplus
 }
+#endif
 
-
+#endif

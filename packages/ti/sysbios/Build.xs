@@ -366,6 +366,8 @@ function getDefaultCustomCCOpts()
             customCCOpts += " -O3 ";
         }
         customCCOpts += " -I" + Program.build.target.targetPkgPath +
+            "/libs/install-native/$(GCCTARG)/include/newlib-nano " +
+            " -I" + Program.build.target.targetPkgPath +
             "/libs/install-native/$(GCCTARG)/include ";
         customCCOpts = Program.build.target.ccOpts.prefix + " " + customCCOpts;
         customCCOpts += Program.build.target.ccOpts.suffix + " ";

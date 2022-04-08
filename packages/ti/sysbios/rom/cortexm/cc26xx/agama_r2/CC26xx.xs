@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Texas Instruments Incorporated
+ * Copyright (c) 2016-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -108,11 +108,7 @@ function module$use()
     }
 
     if (Program.build.target.$name.match(/iar/)) {
-        switch(ROM.romName) {
-            case ROM.CC2652R2:
-                Program.linkTemplate = String(CC26xx.$package.packageBase + "golden/CC26xx/linkcmd_iar.xdt");
-                break;
-        }
+        Program.linkTemplate = String(CC26xx.$package.packageBase + "golden/CC26xx/linkcmd_iar.xdt");
     }
 
     var Reset = xdc.useModule('xdc.runtime.Reset');
@@ -121,16 +117,8 @@ function module$use()
     if (Build.buildROM == true) return;
 
     /* set REVISION to the ROM's magic number */
-    switch (ROM.romName) {
-        case ROM.CC2652R2: 
-            CC26xx.REVISION = 1936487754;
-            CC26xx.REVISION_WORD_ADDRESS = 0x1003c800;
-            break;
-
-        default:
-            this.$logError("ROM.romName = " + ROM.romName + " is not supported!", this);
-            break;
-    }
+    CC26xx.REVISION = 1936487754;
+    CC26xx.REVISION_WORD_ADDRESS = 0x1003c800;
     
     /* inform getLibs() about location of library */
     switch (BIOS.libType) {
@@ -141,24 +129,20 @@ function module$use()
         case BIOS.LibType_Debug:
             /* this fall through to the custom logic is on purpose */
         case BIOS.LibType_Custom:
-            switch(ROM.romName) {
-               case ROM.CC2652R2:
-                    if (Program.build.target.$name.match(/iar/)) {
-                        CC26xx.templateName = "CC26xx_custom_makefile_iar.xdt";
-                        xdc.includeFile(String(CC26xx.$package.packageBase
+            if (Program.build.target.$name.match(/iar/)) {
+                CC26xx.templateName = "CC26xx_custom_makefile_iar.xdt";
+                xdc.includeFile(String(CC26xx.$package.packageBase
                                  + "CC26xx_custom_outpolicies_iar.cfg.xs"));
-                    }
-                    else if (Program.build.target.$name.match(/gnu/)) {
-                        CC26xx.templateName = "CC26xx_custom_makefile_gnu.xdt";
-                        xdc.includeFile(String(CC26xx.$package.packageBase
+            }
+            else if (Program.build.target.$name.match(/gnu/)) {
+                CC26xx.templateName = "CC26xx_custom_makefile_gnu.xdt";
+                xdc.includeFile(String(CC26xx.$package.packageBase
                                  + "CC26xx_custom_outpolicies_gnu.cfg.xs"));
-                    }
-                    else {
-                        CC26xx.templateName = "CC26xx_custom_makefile.xdt";
-                        xdc.includeFile(String(CC26xx.$package.packageBase
+            }
+            else {
+                CC26xx.templateName = "CC26xx_custom_makefile.xdt";
+                xdc.includeFile(String(CC26xx.$package.packageBase
                                  + "CC26xx_custom_outpolicies.cfg.xs"));
-                    }
-                   break;
             }
 
             Build.$private.libraryName = "/rom_sysbios.a" + Program.build.target.suffix;

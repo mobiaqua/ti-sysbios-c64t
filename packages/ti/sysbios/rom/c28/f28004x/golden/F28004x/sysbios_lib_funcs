@@ -277,7 +277,7 @@
 00000000 t .text:_ti_sysbios_knl_Clock_getTickPeriod__E__mangled__
 00000000 t .text:_ti_sysbios_knl_Clock_getTicks__E__mangled__
 00000000 t .text:_ti_sysbios_knl_Clock_getTicksUntilInterrupt__E
-00000000 t .text:_ti_sysbios_knl_Clock_getTimeout__E__mangled__
+00000000 t .text:_ti_sysbios_knl_Clock_getTimeout__E
 00000000 t .text:_ti_sysbios_knl_Clock_getTimerHandle__E__mangled__
 00000000 t .text:_ti_sysbios_knl_Clock_Handle__label__S
 00000000 t .text:_ti_sysbios_knl_Clock_Instance_finalize__E__mangled__
@@ -406,6 +406,7 @@
 00000000 t .text:_ti_sysbios_knl_Semaphore_reset__E__mangled__
 00000000 t .text:_ti_sysbios_knl_Swi_andn__E__mangled__
 00000000 t .text:_ti_sysbios_knl_Swi_construct__mangled__
+00000000 t .text:_ti_sysbios_knl_Swi_construct__mangled__2__E
 00000000 t .text:_ti_sysbios_knl_Swi_create__mangled__
 00000000 t .text:_ti_sysbios_knl_Swi_dec__E__mangled__
 00000000 t .text:_ti_sysbios_knl_Swi_delete
@@ -443,6 +444,7 @@
 00000000 t .text:_ti_sysbios_knl_Swi_self__E__mangled__
 00000000 t .text:_ti_sysbios_knl_Swi_setAttrs__E__mangled__
 00000000 t .text:_ti_sysbios_knl_Swi_setHookContext__E__mangled__
+00000000 t .text:_ti_sysbios_knl_Swi_setPri__E
 00000000 t .text:_ti_sysbios_knl_Swi_startup__E__mangled__
 00000000 t .text:_ti_sysbios_knl_Swi_unlockSched__E__mangled__
 00000000 t .text:_ti_sysbios_knl_Task_allBlockedFunction__I__mangled__

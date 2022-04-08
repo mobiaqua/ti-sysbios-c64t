@@ -1,6 +1,6 @@
 %%{
 /*
- * Copyright (c) 2015-2016, Texas Instruments Incorporated
+ * Copyright (c) 2015-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -213,7 +213,7 @@ endef
 
 %var LIB = "rom_sysbios.a" + TARGET.suffix;
 %var ROM_EXEC = "rtos_rom.x" + TARGET.suffix;
-%var CFG_OBJ = "rom_sysbios_config.obj";
+%var IAR_CFG_OBJ = "iar_rom_sysbios_config.obj";
 %var SYMBOL_MAP_FILE = "symbolMapFile.mak";
 
 all: `LIB`
@@ -274,7 +274,7 @@ rom_sysbios.obj: `LIBPPS.join(" ")` makefile
 
 `LIB`: rom_sysbios.obj `LIBASMOBJS.join(" ")`
 	@-$(call RM, $@)
-	@$(AR) $@ $^ `goldenDir``CFG_OBJ`
+	@$(AR) $@ $^ `goldenDir``IAR_CFG_OBJ`
 	@echo Library build complete.
 
 clean:

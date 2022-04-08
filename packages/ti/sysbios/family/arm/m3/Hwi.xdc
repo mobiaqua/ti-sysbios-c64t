@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, Texas Instruments Incorporated
+ * Copyright (c) 2015-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@ import xdc.runtime.Diags;
 import xdc.runtime.Log;
 import xdc.runtime.Assert;
 import xdc.runtime.Error;
+import xdc.runtime.Types;
 
 import ti.sysbios.BIOS;
 import ti.sysbios.interfaces.IHwi;
@@ -417,6 +418,19 @@ module Hwi inherits ti.sysbios.interfaces.IHwi
         Ptr     BFAR;
         Ptr     AFSR;
     }
+
+    struct Struct2__ {
+        Ptr     fxns;    /* IHwi fxns - not used */
+        UArg    arg;
+        FuncPtr fxn;
+        Irp     irp;
+        UInt8   priority;
+        Int16   intNum;
+        Ptr     hookEnv;
+        Types.CordAddr  name;
+    };
+
+    typedef Struct2__ Struct2;
 
     /*! @_nodoc */
     metaonly struct BasicView {
@@ -890,6 +904,49 @@ module Hwi inherits ti.sysbios.interfaces.IHwi
     config UInt priGroup = 0;
 
     // -------- Module Functions --------
+
+    /*!
+     *  ======== construct2 ========
+     *  Construct a Hwi object
+     *
+     *  Hwi_construct2 constructs a Hwi object.  This function is identical
+     *  to Hwi_construct(), but does not take an Error_Block parameter, and
+     *  returns a Hwi_Handle.
+     *
+     *  The following C code sets Hwi parameters and
+     *  constructs a Hwi object:
+     *
+     *  @p(code)
+     *
+     *  Hwi_Struct2 hwiStruct2;
+     *  Hwi_Handle  hwi;
+     *
+     *  Void main()
+     *  {
+     *      Hwi_Params hwiParams;
+     *
+     *      Hwi_Params_init(&hwiParams);
+     *      hwiParams.arg = (UArg)arg;
+     *      hwiParams.priority = intPriority;
+     *
+     *      hwi = Hwi_construct2(&hwiStruct2, intNum, hwiFxn, &hwiParams);
+     *      if (hwi == NULL) {
+     *          // Failure
+     *      }
+     *
+     *      BIOS_start();
+     *  }
+     *  @p
+     *
+     *  @param(hwi)        Pointer to Hwi_Struct2 object.
+     *  @param(intNum)     Interrupt priority
+     *  @param(hwiFxn)     Hwi Function
+     *  @param(prms)       Pointer to Hwi_Params structure
+     *
+     *  @b(returns)        A Hwi handle
+     */
+    Handle construct2(Struct2 *hwi, Int intNum, FuncPtr hwiFxn,
+            const Params *prms);
 
     /*!
      *  ======== disable ========

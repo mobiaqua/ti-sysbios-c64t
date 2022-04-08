@@ -80,6 +80,26 @@ if (xdc.om.$name == "cfg" || typeof(genCdoc) != "undefined") {
                 ]
             }
         },
+        "ti.catalog.arm.cortexr5": {
+            "RM57L8.*": {
+                timer : [
+                    {
+                        name: "RTI Timer0",
+                        baseAddr: 0xFFFFFC00,
+                        intNum: 2,
+                        eventId: -1,
+                        intFreqDivFactor: 2
+                    },
+                    {
+                        name: "RTI Timer1",
+                        baseAddr: 0xFFFFFC00,
+                        intNum: 3,
+                        eventId: -1,
+                        intFreqDivFactor: 2
+                    }
+                ]
+            },
+        },
         "ti.catalog.c6000": {
             "AWR16XX": {
                 timer : [

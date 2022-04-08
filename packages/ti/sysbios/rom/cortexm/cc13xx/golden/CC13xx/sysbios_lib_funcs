@@ -75,6 +75,7 @@
 00000000 g     F .text:ti_sysbios_family_arm_m3_Hwi_clearInterrupt__E	00000000 .hidden ti_sysbios_hal_Hwi_clearInterrupt__E
 00000000 g     F .text:ti_sysbios_family_arm_m3_Hwi_clearInterrupt__E	00000000 .hidden ti_sysbios_hal_Hwi_HwiProxy_clearInterrupt__E
 00000000 g     F .text:ti_sysbios_family_arm_m3_Hwi_construct__mangled__	00000000 .hidden ti_sysbios_family_arm_m3_Hwi_construct__mangled__
+00000000 g     F .text:ti_sysbios_family_arm_m3_Hwi_construct__mangled__2__E	00000000 .hidden ti_sysbios_family_arm_m3_Hwi_construct__mangled__2__E
 00000000 g     F .text:ti_sysbios_family_arm_m3_Hwi_create__mangled__	00000000 .hidden ti_sysbios_family_arm_m3_Hwi_create__mangled__
 00000000 g     F .text:ti_sysbios_family_arm_m3_Hwi_delete__mangled__	00000000 .hidden ti_sysbios_family_arm_m3_Hwi_delete__mangled__
 00000000 g     F .text:ti_sysbios_family_arm_m3_Hwi_destruct__mangled__	00000000 .hidden ti_sysbios_family_arm_m3_Hwi_destruct__mangled__
@@ -420,6 +421,7 @@
 00000000 g     F .text:ti_sysbios_knl_Semaphore_reset__E	00000000 .hidden ti_sysbios_knl_Semaphore_reset__E
 00000000 g     F .text:ti_sysbios_knl_Swi_andn__E	00000000 .hidden ti_sysbios_knl_Swi_andn__E
 00000000 g     F .text:ti_sysbios_knl_Swi_construct__mangled__	00000000 .hidden ti_sysbios_knl_Swi_construct__mangled__
+00000000 g     F .text:ti_sysbios_knl_Swi_construct__mangled__2__E	00000000 .hidden ti_sysbios_knl_Swi_construct__mangled__2__E
 00000000 g     F .text:ti_sysbios_knl_Swi_create__mangled__	00000000 .hidden ti_sysbios_knl_Swi_create__mangled__
 00000000 g     F .text:ti_sysbios_knl_Swi_dec__E	00000000 .hidden ti_sysbios_knl_Swi_dec__E
 00000000 g     F .text:ti_sysbios_knl_Swi_delete__mangled__	00000000 .hidden ti_sysbios_knl_Swi_delete__mangled__
@@ -457,6 +459,7 @@
 00000000 g     F .text:ti_sysbios_knl_Swi_self__E	00000000 .hidden ti_sysbios_knl_Swi_self__E
 00000000 g     F .text:ti_sysbios_knl_Swi_setAttrs__E	00000000 .hidden ti_sysbios_knl_Swi_setAttrs__E
 00000000 g     F .text:ti_sysbios_knl_Swi_setHookContext__E	00000000 .hidden ti_sysbios_knl_Swi_setHookContext__E
+00000000 g     F .text:ti_sysbios_knl_Swi_setPri__E	00000000 .hidden ti_sysbios_knl_Swi_setPri__E
 00000000 g     F .text:ti_sysbios_knl_Swi_startup__E__mangled__	00000000 .hidden ti_sysbios_knl_Swi_startup__E__mangled__
 00000000 g     F .text:ti_sysbios_knl_Swi_unlockSched__E	00000000 .hidden ti_sysbios_knl_Swi_unlockSched__E
 00000000 g     F .text:ti_sysbios_knl_Task_allBlockedFunction__I__mangled__	00000000 .hidden ti_sysbios_knl_Task_allBlockedFunction__I__mangled__
@@ -550,10 +553,10 @@
 00000000 g     F .text:xdc_runtime_Error_setX__E	00000000 .hidden xdc_runtime_Error_setX__E
 00000000 g     F .text:xdc_runtime_Gate_enterSystem__E__mangled__	00000000 .hidden xdc_runtime_Gate_enterSystem__E__mangled__
 00000000 g     F .text:xdc_runtime_Gate_leaveSystem__E__mangled__	00000000 .hidden xdc_runtime_Gate_leaveSystem__E__mangled__
-00000000 g     F .text:xdc_runtime_IHeap_alloc$64	00000000 .hidden xdc_runtime_Memory_HeapProxy_alloc__E__mangled__
-00000000 g     F .text:xdc_runtime_IHeap_free$64	00000000 .hidden xdc_runtime_Memory_HeapProxy_free__E__mangled__
-00000000 g     F .text:xdc_runtime_IHeap_getStats$64	00000000 .hidden xdc_runtime_Memory_HeapProxy_getStats__E
-00000000 g     F .text:xdc_runtime_IHeap_isBlocking$64	00000000 .hidden xdc_runtime_Memory_HeapProxy_isBlocking__E
+00000000 g     F .text:xdc_runtime_IHeap_alloc$63	00000000 .hidden xdc_runtime_Memory_HeapProxy_alloc__E__mangled__
+00000000 g     F .text:xdc_runtime_IHeap_free$63	00000000 .hidden xdc_runtime_Memory_HeapProxy_free__E__mangled__
+00000000 g     F .text:xdc_runtime_IHeap_getStats$63	00000000 .hidden xdc_runtime_Memory_HeapProxy_getStats__E
+00000000 g     F .text:xdc_runtime_IHeap_isBlocking$63	00000000 .hidden xdc_runtime_Memory_HeapProxy_isBlocking__E
 00000000 g     F .text:xdc_runtime_Log_doPrint__E	00000000 .hidden xdc_runtime_Log_doPrint__E
 00000000 g     F .text:xdc_runtime_Memory_alloc__E__mangled__	00000000 .hidden xdc_runtime_Memory_alloc__E__mangled__
 00000000 g     F .text:xdc_runtime_Memory_calloc__E__mangled__	00000000 .hidden xdc_runtime_Memory_calloc__E__mangled__

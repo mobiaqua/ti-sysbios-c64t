@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2014-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -346,7 +346,7 @@ function viewInitBasic(view, obj)
 function viewInitDevice(view, obj)
 {
     var Program = xdc.useModule('xdc.rov.Program');
-    var tNames = ["Timer0_A5", "Timer1_A3", "Timer0_B7"];
+    var tNames = ["Timer_A0", "Timer_A1", "Timer_A2", "Timer_A3"];
 
     view.device = tNames[obj.id];
 

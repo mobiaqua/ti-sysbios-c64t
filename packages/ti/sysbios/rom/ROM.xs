@@ -181,6 +181,29 @@ function getExterns()
 }
 
 /*
+ *  ======== getEnumString ========
+ *  Get the enum value string name, not 0, 1, 2 or 3, etc.  For an enumeration
+ *  type property.
+ *
+ *  Example usage:
+ *  if obj contains an enumeration type property "Enum enumProp"
+ *
+ *  view.enumString = getEnumString(obj.enumProp);
+ *
+ */
+function getEnumString(enumProperty)
+{
+    /*
+     *  Split the string into tokens in order to get rid of the huge package
+     *  path that precedes the enum string name. Return the last 2 tokens
+     *  concatenated with "_"
+     */
+    var enumStrArray = String(enumProperty).split(".");
+    var len = enumStrArray.length;
+    return (enumStrArray[len - 1]);
+}
+
+/*
  *  ======== _setRomName ========
  */
 function _setRomName(field, val)
@@ -203,10 +226,20 @@ function _setRomName(field, val)
             break;
 
         case ROM.CC2652:
+            ROM.$logWarning("Unrecognized ROM name: " +
+                getEnumString(ROM.romName) +
+                ". Please use either 'CC26X2' or 'CC13X2'",
+                ROM, "romName");
+        case ROM.CC13X2:
+        case ROM.CC26X2:
             RomModule = xdc.useModule('ti.sysbios.rom.cortexm.cc26xx.agama.CC26xx');
             break;
 
         case ROM.CC2652R2:
+            ROM.$logWarning("Unrecognized ROM name; " +
+                getEnumString(ROM.romName) + ". Please use 'CC26X2_NO_OAD'",
+                ROM, "romName");
+        case ROM.CC26X2_NO_OAD:
             RomModule = xdc.useModule('ti.sysbios.rom.cortexm.cc26xx.agama_r2.CC26xx');
             break;
 

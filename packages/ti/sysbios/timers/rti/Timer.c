@@ -89,7 +89,7 @@ UInt Timer_getNumTimers()
  */
 Timer_Status Timer_getStatus(UInt timerId)
 {
-    Assert_isTrue(timerId < Timer_numTimerDevices, Timer_A_invalidTimer);
+    Assert_isTrue(timerId < (UInt)Timer_numTimerDevices, Timer_A_invalidTimer);
 
     if (Timer_module->availMask & (0x1 << timerId)) {
         return (Timer_Status_FREE);
@@ -184,7 +184,7 @@ Void Timer_startup()
  */
 Timer_Handle Timer_getHandle(UInt id)
 {
-    Assert_isTrue((id < Timer_numTimerDevices), NULL);
+    Assert_isTrue((id < (UInt)Timer_numTimerDevices), NULL);
     return (Timer_module->handles[id]);
 }
 

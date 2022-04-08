@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, Texas Instruments Incorporated
+ * Copyright (c) 2015-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -416,6 +416,41 @@ module Cache inherits ti.sysbios.interfaces.ICache
      *  @param(value)           value for setting MAR register
      */
     Void setMar(Ptr baseAddr, SizeT byteSize, UInt32 value);
+
+    /*!
+     *  ======== inv ========
+     *  Invalidate the range of memory within the specified starting address and
+     *  byte count.  The range of addresses operated on gets quantized to whole
+     *  cache lines in each cache.  All cache lines in range are invalidated in
+     *  L1P cache.  All cache lines in range are invalidated in L1D cache.
+     *  All cache lines in range are invaliated in L2 cache.
+     */
+    override Void inv(Ptr blockPtr, SizeT byteCnt, Bits16 type, Bool wait);
+
+    /*!
+     *  ======== wb ========
+     *  Writes back the range of memory within the specified starting address
+     *  and byte count.  The range of addresses operated on gets quantized to
+     *  whole cache lines in each cache.  There is no effect on L1P cache.
+     *  All cache lines within the range are left valid in L1D cache and the
+     *  data within the range in L1D cache will be written back to L2 or
+     *  external memory. All cache lines within the range are left valid in
+     *  L2 cache and the data within the range in L2 cache will be written back
+     *  to external memory.
+     */
+    override Void wb(Ptr blockPtr, SizeT byteCnt, Bits16 type, Bool wait);
+
+    /*!
+     *  ======== wbInv ========
+     *  Writes back and invalidates the range of memory within the specified
+     *  starting address and byte count.  The range of addresses operated on
+     *  gets quantized to whole cache lines in each cache.  All cache lines
+     *  within range are invalidated in L1P cache.  All cache lines within the
+     *  range are written back to L2 or external and then invalidated in L1D
+     *  cache. All cache lines within the range are written back to external
+     *  memory and then invalidated in L2 cache.
+     */
+    override Void wbInv(Ptr blockPtr, SizeT byteCnt, Bits16 type, Bool wait);
 
     /*!
      *  ======== invL1pAll ========

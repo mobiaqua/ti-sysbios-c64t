@@ -129,7 +129,7 @@ print(RomModule.$name);
 					 + libsArray[i].match(/[^\;]*/) + "\" ";
     }
 
-    var driverlib = "-l " + xdc.findFile("ti/devices/eng_cc26x2_cc26x4/driverlib/bin/ccs/driverlib.lib");
+    var driverlib = "-l " + xdc.findFile("ti/devices/cc26x2/driverlib/bin/ccs/driverlib.lib");
     print(driverlib);
 
     if (!java.io.File(RomModule.libDir).exists()) {

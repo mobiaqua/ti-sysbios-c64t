@@ -220,7 +220,7 @@ function getISAChain(isa) {
 /*
  *  ======== _langOpts ========
  */
-var _langOpts = {asm: "", c: "", cpp: "--eec++ --guard_calls"};
+var _langOpts = {asm: "", c: "", cpp: "--c++ --no_exceptions --no_rtti --guard_calls"};
 
 /*
  *  ======== _compile ========

@@ -35,11 +35,18 @@
 
 #include <xdc/std.h>
 
+#include <ti/sysbios/hal/Hwi.h>
 #include <ti/sysbios/hal/Seconds.h>
 #include <ti/sysbios/knl/Clock.h>
+#include <ti/sysbios/knl/Task.h>
 
 #include "time.h"
 #include "errno.h"
+#include "pthread_util.h"
+
+static UInt32 secsPerRollover = 0;
+static UInt32 prevTicks = 0;
+static UInt32 rolloverCount = 0;
 
 /*
  *  ======== clock_gettime ========
@@ -47,8 +54,11 @@
 int clock_gettime(clockid_t clockId, struct timespec *ts)
 {
     Seconds_Time t;
-    unsigned long secs;
-    UInt32 ticks;
+    UInt32       secs;
+    UInt32       ticks;
+    UInt32       remTicks;
+    UInt         key;
+    UInt32       numRollovers;
 
     if (clockId == CLOCK_REALTIME) {
         Seconds_getTime(&t);
@@ -58,12 +68,79 @@ int clock_gettime(clockid_t clockId, struct timespec *ts)
     }
     else {
         /* CLOCK_MONOTONIC */
+        if (secsPerRollover == 0) {
+            /* Initialize number of seconds before tick count wraps */
+            secsPerRollover = (1 + 4294967295 / (1000000 / Clock_tickPeriod));
+        }
+
+        key = Hwi_disable();
+
         ticks = Clock_getTicks();
-        secs = ((unsigned long)ticks * Clock_tickPeriod) / 1000000;
-        ts->tv_sec = secs;
-        ts->tv_nsec = ((unsigned long)ticks * Clock_tickPeriod -
-                secs * 1000000) * 1000;
+        if (ticks < prevTicks) {
+            rolloverCount++;
+        }
+        prevTicks = ticks;
+        numRollovers = rolloverCount;
+
+        Hwi_restore(key);
+
+        secs = ticks / (1000000 / Clock_tickPeriod);
+        remTicks = ticks - secs * (1000000 / Clock_tickPeriod);
+
+        ts->tv_sec = (time_t)secs + secsPerRollover * numRollovers;
+        ts->tv_nsec = (unsigned long)(remTicks * Clock_tickPeriod  * 1000);
     }
+
+    return (0);
+}
+
+/*
+ *  ======== clock_nanosleep ========
+ */
+int clock_nanosleep(clockid_t clockId, int flags,
+        const struct timespec *rqtp, struct timespec *rmtp)
+{
+    uint32_t ticks;
+
+    if (rmtp != NULL) {
+        /*
+         *  In the relative case, rmtp will contain the amount of time
+         *  remaining (requested time - actual time slept).  For BIOS,
+         *  this will always be 0.
+         */
+        rmtp->tv_nsec = rmtp->tv_sec = 0;
+    }
+
+    if (flags & TIMER_ABSTIME) {
+        if (_pthread_abstime2ticks(clockId, rqtp, &ticks) != 0) {
+            return (EINVAL);
+        }
+
+        if (ticks == 0) {
+            return (0);
+        }
+    }
+    else {
+        if ((rqtp->tv_sec == 0) && (rqtp->tv_nsec == 0)) {
+            return (0);
+        }
+
+        ticks = rqtp->tv_sec * (1000000 / Clock_tickPeriod);
+
+        /* Take the ceiling */
+        ticks += (rqtp->tv_nsec + Clock_tickPeriod * 1000 - 1) /
+                (Clock_tickPeriod * 1000);
+
+        /*
+         *  Add one tick to ensure the timeout is not less than the
+         *  amount of time requested.  The Clock may be about to tick,
+         *  and that counts as one tick even though the amount of time
+         *  until this tick is less than Clock_tickPeriod.
+         */
+        ticks++;
+    }
+
+    Task_sleep(ticks);
 
     return (0);
 }

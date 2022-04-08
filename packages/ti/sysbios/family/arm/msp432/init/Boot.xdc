@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2016, Texas Instruments Incorporated
+ * Copyright (c) 2014-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -112,7 +112,8 @@ module Boot
      *      ACLK =   32KHz from REFOCLK, LFXT, or external clock
      *      BCLK =   32KHz from REFOCLK, LFXT, or external clock
      *      VCORE = 1 (AM1_LDO mode)
-     *      Flash BNK0 and BNK1 read wait states = 2
+     *      Flash BNK0 and BNK1 read wait states = 1 (MSP432P401xx)
+     *      Flash BNK0 and BNK1 read wait states = 3 (MSP432P4x1xl/MSP432P4x1xT)
      *
      *   SpeedOpt_Medium will configure:
      *      MCLK =   24MHz from DCO, HFXT, or external clock
@@ -121,7 +122,7 @@ module Boot
      *      ACLK =   32KHz from REFOCLK, LFXT, or external clock
      *      BCLK =   32KHz from REFOCLK, LFXT, or external clock
      *      VCORE = 1 (AM1_LDO mode)
-     *      Flash BNK0 and BNK1 read wait states = 1
+     *      Flash BNK0 and BNK1 read wait states = 1 (for all device variants)
      *
      *   SpeedOpt_Low will configure:
      *      MCLK =   12MHz from DCO, HFXT, or external clock
@@ -130,7 +131,8 @@ module Boot
      *      ACLK =   32KHz from REFOCLK, LFXT, or external clock
      *      BCLK =   32KHz from REFOCLK, LFXT, or external clock
      *      VCORE = 0 (AM0_LDO mode)
-     *      Flash BNK0 and BNK1 read wait states = 0
+     *      Flash BNK0 and BNK1 read wait states = 0 (MSP432P401xx)
+     *      Flash BNK0 and BNK1 read wait states = 1 (MSP432P4x1xl/MSP432P4x1xT)
      *   @p
      */
     metaonly config SpeedOpt speedSelect = SpeedOpt_High;

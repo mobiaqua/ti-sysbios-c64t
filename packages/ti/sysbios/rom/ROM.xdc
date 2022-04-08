@@ -109,8 +109,12 @@ metaonly module ROM
         CC2640R2F,      /*! Use for all CC26xx R2 devices */
         CC1350,         /*! Use for all CC13xx devices */
         F28004x,        /*! Use for all F28004x class devices */
-        CC2652,         /*! Use for all CC26xx agama devices */
-        CC2652R2        /*! Use for all CC26xx agama devices */
+        CC26X2,         /*! Use for all CC26x2 agama devices, OAD supported */
+        CC13X2,         /*! Use for all CC13x2 agama devices */
+        CC26X2_NO_OAD,  /*! Use for all CC26x2 agama devices, OAD not supported. */
+        CC2652R2,       /* Use for all CC26x2 agama devices, OAD not supported */
+        CC1352,         /* Use for all CC13x2 agama devices */
+        CC2652          /* Use for all CC26x2 agama devices, OAD supported */
     };
 
     /*!

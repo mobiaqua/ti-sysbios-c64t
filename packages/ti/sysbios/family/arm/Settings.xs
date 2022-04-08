@@ -493,6 +493,7 @@ deviceTable["ti.catalog.arm.cortexm4"]["Vayu"]      = deviceTable["ti.catalog.ar
 deviceTable["ti.catalog.arm.cortexm4"]["TDA3XX"]    = deviceTable["ti.catalog.arm.cortexm4"]["DRA7XX"];
 
 /* Agama devices */
+deviceTable["ti.catalog.arm.cortexm4"]["CC13.*"]    = deviceTable["ti.catalog.arm.cortexm3"]["CC2650"];
 deviceTable["ti.catalog.arm.cortexm4"]["CC26.*"]    = deviceTable["ti.catalog.arm.cortexm3"]["CC2650"];
 
 /* Cortex-R5 devices */

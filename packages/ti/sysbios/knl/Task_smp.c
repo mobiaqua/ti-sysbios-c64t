@@ -1563,6 +1563,8 @@ Int Task_postInit(Task_Object *tsk, Error_Block *eb)
     UInt tskKey, hwiKey;
 #ifndef ti_sysbios_knl_Task_DISABLE_ALL_HOOKS
     Int i;
+    Error_Block localEB;
+    Error_Block *leb;
 #endif
 
     tsk->context = Task_SupportProxy_start(tsk,
@@ -1584,13 +1586,10 @@ Int Task_postInit(Task_Object *tsk, Error_Block *eb)
     }
 
 #ifndef ti_sysbios_knl_Task_DISABLE_ALL_HOOKS
-    Error_Block *leb;
-
     if (eb != Error_IGNORE) {
         leb = eb;
     }
     else {
-        Error_Block localEB;
         Error_init(&localEB);
         leb = &localEB;
     }
@@ -1890,14 +1889,12 @@ Void Task_stat(Task_Object *tsk, Task_Stat *statbuf)
  */
 Void Task_block(Task_Object *tsk)
 {
-    UInt curset, hwiKey, mask;
-    Queue_Object *readyQ;
+    UInt hwiKey;
+    Queue_Object *readyQ = tsk->readyQ;
+    UInt curset = Task_module->smpCurSet[tsk->affinity];
+    UInt mask = tsk->mask;
 
     hwiKey = Hwi_disable();
-
-    readyQ = tsk->readyQ;
-    curset = Task_module->smpCurSet[tsk->affinity];
-    mask = tsk->mask;
 
     /*
      * Can be used by Task_setAffinity() to move a blocked task

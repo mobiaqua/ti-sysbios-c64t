@@ -248,7 +248,6 @@ _ti_sysbios_hal_Hwi_HwiProxy_Params__init__S = 0x3f8ad1;
 _ti_sysbios_gates_GateMutex_Instance_init__E = 0x3f8ae0;
 _ti_sysbios_hal_Hwi_Module_startup__E = 0x3f8aef;
 _ti_sysbios_knl_Clock_Params__init__S = 0x3f8afe;
-_ti_sysbios_knl_Clock_getTimeout__E = 0x3f8b0d;
 _ti_sysbios_knl_Queue_Object__destruct__S = 0x3f8b1c;
 _ti_sysbios_knl_Queue_destruct = 0x3f8b2b;
 _ti_sysbios_knl_Semaphore_Params__init__S = 0x3f8b3a;

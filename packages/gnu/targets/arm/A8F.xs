@@ -1,5 +1,5 @@
 /* 
- *  Copyright (c) 2012 Texas Instruments and others.
+ *  Copyright (c) 2012-2017 Texas Instruments and others.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -53,9 +53,13 @@ function compile(goal) {
     }
 
     goal.opts.copts += " -I" + A8F.targetPkgPath +
+        "/libs/install-native/$(GCCTARG)/include/newlib-nano " +
+        " -I" + A8F.targetPkgPath +
         "/libs/install-native/$(GCCTARG)/include ";
 
     goal.opts.cfgcopts += " -I" + A8F.targetPkgPath +
+        "/libs/install-native/$(GCCTARG)/include/newlib-nano " +
+        " -I" + A8F.targetPkgPath +
         "/libs/install-native/$(GCCTARG)/include ";
 
     return (this.$super.compile(goal));
@@ -71,7 +75,7 @@ function link(goal)
     }
 
     goal.opts += " -L" + A8F.targetPkgPath +
-        "/libs/install-native/$(GCCTARG)/lib/fpu ";
+        "/libs/install-native/$(GCCTARG)/lib/hard ";
 
     return(this.$super.link(goal));
 }

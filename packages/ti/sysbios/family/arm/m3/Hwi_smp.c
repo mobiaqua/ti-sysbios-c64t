@@ -220,13 +220,13 @@ Int Hwi_postInit (Hwi_Object *hwi, Error_Block *eb)
 
 #ifndef ti_sysbios_hal_Hwi_DISABLE_ALL_HOOKS
     Int i;
+    Error_Block localEB;
     Error_Block *leb;
 
     if (eb != Error_IGNORE) {
         leb = eb;
     }
     else {
-        Error_Block localEB;
         Error_init(&localEB);
         leb = &localEB;
     }
@@ -731,7 +731,7 @@ Bool Hwi_getCoreStackInfo(Hwi_StackInfo *stkInfo, Bool computeStackDepth,
 
     /* Copy the stack base address and size */
     if (coreId == 0) {
-        stkInfo->hwiStackSize = (SizeT)Hwi_module->isrStackSize;
+        stkInfo->hwiStackSize = Hwi_module->isrStackSize;
         stkInfo->hwiStackBase = Hwi_module->isrStackBase;
     }
     else {

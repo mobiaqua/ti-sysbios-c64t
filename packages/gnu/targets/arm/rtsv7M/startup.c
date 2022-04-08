@@ -24,6 +24,7 @@ extern unsigned int __data_load__, __data_start__, __data_end__;
 extern void (*__init_array_start []) (void);
 extern void (*__init_array_end []) (void);
 
+extern int main();
 extern void _exit(int code);
 extern void xdc_runtime_System_exit__E(int code);
 volatile unsigned gnu_targets_arm_rtsv7M_exit = 0;

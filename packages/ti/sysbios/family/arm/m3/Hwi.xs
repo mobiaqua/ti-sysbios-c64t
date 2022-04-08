@@ -578,12 +578,13 @@ function module$static$init(mod, params)
     }
 
     mod.isrStack = null;
-    mod.isrStackBase = $externPtr('__TI_STACK_BASE');
     /* Overriden by Hwi_initIsrStackSize() if IAR */
     if (Program.build.target.$name.match(/iar/)) {
+        mod.isrStackBase = null;
         mod.isrStackSize = null;
     }
     else {
+        mod.isrStackBase = $externPtr('__TI_STACK_BASE');
         mod.isrStackSize = $externPtr('__TI_STACK_SIZE');
     }
 
@@ -911,23 +912,44 @@ var modView = null;
 /*
  *  ======== viewGetPriority ========
  */
-function viewGetPriority(that, intNum)
+function viewGetPriority(view, that, intNum)
 {
     var priority = 0;
+    var registerBaseAddr;
 
     try {
-        that.IPR = Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UInt8', isScalar: true}, 0xe000e400, 240, false);
-        that.SHPR = Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UInt8', isScalar: true}, 0xe000ed18, 12, false);
+        registerBaseAddr = 0xe000e400;
+        that.IPR = Program.fetchArray(
+            {
+                type: 'xdc.rov.support.ScalarStructs.S_UInt8',
+                isScalar: true
+            },
+            registerBaseAddr,
+            240,
+            false);
+
+        registerBaseAddr = 0xe000ed18;
+        that.SHPR = Program.fetchArray(
+            {
+                type: 'xdc.rov.support.ScalarStructs.S_UInt8',
+                isScalar: true
+            },
+            registerBaseAddr,
+            12,
+            false);
+
+        if (intNum >= 16) {
+            priority = that.IPR[intNum-16];
+        }
+        else if (intNum >= 4) {
+            priority = that.SHPR[intNum-4];
+        }
     }
     catch (e) {
         print("Error: Problem fetching priorities: " + e.toString());
-    }
 
-    if (intNum >= 16) {
-        priority = that.IPR[intNum-16];
-    }
-    else if (intNum >= 4) {
-        priority = that.SHPR[intNum-4];
+        Program.displayError(view, "priority",  "Unable to read Hwi priority " +
+            "registers at 0x" + registerBaseAddr.toString(16));
     }
 
     return priority;
@@ -1000,7 +1022,7 @@ function viewFillBasicInfo(view, obj)
         }
     }
 
-    var pri = viewGetPriority(this, Math.abs(obj.intNum));
+    var pri = viewGetPriority(view, this, Math.abs(obj.intNum));
 
     mask = numPriTable[hwiModCfg.NUM_PRIORITIES].mask;
 

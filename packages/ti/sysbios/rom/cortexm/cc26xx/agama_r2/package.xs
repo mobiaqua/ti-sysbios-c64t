@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Texas Instruments Incorporated
+ * Copyright (c) 2016-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,11 +41,7 @@ function getSects()
     var romModName;
     var romDir = "golden/";
 
-    switch(ROM.romName) {
-        case ROM.CC2652R2:
-            romModName = "CC26xx";
-            break;
-    }
+    romModName = "CC26xx";
 
     if (Build.buildROMApp == true) {
         if (Program.build.target.$name.match(/iar/)) {
