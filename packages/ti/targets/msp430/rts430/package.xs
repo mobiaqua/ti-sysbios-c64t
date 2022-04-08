@@ -1,5 +1,5 @@
 /* 
- *  Copyright (c) 2013 Texas Instruments and others.
+ *  Copyright (c) 2013-2018 Texas Instruments and others.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -23,6 +23,16 @@ function getLibs(prog)
 function getSects() 
 {
     return ("ti/targets/msp430/rts430/link.xdt");
+}
+
+function validate()
+{
+    var targetVers = prog.build.target.version.split(',')[2] - 0;
+
+    if (targetVers < 18.1) {
+        throw new Error(Program.build.target +
+            " requires compiler version 18.1.1.LTS or later");
+    }
 }
 /*
 

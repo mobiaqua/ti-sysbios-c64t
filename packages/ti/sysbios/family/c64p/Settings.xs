@@ -127,6 +127,19 @@ var settings = {
             clockTickPeriod : 1000,
             targets : [ "ti.targets.elf.C674" ]
         },
+        "J7ES": {
+            hwiDelegate : "ti.sysbios.family.c64p.Hwi",
+            timerDelegate : "ti.sysbios.timers.dmtimer.Timer",
+            clockTimerDelegate : "ti.sysbios.timers.dmtimer.Timer",
+            timerSupportDelegate : "ti.sysbios.family.c64p.tci6488.TimerSupport",
+            timestampDelegate : "ti.sysbios.family.c64p.TimestampProvider",
+            taskSupportDelegate : "ti.sysbios.family.c62.TaskSupport",
+            intrinsicsSupportDelegate : "ti.sysbios.family.c62.IntrinsicsSupport",
+            cacheDelegate : "ti.sysbios.family.c66.Cache",
+            coreDelegate : null,
+            clockTickPeriod : 1000,
+            targets : [ "ti.targets.elf.C66" ] 
+        },
     }
 }
 
@@ -189,6 +202,8 @@ settings.device["Vayu"]           = settings.device["DRA7XX"];
 settings.device["TDA3XX"]         = settings.device["DRA7XX"];
 
 settings.device["IWR16XX"]        = settings.device["AWR16XX"];
+settings.device["AWR18XX"]        = settings.device["AWR16XX"];
+settings.device["IWR18XX"]        = settings.device["AWR16XX"];
 
 /*
  *  ======== deviceSupportCheck ========

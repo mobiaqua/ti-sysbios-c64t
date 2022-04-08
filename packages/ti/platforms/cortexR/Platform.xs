@@ -202,5 +202,13 @@ function instance$meta$init(name)
             this.CPU.deviceName = "CortexR";
             this.CPU.clockRate = 200;
         }
+
+        if (this.deviceName.match(/^SIMMAXWELL/) ||
+            this.deviceName.match(/^J7/) ||
+            this.deviceName.match(/^AM65X/)) {
+            this.CPU.catalogName = "ti.catalog.arm.cortexr5";
+            this.CPU.deviceName = "CortexR";
+            this.CPU.clockRate = 400;
+        }
     }
 }

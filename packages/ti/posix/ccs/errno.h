@@ -118,6 +118,10 @@ extern "C" {
 #define EMSGSIZE        122
 #endif
 
+#ifndef ENFILE
+#define ENFILE          23
+#endif
+
 #ifndef ENOMEM
 #define ENOMEM          12
 #endif
@@ -278,6 +282,10 @@ extern "C" {
 #define EMSGSIZE                122
 #endif
 
+#ifndef ENFILE
+#define ENFILE                  23
+#endif
+
 #ifndef ENOMEM
 #define ENOMEM                  12
 #endif
@@ -420,6 +428,10 @@ extern "C" {
 
 #ifndef EMSGSIZE
 #define EMSGSIZE                122
+#endif
+
+#ifndef ENFILE
+#define ENFILE                  23
 #endif
 
 #ifndef ENOMEM

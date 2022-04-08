@@ -56,17 +56,14 @@ void _pthread_runStub(UArg arg0, UArg arg1);
 static void _pthread_delete(pthread_Obj *thread);
 
 /*
- *  Default pthread attributes.  These are implementation
- *  dependent.
+ *  ======== defaultPthreadAttrs ========
  */
 static pthread_attr_t defaultPthreadAttrs = {
-    1,       /* priority */
-    NULL,    /* stack */
-    0,       /* stacksize - would use Task_defaultStackSize but get compile
-              *  error "expression must have a constant value"
-              */
-    0,       /*  guardsize */
-    PTHREAD_CREATE_JOINABLE /* detachstate */
+    1,                          /* priority */
+    NULL,                       /* stack */
+    0, /* pthread_attr_init */  /* stacksize - must align for all kernels */
+    0,                          /* guardsize */
+    PTHREAD_CREATE_JOINABLE     /* detachstate */
 };
 
 /*
@@ -144,8 +141,12 @@ int pthread_attr_getstacksize(const pthread_attr_t *attr, size_t *stacksize)
  */
 int pthread_attr_init(pthread_attr_t *attr)
 {
+    /* Use default stack size defined by SYS/BIOS configuration. Must be
+     * set at runtime; cannot use symbol dereference for static init.
+     */
+    defaultPthreadAttrs.stacksize = Task_defaultStackSize;
+
     *attr = defaultPthreadAttrs;
-    attr->stacksize = Task_defaultStackSize;
 
     return (0);
 }
@@ -295,6 +296,7 @@ int pthread_create(pthread_t *newthread, const pthread_attr_t *attr,
         return (ENOMEM);
     }
 
+    defaultPthreadAttrs.stacksize = Task_defaultStackSize;
     pAttr = (attr == NULL) ? &defaultPthreadAttrs : (pthread_attr_t *)attr;
 
     taskParams.priority = pAttr->priority;
@@ -397,8 +399,9 @@ int pthread_equal(pthread_t pt1, pthread_t pt2)
  */
 void pthread_exit(void *retval)
 {
-    pthread_Obj      *thread = (pthread_Obj *)pthread_self();
-    UInt              key;
+    pthread_Obj *thread = (pthread_Obj *)pthread_self();
+    UInt key;
+    int oldState;
 
     /*
      *  This function terminates the calling thread and returns
@@ -410,12 +413,8 @@ void pthread_exit(void *retval)
      */
     thread->ret = retval;
 
-    /*
-     *  Don't bother disabling the Task scheduler while the thread
-     *  is exiting.  It will be up to the application to not make
-     *  such calls as pthread_cancel() or pthread_detach() while the
-     *  thread is exiting.
-     */
+    /* prevent thread cancellation while terminating myself */
+    pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &oldState);
 
     /* Pop and execute the cleanup handlers */
     while (thread->cleanupList != NULL) {
@@ -705,9 +704,13 @@ void _pthread_runStub(UArg arg0, UArg arg1)
     UInt         key;
     Ptr          arg;
     pthread_Obj *thread = (pthread_Obj *)(xdc_uargToPtr(arg1));
+    int oldState;
 
     arg = Task_getEnv(thread->task);
     thread->ret = thread->fxn(arg);
+
+    /* prevent thread cancellation while terminating myself */
+    pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &oldState);
 
     /* Pop and execute the cleanup handlers */
     while (thread->cleanupList != NULL) {

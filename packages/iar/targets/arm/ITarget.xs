@@ -41,7 +41,8 @@ var _versionCache = {};
  */
 var _isaChainMap = {
     isa_v7M4 : ["v7M", "v7M4"],
-    isa_v7M  : ["v7M"]
+    isa_v7M  : ["v7M"],
+    isa_v8M  : ["v8M", "v7M"]
 };
 
 /*
