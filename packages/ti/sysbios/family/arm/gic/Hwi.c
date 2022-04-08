@@ -393,8 +393,10 @@ Void Hwi_initIntControllerCore0()
      *
      * ITARGETSR[0:7] are Read-Only
      */
-    for (i = 8; i < (Hwi_NUM_INTERRUPTS / 4); i++) {
-        Hwi_gicd.ITARGETSR[i] = Hwi_module->itargetsr[i];
+    if (Hwi_initGicd) {
+        for (i = 8; i < (Hwi_NUM_INTERRUPTS / 4); i++) {
+            Hwi_gicd.ITARGETSR[i] = Hwi_module->itargetsr[i];
+        }
     }
 
     /*
@@ -1035,10 +1037,12 @@ Void Hwi_reconfig(Hwi_Object *hwi, Hwi_FuncPtr fxn, const Hwi_Params *params)
     }
 
     /* Set target processors */
-    shift = (intNum & 0x3) << 3;
-    mask  = 0xF << shift;
-    Hwi_gicd.ITARGETSR[intNum >> 2] = (Hwi_gicd.ITARGETSR[intNum >> 2] & (~mask)) |
-        ((hwi->targetProcList & 0xF) << shift);
+    if (Hwi_initGicd) {
+        shift = (intNum & 0x3) << 3;
+        mask  = 0xF << shift;
+        Hwi_gicd.ITARGETSR[intNum >> 2] = (Hwi_gicd.ITARGETSR[intNum >> 2] & (~mask)) |
+            ((hwi->targetProcList & 0xF) << shift);
+    }
 
     Hwi_restore(hwiKey);
 
