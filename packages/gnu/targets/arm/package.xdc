@@ -23,6 +23,7 @@ package gnu.targets.arm [1,0,0] {
     interface ITarget, IM;
     module GCArmv5T, GCArmv6, GCArmv7A, GCArmv7AF;
     module M3, M4, M4F;
+    module M33F;
     module A8F, A9F, A15F;
     module A53F;
 }

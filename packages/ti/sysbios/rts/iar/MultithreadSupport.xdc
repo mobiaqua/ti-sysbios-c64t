@@ -42,28 +42,42 @@ import ti.sysbios.knl.Task;
 
 /*!
  *  ======== MultithreadSupport ========
- *  This Multithread support module uses Hook Functions, Hook Context
- *  and an overloaded implementation of the library's lock and thread
- *  local storage access functions to make C runtime library calls re-entrant.
+ *  Provide the kernel support needed for IAR re-entrant C run-time
  *
- *  Multithread support will be enabled when IAR linker option "--threaded_lib"
- *  is passed as the target's linker options prefix. This can be done in one
- *  of the following ways:
- *     - When building an application in IAR Embedded Workbench, under
- *       Project -> Options -> General Options -> Library Configuration,
- *       check the "Enable thread support in Library" box.
- *     - When building an application through makefile using configuro, pass
- *       the linker options on configuro command line using "--linkOptions"
- *       option.
- *     - When building an application through XDC build system using config.bld,
- *       pass the linker options through the XDC target linkOpts.prefix in
- *       config.bld.
+ *  This multi-thread support module uses hook functions, hook context,
+ *  and an overloaded implementation of the C library's lock and thread
+ *  local storage access functions to make C run-time library calls
+ *  re-entrant.
  *
- *  Note: Calling C runtime functions from SWI and HWI threads
- *        is not supported and will generate an exception if
- *        multithread support is enabled.
+ *  This module is used only with the IAR compiler.
  *
+ *  To enable multi-thread support, load this module in your application
+ *  configuration script.
+ *
+ *  @p(code)
+ *  xdc.useModule('ti.sysbios.rts.iar.MultithreadSupport');
+ *  @p
+ *
+ *  If your application is using a module which requires multi-thread
+ *  support, then that module is responsible for loading this module.
+ *  For example, the `ti.posix.tirtos.Settings` module will load this
+ *  module. In this case, it is not necessary to load it explicitly.
+ *
+ *  When this module is used, it will contribute the IAR linker option
+ *  `--threaded_lib` to the linker command.
+ *
+ *  When using the IAR Embedded Workbench IDE, if you enable thread support
+ *  in your project settings, you must also include this module in your
+ *  configuration (unless it is already used as described above). There is
+ *  no mechanism for the IAR IDE to communicate the project selections to
+ *  this module.
+ *
+ *  @(note)
+ *  Calling C run-time functions from SWI or HWI threads is not supported
+ *  and will generate an exception if  multi-thread support is enabled.
  */
+
+@Template ("./MultithreadSupport.xdt")
 
 module MultithreadSupport
 {
@@ -73,7 +87,7 @@ module MultithreadSupport
      *
      *  @_nodoc
      */
-    config Bool enableMultithreadSupport = false;
+    config Bool enableMultithreadSupport = true;
 
     /*!
      *  ======== A_badThreadType ========
@@ -97,7 +111,7 @@ module MultithreadSupport
 
 internal:   /* not for client use */
 
-    /*!
+    /*
      *  ======== perThreadAccess ========
      *  Returns a pointer the symbol in the current task's TLS memory
      *
@@ -110,13 +124,22 @@ internal:   /* not for client use */
      */
     Void *perThreadAccess(Void *symbp);
 
-    /*!
+    /*
      *  ======== getTlsPtr ========
      *  Returns a pointer to the current task's TLS memory
      */
-    Void *getTlsPtr();
+    void *getTlsPtr();
 
-    /*!
+    /*
+     *  ======== getTlsAddr ========
+     *  Return address of thread-local storage buffer
+     *
+     *  This function is generated. It's implementation differs depending
+     *  if SYS/BIOS is in ROM or not.
+     */
+    void *getTlsAddr();
+
+    /*
      *  ======== initLock ========
      *  Initializes a system lock
      *
@@ -127,7 +150,7 @@ internal:   /* not for client use */
      */
     Void initLock(Void **ptr);
 
-    /*!
+    /*
      *  ======== destroyLock ========
      *  Destroy a system lock
      *
@@ -138,7 +161,7 @@ internal:   /* not for client use */
      */
     Void destroyLock(Void **ptr);
 
-    /*!
+    /*
      *  ======== acquireLock ========
      *  Acquire a system lock
      *
@@ -149,7 +172,7 @@ internal:   /* not for client use */
      */
     Void acquireLock(Void **ptr);
 
-    /*!
+    /*
      *  ======== releaseLock ========
      *  Release a system lock
      *
@@ -160,7 +183,7 @@ internal:   /* not for client use */
      */
     Void releaseLock(Void **ptr);
 
-    /*!
+    /*
      *  ======== taskCreateHook ========
      *  Create task hook function
      *
@@ -172,16 +195,16 @@ internal:   /* not for client use */
      */
     Void taskCreateHook(Task.Handle task, Error.Block *eb);
 
-    /*!
+    /*
      *  ======== taskDeleteHook ========
-     *  Delete hook function used to remove the task's hook context.
+     *  Delete hook function used to remove the task's hook context
      *
      *  @param(task) Handle of the Task to delete.
      *
      */
     Void taskDeleteHook(Task.Handle task);
 
-    /*!
+    /*
      *  ======== taskRegHook ========
      *  Registration function for the module's hook
      *

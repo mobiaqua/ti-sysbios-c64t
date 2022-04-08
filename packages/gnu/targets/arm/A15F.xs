@@ -1,4 +1,9 @@
-/* 
+/*
+ *  Copyright 2017 by Texas Instruments Incorporated.
+ *
+ */
+
+/*
  *  Copyright (c) 2012-2017 Texas Instruments and others.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -7,10 +12,7 @@
  * 
  *  Contributors:
  *      Texas Instruments - initial implementation
- * 
- * */
-
-var A15F;
+ */
 
 /*
  *  ======== A15.getISAChain ========
@@ -34,50 +36,6 @@ function getISAChain (isa)
     else {
         return (myChain.slice(0, i + 1));
     }
-}
-
-/*
- *  ======== module$meta$init ========
- */
-function module$meta$init()
-{
-    A15F = this;
-}
-
-/*
- *  ======== A15F.compile ========
- */
-function compile(goal) {
-    if (A15F.targetPkgPath == null) {
-        A15F.targetPkgPath = this.$package.packageBase;
-    }
-
-    goal.opts.copts += " -I" + A15F.targetPkgPath +
-        "/libs/install-native/$(GCCTARG)/include/newlib-nano " +
-        " -I" + A15F.targetPkgPath +
-        "/libs/install-native/$(GCCTARG)/include ";
-
-    goal.opts.cfgcopts += " -I" + A15F.targetPkgPath +
-        "/libs/install-native/$(GCCTARG)/include/newlib-nano " +
-        " -I" + A15F.targetPkgPath +
-        "/libs/install-native/$(GCCTARG)/include ";
-
-    return (this.$super.compile(goal));
-}
-
-/*
- *  ======== A15F.link ========
- */
-function link(goal)
-{
-    if (A15F.targetPkgPath == null) {
-        A15F.targetPkgPath = this.$package.packageBase;
-    }
-
-    goal.opts += " -L" + A15F.targetPkgPath +
-        "/libs/install-native/$(GCCTARG)/lib/hard ";
-
-    return(this.$super.link(goal));
 }
 /*
 

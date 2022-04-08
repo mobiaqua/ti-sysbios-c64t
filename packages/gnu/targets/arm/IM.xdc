@@ -1,4 +1,9 @@
-/* 
+/*
+ *  Copyright 2017 by Texas Instruments Incorporated.
+ *
+ */
+
+/*
  *  Copyright (c) 2008-2017 Texas Instruments and others.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -7,8 +12,7 @@
  *
  *  Contributors:
  *      Texas Instruments - initial implementation
- *
- * */
+ */
 import xdc.bld.ITarget2;
 
 /*!
@@ -16,7 +20,7 @@ import xdc.bld.ITarget2;
  *  Common interface for Cortex M bare metal targets
  *
  *  This defines common parameters of Cortex M bare metal targets. The targets
- *  generate code compatible with the "v7M" architecture.
+ *  generate code compatible with the "v7M" or "v8M" architecture.
  */
 metaonly interface IM inherits gnu.targets.arm.ITarget {
     override readonly config xdc.bld.ITarget.Model model= {
@@ -61,13 +65,6 @@ metaonly interface IM inherits gnu.targets.arm.ITarget {
      *  being "nosys".
      */
     override config string bspLib = "nosys";
-
-    /*!
-     *  ======== targetPkgPath ========
-     *  targetPkgPath controls the path to the package that contains the GNU
-     *  libraries.
-     */
-    config string targetPkgPath = null;
 
     /*
      *  ======== profiles ========

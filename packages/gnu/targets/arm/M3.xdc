@@ -1,4 +1,9 @@
-/* 
+/*
+ *  Copyright 2017 by Texas Instruments Incorporated.
+ *
+ */
+
+/*
  *  Copyright (c) 2008-2017 Texas Instruments and others.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -7,8 +12,7 @@
  *
  *  Contributors:
  *      Texas Instruments - initial implementation
- *
- * */
+ */
 import xdc.bld.ITarget2;
 
 /*!
@@ -48,8 +52,16 @@ metaonly module M3 inherits IM {
 
     override config ITarget2.Options lnkOpts = {
         prefix: "-mthumb -march=armv7-m -nostartfiles -Wl,-static -Wl,--gc-sections",
-        suffix: "-Wl,--start-group -lgcc -lc -lm -Wl,--end-group --specs=nano.specs -Wl,-Map=$(XDCCFGDIR)/$@.map"
+        suffix: "-L$(packageBase)/libs/install-native/$(GCCTARG)/lib/thumb/v7-m -Wl,--start-group -lgcc -lc -lm -Wl,--end-group --specs=nano.specs -Wl,-Map=$(XDCCFGDIR)/$@.map"
     };
+
+    /*!
+     *  ======== includeOpts ========
+     *  Additional user configurable target-specific include path options
+     *
+     *  This target uses newlib-nano run-time.
+     */
+    override config string includeOpts = "-I$(packageBase)/libs/install-native/$(GCCTARG)/include/newlib-nano -I$(packageBase)/libs/install-native/$(GCCTARG)/include";
 }
 /*
 

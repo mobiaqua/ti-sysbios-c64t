@@ -110,15 +110,15 @@ function module$use()
 
     var devFamily = "";
 
-    if (Program.platformName.match(/MSP432P401/)) {
+    if (Program.cpu.deviceName.match(/MSP432P401/)) {
         devFamily = "-DDeviceFamily_MSP432P401x";
     }
-    else if (Program.platformName.match(/MSP432P411/)) {
+    else if (Program.cpu.deviceName.match(/MSP432P411/)) {
         devFamily = "-DDeviceFamily_MSP432P4x1xI";
     }
     else {
         Boot.$logWarning("Unknown device: " + Program.cpu.deviceName
-            + ". Assuming MSP432P401P compatible.", Boot);
+            + ". Assuming MSP432P401R compatible.", Boot);
         devFamily = "-DDeviceFamily_MSP432P401x";
     }
 
