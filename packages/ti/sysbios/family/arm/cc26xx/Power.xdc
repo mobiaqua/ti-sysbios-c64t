@@ -255,6 +255,21 @@ module Power inherits ti.sysbios.interfaces.IPower
 
     /*!
      *  @_nodoc
+     *  ======== initialWaitRCOSC_LF ========
+     *  Time (in units of usec) to wait to see if RCOSC_LF is stable.
+     */
+    config UInt initialWaitRCOSC_LF = 1000;
+
+    /*!
+     *  @_nodoc
+     *  ======== retryWaitRCOSC_LF ========
+     *  Time (in units of usec) to wait when retrying to see if RCOSC_LF is
+     *   stable.
+     */
+    config UInt retryWaitRCOSC_LF = 1000;
+
+    /*!
+     *  @_nodoc
      *  ======== initialWaitXOSC_HF ========
      *  Time (in units of usec) to wait to see if XOSC_HF is stable.
      */
@@ -267,6 +282,21 @@ module Power inherits ti.sysbios.interfaces.IPower
      *   stable.
      */
     config UInt retryWaitXOSC_HF = 50;
+
+    /*!
+     *  @_nodoc
+     *  ======== initialWaitXOSC_LF ========
+     *  Time (in units of usec) to wait to see if XOSC_LF is stable.
+     */
+    config UInt initialWaitXOSC_LF = 10000;
+
+    /*!
+     *  @_nodoc
+     *  ======== retryWaitXOSC_LF ========
+     *  Time (in units of usec) to wait when retrying to see if XOSC_LF is
+     *   stable.
+     */
+    config UInt retryWaitXOSC_LF = 5000;
 
     /*!
      *  @_nodoc
@@ -356,7 +386,7 @@ module Power inherits ti.sysbios.interfaces.IPower
      *  ======== startFirstMeasurement ========
      *  Start the first RCOSC calibration measurement
      */
-    Void injectCalibration();
+    Bool injectCalibration();
 
     /*!
      *  @_nodoc

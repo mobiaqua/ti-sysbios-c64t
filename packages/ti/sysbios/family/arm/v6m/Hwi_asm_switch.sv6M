@@ -37,8 +37,8 @@
         .thumb
 
         .global ti_sysbios_family_xxx_Hwi_switchAndRunFunc
-        .global ti_sysbios_family_arm_m0_Hwi_initStacks__E
-        .global ti_sysbios_family_arm_m0_Hwi_getTaskSP__E
+        .global ti_sysbios_family_arm_v6m_Hwi_initStacks__E
+        .global ti_sysbios_family_arm_v6m_Hwi_getTaskSP__E
 
 
         .align  4
@@ -121,30 +121,30 @@ $1	blx	r0
         pop    {r4, pc}         ; restore r4, lr into pc.
         .endasmfunc
 
-        .sect ".text:ti_sysbios_family_arm_m0_Hwi_getTaskSP__E"
+        .sect ".text:ti_sysbios_family_arm_v6m_Hwi_getTaskSP__E"
         .clink
-        .thumbfunc ti_sysbios_family_arm_m0_Hwi_getTaskSP__E
+        .thumbfunc ti_sysbios_family_arm_v6m_Hwi_getTaskSP__E
 
-ti_sysbios_family_arm_m0_Hwi_getTaskSP__E:
+ti_sysbios_family_arm_v6m_Hwi_getTaskSP__E:
         .asmfunc
         mrs     r0, psp         ; psp = interrupt task stack
         bx      lr
         .endasmfunc
 
 
-        .sect ".text:ti_sysbios_family_arm_m0_Hwi_initStacks__E"
+        .sect ".text:ti_sysbios_family_arm_v6m_Hwi_initStacks__E"
         .clink
-        .thumbfunc ti_sysbios_family_arm_m0_Hwi_initStacks__E
+        .thumbfunc ti_sysbios_family_arm_v6m_Hwi_initStacks__E
 
 ;
-;  ======== ti_sysbios_family_arm_m0_Hwi_initStacks__E ========
+;  ======== ti_sysbios_family_arm_v6m_Hwi_initStacks__E ========
 ;  set up dual stacks
 ;  only called if tasking is enabled
 ;  otherwise, msp = the only stack.
 ;  msp = handlers (isr Stack)
 ;  psp = threads (task Stacks)
 ;
-ti_sysbios_family_arm_m0_Hwi_initStacks__E:
+ti_sysbios_family_arm_v6m_Hwi_initStacks__E:
         .asmfunc
         push    {lr}
         mrs     r2, xpsr

@@ -157,12 +157,11 @@ function module$static$init(mod, params)
     }
 
     /* construct the Clock object for disabling LF clock quailifiers */
-    /* one shot, auto start, first expires at 100 msec */
+    /* one shot, no auto start, timeout set at runtime once detect source */
     clockParams.period = 0;
-    clockParams.startFlag = true;
+    clockParams.startFlag = false;
     clockParams.arg = 0;
-    Clock.construct(mod.lfClockObj, Power.LF_clockFunc,
-        (100000 / Clock.tickPeriod), clockParams);
+    Clock.construct(mod.lfClockObj, Power.LF_clockFunc, 1, clockParams);
 
     /* generate defines for some simple configs (for more efficient runtime) */
     Build.ccArgs.$add(
@@ -181,11 +180,23 @@ function module$static$init(mod, params)
         "-Dti_sysbios_family_arm_cc26xx_Power_wakeDelaySTANDBY__D=" +
             Power.wakeDelaySTANDBY);
     Build.ccArgs.$add(
+        "-Dti_sysbios_family_arm_cc26xx_Power_initialWaitRCOSC_LF__D=" +
+            Power.initialWaitRCOSC_LF);
+    Build.ccArgs.$add(
+        "-Dti_sysbios_family_arm_cc26xx_Power_retryWaitRCOSC_LF__D=" +
+            Power.retryWaitRCOSC_LF);
+    Build.ccArgs.$add(
         "-Dti_sysbios_family_arm_cc26xx_Power_initialWaitXOSC_HF__D=" +
             Power.initialWaitXOSC_HF);
     Build.ccArgs.$add(
         "-Dti_sysbios_family_arm_cc26xx_Power_retryWaitXOSC_HF__D=" +
             Power.retryWaitXOSC_HF);
+    Build.ccArgs.$add(
+        "-Dti_sysbios_family_arm_cc26xx_Power_initialWaitXOSC_LF__D=" +
+            Power.initialWaitXOSC_LF);
+    Build.ccArgs.$add(
+        "-Dti_sysbios_family_arm_cc26xx_Power_retryWaitXOSC_LF__D=" +
+            Power.retryWaitXOSC_LF);
 }
 
 /*

@@ -269,12 +269,12 @@ var deviceTable = {
     },
     "ti.catalog.arm.cortexm0": {
         "TM0SXX": {
-            hwiDelegate : "ti.sysbios.family.arm.m0.Hwi",
-            timerDelegate : "ti.sysbios.family.arm.m0.Timer",
-            clockTimerDelegate : "ti.sysbios.family.arm.m0.Timer",
-            timestampDelegate : "ti.sysbios.family.arm.m0.TimestampProvider",
-            taskSupportDelegate : "ti.sysbios.family.arm.m0.TaskSupport",
-            intrinsicsSupportDelegate : "ti.sysbios.family.arm.m0.IntrinsicsSupport",
+            hwiDelegate : "ti.sysbios.family.arm.v6m.Hwi",
+            timerDelegate : "ti.sysbios.family.arm.v6m.Timer",
+            clockTimerDelegate : "ti.sysbios.family.arm.v6m.Timer",
+            timestampDelegate : "ti.sysbios.family.arm.v6m.TimestampProvider",
+            taskSupportDelegate : "ti.sysbios.family.arm.v6m.TaskSupport",
+            intrinsicsSupportDelegate : "ti.sysbios.family.arm.v6m.IntrinsicsSupport",
             mmuModule : null,
             cacheDelegate : null,
             powerDelegate : null,

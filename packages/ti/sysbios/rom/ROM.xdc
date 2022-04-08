@@ -108,7 +108,7 @@ metaonly module ROM
         CC2650,         /*! Use for all CC26xx devices */
 	CC1350,         /*! Use for all CC13xx devices */
 	CC2650_FLASH,	/*! THIS OPTION IS NOT SUPPORTED! */
-	TM0SXX,		/*! THIS OPTION IS NOT SUPPORTED! */
+	RF432S0XX,		/*! THIS OPTION IS NOT SUPPORTED! */
 	F28004x         /*! THIS OPTION IS NOT SUPPORTED! */
     };
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -262,7 +262,11 @@ Void *HeapMultiBuf_alloc(HeapMultiBuf_Object *obj, SizeT size, SizeT align,
         if ((size <= heapBlockSize) && (heapBlockAlign >= align)) {
 
             block = HeapBuf_alloc(bufHandle, size, align, eb);
-            if (block == NULL) {
+            /*
+             * If the last heap alloc fails do not attempt to
+             * borrow from non-existent buffer.
+             */
+            if ((block == NULL) && (i != (obj->numHeapBufs - 1))){
 
                 /*
                  *  If we're out of blocks of the requested size and block
@@ -275,8 +279,8 @@ Void *HeapMultiBuf_alloc(HeapMultiBuf_Object *obj, SizeT size, SizeT align,
                 }
                 else {
                     /*
-                     *  If the next HeapBuf has the same BlockSize and alignment,
-                     *  loop back around and use it.
+                     *  If the next HeapBuf has the same BlockSize and
+                     *  alignment, loop back around and use it.
                      *  Note: if the next bucket has larger alignment do not
                      *  take from it (unless blockBorrow was true...which you
                      *  would have executed the above if instead).
@@ -380,8 +384,8 @@ Void HeapMultiBuf_free(HeapMultiBuf_Object *obj, Ptr block, SizeT size)
     /* Search for the block's HeapBuf by comparing addresses. */
     for (i = 0; i < obj->numBufs; i++) {
         pair = obj->bufsByAddr[i];
-        if (block <= pair.lastAddr) { // <=, not <
-            //ASSERT(HeapBuf_getBlockSize(pair.heapBuf) >= size)
+        if (block <= pair.lastAddr) { /* <=, not < */
+            /* ASSERT(HeapBuf_getBlockSize(pair.heapBuf) >= size) */
             HeapBuf_free(pair.heapBuf, block, size);
             return;
         }

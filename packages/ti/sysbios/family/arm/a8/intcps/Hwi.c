@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, Texas Instruments Incorporated
+ * Copyright (c) 2013-2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -702,15 +702,15 @@ Void Hwi_post(UInt intNum)
         Hwi_intc.ISR_SET0 = (1 << intNum);
     }
     else if ( intNum < 64 ) {
-        intNum %= 32;    // normalize to 0 - 31
+        intNum %= 32;    /* normalize to 0 - 31 */
         Hwi_intc.ISR_SET1 = (1 << intNum);
     }
     else if ( intNum < 96 ) {
-        intNum %= 32;    // normalize to 0 - 31
+        intNum %= 32;    /* normalize to 0 - 31 */
         Hwi_intc.ISR_SET2 = (1 << intNum);
     }
     else if ( intNum < 128 ) {
-        intNum %= 32;    // normalize to 0 - 31
+        intNum %= 32;    /* normalize to 0 - 31 */
         Hwi_intc.ISR_SET3 = (1 << intNum);
     }
 }
@@ -732,15 +732,15 @@ UInt Hwi_disableInterrupt(UInt intNum)
         return (Hwi_disableMIR0(1 << intNum)) ;
     }
     else if ( intNum < 64 ) {
-        intNum %= 32;    // normalize to 0 - 31
+        intNum %= 32;    /* normalize to 0 - 31 */
         return (Hwi_disableMIR1(1 << intNum));
     }
     else if ( intNum < 96 ) {
-        intNum %= 32;    // normalize to 0 - 31
+        intNum %= 32;    /* normalize to 0 - 31 */
         return (Hwi_disableMIR2(1 << intNum));
     }
     else {
-        intNum %= 32;    // normalize to 0 - 31
+        intNum %= 32;    /* normalize to 0 - 31 */
         return (Hwi_disableMIR3(1 << intNum));
     }
 }
@@ -754,15 +754,15 @@ UInt Hwi_enableInterrupt(UInt intNum)
         return (Hwi_enableMIR0(1 << intNum));
     }
     else if ( intNum < 64 ) {
-        intNum %= 32;    // normalize to 0 - 31
+        intNum %= 32;    /* normalize to 0 - 31 */
         return (Hwi_enableMIR1(1 << intNum));
     }
     else if ( intNum < 96 ) {
-        intNum %= 32;    // normalize to 0 - 31
+        intNum %= 32;    /* normalize to 0 - 31 */
         return (Hwi_enableMIR2(1 << intNum));
     }
     else {
-        intNum %= 32;    // normalize to 0 - 31
+        intNum %= 32;    /* normalize to 0 - 31 */
         return (Hwi_enableMIR3(1 << intNum));
     }
 }
@@ -806,15 +806,15 @@ Void Hwi_clearPostedInterrupt(UInt intNum)
         Hwi_intc.ISR_CLEAR0 = (1 << intNum);
     }
     else if ( intNum < 64 ) {
-        intNum %= 32;    // normalize to 0 - 31
+        intNum %= 32;    /* normalize to 0 - 31 */
         Hwi_intc.ISR_CLEAR1 = (1 << intNum);
     }
     else if ( intNum < 96 ) {
-        intNum %= 32;    // normalize to 0 - 31
+        intNum %= 32;    /* normalize to 0 - 31 */
         Hwi_intc.ISR_CLEAR2 = (1 << intNum);
     }
     else if ( intNum < 128 ) {
-        intNum %= 32;    // normalize to 0 - 31
+        intNum %= 32;    /* normalize to 0 - 31 */
         Hwi_intc.ISR_CLEAR3 = (1 << intNum);
     }
 

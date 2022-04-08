@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, Texas Instruments Incorporated
+ * Copyright (c) 2012, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,25 +30,18 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 /*
- *  ======== package.xdc ========
+ *  ======== IntrinsicsSupport.xdc ========
  *
  */
-requires ti.sysbios.interfaces;
+
+package ti.sysbios.family.arm.v6m;
+
 
 /*!
- *  ======== ti.sysbios.family.arm.m0 ========
- *  Contains specifications for the m0 family/device-specific SYS/BIOS functions.
- *
- *  The link below provides SYS/BIOS M0 register usage information:
- *
- *      {@link ./doc-files/m0regconv.html SYS/BIOS M3 Register Usage}
- *
+ *  ======== IntrinsicsSupport ========
+ *  @_nodoc
+ *  M3 Intrinsics Support Module
  */
-package ti.sysbios.family.arm.m0 [2,0,0,0] {
-    module Clobber;
-    module Hwi;
-    module IntrinsicsSupport;
-    module TaskSupport;
-    module Timer;
-    module TimestampProvider;
+module IntrinsicsSupport inherits ti.sysbios.interfaces.IIntrinsicsSupport
+{
 }

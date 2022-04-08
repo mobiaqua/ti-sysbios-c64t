@@ -62,7 +62,7 @@ function module$meta$init()
  */
 function module$use()
 {
-    Hwi = xdc.useModule("ti.sysbios.family.arm.m0.Hwi");
+    Hwi = xdc.useModule("ti.sysbios.family.arm.v6m.Hwi");
     BIOS = xdc.useModule('ti.sysbios.BIOS');
 
     if ((BIOS.smpEnabled == true) && (BIOS.buildingAppLib == true)) {

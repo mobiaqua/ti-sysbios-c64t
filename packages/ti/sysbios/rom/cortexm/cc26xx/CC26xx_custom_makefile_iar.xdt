@@ -145,7 +145,7 @@
 
     var CMDPREFIX = TARGET.cmdPrefix;
 
-    copy(goldenDir+"romInternFuncs.txt", Build.$private.outputDir+"/romInternFuncs.txt");
+    copy(goldenDir+"romFuncs.txt", Build.$private.outputDir+"/romInternFuncs.txt");
 %%}
 
 MAKEFLAGS = -j16
@@ -167,7 +167,7 @@ BIOS_ROOT = `BIOSROOT`
 
 BIOS_DEFS = `Build.getDefs() + ROM.getConfigDefs()`
 
-INTERN_FUNCS = `fileToString(goldenDir+"romInternFuncs.txt")`
+INTERN_FUNCS = `fileToString(goldenDir+"romFuncs.txt")`
 
 BIOS_INC  = -I"`File.getDOSPath(this.$package.packageRepository)`"
 
@@ -190,7 +190,7 @@ CC_LIB = `CGEN`/bin/`TARGET.cc.cmd` `CCOPTS_LIB` -I `CGEN`/include
 CC_PP = `CGEN`/bin/`TARGET.cc.cmd` `CCOPTS_PP` -I `CGEN`/include `POPTS`
 
 %if (environment["os.name"].match(/Windows.*/i)) {
-DEL = cmd.exe /q /c del /f
+DEL = cmd.exe /q /c del /q /f
 CP = cmd.exe /q /c copy /Y
 %}
 %else {
@@ -206,7 +206,7 @@ define ASSEMBLE
 	@echo asm`TARGET.suffix` $< ...
 	@$(ASM) $(BIOS_DEFS) $(XOPTS) $(INCS) $<
 endef
-%var LIB = "sysbios.a" + TARGET.suffix;
+%var LIB = "rom_sysbios.a" + TARGET.suffix;
 %var ROM_EXEC = "rtos_rom.x" + TARGET.suffix;
 
 all: `LIB`
@@ -217,11 +217,11 @@ all: `LIB`
 % * and mangle the names of the ROM'd APIs in the non-ROM lib.
 % */
 %for each (var s in asmSources) {
-%   var libAsmObj = packageName(s) + "_" + baseName(s) + "_lib.obj";
-%   var libAsmFile = packageName(s) + "_" + baseName(s) + "_lib.asm";
+%   var libAsmObj = "rom_" + packageName(s) + "_" + baseName(s) + "_lib.obj";
+%   var libAsmFile ="rom_" + packageName(s) + "_" + baseName(s) + "_lib.asm";
 %   var asmDir = packageDir(s);
 %   LIBASMOBJS.push(libAsmObj)
-`libAsmObj`: `s`
+`libAsmObj`: `s` makefile
 	@$(XDC_ROOT)/../xs -c `romModuleLibDir`../mangleAsmFile.xs $(BIOS_ROOT)`s` `libAsmFile` romInternFuncs.txt
 	@$(ASM) -o `libAsmObj` -I$(BIOS_ROOT)`asmDir` $(BIOS_DEFS) $(XOPTS) $(INCS) `libAsmFile`
 
@@ -240,8 +240,8 @@ all: `LIB`
 %   else {
 %       var libPP = packageName(s) + "_" + baseName(s) + "_lib.pp";
 %   }
-%   LIBPPS.push("mangled_" + libPP);
-mangled_`libPP`: `s`
+%   LIBPPS.push("rom_" + libPP);
+rom_`libPP`: `s` makefile
 %/* 
 % * print "Preprocessing" banner on first generated config.c
 % * file rule to make sure it gets printed after a clean.
@@ -252,21 +252,21 @@ mangled_`libPP`: `s`
 %}
 	@$(CC_PP) --preprocess=nl `libPP` $(BIOS_DEFS) $(XOPTS) $(INCS) \
 	`srcName(s)`
-	@$(XDC_ROOT)/../xs -c `romModuleLibDir`../mangleCFile.xs `libPP` mangled_`libPP` romInternFuncs.txt  "$(INTERN_FUNCS)"
+	@$(XDC_ROOT)/../xs -c `romModuleLibDir`../mangleCFile.xs `libPP` rom_`libPP` romInternFuncs.txt  "$(INTERN_FUNCS)"
 
 %}
 
-sysbios.obj: `LIBPPS.join(" ")`
+rom_sysbios.obj: `LIBPPS.join(" ")` makefile
 	@echo Creating the SYS/BIOS library that contains the APIs not included in the ROM ...
-	@$(CC) -o sysbios.obj $(BIOS_DEFS) $(XOPTS) $(INCS) \
+	@$(CC) -o rom_sysbios.obj $(BIOS_DEFS) $(XOPTS) $(INCS) \
 %for each (var s in LIBPPS) {
 	`s` \
 %}
 
-`LIB`: sysbios.obj `LIBASMOBJS.join(" ")`
+`LIB`: rom_sysbios.obj `LIBASMOBJS.join(" ")`
 	@-$(call RM, $@)
 	@$(AR) $@ $^
 	@echo Library build complete.
 
 clean:
-	@-$(call RM, *.obj)
+	@-$(call RM, *)

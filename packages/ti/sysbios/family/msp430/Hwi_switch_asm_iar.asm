@@ -1,5 +1,5 @@
 ;
-;  Copyright (c) 2014, Texas Instruments Incorporated
+;  Copyright (c) 2014-2015, Texas Instruments Incorporated
 ;  All rights reserved.
 ; 
 ;  Redistribution and use in source and binary forms, with or without
@@ -134,20 +134,26 @@ doneSwitchT:
     JNE doneSwitchI
 
     ; else, load current isrStack pointer
-    MOVX.W offset_isrStack(R15), R13
+    MOVX.W offset_isrStack(R15), R14
 
     ; store current (task) stack pointer as taskSP 
     MOVX.W SP, offset_taskSP(R15)
 
     ; swap isrStack pointer in as the SP
-    MOVX.W R13, SP
+    MOVX.W R14, SP
 
 doneSwitchI:
 
     ; Save oldTaskSP
     PUSHX.A R11
 
-    ; Call func()
+    ; for large code model convert (R13:R12) address to 20-bits in R12
+#ifdef USE_LARGE_CODE_MODEL
+    PUSHM.W #2, R13
+    POPX.A R12
+#endif
+
+    ; Call func() in R12
     CALLA R12
 
     ; Restore oldTaskSP

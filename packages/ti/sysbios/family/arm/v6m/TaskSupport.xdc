@@ -30,31 +30,21 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 /*
- *  ======== package.xs ========
+ *  ======== TaskSupport.xdc ========
  *
  */
 
+package ti.sysbios.family.arm.v6m;
 
-/*
- *  ======== Package.getLibs ========
- *  This function is called when a program's configuration files are
- *  being generated and it returns the name of a library appropriate
- *  for the program's configuration.
+/*!
+ *  ======== TaskSupport ========
+ *  M3 Task Support Module.
  */
-
-function getLibs(prog)
+module TaskSupport inherits ti.sysbios.interfaces.ITaskSupport
 {
-    var Build = xdc.module("ti.sysbios.Build");
+    /*! default Task stack size. */
+    override readonly config SizeT defaultStackSize = 2048;
 
-    /* use shared getLibs() */
-    return (Build.getLibs(this));
+    /*! required stack alignment (in MAUs). */
+    override readonly config UInt stackAlignment = 8;
 }
-
-/*
- *  ======== Package.getSects ========
- */
-function getSects()
-{
-    return "ti/sysbios/family/arm/m0/linkcmd.xdt";
-}
-

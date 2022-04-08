@@ -94,6 +94,7 @@ function module$static$init(mod, params)
     mod.timeUpper = 0;
     mod.period64 = Timer.MAX_PERIOD;
     mod.clock = null;
+    mod.nextThreshold = 0;
 }
 
 /*
@@ -141,7 +142,6 @@ function instance$static$init(obj, id, tickFxn, params)
 
     //obj.period64 = obj.period;
     obj.savedCurrCount = 0;
-    obj.nextThreshold = obj.period64;
 
     if (obj.tickFxn) {
         if (!params.hwiParams) {

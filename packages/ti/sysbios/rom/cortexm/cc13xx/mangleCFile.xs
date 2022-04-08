@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -84,25 +84,27 @@ function main(args)
     /* Read file */
     while ((srcLine = srcFile.readLine()) != null) {
         srcLine = String(srcLine);
-        var firstChar = srcLine[0];
-        var firstChars = srcLine.substring(0, 2);
-        /* lines must be at least "ti_sysbios_BIOS" in length */
-        if ((srcLine.length > 14) && 
-            (firstChars != "ex") && 
-            (firstChars != "st") && 
-            (firstChars != "if") && 
-            (firstChars != "ty") && 
-            (firstChars != "# ") && 
-            (firstChars != "#l") &&
-            (firstChars != "en") &&
-            (firstChar != " ") && 
-            (firstChar != "}")) {
-            linesProcessed++;
-            result = funcsRegEx.exec(srcLine);
-            if (result != null) {
-		/* mangle the function name so it won't be found in the sysbios lib */
-		srcLine = srcLine.replace(result[0], result[0]+"__mangled__");
-	    }
+        if (funcsRegEx.source != "") {
+            var firstChar = srcLine[0];
+            var firstChars = srcLine.substring(0, 2);
+            /* lines must be at least "ti_sysbios_BIOS" in length */
+            if ((srcLine.length > 14) &&
+                (firstChars != "ex") &&
+                (firstChars != "st") &&
+                (firstChars != "if") &&
+                (firstChars != "ty") &&
+                (firstChars != "# ") &&
+                (firstChars != "#l") &&
+                (firstChars != "en") &&
+                (firstChar != " ") &&
+                (firstChar != "}")) {
+                linesProcessed++;
+                result = funcsRegEx.exec(srcLine);
+                if (result != null) {
+		    /* mangle the function name so it won't be found in the sysbios lib */
+		    srcLine = srcLine.replace(result[0], result[0]+"__mangled__");
+	        }
+            }
         }
         dstFile.write(srcLine + "\n");
     }

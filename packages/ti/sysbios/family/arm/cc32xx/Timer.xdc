@@ -291,6 +291,14 @@ module Timer inherits ti.sysbios.interfaces.ITimer
      */
     UInt64 getCount64(Object * timer);
 
+   /*!
+     *  ======== getMatchShadowReg ========
+     *  Get the 64-bit value last written to the match register
+     *
+     *  @b(returns)     match register value
+     */
+    UInt64 getMatchShadowReg();
+
     /*!
      *  ======== getAvailMask ========
      *  Returns the availMask.
@@ -374,7 +382,6 @@ internal:   /* not for client use */
         Hwi.Handle              hwi;
         UInt64                  period64;
         UInt64                  savedCurrCount;
-        UInt64                  nextThreshold;
     }
 
     struct Module_State {
@@ -400,5 +407,12 @@ internal:   /* not for client use */
          *  period.
          */
         UInt64          period64;
+
+        /*
+         *  Shadow the match register.  This is part of the module
+         *  state, so it can be accessed from an API without having to
+         *  specify a Timer object.
+         */
+        UInt64          nextThreshold;
     }
 }

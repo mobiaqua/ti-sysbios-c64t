@@ -134,7 +134,7 @@ function module$use()
 	    }
 
             xdc.includeFile(String(CC13xx.$package.packageBase + "CC13xx_custom_outpolicies.cfg.xs"));
-            Build.$private.libraryName = "/sysbios.a" + Program.build.target.suffix;
+            Build.$private.libraryName = "/rom_sysbios.a" + Program.build.target.suffix;
             var SourceDir = xdc.useModule("xdc.cfg.SourceDir");
             /* if building a pre-built library */
             if (BIOS.buildingAppLib == false) {

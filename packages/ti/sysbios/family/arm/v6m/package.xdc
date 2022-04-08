@@ -1,6 +1,5 @@
-%%{
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2012-2013, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,36 +29,26 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-%%}
-%var Hwi = xdc.module("ti.sysbios.family.arm.m0.Hwi");
-%if (Program.build.target.$name.match(/elf/)) {
--u `String(Hwi.resetFunc).substr(1)`
---retain "*(.resetVecs)"
-%}
-%else if (Program.build.target.$name.match(/gnu/)) {
-%    if (Hwi.isTiva == true) {
-    _intvecs_base_address = `Hwi.resetVectorAddress`;
-%        if (Hwi.vectorTableAddress != Hwi.resetVectorAddress) {
-    _vtable_base_address = `Hwi.vectorTableAddress`;
-%        }
-%    }
-%    else {
-    .resetVecs (`Hwi.resetVectorAddress`) : AT (`Hwi.resetVectorAddress`) {KEEP(*(.resetVecs))}
-%        if (Hwi.vectorTableAddress != Hwi.resetVectorAddress) {
-    .vecs (`Hwi.vectorTableAddress`) : AT (`Hwi.vectorTableAddress`) {KEEP(*(.vecs))}
-%        }
-%        else {
-    .vecs (DSECT) : {*(.vecs)}
-%        }
-%    }
-%}
-%else if (Program.build.target.$name.match(/iar/)) {
---entry `String(Hwi.resetFunc).substr(1)`
---keep __vector_table
-%}
-%if (Program.build.target.$name.match(/iar/)) {
---define_symbol ti_sysbios_family_arm_m0_Hwi_nvic=0xe000e000
-%}
-%else {
-ti_sysbios_family_arm_m0_Hwi_nvic = 0xe000e000;
-%}
+/*
+ *  ======== package.xdc ========
+ *
+ */
+requires ti.sysbios.interfaces;
+
+/*!
+ *  ======== ti.sysbios.family.arm.v6m ========
+ *  Contains specifications for the v6m family/device-specific SYS/BIOS functions.
+ *
+ *  The link below provides SYS/BIOS M0 register usage information:
+ *
+ *      {@link ./doc-files/v6mregconv.html SYS/BIOS M3 Register Usage}
+ *
+ */
+package ti.sysbios.family.arm.v6m [2,0,0,0] {
+    module Clobber;
+    module Hwi;
+    module IntrinsicsSupport;
+    module TaskSupport;
+    module Timer;
+    module TimestampProvider;
+}

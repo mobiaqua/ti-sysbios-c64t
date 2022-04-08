@@ -212,8 +212,8 @@ function _setRomName(field, val)
             RomModule = xdc.useModule('ti.sysbios.rom.cortexm.cc13xx.CC13xx');
             break;
 
-        case ROM.TM0SXX:
-            RomModule = xdc.useModule('ti.sysbios.rom.cortexm.tm0sxx.TM0Sxx');
+        case ROM.RF432S0XX:
+            RomModule = xdc.useModule('ti.sysbios.rom.cortexm.rf432s0xx.RF432S0xx');
             break;
 
         case ROM.F28004x:

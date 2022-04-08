@@ -652,7 +652,6 @@ void _pthread_cleanup_push(struct _pthread_cleanup_context *context,
  */
 static void _pthread_runStub(UArg arg0, UArg arg1)
 {
-//    Queue_Elem   qElem;
     UInt         key;
     Ptr          arg;
     pthread_Obj *thread = (pthread_Obj *)(xdc_uargToPtr(arg1));

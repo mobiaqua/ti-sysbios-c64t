@@ -283,7 +283,7 @@ Void Power_doCalibrate(Void)
 
             /* set saturation config to 2^24 */
             HWREG(AUX_TDCIF_BASE + AUX_TDC_O_SATCFG) =
-                AUX_TDC_SATCFG_LIMIT_ROVF;
+                AUX_TDC_SATCFG_LIMIT_R24;
 
             /* set start and stop trigger sources and polarity */
             HWREG(AUX_TDCIF_BASE + AUX_TDC_O_TRIGSRC) =

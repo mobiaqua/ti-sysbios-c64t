@@ -38,8 +38,8 @@
 #include <xdc/runtime/Types.h>
 
 #include <ti/sysbios/BIOS.h>
-#include <ti/sysbios/family/arm/m0/Timer.h>
-#include <ti/sysbios/family/arm/m0/Hwi.h>
+#include <ti/sysbios/family/arm/v6m/Timer.h>
+#include <ti/sysbios/family/arm/v6m/Hwi.h>
 
 #include "package/internal/TimestampProvider.xdc.h"
 

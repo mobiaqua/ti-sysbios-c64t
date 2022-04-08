@@ -38,51 +38,51 @@
 
         .thumb
 
-        .global ti_sysbios_family_arm_m0_Hwi_doSwiRestore__I
-        .global ti_sysbios_family_arm_m0_Hwi_doTaskRestore__I
-        .global ti_sysbios_family_arm_m0_Hwi_dispatchC__I
-        .global ti_sysbios_family_arm_m0_Hwi_dispatch__I
-        .global ti_sysbios_family_arm_m0_Hwi_pendSV__I
-        .global ti_sysbios_family_arm_m0_Hwi_excHandlerAsm__I
-        .global ti_sysbios_family_arm_m0_Hwi_excHandler__I
-        .global ti_sysbios_family_arm_m0_Hwi_return
+        .global ti_sysbios_family_arm_v6m_Hwi_doSwiRestore__I
+        .global ti_sysbios_family_arm_v6m_Hwi_doTaskRestore__I
+        .global ti_sysbios_family_arm_v6m_Hwi_dispatchC__I
+        .global ti_sysbios_family_arm_v6m_Hwi_dispatch__I
+        .global ti_sysbios_family_arm_v6m_Hwi_pendSV__I
+        .global ti_sysbios_family_arm_v6m_Hwi_excHandlerAsm__I
+        .global ti_sysbios_family_arm_v6m_Hwi_excHandler__I
+        .global ti_sysbios_family_arm_v6m_Hwi_return
 
         .global ti_sysbios_family_arm_ducati_Core_unlock__E
 
-ti_sysbios_family_arm_m0_Hwi_Module__state__V .tag ti_sysbios_family_arm_m0_Hwi_Module_State
+ti_sysbios_family_arm_v6m_Hwi_Module__state__V .tag ti_sysbios_family_arm_v6m_Hwi_Module_State
 
-        .global ti_sysbios_family_arm_m0_Hwi_disableFxn__E
-        .global ti_sysbios_family_arm_m0_Hwi_enableFxn__E
-        .global ti_sysbios_family_arm_m0_Hwi_restoreFxn__E
+        .global ti_sysbios_family_arm_v6m_Hwi_disableFxn__E
+        .global ti_sysbios_family_arm_v6m_Hwi_enableFxn__E
+        .global ti_sysbios_family_arm_v6m_Hwi_restoreFxn__E
 
 ;
 ; Hwi_enable/disable/restore
 ;
 
-        .sect ".text:ti_sysbios_family_arm_m0_Hwi_disableFxn__E"
+        .sect ".text:ti_sysbios_family_arm_v6m_Hwi_disableFxn__E"
         .clink
-        .thumbfunc _ti_sysbios_family_arm_m0_Hwi_disableFxn__E
-ti_sysbios_family_arm_m0_Hwi_disableFxn__E:
+        .thumbfunc _ti_sysbios_family_arm_v6m_Hwi_disableFxn__E
+ti_sysbios_family_arm_v6m_Hwi_disableFxn__E:
         .asmfunc
         mrs     r0, primask
         cpsid   i
         bx      lr
         .endasmfunc
 
-        .sect ".text:ti_sysbios_family_arm_m0_Hwi_enableFxn__E"
+        .sect ".text:ti_sysbios_family_arm_v6m_Hwi_enableFxn__E"
         .clink
-        .thumbfunc _ti_sysbios_family_arm_m0_Hwi_enableFxn__E
-ti_sysbios_family_arm_m0_Hwi_enableFxn__E:
+        .thumbfunc _ti_sysbios_family_arm_v6m_Hwi_enableFxn__E
+ti_sysbios_family_arm_v6m_Hwi_enableFxn__E:
         .asmfunc
         mrs     r0, primask
         cpsie   i
         bx      lr
         .endasmfunc
 
-        .sect ".text:ti_sysbios_family_arm_m0_Hwi_restoreFxn__E"
+        .sect ".text:ti_sysbios_family_arm_v6m_Hwi_restoreFxn__E"
         .clink
-        .thumbfunc _ti_sysbios_family_arm_m0_Hwi_restoreFxn__E
-ti_sysbios_family_arm_m0_Hwi_restoreFxn__E:
+        .thumbfunc _ti_sysbios_family_arm_v6m_Hwi_restoreFxn__E
+ti_sysbios_family_arm_v6m_Hwi_restoreFxn__E:
         .asmfunc
         msr     primask, r0
         bx      lr
@@ -93,11 +93,11 @@ ti_sysbios_family_arm_m0_Hwi_restoreFxn__E:
 ; Here on all dispatched interrupts
 ;
 
-        .sect ".text:ti_sysbios_family_arm_m0_Hwi_dispatch__I"
+        .sect ".text:ti_sysbios_family_arm_v6m_Hwi_dispatch__I"
         .clink
-        .thumbfunc ti_sysbios_family_arm_m0_Hwi_dispatch__I
+        .thumbfunc ti_sysbios_family_arm_v6m_Hwi_dispatch__I
 
-ti_sysbios_family_arm_m0_Hwi_dispatch__I:
+ti_sysbios_family_arm_v6m_Hwi_dispatch__I:
         .asmfunc
 
 ;
@@ -249,16 +249,16 @@ swiTaskKeyDefault	.word		0x00000101
 dummyPSR		.word		0x01000000
 pendSvBit		.word		0x10000000
 nvic_icsr:              .word           0xe000ed04
-dispatchAddr:           .word           ti_sysbios_family_arm_m0_Hwi_dispatchC__I
-doSwiRestoreAddr:       .word           ti_sysbios_family_arm_m0_Hwi_doSwiRestore__I
-doTaskRestoreAddr:      .word           ti_sysbios_family_arm_m0_Hwi_doTaskRestore__I
-swiTaskKeyAddr:         .word           ti_sysbios_family_arm_m0_Hwi_Module__state__V.swiTaskKeys
+dispatchAddr:           .word           ti_sysbios_family_arm_v6m_Hwi_dispatchC__I
+doSwiRestoreAddr:       .word           ti_sysbios_family_arm_v6m_Hwi_doSwiRestore__I
+doTaskRestoreAddr:      .word           ti_sysbios_family_arm_v6m_Hwi_doTaskRestore__I
+swiTaskKeyAddr:         .word           ti_sysbios_family_arm_v6m_Hwi_Module__state__V.swiTaskKeys
 $1Addr:                 .word           $1
 
-        .sect ".text:ti_sysbios_family_arm_m0_Hwi_pendSV__I"
+        .sect ".text:ti_sysbios_family_arm_v6m_Hwi_pendSV__I"
         .clink
-        .thumbfunc ti_sysbios_family_arm_m0_Hwi_pendSV__I
-ti_sysbios_family_arm_m0_Hwi_pendSV__I:
+        .thumbfunc ti_sysbios_family_arm_v6m_Hwi_pendSV__I
+ti_sysbios_family_arm_v6m_Hwi_pendSV__I:
         .asmfunc
 	mov     r1, lr
 	movs	r2, #4
@@ -272,16 +272,16 @@ $1
 	mov	r2, sp          ; else use MSP
         adds    r2, #(8*4)      ; blow off pendSV stack
 	mov	sp, r2
-ti_sysbios_family_arm_m0_Hwi_return:
+ti_sysbios_family_arm_v6m_Hwi_return:
 	bx	r1              ; return into task, re-enables ints
 
         .endasmfunc
 
-        .sect ".text:ti_sysbios_family_arm_m0_Hwi_excHandlerAsm__I"
+        .sect ".text:ti_sysbios_family_arm_v6m_Hwi_excHandlerAsm__I"
         .clink
-        .thumbfunc ti_sysbios_family_arm_m0_Hwi_excHandlerAsm__I
+        .thumbfunc ti_sysbios_family_arm_v6m_Hwi_excHandlerAsm__I
 
-ti_sysbios_family_arm_m0_Hwi_excHandlerAsm__I:
+ti_sysbios_family_arm_v6m_Hwi_excHandlerAsm__I:
         .asmfunc
 	mov     r1, lr
 	movs	r2, #4
@@ -304,7 +304,7 @@ $1
 	bx	r2
 
 excHandlerAddr:
-        .word          ti_sysbios_family_arm_m0_Hwi_excHandler__I
+        .word          ti_sysbios_family_arm_v6m_Hwi_excHandler__I
         .endasmfunc
 
         .end

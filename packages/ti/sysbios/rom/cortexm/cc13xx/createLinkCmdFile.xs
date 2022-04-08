@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -118,7 +118,7 @@ function buildRomSegment(objDumpArray)
     for (idx = 0; idx < objDumpArray.length; idx++) {
         tokens = String(objDumpArray[idx]).split(/\s+/);
         virtualAddr = "0x" + String(tokens[0]);
-        virtualAddr = (parseInt(virtualAddr) + 1).toString(16);
+        virtualAddr = (parseInt(virtualAddr) | 1).toString(16);
         symbolName = String(tokens[6]);
         if (isIAR) {
             lineArray[lineArray.length] = "--define_symbol " + symbolName + "=0x" + virtualAddr;

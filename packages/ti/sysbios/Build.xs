@@ -295,7 +295,7 @@ var biosPackages = [
     "ti.sysbios.family.arm.lm4",
     "ti.sysbios.family.arm.lm4.rtc",
     "ti.sysbios.family.arm.lm3",
-    "ti.sysbios.family.arm.m0",
+    "ti.sysbios.family.arm.v6m",
     "ti.sysbios.family.arm.m3",
     "ti.sysbios.family.arm.msp432",
     "ti.sysbios.family.arm.msp432.init",
@@ -1018,6 +1018,12 @@ function buildLibs(objList, relList, filter, xdcArgs, incs)
                         " -Dti_sysbios_family_arm_gic_Hwi_enableAsidTagging__D=FALSE";
                     asmopts +=
                         " -Dti_sysbios_family_arm_gic_Hwi_enableAsidTagging__D=FALSE";
+                }
+
+                if ((targ.$name == "ti.targets.arm.elf.R4F") ||
+                    (targ.$name == "ti.targets.arm.elf.R5F")) {
+                    ccopts += " -Dti_sysbios_hal_Core_numCores__D=1";
+                    asmopts += " -Dti_sysbios_hal_Core_numCores__D=1";
                 }
             }
 

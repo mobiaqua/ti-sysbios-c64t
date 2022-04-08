@@ -163,7 +163,6 @@ UInt32 Seconds_getTime(Seconds_Time *ts)
  */
 Void Seconds_set(UInt32 seconds)
 {
-    UInt32        status;
     UInt64        curCount;
     UInt          key;
 
@@ -174,25 +173,18 @@ Void Seconds_set(UInt32 seconds)
      */
     key = Swi_disable();
 
-    /* Start the RTC counter the first time Seconds_set() is called. */
+    /*
+     *  Start the RTC counter the first time Seconds_set() is called, if
+     *  it is not already running.
+     */
     if (Seconds_module->refSeconds == 0xffffffff) {
         /*
-         *  Disable the timer. This is needed for reloading without having
-         *  to power-cycle the board.
+         *  Only start the RTC if it is not already running.
          */
-        HWREG(HIB3P3_BASE + HIB3P3_O_MEM_HIB_RTC_TIMER_ENABLE) = 0x0;
-
-        /* Reset the timer */
-        HWREG(HIB3P3_BASE + HIB3P3_O_MEM_HIB_RTC_TIMER_RESET) = 1;
-
-        HWREG(HIB3P3_BASE+HIB3P3_O_MEM_INT_OSC_CONF) = 0x00000101;
-
-        /* Read the interrupt status to clear any pending interrupt */
-        status = HWREG(ARCM_BASE + APPS_RCM_O_APPS_RCM_INTERRUPT_STATUS);
-        (void)status;
-
-        /* Enable the timer */
-        HWREG(HIB3P3_BASE + HIB3P3_O_MEM_HIB_RTC_TIMER_ENABLE) = 0x1;
+        if (!(HWREG(HIB3P3_BASE + HIB3P3_O_MEM_HIB_RTC_TIMER_ENABLE) & 0x1)) {
+            /* Enable the timer */
+            HWREG(HIB3P3_BASE + HIB3P3_O_MEM_HIB_RTC_TIMER_ENABLE) = 0x1;
+        }
     }
 
     curCount = Seconds_getCount();

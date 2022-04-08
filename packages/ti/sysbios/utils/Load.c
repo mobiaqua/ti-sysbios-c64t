@@ -435,8 +435,7 @@ Void Load_idleFxn(Void)
     if (delta < Load_module->minLoop) {
         Load_module->minLoop = delta;
     }
-//    Load_module->minLoop = (Load_module->minLoop * (Load_module->idleCnt - 1) +
-//            delta) / Load_module->idleCnt;
+
     Hwi_restore(key);
 
     /*

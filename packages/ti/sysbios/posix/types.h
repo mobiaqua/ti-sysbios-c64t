@@ -109,7 +109,6 @@ typedef unsigned long timer_t;
 
 #endif
 
-// TODO: Is this already defined for GCC?
 typedef uint32_t clockid_t;
 
 /*

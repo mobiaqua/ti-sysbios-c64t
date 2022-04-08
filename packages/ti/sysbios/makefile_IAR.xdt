@@ -104,7 +104,7 @@ AR = `CMDPREFIX` `CGEN`/bin/`TARGET.ar.cmd` `TARGET.ar.opts`
 %if (BIOS.buildingAppLib == false) {
 %    Build.$private.libDir = Build.$private.libDir.replace(/\//g,'\\');
 %}
-DEL = cmd.exe /q /c del /f
+DEL = cmd.exe /q /c del /q /f
 CP = cmd.exe /q /c copy /Y
 %}
 %else {
@@ -166,12 +166,15 @@ BIOS.o: `Build.getCFiles(TARGET.$name)` makefile
 %}
 
 clean:
+%if (environment["os.name"].match(/Windows.*/i)) {
+	@$(DEL) ..\makefile.libs
+%}
+%else {
+	@$(DEL) ../makefile.libs
+%}
 	@-$(call RM, `LIB`)
 %if (BIOS.buildingAppLib == false) {
 	@-$(call RM, "`Build.$private.libDir``LIB`")
 %}
-	@-$(call RM, BIOS.o)
-%for (var i = 0; i < OBJS.length; i++) {
-	@-$(call RM, `OBJS[i]`)
-%}
+	@-$(call RM, *)
 

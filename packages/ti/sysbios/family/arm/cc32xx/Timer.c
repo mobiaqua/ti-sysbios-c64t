@@ -228,7 +228,7 @@ Void Timer_setThreshold(Timer_Object *obj, UInt64 next)
      *  to be changed.  This should occur about once every 36 hours:
      *  0x100000000 / 0x8000 (= 32768, the RTC frequency) seconds.
      */
-    if ((next >> 32) != (obj->nextThreshold >> 32)) {
+    if ((next >> 32) != (Timer_module->nextThreshold >> 32)) {
         HWREG(HIB3P3_BASE + HIB3P3_O_MEM_HIB_RTC_IRQ_MSW_CONF)
             = (UInt32)(next >> 32);
 
@@ -255,7 +255,7 @@ Void Timer_setThreshold(Timer_Object *obj, UInt64 next)
 #endif
 
     /* update threshold counters saved in timer obj */
-    obj->nextThreshold = next;
+    Timer_module->nextThreshold = next;
 }
 
 /*
@@ -452,7 +452,7 @@ Void Timer_start(Timer_Object *obj)
     HWREG(HIB3P3_BASE + HIB3P3_O_MEM_HIB_RTC_IRQ_MSW_CONF)
             = (UInt32)(next >> 32);
 
-    obj->nextThreshold = next;
+    Timer_module->nextThreshold = next;
 
     HWREG(ARCM_BASE + APPS_RCM_O_APPS_RCM_INTERRUPT_ENABLE) |= 0x4;
     HWREG(HIB3P3_BASE + HIB3P3_O_MEM_HIB_RTC_IRQ_ENABLE) |= 0x1;
@@ -562,6 +562,15 @@ UInt64 Timer_getCount64(Timer_Object *obj)
 #endif
 }
 
+
+/*
+ *  ======== Timer_getMatchShadowReg ========
+ */
+UInt64 Timer_getMatchShadowReg()
+{
+    return (Timer_module->nextThreshold);
+}
+
 /*
  *  ======== Timer_dynamicStub ========
  */
@@ -598,7 +607,8 @@ Void Timer_periodicStub(UArg arg)
     if (status & PRCM_INT_SLOW_CLK_CTR) {
 
         /* calculate new 64-bit RTC count for next interrupt */
-        newThreshold = (UInt64) obj->nextThreshold + (UInt64) obj->period64;
+        newThreshold = (UInt64)Timer_module->nextThreshold +
+                (UInt64)obj->period64;
 
         /* set the compare threshold at the RTC */
         Timer_setThreshold(obj, newThreshold);
@@ -689,28 +699,23 @@ Void Timer_setFunc(Timer_Object *obj, Timer_FuncPtr fxn, UArg arg)
     obj->arg = arg;
 }
 
-/* ======== Timer_initDevice ========
- * Disable and reset the RTC.
+/*
+ *  ======== Timer_initDevice ========
+ *  Disable and reset the RTC.
  */
 Void Timer_initDevice(Timer_Object *obj)
 {
     volatile UInt32        status;
 
     /*
-     *  Disable the timer. This is needed for reloading without having
-     *  to power-cycle the board.
+     *  Only start the RTC if it is not already running.
      */
-    HWREG(HIB3P3_BASE + HIB3P3_O_MEM_HIB_RTC_TIMER_ENABLE) = 0x0;
+    if ((HWREG(HIB3P3_BASE + HIB3P3_O_MEM_HIB_RTC_TIMER_ENABLE) & 0x1) == 0) {
+        /* Read the interrupt status to clear any pending interrupt */
+        status = HWREG(ARCM_BASE + APPS_RCM_O_APPS_RCM_INTERRUPT_STATUS);
 
-    /* Reset the timer */
-    HWREG(HIB3P3_BASE + HIB3P3_O_MEM_HIB_RTC_TIMER_RESET) = 1;
-
-    HWREG(HIB3P3_BASE+HIB3P3_O_MEM_INT_OSC_CONF) = 0x00000101;
-
-    /* Read the interrupt status to clear any pending interrupt */
-    status = HWREG(ARCM_BASE + APPS_RCM_O_APPS_RCM_INTERRUPT_STATUS);
-
-    (void)status;	/* suppress unused variable warning */
+        (void)status;	/* suppress unused variable warning */
+    }
 }
 
 /*

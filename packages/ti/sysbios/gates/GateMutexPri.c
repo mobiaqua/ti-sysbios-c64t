@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -218,7 +218,7 @@ Void GateMutexPri_leave(GateMutexPri_Object *obj, IArg key)
     tskKey = Task_disable();
 
     /* Assert that caller is gate owner. */
-    // ASSERT(owner == obj->owner);
+    /* ASSERT(owner == obj->owner); */
 
     /* If this is not the outermost call to leave, just return. */
     if (key != FIRST_ENTER) {

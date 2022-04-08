@@ -61,7 +61,8 @@ function module$meta$init()
         else if (Program.build.target.name == "A15F") {
             TimerSupport.availMask = 0x0202;
         }
-        else if (Program.build.target.name == "ARP32") {
+        else if ((Program.build.target.name == "ARP32") ||
+                 (Program.build.target.name == "ARP32_far")) {
             TimerSupport.availMask = 0x00C0;
         }
     }
@@ -72,7 +73,8 @@ function module$meta$init()
         else if (Program.build.target.name == "M4") {
             TimerSupport.availMask = 0x0C;
         }
-        else if (Program.build.target.name == "ARP32") {
+        else if ((Program.build.target.name == "ARP32") ||
+                 (Program.build.target.name == "ARP32_far")) {
             TimerSupport.availMask = 0x00C0;
         }
     }
@@ -97,6 +99,7 @@ function module$use()
 {
     if (((Program.build.target.name != "C66") &&
          (Program.build.target.name != "ARP32") &&
+         (Program.build.target.name != "ARP32_far") &&
          (Program.build.target.name != "M4") &&
          (Program.build.target.name != "A15F")) ||
         ((Program.cpu.deviceName == "TDA3XX") &&
@@ -111,7 +114,8 @@ function module$use()
         Wugen = xdc.useModule('ti.sysbios.family.arm.ducati.Wugen');
     }
 
-    if (Program.build.target.name == "ARP32") {
+    if ((Program.build.target.name == "ARP32") ||
+        (Program.build.target.name == "ARP32_far")) {
 	var IntXbar = xdc.useModule('ti.sysbios.family.shared.vayu.IntXbar');
         IntXbar.connectIRQMeta(5, 38);
         IntXbar.connectIRQMeta(6, 39);

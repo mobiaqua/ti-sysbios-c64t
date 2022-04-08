@@ -1,6 +1,6 @@
 %%{
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -87,7 +87,7 @@ AR = `CGEN`/`TARGET.arBin.cmd` `TARGET.ar.opts`
 %if (BIOS.buildingAppLib == false) {
 %    Build.$private.libDir = Build.$private.libDir.replace(/\//g,'\\');
 %}
-DEL = cmd.exe /q /c del /f
+DEL = cmd.exe /q /c del /q /f
 CP = cmd.exe /q /c copy /Y
 %}
 %else {
@@ -150,12 +150,15 @@ all: `LIB`
 %}
 
 clean:
+%if (environment["os.name"].match(/Windows.*/i)) {
+	@$(DEL) ..\makefile.libs
+%}
+%else {
+	@$(DEL) ../makefile.libs
+%}
 	@-$(call RM, `LIB`)
 %if (BIOS.buildingAppLib == false) {
 	@-$(call RM, "`Build.$private.libDir``LIB`")
 %}
-%for (var i = 0; i < OBJS.length; i++) {
-	@-$(call RM, `OBJS[i]`)
-	@-$(call RM, `OBJS[i] + ".dep"`)
-%}
+	@-$(call RM, *)
 

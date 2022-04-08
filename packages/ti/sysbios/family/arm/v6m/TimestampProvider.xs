@@ -49,7 +49,7 @@ function module$use()
     TimestampProvider = this;
     /* set fxntab default */
     TimestampProvider.common$.fxntab = false;
-    Timer = xdc.useModule('ti.sysbios.family.arm.m0.Timer');
+    Timer = xdc.useModule('ti.sysbios.family.arm.v6m.Timer');
     Clock = xdc.module('ti.sysbios.knl.Clock');
     Startup = xdc.useModule('xdc.runtime.Startup');
     BIOS = xdc.useModule('ti.sysbios.BIOS');
@@ -79,7 +79,7 @@ function module$static$init(mod, params)
 	    else if (Clock.tickSource != Clock.TickSource_TIMER) {
 		configTimer = true;
 	    }
-	    else if (Clock.TimerProxy.delegate$.$name != "ti.sysbios.family.arm.m0.Timer") {
+	    else if (Clock.TimerProxy.delegate$.$name != "ti.sysbios.family.arm.v6m.Timer") {
 		configTimer = true;
 	    }
 	}

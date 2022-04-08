@@ -58,12 +58,12 @@ resetHandler:
         mrc     p15, #0, r0, c0, c0, #5 ; read core Id
         ands    r0, r0, #0xFF
         ldreq   r1, core0VectorTable
-;    .if (ti_sysbios_hal_Core_numCores__D == 1)
+    .if (ti_sysbios_hal_Core_numCores__D == 1)
 loopForever:
         bne     loopForever
-;    .else
-;        ldrne   r1, core1VectorTable
-;    .endif
+    .else
+        ldrne   r1, core1VectorTable
+    .endif
         ldr     r1, [r1]
         ldr     r1, [r1]
         bx      r1

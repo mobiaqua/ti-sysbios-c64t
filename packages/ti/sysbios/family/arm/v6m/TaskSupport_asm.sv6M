@@ -30,15 +30,15 @@
 ;  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ;
 ;
-; ======== TaskSupport_asm.sem0 ========
+; ======== TaskSupport_asm.sev6m ========
 ;
 ;
 
         .thumb
 
-        .global ti_sysbios_family_arm_m0_TaskSupport_swap__E
-        .global ti_sysbios_family_arm_m0_TaskSupport_buildTaskStack
-        .global ti_sysbios_family_arm_m0_TaskSupport_glue
+        .global ti_sysbios_family_arm_v6m_TaskSupport_swap__E
+        .global ti_sysbios_family_arm_v6m_TaskSupport_buildTaskStack
+        .global ti_sysbios_family_arm_v6m_TaskSupport_glue
         .global ti_sysbios_knl_Task_swapReturn
 
         .align  4
@@ -74,11 +74,11 @@ ENTER   .set    r3      ; 4th argument
 ARG0    .set    0       ; 5th argument (stack offset)
 ARG1    .set    4       ; 6th argument (stack offset)
 
-        .sect ".text:ti_sysbios_family_arm_m0_TaskSupport_buildTaskStack"
+        .sect ".text:ti_sysbios_family_arm_v6m_TaskSupport_buildTaskStack"
         .clink
-        .thumbfunc ti_sysbios_family_arm_m0_TaskSupport_buildTaskStack
+        .thumbfunc ti_sysbios_family_arm_v6m_TaskSupport_buildTaskStack
 
-ti_sysbios_family_arm_m0_TaskSupport_buildTaskStack:
+ti_sysbios_family_arm_v6m_TaskSupport_buildTaskStack:
         .asmfunc
 
 	subs	STACK, #4*13
@@ -110,7 +110,7 @@ ti_sysbios_family_arm_m0_TaskSupport_buildTaskStack:
 
         .endasmfunc
 
-glueAddr:       .word   ti_sysbios_family_arm_m0_TaskSupport_glue
+glueAddr:       .word   ti_sysbios_family_arm_v6m_TaskSupport_glue
 
 ;
 ;  ======== TaskSupport_swap ========
@@ -121,11 +121,11 @@ glueAddr:       .word   ti_sysbios_family_arm_m0_TaskSupport_glue
 OLD     .set    r0                      ; 1st argument
 NEW     .set    r1                      ; 2nd argument
 
-        .sect ".text:ti_sysbios_family_arm_m0_TaskSupport_swap__E"
+        .sect ".text:ti_sysbios_family_arm_v6m_TaskSupport_swap__E"
         .clink
-        .thumbfunc ti_sysbios_family_arm_m0_TaskSupport_swap__E
+        .thumbfunc ti_sysbios_family_arm_v6m_TaskSupport_swap__E
 
-ti_sysbios_family_arm_m0_TaskSupport_swap__E:
+ti_sysbios_family_arm_v6m_TaskSupport_swap__E:
         .asmfunc
 
 	mov	r3, lr
@@ -155,14 +155,14 @@ ti_sysbios_knl_Task_swapReturn:
 ;
 ;  This glue function is executed immediately before executing the "fxn"
 ;  passed to Task_start.  This function loads the parameters to "fxn" into
-;  registers - necessary for the m0 register passing model.
+;  registers - necessary for the v6m register passing model.
 ;
 
-        .sect ".text:ti_sysbios_family_arm_m0_TaskSupport_glue"
+        .sect ".text:ti_sysbios_family_arm_v6m_TaskSupport_glue"
         .clink
-        .thumbfunc ti_sysbios_family_arm_m0_TaskSupport_glue
+        .thumbfunc ti_sysbios_family_arm_v6m_TaskSupport_glue
 
-ti_sysbios_family_arm_m0_TaskSupport_glue:
+ti_sysbios_family_arm_v6m_TaskSupport_glue:
         .asmfunc
 
         ldr     r0, [sp, #16]   ; Task enter function

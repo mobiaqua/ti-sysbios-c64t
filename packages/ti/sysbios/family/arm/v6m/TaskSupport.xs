@@ -155,7 +155,7 @@ function getCallStack$view(taskRawView, taskState, threadType)
                     /*
                      * Compensate for push of old basepri and swiTaskKey
                      * to get to real task SP at time of interrupt.
-                     * (See family/arm/m0/Hwi_asm.sv7M for details)
+                     * (See family/arm/v6m/Hwi_asm.sv7M for details)
                      */
                     if (threadType == "Swi") {
                         taskSP += 8;

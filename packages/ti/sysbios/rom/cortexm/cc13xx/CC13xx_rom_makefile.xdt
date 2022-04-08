@@ -179,7 +179,7 @@ ASM = `CGEN`/bin/`TARGET.asm.cmd` $(CCOPTS) -I `CGEN`/include
 AR = `CGEN`/bin/`TARGET.ar.cmd` `TARGET.ar.opts`
 LNK = `CGEN`/bin/`TARGET.lnk.cmd` $(LNKOPTS)
 NM = `CGEN`/bin/armnm
-OBJDUMP = objdump
+OBJDUMP = /db/vendors/linaro/gcc-arm-none-eabi-4_8-2014q3/bin/arm-none-eabi-objdump
 
 %/*
 % * In order to prevent the linker from aliasing some of the generated proxy/delegate

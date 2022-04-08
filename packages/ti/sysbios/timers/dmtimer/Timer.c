@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2013-2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -402,7 +402,7 @@ Int Timer_Instance_init(Timer_Object *obj, Int id, Timer_FuncPtr tickFxn, const 
             Hwi_Params_init(&hwiParams);
         }
 
-        hwiParams.eventId = obj->eventId; //Timer_module->device[obj->id].eventId;
+        hwiParams.eventId = obj->eventId;
 
         hwiParams.arg = (UArg)obj;
         obj->hwi = Hwi_create(obj->intNum, Timer_stub, &hwiParams, eb);
@@ -442,10 +442,10 @@ Int Timer_Module_startup(Int status)
         if (Timer_startupNeeded) { 
             for (i = 0; i < Timer_numTimerDevices; i++) {
                 obj = Timer_module->handles[i];
-                    /* if timer was statically created/constructed */
+                /* if timer was statically created/constructed */
                 if ((obj != NULL) && (obj->staticInst)) {
                         Timer_postInit(obj, NULL);
-                    }
+                }
             }
         }
         return (Startup_DONE);
@@ -560,7 +560,7 @@ UInt32 Timer_getExpiredCounts(Timer_Object *obj)
             /* threshold reached; count has wrapped thru zero */
             else {
                 result = (0xffffffff - thresh + 1) + count + period;
-             }
+            }
         }
 
         /* new interrupt now pending, when wasn't before read the count */

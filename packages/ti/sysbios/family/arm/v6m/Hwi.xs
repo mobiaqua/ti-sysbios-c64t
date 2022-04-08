@@ -394,7 +394,7 @@ function module$static$init(mod, params)
     mod.isrStackBase = $externPtr('__TI_STACK_BASE');
     mod.isrStackSize = Program.stack;
 
-    mod.dispatchTable = $externPtr('ti_sysbios_family_arm_m0_Hwi_dispatchTable[0]');
+    mod.dispatchTable = $externPtr('ti_sysbios_family_arm_v6m_Hwi_dispatchTable[0]');
     
     Hwi.ccr = (params.nvicCCR.STKALIGN << 9) |
               (params.nvicCCR.BFHFNMIGN << 8) |
@@ -666,10 +666,10 @@ function viewNvicFetch(that)
  */
 function viewInitBasic(view, obj)
 {
-    var Hwi = xdc.useModule('ti.sysbios.family.arm.m0.Hwi');
+    var Hwi = xdc.useModule('ti.sysbios.family.arm.v6m.Hwi');
     var Program = xdc.useModule('xdc.rov.Program');
     var halHwi = xdc.useModule('ti.sysbios.hal.Hwi');
-    var hwiModCfg = Program.getModuleConfig('ti.sysbios.family.arm.m0.Hwi');
+    var hwiModCfg = Program.getModuleConfig('ti.sysbios.family.arm.v6m.Hwi');
 
     view.priority = viewGetPriority(this, Math.abs(obj.intNum));
 
@@ -701,7 +701,7 @@ function viewInitBasic(view, obj)
 function viewInitDetailed(view, obj)
 {
     var Program = xdc.useModule('xdc.rov.Program');
-    var Hwi = xdc.useModule('ti.sysbios.family.arm.m0.Hwi');
+    var Hwi = xdc.useModule('ti.sysbios.family.arm.v6m.Hwi');
     var hwiModConfig = Program.getModuleConfig(Hwi.$name);
     var BIOS = xdc.useModule('ti.sysbios.BIOS');
     var biosModConfig = Program.getModuleConfig(BIOS.$name);
@@ -879,7 +879,7 @@ function viewDecodeNoIsr(excContext, excNum)
 function viewDecodeException(excContext)
 {
     var Program = xdc.useModule('xdc.rov.Program');
-    var Hwi = xdc.useModule('ti.sysbios.family.arm.m0.Hwi');
+    var Hwi = xdc.useModule('ti.sysbios.family.arm.v6m.Hwi');
 
     var excNum = String(excContext.ICSR & 0xff);
 
@@ -1025,7 +1025,7 @@ function viewFillExceptionContext(excContext)
 function viewInitException()
 {
     var Program = xdc.useModule('xdc.rov.Program');
-    var Hwi = xdc.useModule('ti.sysbios.family.arm.m0.Hwi');
+    var Hwi = xdc.useModule('ti.sysbios.family.arm.v6m.Hwi');
     var hwiModConfig = Program.getModuleConfig(Hwi.$name);
 
     var BIOS = xdc.useModule('ti.sysbios.BIOS');
@@ -1037,7 +1037,7 @@ function viewInitException()
     var excActive = false;
 
     try {
-        var hwiRawView = Program.scanRawView('ti.sysbios.family.arm.m0.Hwi');
+        var hwiRawView = Program.scanRawView('ti.sysbios.family.arm.v6m.Hwi');
     }
     catch (e) {
         return null;
@@ -1097,7 +1097,7 @@ function viewInitModule(view, mod)
 {
     var Program = xdc.useModule('xdc.rov.Program');
     var halHwiModCfg = Program.getModuleConfig('ti.sysbios.hal.Hwi');
-    var hwiModCfg = Program.getModuleConfig('ti.sysbios.family.arm.m0.Hwi');
+    var hwiModCfg = Program.getModuleConfig('ti.sysbios.family.arm.v6m.Hwi');
 
     viewNvicFetch(this);
     view.activeInterrupt = String(this.ICSR & 0xff);

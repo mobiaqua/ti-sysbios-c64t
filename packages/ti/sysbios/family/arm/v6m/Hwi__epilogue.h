@@ -41,17 +41,17 @@ extern "C" {
 /*
  *  ======== Hwi_disable ========
  */
-#define ti_sysbios_family_arm_m0_Hwi_disable() ti_sysbios_family_arm_m0_Hwi_disableFxn()
+#define ti_sysbios_family_arm_v6m_Hwi_disable() ti_sysbios_family_arm_v6m_Hwi_disableFxn()
 
 /*
  *  ======== Hwi_enable ========
  */
-#define ti_sysbios_family_arm_m0_Hwi_enable() ti_sysbios_family_arm_m0_Hwi_enableFxn()
+#define ti_sysbios_family_arm_v6m_Hwi_enable() ti_sysbios_family_arm_v6m_Hwi_enableFxn()
 
 /*
  *  ======== Hwi_restore ========
  */
-#define ti_sysbios_family_arm_m0_Hwi_restore(key) ti_sysbios_family_arm_m0_Hwi_restoreFxn(key)
+#define ti_sysbios_family_arm_v6m_Hwi_restore(key) ti_sysbios_family_arm_v6m_Hwi_restoreFxn(key)
 
 #else /* ti_sysbios_Build_useHwiMacros */
 
@@ -62,24 +62,24 @@ extern "C" {
 /*
  *  ======== Hwi_disable ========
  */
-#define ti_sysbios_family_arm_m0_Hwi_disable() ti_sysbios_family_arm_m0_Hwi_disableFxn()
+#define ti_sysbios_family_arm_v6m_Hwi_disable() ti_sysbios_family_arm_v6m_Hwi_disableFxn()
 
 /*
  *  ======== Hwi_enable ========
  */
-#define ti_sysbios_family_arm_m0_Hwi_enable() ti_sysbios_family_arm_m0_Hwi_enableFxn()
+#define ti_sysbios_family_arm_v6m_Hwi_enable() ti_sysbios_family_arm_v6m_Hwi_enableFxn()
 
 /*
  *  ======== Hwi_restore ========
  */
-#define ti_sysbios_family_arm_m0_Hwi_restore(key) ti_sysbios_family_arm_m0_Hwi_restoreFxn(key)
+#define ti_sysbios_family_arm_v6m_Hwi_restore(key) ti_sysbios_family_arm_v6m_Hwi_restoreFxn(key)
 
 #else /* defined(__ti__) */
 
 /*
  *  ======== Hwi_disable ========
  */
-static inline UInt ti_sysbios_family_arm_m0_Hwi_disable()
+static inline UInt ti_sysbios_family_arm_v6m_Hwi_disable()
 {
     UInt key;
     asm volatile (
@@ -93,7 +93,7 @@ static inline UInt ti_sysbios_family_arm_m0_Hwi_disable()
 /*
  *  ======== Hwi_enable ========
  */
-static inline UInt ti_sysbios_family_arm_m0_Hwi_enable()
+static inline UInt ti_sysbios_family_arm_v6m_Hwi_enable()
 {
     UInt key;
     asm volatile (
@@ -107,7 +107,7 @@ static inline UInt ti_sysbios_family_arm_m0_Hwi_enable()
 /*
  *  ======== Hwi_restore ========
  */
-static inline Void ti_sysbios_family_arm_m0_Hwi_restore(UInt key)
+static inline Void ti_sysbios_family_arm_v6m_Hwi_restore(UInt key)
 {
     asm volatile (
             "msr primask, %0"

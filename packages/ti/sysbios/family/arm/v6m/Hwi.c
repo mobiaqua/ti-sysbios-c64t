@@ -57,13 +57,13 @@ extern Char *ti_sysbios_family_xxx_Hwi_switchToIsrStack();
 extern Void ti_sysbios_family_xxx_Hwi_switchToTaskStack(Char *oldTaskSP);
 extern Void ti_sysbios_family_xxx_Hwi_switchAndRunFunc(Void (*func)());
 
-extern UInt32 ti_sysbios_family_arm_m0_Hwi_dispatchTable[];
+extern UInt32 ti_sysbios_family_arm_v6m_Hwi_dispatchTable[];
 
 #define Hwi_switchToIsrStack ti_sysbios_family_xxx_Hwi_switchToIsrStack
 #define Hwi_switchToTaskStack ti_sysbios_family_xxx_Hwi_switchToTaskStack
 #define Hwi_switchAndRunFunc ti_sysbios_family_xxx_Hwi_switchAndRunFunc
 
-#ifdef ti_sysbios_family_arm_m0_Hwi_dispatcherTaskSupport__D
+#ifdef ti_sysbios_family_arm_v6m_Hwi_dispatcherTaskSupport__D
 #define TASK_DISABLE Task_disable
 #define TASK_RESTORE Task_restoreHwi
 #else
@@ -71,7 +71,7 @@ extern UInt32 ti_sysbios_family_arm_m0_Hwi_dispatchTable[];
 #define TASK_RESTORE Hwi_taskRestoreHwi
 #endif
 
-#ifdef ti_sysbios_family_arm_m0_Hwi_dispatcherSwiSupport__D
+#ifdef ti_sysbios_family_arm_v6m_Hwi_dispatcherSwiSupport__D
 #define SWI_DISABLE Swi_disable
 #define SWI_RESTORE Swi_restoreHwi
 #else
@@ -346,8 +346,8 @@ Void Hwi_Instance_finalize(Hwi_Object *hwi, Int status)
 extern UInt32 __vector_table[];
 #define Hwi_resetVectors __vector_table
 #else
-extern UInt32 ti_sysbios_family_arm_m0_Hwi_resetVectors[];
-#define Hwi_resetVectors ti_sysbios_family_arm_m0_Hwi_resetVectors
+extern UInt32 ti_sysbios_family_arm_v6m_Hwi_resetVectors[];
+#define Hwi_resetVectors ti_sysbios_family_arm_v6m_Hwi_resetVectors
 #endif
 
 Void Hwi_initNVIC()

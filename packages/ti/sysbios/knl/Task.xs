@@ -1474,6 +1474,14 @@ function viewInitCallStack()
     var Support = Program.$modules['ti.sysbios.knl.Task'].SupportProxy;
     var Delegate = xdc.useModule(Support.$name, true);
 
+    /*
+     * Temporary fix for SDOCM00119663, IAR 7.40.3+ does
+     * not support Callstackview.
+     */
+    if (Program.build.target.$name.match(/iar/)) {
+        return;
+    }
+
     try {
         var taskRawView = Program.scanRawView('ti.sysbios.knl.Task');
         var biosModView = Program.scanModuleView('ti.sysbios.BIOS', 'Module');

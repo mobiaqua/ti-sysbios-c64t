@@ -34,7 +34,7 @@
  *  ======== Hwi.xdc ========
  *
  */
-package ti.sysbios.family.arm.m0;
+package ti.sysbios.family.arm.v6m;
 
 import xdc.rov.ViewInfo;
 import xdc.runtime.Diags;
@@ -340,7 +340,7 @@ module Hwi inherits ti.sysbios.interfaces.IHwi
     /*!
      * Physical Nested Vectored Interrupt Controller Device.
      * Short name is "Hwi_nvic"
-     * Long name is "ti_sysbios_family_arm_m0_Hwi_nvic"
+     * Long name is "ti_sysbios_family_arm_v6m_Hwi_nvic"
      */
     extern volatile NVIC nvic;
 
@@ -348,7 +348,7 @@ module Hwi inherits ti.sysbios.interfaces.IHwi
      * Virtual Nested Vectored Interrupt Controller structure
      * written to by both cores for SMP.
      * Short name is "Hwi_vnvic"
-     * Long name is "ti_sysbios_family_arm_m0_Hwi_vnvic"
+     * Long name is "ti_sysbios_family_arm_v6m_Hwi_vnvic"
      */
     extern volatile NVIC vnvic;
 
@@ -509,7 +509,7 @@ module Hwi inherits ti.sysbios.interfaces.IHwi
      *  Error raised when an exception occurs
      */
     config Error.Id E_exception = {
-        msg: "E_exception: id = %d, pc = %08x.\nTo see more exception detail, set ti.sysbios.family.arm.m0.Hwi.enableException = true or,\nexamine the Exception view for the ti.sysbios.family.arm.m0.Hwi module using ROV."
+        msg: "E_exception: id = %d, pc = %08x.\nTo see more exception detail, set ti.sysbios.family.arm.v6m.Hwi.enableException = true or,\nexamine the Exception view for the ti.sysbios.family.arm.v6m.Hwi module using ROV."
     };
 
     /*!
@@ -716,8 +716,8 @@ module Hwi inherits ti.sysbios.interfaces.IHwi
      *  your config file:
      *
      *  @p(code)
-     *     var m0Hwi = xdc.useModule('ti.sysbios.family.arm.m0.Hwi');
-     *     m0Hwi.intAffinity[22] = 1;
+     *     var v6mHwi = xdc.useModule('ti.sysbios.family.arm.v6m.Hwi');
+     *     v6mHwi.intAffinity[22] = 1;
      *  @p
      *
      *  @a(constraints)
@@ -1040,10 +1040,10 @@ internal:   /* not for client use */
      *  assembly code snippets:
      *
      *   hwiX:        ldr r3, hwiObjectX
-     *                ldr pc, ti_sysbios_family_arm_m0_Hwi_dispatch__I
+     *                ldr pc, ti_sysbios_family_arm_v6m_Hwi_dispatch__I
      *   hwiObjectX: .word 0
      *   hwiY:        ldr r3, hwiObjectY
-     *                ldr pc, ti_sysbios_family_arm_m0_Hwi_dispatch__I
+     *                ldr pc, ti_sysbios_family_arm_v6m_Hwi_dispatch__I
      *   hwiObjectY: .word 0
      *               ...
      *

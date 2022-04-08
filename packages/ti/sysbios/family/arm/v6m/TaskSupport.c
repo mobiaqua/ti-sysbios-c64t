@@ -42,7 +42,7 @@
 #include <ti/sysbios/interfaces/ITaskSupport.h>
 #include "package/internal/TaskSupport.xdc.h"
 
-#define TaskSupport_buildTaskStack ti_sysbios_family_arm_m0_TaskSupport_buildTaskStack
+#define TaskSupport_buildTaskStack ti_sysbios_family_arm_v6m_TaskSupport_buildTaskStack
 
 extern Ptr TaskSupport_buildTaskStack(Ptr stack, Task_FuncPtr fxn, TaskSupport_FuncPtr exit, TaskSupport_FuncPtr enter, UArg arg0, UArg arg1);
 

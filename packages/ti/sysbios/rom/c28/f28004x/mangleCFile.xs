@@ -87,15 +87,15 @@ function main(args)
         var firstChar = srcLine[0];
         var firstChars = srcLine.substring(0, 2);
         /* lines must be at least "ti_sysbios_BIOS" in length */
-        if ((srcLine.length > 14) && 
-            (firstChars != "ex") && 
-            (firstChars != "st") && 
-            (firstChars != "if") && 
-            (firstChars != "ty") && 
-            (firstChars != "# ") && 
+        if ((srcLine.length > 14) &&
+            (firstChars != "ex") &&
+            (firstChars != "st") &&
+            (firstChars != "if") &&
+            (firstChars != "ty") &&
+            (firstChars != "# ") &&
             (firstChars != "#l") &&
             (firstChars != "en") &&
-            (firstChar != " ") && 
+            (firstChar != " ") &&
             (firstChar != "}")) {
             linesProcessed++;
             result = funcsRegEx.exec(srcLine);

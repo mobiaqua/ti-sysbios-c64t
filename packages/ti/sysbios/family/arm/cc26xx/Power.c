@@ -206,14 +206,19 @@ UInt32 Power_getXoscStartupTime(UInt32 timeUntilWakeupInMs)
  *  ======== Power_injectCalibration ========
  *  Explicitly trigger RCOSC calibration
  */
-Void Power_injectCalibration(Void)
+Bool Power_injectCalibration(Void)
 {
+    Bool started = FALSE;
+
     if (Power_calibrateRCOSC) {
         if (Power_initiateCalibration()) {
             /* here if AUX SMPH was available, start calibration now ... */
             Power_doCalibrate();
+            started = TRUE;
          }
      }
+
+    return (started);
 }
 
 /*
@@ -678,8 +683,7 @@ Power_Status Power_sleep(Power_SleepState sleepState, UArg arg0, UArg arg1)
                 } while (modeVIMS == VIMS_MODE_CHANGING);
 
                 /* 10.2 If in a cache mode, turn VIMS off */
-                if ((modeVIMS == VIMS_MODE_ENABLED) ||
-                    (modeVIMS == VIMS_MODE_SPLIT)) {
+                if (modeVIMS == VIMS_MODE_ENABLED) {
 
                     /* 10.3 Now turn off the VIMS */
                     VIMSModeSet(VIMS_BASE, VIMS_MODE_OFF);
@@ -690,7 +694,7 @@ Power_Status Power_sleep(Power_SleepState sleepState, UArg arg0, UArg arg1)
             }
 
             /* 11. Setup recharge parameters */
-            SysCtrlSetRechargeBeforePowerDown(XoscInHighPowerMode);
+            SysCtrlSetRechargeBeforePowerDown(XOSC_IN_HIGH_POWER_MODE);
 
             /* 12. Make sure all writes have taken effect */
             SysCtrlAonSync();
@@ -702,8 +706,7 @@ Power_Status Power_sleep(Power_SleepState sleepState, UArg arg0, UArg arg1)
             if (retainCache == FALSE) {
 
                 /* 14.1 If previously in a cache mode, restore the mode now */
-                if ((modeVIMS == VIMS_MODE_ENABLED) ||
-                    (modeVIMS == VIMS_MODE_SPLIT)) {
+                if (modeVIMS == VIMS_MODE_ENABLED) {
                     VIMSModeSet(VIMS_BASE, modeVIMS);
                 }
 
@@ -831,14 +834,15 @@ Void Power_unregisterNotify(Power_NotifyObj * pNotifyObj)
 Int ti_sysbios_family_arm_cc26xx_Power_Module_startup(Int status)
 {
     UInt32 ccfgLfClkSrc;
+    UInt32 timeout;
 
     DRIVERLIB_ASSERT_CURR_RELEASE();
 
+    /* read the LF clock source from CCFG */
+    ccfgLfClkSrc = CCFGRead_SCLK_LF_OPTION();
+
     /* check if should calibrate RCOSC_LF */
     if (Power_calibrateRCOSC_LF) {
-
-        /* read the LF clock source from CCFG */
-        ccfgLfClkSrc = CCFGRead_SCLK_LF_OPTION();
 
         /* verify RCOSC_LF is the LF clock source */
         if (ccfgLfClkSrc == SCLK_LF_OPTION_RCOSC_LF) {
@@ -846,13 +850,55 @@ Int ti_sysbios_family_arm_cc26xx_Power_Module_startup(Int status)
         }
     }
 
+    /*
+     * if LF source is RCOSC_LF or XOSC_LF: assert the SB_DISALLOW constraint
+     * and start a timeout to check for activation
+     */
+    if ((ccfgLfClkSrc == SCLK_LF_OPTION_RCOSC_LF) ||
+        (ccfgLfClkSrc == SCLK_LF_OPTION_XOSC_LF)) {
+
+        /* disallow STANDBY pending LF clock quailifier disabling */
+        Power_setConstraint(Power_SB_DISALLOW);
+
+        /* determine timeout */
+        if (ccfgLfClkSrc == SCLK_LF_OPTION_RCOSC_LF) {
+            timeout = Power_initialWaitRCOSC_LF;
+        }
+        else {
+            timeout = Power_initialWaitXOSC_LF;
+        }
+
+        /* start the Clock object */
+        Clock_setTimeout(
+            ti_sysbios_family_arm_cc26xx_Power_Module_State_lfClockObj(),
+            (timeout / Clock_tickPeriod));
+        Clock_start(
+            ti_sysbios_family_arm_cc26xx_Power_Module_State_lfClockObj());
+    }
+
+    /*
+     * else, if the LF clock source is external, can disable clock qualifiers
+     * now; no need to assert SB_DISALLOW or start the Clock object
+     */
+    else if (ccfgLfClkSrc == SCLK_LF_OPTION_EXTERNAL) {
+
+        /* yes, disable the LF clock qualifiers */
+        DDI16BitfieldWrite(
+            AUX_DDI0_OSC_BASE,
+            DDI_0_OSC_O_CTL0,
+            DDI_0_OSC_CTL0_BYPASS_XOSC_LF_CLK_QUAL_M|
+                DDI_0_OSC_CTL0_BYPASS_RCOSC_LF_CLK_QUAL_M,
+            DDI_0_OSC_CTL0_BYPASS_RCOSC_LF_CLK_QUAL_S,
+            0x3);
+
+        /* enable clock loss detection */
+        OSCClockLossEventEnable();
+    }
+
     /* if VIMS RAM is configured as GPRAM: set retention constraint */
     if (!CCFGRead_DIS_GPRAM()) {
         Power_setConstraint(Power_SB_VIMS_CACHE_RETAIN);
     }
-
-    /* set standby disallow constraint pending LF clock quailifier disabling */
-    Power_setConstraint(Power_SB_DISALLOW);
 
     return (Startup_DONE);
 }
@@ -887,7 +933,9 @@ Void Power_doWFI()
  */
 Void Power_LF_clockFunc(UArg arg)
 {
+    UInt32 ccfgLfClkSrc;
     UInt32 sourceLF;
+    UInt32 timeout;
 
      /* query LF clock source */
     sourceLF = OSCClockSourceGet(OSC_SRC_CLK_LF);
@@ -905,20 +953,36 @@ Void Power_LF_clockFunc(UArg arg)
             0x3
         );
 
+        /* enable clock loss detection */
+        OSCClockLossEventEnable();
+
         /* now finish by releasing the standby disallow constraint */
         Power_releaseConstraint(Power_SB_DISALLOW);
     }
 
     /* not yet, LF still derived from HF, restart clock to check back later */
     else {
-        /* retrigger LF Clock to fire in 100 msec */
+
+        /* read the LF clock source from CCFG */
+        ccfgLfClkSrc = CCFGRead_SCLK_LF_OPTION();
+
+        /* determine retry timeout */
+        if (ccfgLfClkSrc == SCLK_LF_OPTION_RCOSC_LF) {
+            timeout = Power_retryWaitRCOSC_LF;
+        }
+        else {
+            timeout = Power_retryWaitXOSC_LF;
+        }
+
+        /* retrigger LF Clock to fire again */
         Clock_setTimeout(
             ti_sysbios_family_arm_cc26xx_Power_Module_State_lfClockObj(),
-            (100000 / Clock_tickPeriod));
+            (timeout / Clock_tickPeriod));
         Clock_start(
             ti_sysbios_family_arm_cc26xx_Power_Module_State_lfClockObj());
     }
 }
+
 /*
  *  ======== Power_notify ========
  *  Send notifications to registered clients.

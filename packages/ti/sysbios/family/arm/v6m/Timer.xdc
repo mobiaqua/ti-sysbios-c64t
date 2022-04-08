@@ -34,7 +34,7 @@
  *
  */
 
-package ti.sysbios.family.arm.m0;
+package ti.sysbios.family.arm.v6m;
 
 import xdc.rov.ViewInfo;
 

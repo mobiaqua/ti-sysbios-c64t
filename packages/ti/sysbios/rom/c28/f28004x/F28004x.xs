@@ -122,7 +122,7 @@ function module$use()
         case BIOS.LibType_Custom:
             F28004x.templateName = "F28004x_custom_makefile.xdt";
             xdc.includeFile(String(F28004x.$package.packageBase + "F28004x_custom_outpolicies.cfg.xs"));
-            Build.$private.libraryName = "/sysbios.a" + Program.build.target.suffix;
+            Build.$private.libraryName = "/rom_sysbios.a" + Program.build.target.suffix;
             var SourceDir = xdc.useModule("xdc.cfg.SourceDir");
 
             /* if building a pre-built library */
