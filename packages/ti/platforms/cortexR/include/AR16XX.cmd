@@ -15,21 +15,22 @@
 /*----------------------------------------------------------------------------*/
 /* Memory Map                                                                 */
 MEMORY{
-    VECTORS (X)  : origin=0x00000000 length=0x00000100
-    CODE    (RX) : origin=0x00000100 length=0x0003FF00
-    DATA    (RW) : origin=0x08000000 length=0x00030000
+    VECTORS  (X)  : origin=0x00000000 length=0x00000100
+    PROG_RAM (RX) : origin=0x00000100 length=0x0003FF00
+    DATA_RAM (RW) : origin=0x08000000 length=0x00030000
+    L3_RAM   (RW) : origin=0x51020000 length=0x00040000
 }
 
 /*----------------------------------------------------------------------------*/
 /* Section Configuration                                                      */
 SECTIONS{
     .intvecs : {} > VECTORS
-    .text    : {} > CODE
-    .const   : {} > CODE
-    .cinit   : {} > CODE
-    .pinit   : {} > CODE
-    .bss     : {} > DATA
-    .data    : {} > DATA
-    .stack   : {} > DATA
+    .text    : {} > PROG_RAM ALIGN(8)
+    .const   : {} > PROG_RAM ALIGN(8)
+    .cinit   : {} > PROG_RAM ALIGN(8)
+    .pinit   : {} > PROG_RAM ALIGN(8)
+    .bss     : {} > DATA_RAM
+    .data    : {} > DATA_RAM
+    .stack   : {} > DATA_RAM
 }
 /*----------------------------------------------------------------------------*/

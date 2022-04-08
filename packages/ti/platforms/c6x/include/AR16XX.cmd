@@ -32,74 +32,43 @@
 
 MEMORY
 {
-        L1PRAM:         o = 0x00E00000, l = 0x00008000
-        L1DRAM:         o = 0x00F00000, l = 0x00008000
-        L2SRAM_UMAP1:   o = 0x007E0000, l = 0x00020000
-        L2SRAM_UMAP0:   o = 0x00800000, l = 0x00020000
-        L3SRAM:         o = 0x20000000, l = 0x00100000
+    L1PRAM:         o = 0x00E00000, l = 0x00008000
+    L1DRAM:         o = 0x00F00000, l = 0x00008000
+    L2SRAM_UMAP1:   o = 0x007E0000, l = 0x00020000
+    L2SRAM_UMAP0:   o = 0x00800000, l = 0x00020000
+    L3SRAM:         o = 0x20020000, l = 0x000A0000
 }
 
 /* Set L1D, L1P and L2 Cache Sizes */
 ti_sysbios_family_c64p_Cache_l1dSize = 32*1024;
 ti_sysbios_family_c64p_Cache_l1pSize = 32*1024;
-ti_sysbios_family_c64p_Cache_l2Size = 0;
+ti_sysbios_family_c64p_Cache_l2Size  = 0;
 
 SECTIONS
 {
-    .vecs         >        L2SRAM_UMAP1               // Interrupt Vectors
-    .cinit        >        L2SRAM_UMAP1               // Initialization Tables
-    .pinit        >        L2SRAM_UMAP1               // Constructor Tables
-    .init_array   >        L2SRAM_UMAP1               //
-    .binit        >        L2SRAM_UMAP1               // Boot Tables
-    .const        >        L2SRAM_UMAP1               // Constant Data
-    .switch       >        L2SRAM_UMAP1               // Jump Tables
-    .text         >        L2SRAM_UMAP1               // Executable Code
-    .text:_c_int00: align=1024 > L2SRAM_UMAP1         // Entrypoint
-
-    GROUP (NEARDP_DATA)                       // group near data
-    {
-       .neardata
-       .rodata
-       .bss                                   // note: removed fill = 0
-    }             >        L2SRAM_UMAP1
-    .far: fill = 0x0, load > L2SRAM_UMAP1             // Far Global & Static Variables
-    .fardata      >        L2SRAM_UMAP1               // Far RW Data
-    .stack        >        L2SRAM_UMAP1               // Software System Stack
-    .sysmem       >        L2SRAM_UMAP1               // Dynamic Memory Allocation Area
-
-    .cio          >        L2SRAM_UMAP1               // C I/O Buffer
-
-/*
+    .vecs:              {. = align(32); } > L2SRAM_UMAP1 // Interrupt Vectors
     GROUP
     {
-        .vects:      {. = align(8);}
-        .l2_int:     {. = align(8);}
-        .switch:     {. = align(8);}
-        .const:      {. += 0x100;}
-        .text:       {. = align(4);}
-        .int_code:   {. = align(4);}
-        .lib_code:   {. = align(4);}
-        .sysinit:    {. = align(4);}
-        .syssaram:   {. = align(4);}
-        .far:	       {. = align(8);}
-        .cinit:	     {. = align(4);}
-        .pinit:	     {. = align(4);}
-        .data16:	   {. = align(2);}
-        .data:       {. = align(2);}
-        .bss:	       {. = align(8);}
+        .fardata:       {. = align(8);  }
+        .pinit:         {. = align(8);  }
+        .init_array:    {. = align(8);  }
+        .binit:         {. = align(8);  }
+        .const:         {. = align(8);  }
+        .switch:        {. = align(8);  }
+        .stack:         {. = align(8);  }
+        .sysmem:        {. = align(8);  }
+        .cio:           {. = align(8);  }
+        .neardata:      {. = align(8);  }
+        .bss:           {. = align(8);  }
+        .data:          {. = align(8);  }
+        .rodata:        {. = align(8);  }
+    } > L2SRAM_UMAP0 | L2SRAM_UMAP1
 
-        .sysmem:     {. = align(16);}
-         gem_l2ram_usr_init:   {. = align(8);}
-         gem_l2ram_usr_uninit: {. = align(8);}
-        .stack:	     {. = align(8);}
-        .sysstack:   {. = align(8);}
+    GROUP
+    {
+        .cinit:         {. = align(8); }
+    } > L2SRAM_UMAP0 | L2SRAM_UMAP1
 
-   }	> L2SRAM_UMAP1
-*/
-   GROUP
-   {
-       .text0:       {. = align(4);}
-       .umap0:      {. = align(8);}
-
-   }	> L2SRAM_UMAP0
+    .far: fill = 0x0, load > L2SRAM_UMAP0 | L2SRAM_UMAP1             // Far Global & Static Variables
+    .text: {} >> L2SRAM_UMAP0 | L2SRAM_UMAP1
 }

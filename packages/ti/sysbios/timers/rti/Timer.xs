@@ -88,14 +88,14 @@ if (xdc.om.$name == "cfg" || typeof(genCdoc) != "undefined") {
                         baseAddr: 0x02020000,
                         intNum: 14,
                         eventId: 75,
-                        intFreqDivFactor: 1
+                        intFreqDivFactor: 3
                     },
                     {
                         name: "RTI2 Timer1",
                         baseAddr: 0x02020000,
                         intNum: 15,
                         eventId: 76,
-                        intFreqDivFactor: 1
+                        intFreqDivFactor: 3
                     }
                 ]
             }
