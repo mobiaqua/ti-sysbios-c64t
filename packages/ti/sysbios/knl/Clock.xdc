@@ -520,7 +520,8 @@ module Clock
      *  ======== setTicks ========
      *  Set the internal Clock tick counter
      *
-     *  Used internally by Power modules.
+     *  Used internally by Power modules. Only applicable for
+     *  Clock.TickMode_PERIODIC
      */
     Void setTicks(UInt32 ticks);
 
@@ -1003,17 +1004,17 @@ internal:
      *  ======== Module_State ========
      */
     struct Module_State {
-        volatile UInt32	    ticks;          // last tick serviced
-        UInt		    swiCount;       // num of Swi posts before Swi runs
+        volatile UInt32     ticks;          // last tick serviced
+        UInt                swiCount;       // num of Swi posts before Swi runs
         TimerProxy.Handle   timer;          // timer used
-				            // points to generated Clock_doTick()
-        Queue.Object	    clockQ;         // clock que
-        Swi.Handle	    swi;            // clock swi
-        volatile UInt	    numTickSkip;    // number of ticks being suppressed
-        UInt32		    nextScheduledTick;
-        UInt32		    maxSkippable;   // timer dependent (in tickPeriods)
-        Bool		    inWorkFunc;     // true if in Clock Swi servicing Q
-        Bool		    startDuringWorkFunc; // Clock_start during workFunc?
-        Bool		    ticking;        // set true during first Clock tick
+                                            // points to generated Clock_doTick()
+        Queue.Object        clockQ;         // clock que
+        Swi.Handle          swi;            // clock swi
+        volatile UInt       numTickSkip;    // number of ticks being suppressed
+        UInt32              nextScheduledTick;
+        UInt32              maxSkippable;   // timer dependent (in tickPeriods)
+        Bool                inWorkFunc;     // true if in Clock Swi servicing Q
+        Bool                startDuringWorkFunc; // Clock_start during workFunc?
+        Bool                ticking;        // set true during first Clock tick
     };
 }

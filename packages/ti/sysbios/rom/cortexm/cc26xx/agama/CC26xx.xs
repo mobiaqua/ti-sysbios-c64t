@@ -76,7 +76,6 @@ function module$meta$init()
     if (Build.buildROM == true) {
         Build.buildROMApp = false;
         BIOS.libDir = null;
-//        CC26xx.libDir = String(CC26xx.$package.packageBase + appName + "/");
         CC26xx.libDir = String(CC26xx.$package.packageBase + "CC26xx/");
     }
     else {
@@ -232,14 +231,20 @@ function module$validate()
     var Timestamp = xdc.module('xdc.runtime.Timestamp');
     var System = xdc.module('xdc.runtime.System');
 
-    if (BIOS.assertsEnabled == true) {
-        this.$logError(
-            "BIOS.assertsEnabled must be set to 'false' when using ROM", BIOS, "assertsEnabled");
+    if (BIOS.$written("assertsEnabled") && BIOS.assertsEnabled == true) {
+        if ($assertsEnabledWarningIssued === undefined) {
+            this.$logWarning(
+                "\nAsserts are disabled in all ROM APIs." +
+                "\nOnly APIs not in the ROM will have their Asserts enabled.", BIOS, "assertsEnabled");
+        }
     }
 
-    if (BIOS.logsEnabled == true) {
-        this.$logError(
-            "BIOS.logsEnabled must be set to 'false' when using ROM", BIOS, "logsEnabled");
+    if (BIOS.$written("logsEnabled") && BIOS.logsEnabled == true) {
+        if ($logsEnabledWarningIssued === undefined) {
+            this.$logWarning(
+                "\nLogs are disabled in all ROM APIs." +
+                "\nOnly APIs not in the ROM will have their Logs enabled.", BIOS, "logsEnabled");
+        }
     }
 
     if (BIOS.taskEnabled == false) {
@@ -405,6 +410,7 @@ function loadAppConfig()
      * Pull in all modules and their configurations that were used in
      * building the ROM.
      */
+
     xdc.includeFile(String(CC26xx.$package.packageBase + "CC26xx.cfg.xs"));
 }
 

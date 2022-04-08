@@ -44,9 +44,61 @@
 #include "errno.h"
 #include "pthread_util.h"
 
-static UInt32 secsPerRollover = 0;
+/*
+ *  clock_gettime(CLOCK_MONOTONIC) will keep track of Clock tick
+ *  rollovers to ensure that it is monotonic.
+ *  The tick count is 32 bits, so at a 1 msec tick rate, the
+ *  count rolls over every 4294967296 / 1000 seconds, or about every 50 days.
+ *
+ *  To detect rollover, we'll save the current tick count in clock_gettime()
+ *  to prevTicks.  If the current tick count is less than prevTicks, the
+ *  tick count has rolled over and we'll increment rolloverCount.
+ *  If clock_gettime() is not called sufficiently often (e.g. every 49 daya
+ *  for a 1 msec tick rate), the tick count could rollover twice without
+ *  being detected.  Although clock_gettime(CLOCK_MONOTONIC) would still
+ *  detect one rollover, the time would be off (by 50 days for a 1 msec
+ *  tick rate).  To prevent this from happening, we use a Clock object
+ *  with a timeout of 0xFFFFFFFF ticks, and a timeout function that
+ *  checks for rollover.  This prevents the application from having to
+ *  call clock_gettime() sufficiently often to keep an accurate time.
+ *
+ *  Each time the tick count rolls over, there will be a remainder of ticks
+ *  that don't make up a whole second.  We need to take this into account
+ *  in clock_gettime().  The following definitions are for that purpose.
+ */
+
+/*
+ *  The maximum number of ticks before the tick count rolls over.  We use
+ *  0xFFFFFFFF instead of 0x100000000 to avoid 64-bit math.
+ */
+#define MAX_TICKS 0xFFFFFFFF
+#define TICKS_PER_SEC (1000000 / Clock_tickPeriod)
+
+/* The integral number of seconds in a period of MAX_TICKS */
+#define MAX_SECONDS (MAX_TICKS / TICKS_PER_SEC)
+
+/* The total number of system ticks in MAX_SECONDS seconds */
+#define MAX_SECONDS_TICKS (MAX_SECONDS * TICKS_PER_SEC)
+
+/*
+ *  MAX_TICKS - MAX_SECONDS_TICKS is the number of ticks left over that
+ *  don't make up a whole second.  We add 1 to get the remaining number
+ *  of ticks when the tick count wraps back to 0.  REM_TICKS could
+ *  theoritically be equivalent to 1 second (when the tick period divides
+ *  0x100000000 evenly), so it is not really a "remainder", since it ranges
+ *  from 1 to TICKS_PER_SEC, instead of from 0 to TICKS_PER_SEC - 1.
+ *  However, this will not affect the seconds calculation in clock_gettime(),
+ *  so we can ignore this special case.
+ */
+#define REM_TICKS ((MAX_TICKS - MAX_SECONDS_TICKS) + 1)
+
+static Void clockFxn(UArg arg);
+static UInt32 getClockTicks(Void);
+
 static UInt32 prevTicks = 0;
 static UInt32 rolloverCount = 0;
+static Clock_Struct clockStruct;
+static Bool firstTime = TRUE;
 
 /*
  *  ======== clock_gettime ========
@@ -57,6 +109,7 @@ int clock_gettime(clockid_t clockId, struct timespec *ts)
     UInt32       secs;
     UInt32       ticks;
     UInt32       remTicks;
+    UInt32       remSecs;
     UInt         key;
     UInt32       numRollovers;
 
@@ -68,26 +121,33 @@ int clock_gettime(clockid_t clockId, struct timespec *ts)
     }
     else {
         /* CLOCK_MONOTONIC */
-        if (secsPerRollover == 0) {
-            /* Initialize number of seconds before tick count wraps */
-            secsPerRollover = (1 + 4294967295 / (1000000 / Clock_tickPeriod));
-        }
-
         key = Hwi_disable();
 
-        ticks = Clock_getTicks();
-        if (ticks < prevTicks) {
-            rolloverCount++;
+        if (firstTime) {
+            Clock_addI(Clock_handle(&clockStruct), (Clock_FuncPtr)clockFxn,
+                    (UInt)0xFFFFFFFF, (UArg)0);
+            Clock_setPeriod(Clock_handle(&clockStruct), 0xFFFFFFFF);
+            Clock_startI(Clock_handle(&clockStruct));
+            firstTime = FALSE;
         }
-        prevTicks = ticks;
+
+        ticks = getClockTicks();
         numRollovers = rolloverCount;
 
         Hwi_restore(key);
 
-        secs = ticks / (1000000 / Clock_tickPeriod);
-        remTicks = ticks - secs * (1000000 / Clock_tickPeriod);
+        secs = ticks / TICKS_PER_SEC;
 
-        ts->tv_sec = (time_t)secs + secsPerRollover * numRollovers;
+        /* Remaining ticks after seconds are subtracted from tick count */
+        remTicks = ticks - (secs * TICKS_PER_SEC);
+
+        /* Add contribution of remaining ticks from tick count rollovers */
+        remTicks += REM_TICKS * numRollovers;
+
+        remSecs = remTicks / TICKS_PER_SEC;
+        remTicks -= remSecs * TICKS_PER_SEC;
+
+        ts->tv_sec = (time_t)secs + remSecs + (MAX_SECONDS * numRollovers);
         ts->tv_nsec = (unsigned long)(remTicks * Clock_tickPeriod  * 1000);
     }
 
@@ -151,11 +211,58 @@ int clock_nanosleep(clockid_t clockId, int flags,
 int clock_settime(clockid_t clock_id, const struct timespec *ts)
 {
     if (clock_id == CLOCK_MONOTONIC) {
-        /* EINVAL */
+        /* errno = EINVAL */
         return (-1);
     }
 
     Seconds_set(ts->tv_sec);
 
     return (0);
+}
+
+/*
+ *  ======== clock_getticks ========
+ *  Internal function for testing.
+ */
+void ti_sysbios_posix_clock_getticks(UInt32 *ticksLo, UInt32 *ticksHi)
+{
+    UInt         key;
+
+    key = Hwi_disable();
+
+    *ticksLo = getClockTicks();
+    *ticksHi = rolloverCount;
+
+    Hwi_restore(key);
+}
+
+/*
+ *  ======== clockFxn ========
+ */
+static Void clockFxn(UArg arg)
+{
+    UInt         key;
+
+    key = Hwi_disable();
+
+    (Void)getClockTicks();
+
+    Hwi_restore(key);
+}
+
+/*
+ *  ======== getClockTicks ========
+ *  Call with interrupts disabled.
+ */
+static UInt32 getClockTicks(Void)
+{
+    UInt32       ticks;
+
+    ticks = Clock_getTicks();
+    if (ticks < prevTicks) {
+        rolloverCount++;
+    }
+    prevTicks = ticks;
+
+    return (ticks);
 }

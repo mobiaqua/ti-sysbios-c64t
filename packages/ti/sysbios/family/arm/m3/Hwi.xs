@@ -126,8 +126,14 @@ if (xdc.om.$name == "cfg") {
             resetVectorAddress : 0,
             vectorTableAddress : 0x20000000,
         },
-        "MSP432.*": {
+        "MSP432P.*": {
             numInterrupts : 16 + 64,
+            numPriorities : 8,
+            resetVectorAddress : 0,
+            vectorTableAddress : 0x20000000,
+        },
+        "MSP432E.*": {
+            numInterrupts : 16 + 200,
             numPriorities : 8,
             resetVectorAddress : 0,
             vectorTableAddress : 0x20000000,
@@ -154,6 +160,12 @@ if (xdc.om.$name == "cfg") {
             numInterrupts : 16 + 147,           /* supports 163 interrupts */
             numPriorities : 8,
             resetVectorAddress : 0x00200000,    /* placed low in flash */
+            vectorTableAddress : 0x20000000,
+        },
+        "CC26.2.*": {
+            numInterrupts : 16 + 38,            /* supports 54 interrupts */
+            numPriorities : 8,
+            resetVectorAddress : 0x0,           /* placed low in flash */
             vectorTableAddress : 0x20000000,
         },
         "CC26.*": {
@@ -192,6 +204,7 @@ if (xdc.om.$name == "cfg") {
     deviceTable["OMAP5430"]      = deviceTable["OMAP4430"];
     deviceTable["Vayu"]          = deviceTable["OMAP4430"];
     deviceTable["DRA7XX"]        = deviceTable["OMAP4430"];
+    deviceTable["CC13.2.*"]      = deviceTable["CC26.2.*"];
     deviceTable["CC13.*"]        = deviceTable["CC26.*"];
     deviceTable["CC3220"]        = deviceTable["CC3200"];
     deviceTable["CC3220S"]       = deviceTable["CC3200"];
@@ -677,7 +690,9 @@ function module$static$init(mod, params)
 
         /* place msp432's sparse dispatchTable in SRAM_CODE */
         if (Program.platformName.match(/ti\.platforms\.msp432/)) {
+            if (!(Program.cpu.deviceName.match(/MSP432E/))) {
             Build.ccArgs.$add("-Dti_sysbios_family_arm_m3_Hwi_FIX_MSP432_DISPATCH_TABLE_ADDRESS");
+            }
         }
     }
 

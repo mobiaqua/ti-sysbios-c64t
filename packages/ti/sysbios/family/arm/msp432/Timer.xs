@@ -59,6 +59,17 @@ function module$meta$init()
 
     Timer.anyMask = (1 << 4) - 1;
     Timer.numTimerDevices = 4;
+
+    /*
+     * for newer (non-MSP432P401x) devices, set Timer.defaultDynamic to
+     * true; if the application configuration does not specify Clock.tickMode
+     * then the default will be Clock.TickMode_PERIODIC on older devices, and
+     * Clock.TickMode_DYNAMIC on newer devices
+     */
+    Program = xdc.module('xdc.cfg.Program');
+    if (!Program.platformName.match(/MSP432P401/)) {
+        Timer.defaultDynamic = true;
+    }
 }
 
 /*
@@ -373,6 +384,21 @@ function viewInitDevice(view, obj)
     view.period = obj.period;
     view.currCount = view.period - (TMR[9] - TMR[8]);
     view.remainingCount = TMR[9] - TMR[8]; /* compare - count */
+
+    switch (TMR[0] & 0x0300) {
+        case 0x0000:
+            view.clockSource = "EXT";
+            break;
+        case 0x0100:
+            view.clockSource = "ACLK";
+            break;
+        case 0x0200:
+            view.clockSource = "SMCLK";
+            break;
+        case 0x0300:
+            view.clockSource = "EXT_INV";
+            break;
+    }
 
     view.id         = obj.id;
     view.intNum     = obj.intNum;

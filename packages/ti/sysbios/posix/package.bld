@@ -91,6 +91,7 @@ Pkg.otherFiles = [
     "pthread_util.h",
     "sched.h",
     "signal.h",
+    "sys/time.h",
     "sys/types.h",
     "semaphore.h",
     "time.h",

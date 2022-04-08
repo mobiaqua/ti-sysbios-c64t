@@ -30,8 +30,8 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 /*
- *  ======== TMS320F280049.cmd ========
- *  Define the memory block start/length for the F28377D
+ *  ======== TMS320F280049M.cmd ========
+ *  Define the memory block start/length for the Potenza F280049M
  */
 
 MEMORY
@@ -72,7 +72,11 @@ SECTIONS
     /* Allocate program areas: */
     .cinit              : > FLASHA | FLASHB PAGE = 0
     .binit              : > FLASHA | FLASHB PAGE = 0
+#ifdef __TI_EABI__
+    .init_arrray        : > FLASHA | FLASHB PAGE = 0
+#else
     .pinit              : > FLASHA | FLASHB PAGE = 0
+#endif
     .text               : > FLASHA | FLASHB PAGE = 0
     codestart           : > BEGIN   PAGE = 0
     ramfuncs            : LOAD = FLASHA | FLASHB PAGE = 0
@@ -86,12 +90,22 @@ SECTIONS
 
     /* Allocate uninitalized data sections: */
     .stack              : > M01SARAM | LS07SARAM    PAGE = 1
+#ifdef __TI_EABI__
+    .bss                : > M01SARAM | LS07SARAM    PAGE = 1
+    .sysmem             : > LS07SARAM | M01SARAM    PAGE = 1
+    .data               : > M01SARAM | LS07SARAM    PAGE = 1
+#else
     .ebss               : > M01SARAM | LS07SARAM    PAGE = 1
     .esysmem            : > LS07SARAM | M01SARAM    PAGE = 1
+#endif
     .cio                : > LS07SARAM | M01SARAM    PAGE = 1
 
     /* Initalized sections go in Flash */
+#ifdef __TI_EABI__
+    .const              : > FLASHA | FLASHB PAGE = 0
+#else
     .econst             : > FLASHA | FLASHB PAGE = 0
+#endif
     .switch             : > FLASHA | FLASHB PAGE = 0
     .args               : > FLASHA | FLASHB PAGE = 0
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Texas Instruments Incorporated
+ * Copyright (c) 2015-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -224,14 +224,20 @@ function module$validate()
     var Timestamp = xdc.module('xdc.runtime.Timestamp');
     var System = xdc.module('xdc.runtime.System');
 
-    if (BIOS.assertsEnabled == true) {
-        this.$logError(
-            "BIOS.assertsEnabled must be set to 'false' when using ROM", BIOS, "assertsEnabled");
+    if (BIOS.$written("assertsEnabled") && BIOS.assertsEnabled == true) {
+        if ($assertsEnabledWarningIssued === undefined) {
+            this.$logWarning(
+                "\nAsserts are disabled in all ROM APIs." +
+                "\nOnly APIs not in the ROM will have their Asserts enabled.", BIOS, "assertsEnabled");
+        }
     }
 
-    if (BIOS.logsEnabled == true) {
-        this.$logError(
-            "BIOS.logsEnabled must be set to 'false' when using ROM", BIOS, "logsEnabled");
+    if (BIOS.$written("logsEnabled") && BIOS.logsEnabled == true) {
+        if ($logsEnabledWarningIssued === undefined) {
+            this.$logWarning(
+                "\nLogs are disabled in all ROM APIs." +
+                "\nOnly APIs not in the ROM will have their Logs enabled.", BIOS, "logsEnabled");
+        }
     }
 
     if (BIOS.taskEnabled == false) {

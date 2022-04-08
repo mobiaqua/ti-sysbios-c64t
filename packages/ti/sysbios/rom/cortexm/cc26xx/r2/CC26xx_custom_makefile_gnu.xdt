@@ -73,7 +73,7 @@
 vpath % `File.getDOSPath(this.$package.packageRepository) + "ti/sysbios/"`
 vpath %.c `XDCROOT`
 
-CCOPTS    = `BIOS.getCCOpts(TARGET.name)`
+CCOPTS    = `BIOS.getCCOpts(TARGET.name)` -fno-ipa-ra
 
 XDC_ROOT  = `XDCROOT`
 

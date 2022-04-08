@@ -103,7 +103,7 @@ UInt32 Clock_getTickPeriod()
 }
 
 /*
- *  ======== Clock_getTicks  ========
+ *  ======== Clock_getTicks ========
  */
 UInt32 Clock_getTicks()
 {

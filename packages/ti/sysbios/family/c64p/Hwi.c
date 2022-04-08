@@ -621,7 +621,7 @@ Void Hwi_setupSC()
     /* Register secure contexts */
     rv = SK_registerSCWP(&Hwi_module->scw, 1);
 
-    if (rv < 0) {
+    if (rv != (Int)&Hwi_module->scw) {
         Error_raise(NULL, Hwi_E_registerSCFailed, 0, 0);
     }
 

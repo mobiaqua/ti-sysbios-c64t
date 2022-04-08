@@ -52,11 +52,14 @@ extern "C" {
  *  ssize_t is a signed size_t.  It is the return type for mqueue
  *  receive functions, so we need to define it for TI and IAR.
  */
+#define _TI_POSIX_DECL_ssize_t
 typedef long int ssize_t;
 
 typedef uint32_t clockid_t;
 typedef unsigned long useconds_t;
 typedef unsigned long timer_t;
+
+typedef long suseconds_t;
 
 #else
 #include <../include/sys/types.h>

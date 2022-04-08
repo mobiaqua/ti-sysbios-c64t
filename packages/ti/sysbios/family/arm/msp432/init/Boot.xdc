@@ -94,8 +94,12 @@ module Boot
      *  Clock configuration will setup the clock system (CS), VCORE, and
      *  Flash wait states appropriately, for one of three different device
      *  speed options, as selected by `{@link #speedSelect}`.
+     *
+     *  Clock configuration by the Boot module is only supported for
+     *  MSP432P401x devices.  If an attempt is made to enable this feature for
+     *  newer MSP432 devices a build error will be thrown.
      */
-    metaonly config Bool configureClocks = true;
+    metaonly config Bool configureClocks;
 
     /*!
      *  Clock speed selection, default is SpeedOpt_High.
@@ -112,8 +116,7 @@ module Boot
      *      ACLK =   32KHz from REFOCLK, LFXT, or external clock
      *      BCLK =   32KHz from REFOCLK, LFXT, or external clock
      *      VCORE = 1 (AM1_LDO mode)
-     *      Flash BNK0 and BNK1 read wait states = 1 (MSP432P401xx)
-     *      Flash BNK0 and BNK1 read wait states = 3 (MSP432P4x1xl/MSP432P4x1xT)
+     *      Flash BNK0 and BNK1 read wait states = 1
      *
      *   SpeedOpt_Medium will configure:
      *      MCLK =   24MHz from DCO, HFXT, or external clock
@@ -122,7 +125,7 @@ module Boot
      *      ACLK =   32KHz from REFOCLK, LFXT, or external clock
      *      BCLK =   32KHz from REFOCLK, LFXT, or external clock
      *      VCORE = 1 (AM1_LDO mode)
-     *      Flash BNK0 and BNK1 read wait states = 1 (for all device variants)
+     *      Flash BNK0 and BNK1 read wait states = 1
      *
      *   SpeedOpt_Low will configure:
      *      MCLK =   12MHz from DCO, HFXT, or external clock
@@ -131,8 +134,7 @@ module Boot
      *      ACLK =   32KHz from REFOCLK, LFXT, or external clock
      *      BCLK =   32KHz from REFOCLK, LFXT, or external clock
      *      VCORE = 0 (AM0_LDO mode)
-     *      Flash BNK0 and BNK1 read wait states = 0 (MSP432P401xx)
-     *      Flash BNK0 and BNK1 read wait states = 1 (MSP432P4x1xl/MSP432P4x1xT)
+     *      Flash BNK0 and BNK1 read wait states = 0
      *   @p
      */
     metaonly config SpeedOpt speedSelect = SpeedOpt_High;
