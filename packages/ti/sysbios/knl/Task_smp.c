@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, Texas Instruments Incorporated
+ * Copyright (c) 2015-2018, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1814,12 +1814,14 @@ Void Task_stat(Task_Object *tsk, Task_Stat *statbuf)
  */
 Void Task_block(Task_Object *tsk)
 {
-    UInt hwiKey;
-    Queue_Object *readyQ = tsk->readyQ;
-    UInt curset = Task_module->smpCurSet[tsk->affinity];
-    UInt mask = tsk->mask;
+    UInt curset, hwiKey, mask;
+    Queue_Object *readyQ;
 
     hwiKey = Hwi_disable();
+
+    readyQ = tsk->readyQ;
+    curset = Task_module->smpCurSet[tsk->affinity];
+    mask = tsk->mask;
 
     /*
      * Can be used by Task_setAffinity() to move a blocked task

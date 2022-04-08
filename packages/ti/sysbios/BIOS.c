@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2013-2018, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,8 +49,14 @@
  */
 BIOS_ThreadType BIOS_getThreadType(Void)
 {
+    UInt key;
+    BIOS_ThreadType threadType;
+
     if (BIOS_smpEnabled == TRUE) {
-        return (BIOS_module->smpThreadType[Core_getId()]);
+        key = Core_hwiDisable();
+        threadType = BIOS_module->smpThreadType[Core_getId()];
+        Core_hwiRestore(key);
+        return (threadType);
     }
     else {
         return (BIOS_module->threadType);
