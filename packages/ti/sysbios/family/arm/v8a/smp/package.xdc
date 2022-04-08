@@ -39,7 +39,6 @@ requires ti.sysbios.interfaces;
  *  Contains specifications for the v8a family-specific SMP/BIOS functions.
  */
 package ti.sysbios.family.arm.v8a.smp [2,0,0,0] {
-    module Cache;
     module Core;
     module GateSmp;
 }

@@ -110,7 +110,7 @@ if (xdc.om.$name == "cfg") {
         }
     };
 
-    deviceTable["AM65X"] = deviceTable["SIMMAXWELL"];
+    deviceTable["AM65.*"] = deviceTable["SIMMAXWELL"];
     deviceTable["J7.*"] = deviceTable["SIMMAXWELL"];
 }
 
@@ -125,14 +125,14 @@ function deviceSupportCheck()
     for (device in deviceTable) {
         if (device == Program.cpu.deviceName) {
             return device;
-            }
+        }
     }
 
     /* now look for a wildcard match */
     for (device in deviceTable) {
         if (Program.cpu.deviceName.match(device)) {
             return device;
-            }
+        }
     }
 
     /*
@@ -214,6 +214,8 @@ function module$meta$init()
      */
     Hwi.interrupt.length = Hwi.NUM_INTERRUPTS;
     Hwi.intAffinity.length = Hwi.NUM_INTERRUPTS;
+    Hwi.intRouting.length = Hwi.NUM_INTERRUPTS;
+
     for (var intNum = 0; intNum < Hwi.NUM_INTERRUPTS; intNum++) {
         Hwi.interrupt[intNum].used = false;
         Hwi.interrupt[intNum].fxn = null;
@@ -257,12 +259,13 @@ function module$use()
     /* Pull smp.Core module only if SMP enabled */
     if (BIOS.smpEnabled) {
         Core = xdc.useModule('ti.sysbios.family.arm.v8a.smp.Core');
+        Hwi.initGicd = true;
     }
     else {
         Core = xdc.useModule('ti.sysbios.family.arm.v8a.Core');
+        Hwi.initGicd = Core.bootMaster;
     }
 
-    Hwi.initGicd = Core.bootMaster;
 
     if (BIOS.smpEnabled) {
         Hwi.gicMap.length = Core.numCores;
@@ -389,6 +392,8 @@ function module$static$init(mod, params)
      */
     isrStackSize = Program.stack & (-align);
 
+    Hwi.isrStackSize = isrStackSize;
+
     if (isrStackSize != Program.stack) {
         Hwi.$logWarning("stack size was adjusted to guarantee proper alignment",
             this, "Program.stack");
@@ -396,12 +401,16 @@ function module$static$init(mod, params)
 
     mod.isrStackBase = $externPtr('__TI_STACK_BASE');
     mod.isrStackSize = isrStackSize;
+    mod.taskSP.length = Core.numCores;
+    mod.irp.length = Core.numCores;
     mod.isrStack.length = Core.numCores;
     mod.hwiStack.length = Core.numCores;
     mod.excActive.length = Core.numCores;
     mod.excContext.length = Core.numCores;
 
     for (var idx = 0; idx < Core.numCores; idx++) {
+        mod.taskSP[idx] = null;
+        mod.irp[idx] = 0;
         mod.isrStack[idx] = null;
         if (idx == 0) {
             /* Use ".stack" for Core 0 */
@@ -424,19 +433,22 @@ function module$static$init(mod, params)
     mod.spuriousInts = 0;
     mod.lastSpuriousInt = 0;
 
-    mod.irp = 0;
-
     mod.dispatchTable.length = Hwi.NUM_INTERRUPTS;
     mod.intAffinity.length = Hwi.NUM_INTERRUPTS;
 
     for (var intNum = 0; intNum < Hwi.NUM_INTERRUPTS; intNum++) {
         mod.dispatchTable[intNum] = null;
         // TODO should we validate the affinity ???
-        if (Hwi.intAffinity[intNum].routingMode != undefined) {
-            mod.intAffinity[intNum].aff0 = Hwi.intAffinity[intNum].aff0;
-            mod.intAffinity[intNum].aff1 = Hwi.intAffinity[intNum].aff1;
+        if (Hwi.intRouting[intNum].routingMode != undefined) {
+            mod.intAffinity[intNum].aff0 = Hwi.intRouting[intNum].aff0;
+            mod.intAffinity[intNum].aff1 = Hwi.intRouting[intNum].aff1;
             mod.intAffinity[intNum].routingMode =
-                Hwi.intAffinity[intNum].routingMode;
+                Hwi.intRouting[intNum].routingMode;
+        }
+        else if (Hwi.intAffinity[intNum] != undefined) {
+            var aff = Hwi.intAffinity[intNum];
+            mod.intAffinity[intNum] = {aff0: aff & 1, aff1: (aff & 2) > 1,
+                routingMode: Hwi.RoutingMode_NODE};
         }
         else {
             /* By default, all interrupts are routed to Cluster 0 Core 0 */

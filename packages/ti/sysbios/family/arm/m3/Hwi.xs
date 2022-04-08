@@ -237,7 +237,7 @@ if (xdc.om.$name == "cfg") {
     deviceTable["CC13.*"]        = deviceTable["CC26.*"];
     deviceTable["CC32.*S"]       = deviceTable["CC3200"];
     deviceTable["CC32.*SF"]      = deviceTable["CC3220SF"];
-    deviceTable["AM65X"]         = deviceTable["SIMMAXWELL"];
+    deviceTable["AM65.*"]        = deviceTable["SIMMAXWELL"];
     deviceTable["J7.*"]          = deviceTable["SIMMAXWELL"];
 }
 

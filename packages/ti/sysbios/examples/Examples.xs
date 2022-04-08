@@ -257,6 +257,7 @@ function generateExampleTemplates(examples, targetOptions,
                             linkerCommandFile: opts.linkerCommandFile,
                             compilerBuildOptions: opts.compilerBuildOptions,
                             linkerBuildOptions: opts.linkerBuildOptions,
+                            endianness: opts.endianness,
                             title: exampleList[j].title,
                             name: exampleList[j].name,
                             description: exampleList[j].description,
@@ -404,5 +405,9 @@ function getTargetOptions(opts, deviceOpts)
 
     if ('cmdFile' in deviceOpts) {
         opts.cmdFile = deviceOpts.cmdFile;
+    }
+
+    if ('endianness' in deviceOpts) {
+        opts.endianness = deviceOpts.endianness;
     }
 }

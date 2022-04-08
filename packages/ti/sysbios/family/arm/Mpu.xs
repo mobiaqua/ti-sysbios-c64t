@@ -103,8 +103,8 @@ if (xdc.om.$name == "cfg" || typeof(genCdoc) != "undefined") {
     /* Keystone3 devices */
     deviceTable["SIMFLEMING"] = deviceTable["RM57D8XX"];
     deviceTable["SIMMAXWELL"] = deviceTable["RM57D8XX"];
-    deviceTable["AM65X"] = deviceTable["SIMMAXWELL"];
-    deviceTable["J7.*"] = deviceTable["SIMMAXWELL"];
+    deviceTable["AM65.*"]     = deviceTable["SIMMAXWELL"];
+    deviceTable["J7.*"]       = deviceTable["SIMMAXWELL"];
 }
 
 /*

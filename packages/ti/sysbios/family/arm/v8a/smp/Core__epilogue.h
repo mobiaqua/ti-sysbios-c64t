@@ -34,16 +34,16 @@
 extern "C" {
 #endif
 
-#if defined(xdc_target__isaCompatible_v8A)
-
-#include "ti/sysbios/family/arm/gicv3/Hwi.h"
+#include "ti/sysbios/family/arm/gicv3/HwiMacros.h"
 
 /*
  *  ======== Core_hwiDisable ========
  */
 static inline UInt ti_sysbios_family_arm_v8a_smp_Core_hwiDisable()
 {
-    return (ti_sysbios_family_arm_gicv3_Hwi_disable());
+    UInt key;
+    ti_sysbios_family_arm_gicv3_HwiMacros_disable(key);
+    return (key);
 }
 
 /*
@@ -51,7 +51,9 @@ static inline UInt ti_sysbios_family_arm_v8a_smp_Core_hwiDisable()
  */
 static inline UInt ti_sysbios_family_arm_v8a_smp_Core_hwiEnable()
 {
-    return (ti_sysbios_family_arm_gicv3_Hwi_enable());
+    UInt key;
+    ti_sysbios_family_arm_gicv3_HwiMacros_enable(key);
+    return (key);
 }
 
 
@@ -60,10 +62,8 @@ static inline UInt ti_sysbios_family_arm_v8a_smp_Core_hwiEnable()
  */
 static inline Void ti_sysbios_family_arm_v8a_smp_Core_hwiRestore(UInt key)
 {
-    ti_sysbios_family_arm_gicv3_Hwi_restore(key);
+    ti_sysbios_family_arm_gicv3_HwiMacros_restore(key);
 }
-
-#endif
 
 #ifdef __cplusplus
 }

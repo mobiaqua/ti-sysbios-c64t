@@ -47,14 +47,12 @@ var Startup = null;
 if (xdc.om.$name == "cfg") {
     var deviceTable = {
         "SIMMAXWELL": {
-            bootMagicBase    : 0x0,         /* Not used */
-            baseClusterId    : 0,
-            numCores         : 2
+            numCores         : 4
         }
     };
 
-    deviceTable["AM65X"] = deviceTable["SIMMAXWELL"];
-    deviceTable["J7ES"] = deviceTable["SIMMAXWELL"];
+    deviceTable["AM65.*"] = deviceTable["SIMMAXWELL"];
+    deviceTable["J7ES"]   = deviceTable["SIMMAXWELL"];
 }
 
 /*
@@ -90,8 +88,8 @@ function module$meta$init()
     Core = this;
 
     for (device in deviceTable) {
-        if (device == Program.cpu.deviceName) {
-            Core.bootMagicBase = deviceTable[device].bootMagicBase;
+        if (device == Program.cpu.deviceName ||
+            Program.cpu.deviceName.match(device)) {
             Core.numCores = deviceTable[device].numCores;
             Core.CPUMASK = (0x1 << Core.numCores) - 1;
             return;
@@ -133,7 +131,7 @@ function module$use()
     Core.gate = GateSmp.create();
 
     /* install func to start all secondary cores */
-    Task.startupHookFunc = Core.startCoreXKeystone3;
+    Task.startupHookFunc = Core.startCoreX;
 
     /* install our atexit func */
     System.atexitMeta(Core.atexit);
@@ -142,14 +140,7 @@ function module$use()
         Core.CPUMASK = (0x1 << Core.numCores) - 1;
     }
 
-    if (Core.resetSection == null) {
-        Core.resetSection = ".text";
-    }
-
     Core.initStackFlag = HalHwi.initStackFlag;
-
-    /* Install Core_enableEctlrSmp() as a reset function */
-    Reset.fxns[Reset.fxns.length++] = Core.enableEctlrSmp;
 }
 
 /*
@@ -157,7 +148,6 @@ function module$use()
  */
 function module$static$init(mod, params)
 {
-    // TODO show schedulerints in ROV
     mod.schedulerInts.length = Core.numCores;
     mod.interrupts.length = Core.numCores + 1;
     mod.gateEntered.length = Core.numCores;
@@ -183,6 +173,7 @@ function module$static$init(mod, params)
     }
 
     mod.notifyLock = false;
+    mod.startupCalled = false;
 
     /* add -D to compile line to optimize exception code */
     Build.ccArgs.$add("-Dti_sysbios_family_arm_v8a_smp_Core_initStackFlag__D=" +

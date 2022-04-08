@@ -173,7 +173,7 @@ function instance$meta$init(name)
 
         /* figure out the clock configuration */
         if (this.deviceName.match(/^SIMMAXWELL/) ||
-            this.deviceName.match(/^AM65X/) ||
+            this.deviceName.match(/^AM65/) ||
             this.deviceName.match(/^J7ES/)) {
             this.CPU.catalogName = "ti.catalog.arm.cortexa53";
             this.CPU.deviceName = "CortexA";

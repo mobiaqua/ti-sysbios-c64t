@@ -431,7 +431,7 @@ Void Hwi_initIntControllerCoreX()
     UInt32 i, j;
     UInt32 intActiveReg;
     UInt coreId;
-    
+
     coreId = Core_getId();
 
     /*
@@ -572,12 +572,6 @@ Void Hwi_raiseSGI(Hwi_SgiIntAffinity affinity, UInt intNum)
         reg |= ((UInt64)affinity.aff1 << 16) |
           ((UInt64)affinity.targetList & 0xFFFF);
     }
-
-    /* Ensure all memory write ops complete */
-    __asm__ __volatile__ (
-        "dmb ishst"
-        ::: "memory"
-    );
 
     Hwi_writeSystemReg(s3_0_c12_c11_5, reg); /* icc_sgi1r_el1 */
 
@@ -1230,7 +1224,7 @@ Void Hwi_excDumpContext()
  *  ======== Hwi_dispatchIRQC ========
  *  Configurable IRQ interrupt dispatcher.
  */
-Void Hwi_dispatchIRQC(Hwi_Irp irp)
+Void Hwi_dispatchIRQC(Hwi_Irp irp, Bool rootISR, Char *taskSP)
 {
     /*
      * TODO Stale comment ???
@@ -1246,6 +1240,7 @@ Void Hwi_dispatchIRQC(Hwi_Irp irp)
     BIOS_ThreadType prevThreadType;
     UInt intNum;
     Int swiKey;
+    UInt coreId = 0;
 #ifndef ti_sysbios_hal_Hwi_DISABLE_ALL_HOOKS
     Int i;
 #endif
@@ -1260,8 +1255,16 @@ Void Hwi_dispatchIRQC(Hwi_Irp irp)
         return;
     }
 
+    if (BIOS_smpEnabled) {
+        coreId = Core_getId();
+    }
+
     /* save irp for ROV call stack view */
-    Hwi_module->irp = irp;
+    Hwi_module->irp[coreId] = irp;
+
+    if (rootISR) {
+        Hwi_module->taskSP[coreId] = taskSP;
+    }
 
     intNum = Hwi_module->curIntId;
 
@@ -1282,7 +1285,7 @@ Void Hwi_dispatchIRQC(Hwi_Irp irp)
     /* set thread type to Hwi */
     prevThreadType = BIOS_setThreadType(BIOS_ThreadType_Hwi);
 
-    hwi->irp = Hwi_module->irp;
+    hwi->irp = irp;
 
 #ifndef ti_sysbios_hal_Hwi_DISABLE_ALL_HOOKS
     /* call the begin hooks */
@@ -1330,4 +1333,8 @@ Void Hwi_dispatchIRQC(Hwi_Irp irp)
 
     /* restore thread type */
     BIOS_setThreadType(prevThreadType);
+
+    if (rootISR) {
+        Hwi_module->taskSP[coreId] = NULL;
+    }
 }

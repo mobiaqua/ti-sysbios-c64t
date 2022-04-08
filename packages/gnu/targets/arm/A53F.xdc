@@ -52,7 +52,7 @@ metaonly module A53F inherits gnu.targets.arm.ITarget {
     override readonly config string isa                 = "v8A";
     override readonly config xdc.bld.ITarget.Model model= {
         endian: "little",
-        shortEnums: true
+        shortEnums: false
     };
 
     override readonly config Bool alignDirectiveSupported = true;

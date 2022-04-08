@@ -79,6 +79,11 @@ _c_int00:
     mov     x8, x0
     cmp     x0, #0
     bne     0f                  /* core 0 initializes GIC */
+
+    /* Only core 0 clears waitForCore0 */
+    ldr     x0, =ti_sysbios_family_arm_v8a_smp_Core_waitForCore0
+    str     xzr, [x0]
+
     INIT_GICD_IGROUPR
     INIT_GICD_IGRPMODR
 0:  ldr     x0, =GICR_BASE_ADDR
@@ -107,7 +112,6 @@ _c_int00:
     msr     actlr_el3, x0       /* Enable CPUECTLR_EL1 access from EL2 */
     orr     x0, x0, #0x2
     msr     actlr_el3, x0       /* Enable CPUECTLR_EL1 access from EL2 */
-    /* TODO setup vbar */
     ldr     x0, =GTC_CNTCR_ADDR
     ldr     w1, [x0]
     orr     w1, w1, #0x1
@@ -167,22 +171,26 @@ _c_int00:
 
     isb                         /* Synchronize processor context */
 
-    ldr     x0, =waitForCore0
-    str     xzr, [x0]
-    ldr     x2, =0x1234567
+    /* point to core's isr stack */
+    cmp     x8, #1              /* core 1? */
+    bne     5f
+    ldr     x0, =ti_sysbios_family_arm_gicv3_Hwi_Module_State_0_hwiStack_1__A
+    b       7f
 5:
-    ldr     x1, [x0]
-    cmp     x1, x2
-    bne     5b
-
-    ldr     x0, =ti_sysbios_family_arm_gicv3_Hwi_Module_State_0_isrStack__A
-    mov     x1, #8
-    mul     x1, x1, x8
+    cmp     x8, #2              /* core 2? */
+    bne     6f    
+    ldr     x0, =ti_sysbios_family_arm_gicv3_Hwi_Module_State_0_hwiStack_2__A
+    b       7f
+6:
+    ldr     x0, =ti_sysbios_family_arm_gicv3_Hwi_Module_State_0_hwiStack_3__A
+7:
+    ldr     x1, =ti_sysbios_family_arm_gicv3_Hwi_isrStackSize__C
+    ldr     x1, [x1]
     add     x0, x0, x1
-    ldr     x0, [x0]
     msr     spsel, #1           /* Use SP_ELx for ELx */
     mov     sp, x0              /* Initialize SP */
 
+    /* jump into Core_startup() */
     ldr     x0, =ti_sysbios_family_arm_v8a_smp_Core_startup__I
     br      x0
 
@@ -292,19 +300,6 @@ ti_sysbios_family_arm_v8a_smp_Core_disableCaches__I:
 
     ret
     .endfunc
-
-/*
- * ======== Core_enableActlrSmp ========
- */
-        .section .text.ti_sysbios_family_arm_v8a_smp_Core_enableEctlrSmp__I__I
-        .func ti_sysbios_family_arm_v8a_smp_Core_enableEctlrSmp__I
-
-ti_sysbios_family_arm_v8a_smp_Core_enableEctlrSmp__I:
-        mov    x0, #0x40
-        msr    S3_1_C15_C2_1, x0
-        ret
-        .endfunc
-
 
 /*
  * ======== Core_getId ========

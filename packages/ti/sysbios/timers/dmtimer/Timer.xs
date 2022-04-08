@@ -39,6 +39,7 @@ var TimerSupport = null;
 var Hwi = null;
 var catalogName;
 var BIOS = null;
+var deviceTableName = null;
 
 /*
  * ======== getAsmFiles ========
@@ -2672,13 +2673,13 @@ used by DSP */
     deviceTable["ti.catalog.arp32"]["Vayu"] =
         deviceTable["ti.catalog.arp32"]["DRA7XX"];
 
-    deviceTable["ti.catalog.arm.cortexa53"]["AM65X"] =
+    deviceTable["ti.catalog.arm.cortexa53"]["AM65.*"] =
         deviceTable["ti.catalog.arm.cortexa53"]["SIMMAXWELL"];
 
     deviceTable["ti.catalog.arm.cortexa53"]["J7ES"] =
         deviceTable["ti.catalog.arm.cortexa53"]["SIMMAXWELL"];
 
-    deviceTable["ti.catalog.arm.cortexr5"]["AM65X"] =
+    deviceTable["ti.catalog.arm.cortexr5"]["AM65.*"] =
         deviceTable["ti.catalog.arm.cortexr5"]["SIMMAXWELL"];
 
     deviceTable["ti.catalog.arm.cortexr5"]["J7"] =
@@ -2710,7 +2711,9 @@ function module$meta$init()
 
     /* loop through the device table */
     for (deviceName in deviceTable[catalogName]) {
-        if (deviceName == Program.cpu.deviceName) {
+        if (deviceName == Program.cpu.deviceName ||
+            Program.cpu.deviceName.match(deviceName)) {
+            deviceTableName = deviceName;
             var device = deviceTable[catalogName][deviceName].timer;
 
             /* initialize timer fields */
@@ -2819,7 +2822,7 @@ function module$use()
  */
 function module$static$init(mod, params)
 {
-    var device = deviceTable[catalogName][Program.cpu.deviceName].timer;
+    var device = deviceTable[catalogName][deviceTableName].timer;
 
     mod.device.length = device.length;
     mod.intFreqs.length = device.length;
@@ -2893,7 +2896,7 @@ function module$static$init(mod, params)
 function instance$static$init(obj, id, tickFxn, params)
 {
     var modObj = this.$module.$object;
-    var device = deviceTable[catalogName][Program.cpu.deviceName];
+    var device = deviceTable[catalogName][deviceTableName];
  
     /* set flag because static instances need to be started */
     Timer.startupNeeded = true;
@@ -3261,7 +3264,7 @@ function viewInitModule(view, obj)
  */
 function getFreqMeta(id)
 {
-    var device = deviceTable[catalogName][Program.cpu.deviceName].timer;
+    var device = deviceTable[catalogName][deviceTableName].timer;
     var modObj = this.$object;
     var timerId = 0;
 

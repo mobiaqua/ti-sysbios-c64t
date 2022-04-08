@@ -45,7 +45,7 @@
 #include <ti/sysbios/knl/Task.h>
 #define ti_sysbios_family_arm_gicv3_Hwi__internalaccess
 #include <ti/sysbios/family/arm/gicv3/Hwi.h>
-#include <ti/sysbios/family/arm/v8a/smp/Cache.h>
+#include <ti/sysbios/family/arm/v8a//Cache.h>
 #include <ti/sysbios/family/arm/v8a/smp/GateSmp.h>
 
 #include "package/internal/Core.xdc.h"
@@ -57,15 +57,59 @@ extern void _exit(int code);
 extern Void ti_sysbios_hal_Hwi_initStack(Void);
 
 /*
+ * Core_waitForCore0
+ *
+ * used to throttle non Core 0 startup code
+ * until Core 0 has performed C Init
+ */
+volatile UInt64 ti_sysbios_family_arm_v8a_smp_Core_waitForCore0;
+
+/*
  *  ======== Core_Module_startup ========
  */
 Int Core_Module_startup(Int status)
 {
+    Core_module->startupCalled = TRUE;
+
     /* grab Hwi/Swi/Task schedulers */
     /* Task and Swi scheduler is locked by default */
     Core_lock();
 
     return (Startup_DONE);
+}
+
+/*
+ *  ======== Core_lock ========
+ */
+IArg Core_lock()
+{
+    /*
+     * Core_lock() calls before Core 0 has initialized the Core module
+     * will simply disable local interrupts. The other Cores will be
+     * parked waiting for Core 0 to finish system initialization.
+     *
+     * Memory accesses by LDXR and STXR in GateSmp_enter() would result
+     * in an abort if performed before Cache and MMU are initialized.
+     *
+     * Mmu_startup() is called by Cache_startup() (a resetFxn) before
+     * Core_Module_startup().
+     */
+    if (Core_module->startupCalled) {
+         return (GateSmp_enter(Core_gate));
+    }
+    else {
+        return (Core_hwiDisable());
+    }
+}
+
+/*
+ *  ======== Core_unlock ========
+ */
+Void Core_unlock()
+{
+    if (Task_enabled() && Swi_enabled()) {
+        GateSmp_leave(Core_gate, 0);
+    }
 }
 
 /*
@@ -75,7 +119,7 @@ Void Core_hwiFunc(UArg arg)
 {
     UInt coreId = Core_getId();
 
-    /* count these events for diagnostic purposes */    
+    /* count these events for diagnostic purposes */
     Core_module->interrupts[arg][coreId] += 1;
 
     if (arg == Core_numCores) {
@@ -139,7 +183,7 @@ Void Core_atexit(Int arg)
         Hwi_gicd.ICPENDR[i] = 0xffffffff;
         Hwi_gicd.ICACTIVER[i] = 0xffffffff;
     }
-    
+
     Task_unlockSched();
     Swi_unlockSched();
     Core_unlock();
@@ -152,7 +196,6 @@ Void Core_atexit(Int arg)
 
 /*
  *  ======== Core_InterruptCore ========
- *  //TODO we may need to interrupt more than one core.
  */
 Void Core_interruptCore(UInt dstCoreId)
 {
@@ -160,8 +203,12 @@ Void Core_interruptCore(UInt dstCoreId)
 
     affinity.routingMode = Hwi_RoutingMode_NODE;
     affinity.targetList = 1 << (dstCoreId & 1);
-    affinity.aff1 = (dstCoreId & 2) > 1; /* cluster id */
-
+    if (dstCoreId > 1) {
+        affinity.aff1 = 1;  /* cluster 1 for cores 2, 3 */
+    }
+    else {
+        affinity.aff1 = 0;  /* cluster 0 for cores 0, 1 */
+    }
     Hwi_raiseSGI(affinity, Core_numCores);
 }
 
@@ -243,23 +290,17 @@ Void Core_notifySpinUnlock(UInt key)
 }
 
 /*
- *  ======== Core_smpBoot ========
- *  Boot routine called on all other CPUs once they are brought out of reset
- */
-//Void __attribute__((naked)) Core_smpBoot()
-Void Core_smpBoot()
-{
-}
-
-volatile UInt64 waitForCore0;
-
-/*
  *  ======== Core_startup ========
  *  Other core's initial thread.
  *  Executes on stack provided by Core module.
  */
 Void Core_startup()
 {
+    /* wait for Core 0 to perform C runtime initialize */
+    while (ti_sysbios_family_arm_v8a_smp_Core_waitForCore0 != 0x1234567) {
+        ;
+    }
+
     /* Install vector table */
     Hwi_init();
 
@@ -290,48 +331,18 @@ Void Core_startup()
     /* Wait for store to complete */
     __asm__ __volatile__ (
         "dmb ish"
+        ::: "memory"
     );
 
     /* Wait for core 0's signal to start running tasks */
     while(!Core_module->syncCores[0][0]);
 
-    /*
-     * Enable FIQ interrupts on this core. Task_startCore() will
-     * enable IRQs.
-     */
-//Fixme
-    if (Hwi_enableSecureMode) {
-//        Hwi_enableFIQ();
-    }
-
     Task_startCore(Core_getId());
 }
 
-/*
- *  ======== Core_lock ========
- */
-IArg Core_lock()
-{
-    return (GateSmp_enter(Core_gate));
-}
-
-/*
- *  ======== Core_unlock ========
- */
-Void Core_unlock()
-{
-    if (Task_enabled() && Swi_enabled()) {
-        GateSmp_leave(Core_gate, 0);
-    }
-}
-
-extern Char *ti_sysbios_family_arm_gicv3_Hwi_Module_State_0_isrStack__A[];
-Void Core_startCoreXKeystone3(Void)
+Void Core_startCoreX(Void)
 {
     UInt idx;
-
-    /* push isrStack array to L3 so other cores can fetch their boot stacks */
-    Cache_wb((Ptr)&ti_sysbios_family_arm_gicv3_Hwi_Module_State_0_isrStack__A, 32, 0, 0);
 
     /* Init syncCores flag */
     Core_module->syncCores[0][0] = FALSE;
@@ -339,10 +350,10 @@ Void Core_startCoreXKeystone3(Void)
     /* push syncCores array to L3 so other cores can see it */
     Cache_wb((Ptr)&Core_module->syncCores, 128, 0, 0);
 
-    waitForCore0 = 0x01234567;
-    
-    /* push to L3 so other cores can see these vital objects */
-    Cache_wb((Ptr)&waitForCore0, 8, 0, 0);
+    ti_sysbios_family_arm_v8a_smp_Core_waitForCore0 = 0x01234567;
+
+    /* push waitForCore0 L3 so other cores can see it */
+    Cache_wb((Ptr)&ti_sysbios_family_arm_v8a_smp_Core_waitForCore0, 8, 0, 0);
 
     /* Wait for all other cores to run their startup sequence */
     for (idx = 1; idx < Core_numCores; idx++) {

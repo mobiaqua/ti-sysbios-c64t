@@ -48,15 +48,3 @@ function getLibs(prog)
     /* use shared getLibs() */
     return (Build.getLibs(this));
 }
-
-/*
- *  ======== Package.getSects ========
- */
-function getSects()
-{
-    for (var mod in this.$modules) {
-        if (this.$modules[mod].$used == true) {
-            return "ti/sysbios/family/arm/v8a/smp/linkcmd.xdt";
-        }
-    }
-}

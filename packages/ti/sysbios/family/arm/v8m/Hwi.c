@@ -549,6 +549,7 @@ UInt Hwi_disableFxn()
             "msr basepri, %1"
             : "=&r" (key)
             : "r" (ti_sysbios_family_arm_v8m_Hwi_disablePriority)
+            : "memory"
             );
     return (key);
 }
@@ -564,7 +565,9 @@ Void Hwi_restoreFxn(UInt key)
     __asm__ __volatile__ (
 #endif
             "msr basepri, %0"
-            :: "r" (key)
+            :
+            : "r" (key)
+            : "memory"
             );
 }
 
@@ -584,7 +587,8 @@ UInt Hwi_enableFxn()
             "mrs %0, basepri\n\t"
             "msr basepri, r12"
             : "=r" (key)
-            :: "r12"
+            :
+            : "r12", "memory"
             );
     return (key);
 }

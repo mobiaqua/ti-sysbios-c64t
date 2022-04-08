@@ -62,16 +62,18 @@ ti_sysbios_family_arm_v8a_smp_GateSmp_startup__I:
 ti_sysbios_family_arm_v8a_smp_GateSmp_tryLock__I:
         ldxr    w1, [x0]
         cmp     w1, #1  /* is locked already? */
-        beq     ti_sysbios_family_arm_v8a_smp_GateSmp_tryLock__I
+        beq     1f      /* if so, leave with fail */
 
-        /* attempt to lock */
-        mov     w1, #1
-        stxr    w2, w1, [x0]
-        mov     w0, w2  /* 0 = successful lock */
+        mov     w2, #1  /* locked = 1 */
+        stxr    w1, w2, [x0] /* if so attempt to grab it */
+        cmp     w1, #0       /* did we get it? zero is yes */
+        /* if not, loop while in contention */
+        bne     ti_sysbios_family_arm_v8a_smp_GateSmp_tryLock__I
+1:
+        mov     w0, w1
         dmb     sy
         ret
         .endfunc
-
 
 /*
  * ======== GateSmp_unlock ========

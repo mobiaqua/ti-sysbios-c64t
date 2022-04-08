@@ -41,11 +41,15 @@ import ti.sysbios.family.arm.v8a.smp.GateSmp;
 /*!
  *  ======== Core ========
  *  Core Identification Module.
+ *
+ *  This Core module supports 2-core SMP mode on cluster 0
+ *  and 4-core SMP mode with Core 0 being core 0 on cluster 0.
+ *
+ *  2-core SMP mode on Cluster 1 is explicitly NOT SUPPORTED.
  */
 
 @ModuleStartup
 @CustomHeader
-@Template ("./Core.xdt")
 
 module Core inherits ti.sysbios.interfaces.ICore
 {
@@ -60,70 +64,6 @@ module Core inherits ti.sysbios.interfaces.ICore
      *  ======== baseClusterId ========
      */
     config UInt baseClusterId = 0;
-
-    /*!
-     *  ======== bootMaster ========
-     *  Boolean flag indicating whether this core is boot master
-     *
-     *  If a core is marked as a boot master then, it will initialize
-     *  shared global peripherals like the GIC distributor. This
-     *  config param should be set to false for secondary cores
-     *  running in an AMP system.
-     */
-    metaonly config Bool bootMaster = true;
-
-    /*!
-     *  @_nodoc
-     *  ======== initBootRegs ========
-     *  Initialize AUX Core Boot 0 reg on OMAP5xxx/J6 or
-     *  ARM boot magic registers on Keystone2
-     *
-     *  Needs to be set to true only for regressions as
-     *  regressions load multiple programs back-to-back
-     *  without doing a system reset.
-     *
-     *  If a system reset is performed, this config param
-     *  can be set to false.
-     */
-    config Bool initBootRegs = false;
-
-    /*!
-     *  ======== useSkernelCmd ========
-     *  Use sKernel command to wake-up cores on Keystone2 devices
-     *
-     *  This config param only has an effect when building apps
-     *  for Keystone2 devices. It is ignored for all other devices
-     *  like OMAP5xxx, DRA7xx, etc.
-     *
-     *  If set to true, this config param will cause SYS/BIOS
-     *  to use sKernel commands to wake-up cores. This param
-     *  is true by default.
-     *
-     *  If debugging using CCS, a gel script can be used to
-     *  wake-up all cores instead of using sKernel commands
-     *  at runtime. This config param can be disabled in this
-     *  case.
-     *
-     *  Note: If debugging using CCS and using a gel script to
-     *  wake-up all cores, the application needs to be loaded
-     *  on only one of the cores. Only the app symbols need to
-     *  be loaded on all other cores.
-     */
-    config Bool useSkernelCmd = true;
-
-    /*!
-     *  ======== resetSection ========
-     *  Section to place the reset function
-     *
-     *  This configuration parameter allows the app to specify a named output
-     *  section that will contain the SYS/BIOS core reset function.
-     *  The core reset function is different from _c_int00 and internally
-     *  calls _c_int00.
-     *
-     *  If resetSection is `null` (or `undefined`) the reset function is placed
-     *  in the target's default text section.
-     */
-    config String resetSection = null;
 
     /*!
      *  @_nodoc
@@ -206,28 +146,12 @@ internal:
 
     config GateSmp.Handle gate;
 
-    /*
-     *  ======== bootMagicBase ========
-     *  Base address for the boot magic registers (Used only for K2 devices)
-     */
-    config UInt32 bootMagicBase;
-
     config Bool initStackFlag = true;
 
     /*
-     *  ======== enableEctlrSmp ========
+     *  ======== startCoreX ========
      */
-    Void enableEctlrSmp();
-
-    /*
-     *  ======== resetKeystone3 ========
-     */
-    Void resetKeystone3();
-
-    /*
-     *  ======== startCoreXKeystone3 ========
-     */
-    Void startCoreXKeystone3();
+    Void startCoreX();
 
     /*
      *  ======== exit ========
@@ -242,17 +166,6 @@ internal:
     Void hwiFunc(UArg arg);
 
     /*
-     *  ======== skernelCmd ========
-     *  Secure Kernel Command
-     */
-    Void skernelCmd(UInt32 cmd, UInt32 coreId, UInt32 startAddr);
-
-    /*
-     *  ======== smpBoot ========
-     */
-    Void smpBoot();
-
-    /*
      *  ======== startup ========
      *  Other core's first function
      */
@@ -265,6 +178,7 @@ internal:
     Void atexit(Int arg);
 
     struct Module_State {
+        Bool             startupCalled;
         Bool             gateEntered[];
         UInt             schedulerInts[];
         UInt             interrupts[][];

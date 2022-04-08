@@ -41,7 +41,7 @@
 #include <ti/sysbios/hal/Hwi.h>
 
 #if (ti_sysbios_BIOS_smpEnabled__D)
-#include <ti/sysbios/family/arm/v8a/smp/Cache.h>
+#include <ti/sysbios/family/arm/v8a/Cache.h>
 #include <ti/sysbios/family/arm/v8a/smp/Core.h>
 #else
 #include <ti/sysbios/family/arm/v8a/Cache.h>

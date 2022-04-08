@@ -36,8 +36,6 @@
 var BiosBuild = xdc.loadCapsule("ti/sysbios/Build.xs");
 
 var objList = [
-    "Cache",
-    "Cache_asm_gnu",
     "Core",
     "Core_asm_gnu",
     "GateSmp",
@@ -53,9 +51,6 @@ var trgFilter = {
 BiosBuild.buildLibs(objList, undefined, trgFilter, arguments);
 
 Pkg.otherFiles = [ "package.bld",
-                   "Core.xdt",
-                   "Core_link.xdt",
-                   "linkcmd.xdt",
                    "Core__epilogue.h",
                    "Core__prologue.h"
                  ];

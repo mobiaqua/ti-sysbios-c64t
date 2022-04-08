@@ -101,7 +101,7 @@ var targetOptions = {
                             "RM4|TMS570LS|ARM7|ARM11|Generic|EVMDMRX45X" +
                             "|CC13|CC25|CM25|CC26|CC32|TMS470M|DM350|DM357|" +
                             "DM368|P401R|RM57D8|AM57|TDA2|TDA3|AWR14|AWR16|" +
-                            "IWR14|IWR16).*",
+                            "IWR14|IWR16|AM65).*",
                     }
                 }
             },
@@ -189,6 +189,15 @@ var targetOptions = {
                         linkerCommandFile: "ti/platforms/cortexR/include/" +
                             "$DeviceId$_Core1.cmd",
                         productGroup: "RM57D8xx",
+                    },
+                    "AM65X": {
+                        deviceVariant: "CortexR5",
+                        deviceId: ".*AM65.*",
+                        platform: "ti.platforms.cortexR:$DeviceId$",
+                        linkerCommandFile: "ti/platforms/cortexR/include/" +
+                            "$DeviceId$.cmd",
+                        endianness: "little",
+                        productGroup: "Sitara",
                     }
                 }
             },
@@ -495,7 +504,8 @@ var targetOptions = {
                 deviceVariant: "CortexA53",
                 cfgPrefix: "default/",
                 target: "gnu.targets.arm.A53F",
-                linkerCommandFile: "",
+                linkerCommandFile: "ti/platforms/cortexA/include_gnu/$DeviceId$.lds",
+                platform: "ti.platforms.cortexA:$DeviceId$",
                 compilerBuildOptions: " -mcpu=cortex-a53+fp+simd -std=c99 "
                     + " -mabi=lp64 -mcmodel=large -mstrict-align "
                     + " -mfix-cortex-a53-835769 -mfix-cortex-a53-843419 "
@@ -537,7 +547,7 @@ var targetOptions = {
                 devices: {
                     "SEMIHOST": {
                         cfgPrefix: "cortexm_semihost/",
-                        deviceId: "~.*(CC26|CC13).*",
+                        deviceId: "~.*(CC26|CC13|AM65).*",
                         platform: "ti.platforms.tiva:$DeviceId$",
                         linkerCommandFile: "ti/platforms/tiva/include_gnu/" +
                             "$DeviceId$.lds",

@@ -37,7 +37,6 @@
 #include <xdc/runtime/Assert.h>
 #include <xdc/runtime/Startup.h>
 
-#include <ti/sysbios/BIOS.h>
 #include <ti/sysbios/hal/Core.h>
 
 #include "package/internal/GateSmp.xdc.h"
@@ -69,10 +68,6 @@ IArg GateSmp_enter(GateSmp_Object *gate)
     key = Core_hwiDisable();
 
     coreId = Core_getId();
-
-    if ((coreId == 0) && (BIOS_getThreadType() == BIOS_ThreadType_Main)) {
-        return (key);
-    }
 
     /* If this core already owns the gate, return */
     if (gate->owner == coreId) {
@@ -140,20 +135,12 @@ IArg GateSmp_enter(GateSmp_Object *gate)
  */
 Void GateSmp_leave(GateSmp_Object *gate, IArg key)
 {
-    volatile UInt coreId;
-
     /*
      * No need to disable interrupts. Interrupts are disabled by caller.
      */
 
-    coreId = Core_getId();
-
-    if ((coreId == 0) && (BIOS_getThreadType() == BIOS_ThreadType_Main)) {
-        Core_hwiRestore(key);
-    }
-
     /* Check if this core owns the lock before releasing lock */
-    if (gate->owner == coreId) {
+    if (gate->owner == Core_getId()) {
         gate->owner = (~0);
         GateSmp_unlock(&gate->gateWord);
     }

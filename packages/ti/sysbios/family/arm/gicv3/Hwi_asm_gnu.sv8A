@@ -72,9 +72,11 @@ ti_sysbios_family_arm_gicv3_Hwi_dispatchIRQ__I:
         stp     x0, x1, [sp, #-16]!  /* save tskKey */
 
         /* call dispatchIRQC */
-        mrs     x0, elr_el1          /* pass IRP to dispatchIRQC() */
-        ldr     x1, =ti_sysbios_family_arm_gicv3_Hwi_dispatchIRQC__I
-        blr     x1
+        mrs     x0, elr_el1          /* pass IRP to dispatchIRQC() arg0 */
+        mov     x1, x19              /* pass lowest order flag to dispatchIRQC() arg1 */
+        mrs     x2, sp_el0           /* pass taskSP to dispatchIRQC() arg2 */
+        ldr     x3, =ti_sysbios_family_arm_gicv3_Hwi_dispatchIRQC__I
+        blr     x3
 
         ldp     x0, x1, [sp], #16    /* restore tskKey */
         cbz     x19, 3f              /* check if in lowest order IRQ */
