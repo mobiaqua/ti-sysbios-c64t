@@ -41,6 +41,10 @@
 
 #include <ti/sysbios/BIOS.h>
 #include <ti/sysbios/family/arm/v8m/Hwi.h>
+#include <ti/sysbios/family/arm/v8m/mtl/Core.h>
+
+#include <ti/devices/mtxx/mtl1.h>
+#include <ti/devices/mtxx/hwpi/hwpi_sysrtc.h>
 
 #include "package/internal/Timer.xdc.h"
 
@@ -49,78 +53,6 @@
 #define NO_TIMER_AVAIL  2
 #define NO_HWI_OBJ      3
 #define BAD_PERIOD      4
-
-/* SYSRTC structure definitions, extracted from VSOC P3 sysrtc.h */
-typedef struct {
-    uint32_t RESERVED0[2];
-    uint32_t IMASK;          /* !< (@ 0x00011028) Interrupt mask */
-    uint32_t RESERVED1;
-    uint32_t RIS;            /* !< (@ 0x00011030) Raw interrupt status */
-    uint32_t RESERVED2;
-    uint32_t MIS;            /* !< (@ 0x00011038) Masked interrupt status */
-    uint32_t RESERVED3;
-    uint32_t ISET;           /* !< (@ 0x00011040) Interrupt set */
-} SYSRTC_CHANNEL_INT_EVENT_Regs;
-
-typedef struct {
-    uint32_t RESERVED0[62];
-    uint32_t DESC_EX;        /* !< (@ 0x000010F8) IP configuration options */
-    uint32_t DESC;           /* !< (@ 0x000010FC) Module Description */
-    uint32_t UTIME;          /* !< (@ 0x00001100) us view */
-    uint32_t STIME;          /* !< (@ 0x00001104) seconds view */
-    uint32_t MTIME;          /* !< (@ 0x00001108) ms view */
-    uint32_t RESERVED1;
-    uint32_t LFINC;          /* !< (@ 0x00001110) Increment count used */
-    uint32_t LOCALTIME;      /* !< (@ 0x00001114) Current local time */
-    uint32_t WALLTIME;       /* !< (@ 0x00001118) Current wall time */
-    uint32_t WALLTIME_BCD;   /* !< (@ 0x0000111C) Current wall time */
-    uint32_t DAYS;           /* !< (@ 0x00001120) Days since epoch */
-    uint32_t WALLTIME_FULL;  /* !< (@ 0x00001124) Current wall time and days */
-    uint32_t RESERVED2[3];
-    uint32_t LFINC_MAN;        /* !< (@ 0x00001134) Manual increment override */
-    uint32_t LOCALTIME_EPOCH;  /* !< (@ 0x00001138) Local time epoch */
-    uint32_t LOCALTIME_OFFSET; /* !< (@ 0x0000113C) Local time offset */
-} SYSRTC_STAT_Regs;
-
-typedef struct {
-    uint32_t RESERVED0[256];
-    uint32_t FSUB_0;            /* !< (@ 0x00010400) Subscriber port. */
-    uint32_t RESERVED1[15];
-    uint32_t FPUB_0;            /* !< (@ 0x00010440) Publisher port. */
-    uint32_t RESERVED2[15];
-    uint32_t CPU_CONNECT_0;     /* !< (@ 0x00010480) CPU connect config byte */
-    uint32_t RESERVED3[743];
-    SYSRTC_CHANNEL_INT_EVENT_Regs INT_EVENT; /* !< (@ 0x00011020) */
-    uint32_t RESERVED4[39];
-    uint32_t EVT_MODE;        /* !< (@ 0x000110E0) Event Mode */
-    uint32_t RESERVED5[5];
-    uint32_t DESC_EX;         /* !< (@ 0x000110F8) IP configuration options */
-    uint32_t DESC;            /* !< (@ 0x000110FC) Module Description */
-    uint32_t CTL;             /* !< (@ 0x00011100) Status / compare/ capture */
-   uint32_t UTIMEVAL;         /* !< (@ 0x00011104) us value */
-   uint32_t STIMEVAL;         /* !< (@ 0x00011108) seconds value */
-   uint32_t MTIMEVAL;         /* !< (@ 0x0001110C) ms value */
-   uint32_t UTIMEDVAL;        /* !< (@ 0x00011110) us value, relative */
-   uint32_t STIMEDVAL;        /* !< (@ 0x00011114) seconds value, relative */
-   uint32_t MTIMEDVAL;        /* !< (@ 0x00011118) ms value, relative */
-   uint32_t PERVAL;           /* !< (@ 0x0001111C) Periodic compare mode */
-   uint32_t PERDVAL;          /* !< (@ 0x00011120) Periodic compare mode */
-   uint32_t RESERVED6[951];
-} SYSRTC_CHANNEL_Regs;
-
-typedef struct {
-  uint32_t RESERVED[1024];
-  SYSRTC_STAT_Regs  STAT;            /* !< (@ 0x00001000) */
-  uint32_t RESERVED0[15280];
-  SYSRTC_CHANNEL_Regs  CHANNEL[32];  /* !< (@ 0x00010000) */
-} SYSRTC_Regs;
-
-#define SYSRTC_BASE      0x40100000U /*!< Base address of module SYSRTC */
-#define SYSRTC_STAT_OFS  0x00001000U
-
-SYSRTC_STAT_Regs * RTC_stat = (SYSRTC_STAT_Regs *)(SYSRTC_BASE +
-    SYSRTC_STAT_OFS);
-SYSRTC_Regs * RTC_regs = (SYSRTC_Regs *) SYSRTC_BASE;
 
 /*
  *  ======== Timer_getNumTimers ========
@@ -192,7 +124,7 @@ Void Timer_setNextTick(Timer_Object *obj, UInt32 ticks)
  */
 Void Timer_setThreshold(Timer_Object *obj, UInt32 next, Bool wrap)
 {
-    RTC_regs->CHANNEL[0].UTIMEVAL = next;
+    SYSRTC_setUTIMEVAL(SYSRTC, obj->channelId, next);
 }
 
 /*
@@ -204,6 +136,10 @@ Int Timer_Module_startup(Int status)
 {
     Timer_Object *obj;
     Int i;
+
+#if ti_sysbios_family_arm_v8m_mtl_Timer_stopFreeRun__D==TRUE
+    SYSRTC_stopFreeRun(SYSRTC);
+#endif
 
     if (Timer_startupNeeded) {
         for (i = 0; i < Timer_numTimerDevices; i++) {
@@ -310,6 +246,7 @@ Int Timer_Instance_init(Timer_Object *obj, Int id, Timer_FuncPtr tickFxn, const 
     obj->periodType = params->periodType;
     obj->arg = params->arg;
     obj->intNum = Timer_module->device[obj->id].intNum;
+    obj->channelId = Timer_module->device[obj->id].channelId;
     obj->tickFxn = tickFxn;
     obj->prevThreshold = 0;
     obj->nextThreshold = 0;
@@ -459,26 +396,31 @@ Void Timer_reconfig (Timer_Object *obj, Timer_FuncPtr tickFxn, const
  */
 Void Timer_start(Timer_Object *obj)
 {
-    UInt32 previous;
-    UInt32 next;
     UInt key;
 
     key = Hwi_disable();
 
     /* reset the channel */
-    RTC_regs->CHANNEL[obj->id].CTL = 0;
+    SYSRTC_setActiveStatus(SYSRTC, obj->channelId,
+        SYSRTC_CHANNEL_CTL_ACTIVE_NOTACTIVE);
 
     /* clear any pending events */
-    /* !!! TO DO */
+    /* !!! TODO? */
 
     /* enable events from channel */
-    RTC_regs->CHANNEL[obj->id].CPU_CONNECT_0 = 0x2; /* !!! fixed to CPU0 */
-    RTC_regs->CHANNEL[obj->id].INT_EVENT.IMASK = 0x1;
+    if (Core_getId() == 0) {
+        SYSRTC_connectEvent0ToCPUSS0(SYSRTC, obj->channelId);
+    }
+    else {
+        SYSRTC_connectEvent0ToCPUSS1(SYSRTC, obj->channelId);
+    }
+    SYSRTC_setInterruptMask(SYSRTC, obj->channelId,
+        SYSRTC_CHANNEL_INT_EVENT_IMASK_EVT_SET);
 
     /* compute and save thresholds, set compare value to start channel */
-    obj->prevThreshold = RTC_stat->UTIME;
+    obj->prevThreshold = SYSRTC_getUTIME(SYSRTC);
     obj->nextThreshold = obj->prevThreshold + obj->period;
-    RTC_regs->CHANNEL[obj->id].UTIMEVAL = obj->nextThreshold;
+    SYSRTC_setUTIMEVAL(SYSRTC, obj->channelId, obj->nextThreshold);
 
     Hwi_restore(key);
 }
@@ -488,8 +430,10 @@ Void Timer_start(Timer_Object *obj)
  */
 Void Timer_stop(Timer_Object *obj)
 {
-    RTC_regs->CHANNEL[obj->id].CTL = 0;
-    RTC_regs->CHANNEL[obj->id].INT_EVENT.IMASK = 0;
+    SYSRTC_setActiveStatus(SYSRTC, obj->channelId,
+        SYSRTC_CHANNEL_CTL_ACTIVE_NOTACTIVE);
+    SYSRTC_setInterruptMask(SYSRTC, obj->channelId,
+        SYSRTC_CHANNEL_INT_EVENT_IMASK_EVT_CLR);
 }
 
 /*
@@ -533,7 +477,7 @@ UInt32 Timer_getPeriod(Timer_Object *obj)
  */
 UInt32 Timer_getCount(Timer_Object *obj)
 {
-    return (RTC_stat->UTIME);
+    return(SYSRTC_getUTIME(SYSRTC));
 }
 
 /*
@@ -567,7 +511,7 @@ Void Timer_periodicStub(UArg arg)
     /* compute and save thresholds, set compare value to start channel */
     obj->prevThreshold = obj->nextThreshold;
     obj->nextThreshold = obj->prevThreshold + obj->period;
-    RTC_regs->CHANNEL[obj->id].UTIMEVAL = obj->nextThreshold;
+    SYSRTC_setUTIMEVAL(SYSRTC, obj->channelId, obj->nextThreshold);
 
     /* call the tick function */
     obj->tickFxn(obj->arg);

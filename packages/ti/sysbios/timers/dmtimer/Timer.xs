@@ -65,6 +65,7 @@ function getAsmFiles(targetName)
         case "ti.targets.arm.elf.A8F":
         case "ti.targets.arm.elf.A8Fnv":
         case "ti.targets.arm.elf.R5F":
+        case "ti.targets.arm.elf.R5Ft":
             return (["Timer_asm.s470"]);
             break;
 

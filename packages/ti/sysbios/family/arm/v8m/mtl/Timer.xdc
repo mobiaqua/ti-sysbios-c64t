@@ -143,6 +143,7 @@ module Timer inherits ti.sysbios.interfaces.ITimer
         Ptr         halTimerHandle;
         String      label;
         UInt        id;
+        UInt        channelId;
         String      startMode;
         String      runMode;
         UInt        period;
@@ -156,6 +157,7 @@ module Timer inherits ti.sysbios.interfaces.ITimer
     /*! @_nodoc */
     metaonly struct DeviceView {
         UInt        id;
+        UInt        channelId;
         String      device;
         String      devAddr;
         UInt        intNum;
@@ -237,7 +239,14 @@ module Timer inherits ti.sysbios.interfaces.ITimer
      *  Timer_create() is called with an id equal to
      *  {@link Timer#ANY Timer_ANY}.
      */
-    config UInt anyMask = 0xFF;
+    config UInt anyMask = 0x3;
+
+    /*!
+     *  ======== stopFreeRun ========
+     *  @_nodoc
+     *  Stop timer during debug halt.
+     */
+    config Bool stopFreeRun = true;
 
     /*!
      *  ======== getAvailMask ========
@@ -322,6 +331,7 @@ internal:   /* not for client use */
     /*! Information about timer */
     struct TimerDevice {
         UInt intNum;
+        UInt channelId;
     };
 
     /*!
@@ -333,6 +343,7 @@ internal:   /* not for client use */
     struct Instance_State {
         Bool                    staticInst;
         Int                     id;
+        UInt32                  channelId;
         RunMode                 runMode;
         ITimer.StartMode        startMode;
         UInt32                  period;

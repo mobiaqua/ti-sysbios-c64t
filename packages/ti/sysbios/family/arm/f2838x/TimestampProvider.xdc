@@ -78,6 +78,23 @@ package ti.sysbios.family.arm.f2838x;
 
 module TimestampProvider inherits ti.sysbios.interfaces.ITimestamp
 {
+    /*! CM Clock Divider value */
+    enum Div {
+        Div_1 = 0,   /*! /1 */
+        Div_2 = 1,   /*! /2 */
+        Div_3 = 2,   /*! /3 */
+        Div_4 = 3,   /*! /4 */
+        Div_5 = 4,   /*! /5 */
+        Div_6 = 5,   /*! /6 */
+        Div_7 = 6,   /*! /7 */
+        Div_8 = 7    /*! /8 */
+    };
+
+    /*!
+     *  ======== CMCLKDIV ========
+     *  CM Clock Divider value applied to PLLSYSCLK
+     */
+    config Div CMCLKDIV;
 
 internal:
 

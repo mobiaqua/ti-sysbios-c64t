@@ -13,6 +13,12 @@
   <tr>
     <td><control type="checkbox" label="Add the F2838X-specific Timestamp management module to my configuration" value="value:this.$used" bold="true"/></td>
   </tr>
+  <tr>
+    <td><control type="label" label="CM Clock Divider (CMCLKDIV)" align="left"/></td>
+    <td><control type="droplist"
+      value="value:this.CMCLKDIV"
+      tooltip="value:this.CMCLKDIV.$summary"/></td>
+  </tr>
 </table></body></html>
 </page>
 </gep>

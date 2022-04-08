@@ -86,8 +86,8 @@ Void TimestampProvider_getFreq(Types_FreqHz *freq)
 {
     Types_FreqHz cpuFreq;
 
-    /* NOTE: assuming IPCCOUNTER rate is 2x the CM CPU clock rate */
+    /* calculate IPCCOUNTER rate based upon CMCLKDIV and BIOS.cpuFreq */
     BIOS_getCpuFreq(&cpuFreq);
     freq->hi = 0;
-    freq->lo = cpuFreq.lo * 2;
+    freq->lo = cpuFreq.lo * (TimestampProvider_CMCLKDIV + 1);
 }

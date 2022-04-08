@@ -155,6 +155,11 @@ Int Hwi_Instance_init(Hwi_Object *hwi, Int intNum,
 {
     Int status;
 
+    if (intNum >= Hwi_NUM_INTERRUPTS) {
+        Error_raise(eb, Hwi_E_badIntNum, intNum, 0);
+        return (1);
+    }
+
     hwi->intNum = intNum;
 
     /* check vector table entry for already in use vector */
@@ -1394,6 +1399,7 @@ Void Hwi_excDumpRegs(UInt lr)
         case 0xfffffff1:
             System_printf("Exception occurred in ISR thread at PC = 0x%08x.\n", excp->pc);
             break;
+        case 0xffffffd9:
         case 0xffffffe9:
         case 0xfffffff9:
         case 0xffffffed:

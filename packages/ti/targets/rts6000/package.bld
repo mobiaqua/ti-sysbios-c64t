@@ -11,7 +11,7 @@ var KnlBuild = xdc.loadCapsule('xdc/runtime/knl/build.xs');
  */
 Pkg.makePrologue = ".NOTPARALLEL:\n" + RtsBuild.makePrologue;
 
-Pkg.otherSrcs = ['boot.c', 'autoinit.c', 'link.xdt'];
+Pkg.otherSrcs = ['boot.c', 'autoinit.c', 'autoinit_coff.c', 'link.xdt'];
 Pkg.otherFiles = Pkg.otherSrcs;
 
 var attrs = {
@@ -24,7 +24,12 @@ for (var i = 0; i < Build.targets.length; i++) {
     var targ = Build.targets[i];
     if (targ.rts == Pkg.name) {
         Pkg.addLibrary("lib/" + Pkg.name, targ, attrs).addObjects(cobjs);
-        Pkg.addLibrary("lib/boot", targ, attrs).addObjects(["boot", "autoinit"]);
+        var objs = ["boot", "autoinit"];
+        /* if target is COFF (not elf), we need a different autoinit file */
+        if (targ.$name.indexOf("ti.targets.elf") == -1) {
+            objs = ["boot", "autoinit_coff"];
+        }
+        Pkg.addLibrary("lib/boot", targ, attrs).addObjects(objs);
     }
 }
 

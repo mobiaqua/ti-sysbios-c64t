@@ -37,6 +37,7 @@
 var Timer = null;
 var BIOS = null;
 var Hwi = null;
+var Build = null;
 
 /*
  *  ======== module$meta$init ========
@@ -56,8 +57,8 @@ function module$meta$init()
     Timer.common$.fxntab = false;
 
     /* initialize timer fields */
-    Timer.anyMask = (1 << 8) - 1;
-    Timer.numTimerDevices = 8;
+    Timer.anyMask = (1 << 2) - 1;
+    Timer.numTimerDevices = 2;
 }
 
 /*
@@ -66,7 +67,19 @@ function module$meta$init()
 function module$use()
 {
     Hwi = xdc.useModule("ti.sysbios.family.arm.v8m.Hwi");
+    Core = xdc.useModule("ti.sysbios.family.arm.v8m.mtl.Core");
     BIOS = xdc.useModule('ti.sysbios.BIOS');
+    Build = xdc.module("ti.sysbios.Build");
+}
+
+/*
+ *  ======== module$validate ========
+ */
+function module$validate()
+{
+    /* add -D to compile line with definition for Timer.stopFreeRun */
+    Build.ccArgs.$add("-Dti_sysbios_family_arm_v8m_mtl_Timer_stopFreeRun__D=" +
+            (Timer.stopFreeRun ? "TRUE" : "FALSE"));
 }
 
 /*
@@ -74,38 +87,33 @@ function module$use()
  */
 function module$static$init(mod, params)
 {
-    mod.availMask = (1 << 8) - 1;
-    mod.device.length = 8;
-    mod.handles.length = 8;
+    mod.availMask = (1 << 2) - 1;
+    mod.device.length = 2;
+    mod.handles.length = 2;
 
     if (params.anyMask > mod.availMask) {
         Timer.$logError("Incorrect anyMask (" + params.anyMask
             + "). Should be <= " + mod.availMask + ".", Timer);
     }
 
-    mod.device[0].intNum = 24;     /* Channel 0 */
-    mod.handles[0] = null;
+    if (Core.id == 0) {
+        mod.device[0].channelId = 0;   /* SYSRTC channel 0 */
+        mod.device[0].intNum = 27;
+        mod.handles[0] = null;
 
-    mod.device[1].intNum = 25;     /* Channel 1 */
-    mod.handles[1] = null;
+        mod.device[1].channelId = 1;   /* SYSRTC channel 1 */
+        mod.device[1].intNum = 28;
+        mod.handles[1] = null;
+    }
+    else {
+        mod.device[0].channelId = 3;   /* SYSRTC channel 3 */
+        mod.device[0].intNum = 27;
+        mod.handles[0] = null;
 
-    mod.device[2].intNum = 26;     /* Channel 2 */
-    mod.handles[2] = null;
-
-    mod.device[3].intNum = 27;     /* Channel 3 */
-    mod.handles[3] = null;
-
-    mod.device[4].intNum = 28;     /* Channel 4 */
-    mod.handles[4] = null;
-
-    mod.device[5].intNum = 29;     /* Channel 5 */
-    mod.handles[5] = null;
-
-    mod.device[6].intNum = 30;     /* Channel 6 */
-    mod.handles[6] = null;
-
-    mod.device[7].intNum = 31;     /* Channel 7 */
-    mod.handles[7] = null;
+        mod.device[1].channelId = 4;   /* SYSRTC channel 4 */
+        mod.device[1].intNum = 28;
+        mod.handles[1] = null;
+    }
 
     /*
      * plug Timer.startup into BIOS.startupFxns array
@@ -167,6 +175,7 @@ function instance$static$init(obj, id, tickFxn, params)
     obj.runMode = params.runMode;
     obj.startMode = params.startMode;
     obj.intNum = modObj.device[obj.id].intNum;
+    obj.channelId = modObj.device[obj.id].channelId;
     obj.arg = params.arg;
     obj.tickFxn = tickFxn;
     obj.extFreq.lo = 1000000; /* rate of UTIME view */
@@ -265,6 +274,7 @@ function viewInitBasic(view, obj)
     view.halTimerHandle =  halTimer.viewGetHandle(obj.$addr);
     view.label      = Program.getShortName(obj.$label);
     view.id         = obj.id;
+    view.channelId  = obj.channelId;
     view.runMode    = getEnumString(obj.runMode);
     view.startMode  = getEnumString(obj.startMode);
     view.periodType = getEnumString(obj.periodType);

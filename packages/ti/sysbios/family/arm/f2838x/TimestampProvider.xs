@@ -30,6 +30,11 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 /*
+ *  ======== TimestampProvider.xs ========
+ */
+var TimestampProvider = null;
+
+/*
  *  ======== module$meta$init ========
  */
 function module$meta$init()
@@ -40,6 +45,7 @@ function module$meta$init()
     }
     /* set fxntab default */
     this.common$.fxntab = false;
+    TimestampProvider = this;
 }
 
 /*
@@ -53,6 +59,11 @@ function module$use()
             this.common$[dl] = Diags.ALWAYS_OFF;
         }
     }
+
+    /* if CMCLKDIV value not specified by app, choose default of /2 */
+    if (!TimestampProvider.$written("CMCLKDIV")) {
+        TimestampProvider.CMCLKDIV = TimestampProvider.Div_2;
+    }
 }
 
 /*
@@ -62,6 +73,5 @@ function getFreqMeta()
 {
     var BIOS = xdc.module("ti.sysbios.BIOS");
 
-    /* NOTE: assuming IPCCOUNTER rate is 2x the CM CPU clock rate */
-    return (BIOS.getCpuFreqMeta() * 2);
+    return (BIOS.getCpuFreqMeta() * (TimestampProvider.CMCLKDIV + 1));
 }

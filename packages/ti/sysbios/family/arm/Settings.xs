@@ -518,7 +518,7 @@ var deviceTable = {
             powerDelegate : "ti.sysbios.family.arm.v8m.Power",
             secondsDelegate : null,
             syscallDelegate : null,
-            coreDelegate : null,
+            coreDelegate : "ti.sysbios.family.arm.v8m.mtl.Core",
             bootModule : null,
             clockTickPeriod : 1000,
             targets : [ "ti.targets.arm.clang.M33F",
@@ -542,7 +542,7 @@ var deviceTable = {
             syscallDelegate : null,
             coreDelegate : "ti.sysbios.family.arm.v7r.tms570.Core",
             clockTickPeriod : 1000,
-            targets : [ "ti.targets.arm.elf.R5F" ]
+            targets : [ "ti.targets.arm.elf.R5F", "ti.targets.arm.elf.R5Ft" ]
         },
         "AM65x": {
             hwiDelegate : "ti.sysbios.family.arm.v7r.keystone3.Hwi",
@@ -560,7 +560,7 @@ var deviceTable = {
             syscallDelegate : null,
             coreDelegate : "ti.sysbios.family.arm.v7r.keystone3.Core",
             clockTickPeriod : 1000,
-            targets : [ "ti.targets.arm.elf.R5F" ]
+            targets : [ "ti.targets.arm.elf.R5F", "ti.targets.arm.elf.R5Ft" ]
         },
         "J721E": {
             hwiDelegate : "ti.sysbios.family.arm.v7r.keystone3.Hwi",
@@ -578,7 +578,7 @@ var deviceTable = {
             syscallDelegate : null,
             coreDelegate : "ti.sysbios.family.arm.v7r.keystone3.Core",
             clockTickPeriod : 1000,
-            targets : [ "ti.targets.arm.elf.R5F" ]
+            targets : [ "ti.targets.arm.elf.R5F", "ti.targets.arm.elf.R5Ft" ]
         },
     },
     "ti.catalog.arm.cortexr4": {
@@ -731,6 +731,8 @@ deviceTable["ti.catalog.arm.cortexm4"]["MSP432P.*"] = deviceTable["ti.catalog.ar
 
 /* Cortex-M33 devices */
 deviceTable["ti.catalog.arm.cortexm33"]["MTL1_VSOC"] = deviceTable["ti.catalog.arm.cortexm33"]["FVP_MPS2"];
+deviceTable["ti.catalog.arm.cortexm33"]["MTL1_CORE0"] = deviceTable["ti.catalog.arm.cortexm33"]["FVP_MPS2"];
+deviceTable["ti.catalog.arm.cortexm33"]["MTL1_CORE1"] = deviceTable["ti.catalog.arm.cortexm33"]["FVP_MPS2"];
 
 var armSettings = xdc.loadCapsule("armSettings.xs");
 

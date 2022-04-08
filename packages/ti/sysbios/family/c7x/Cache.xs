@@ -192,6 +192,7 @@ function module$meta$init()
 function module$use()
 {
     xdc.useModule("ti.sysbios.hal.Hwi");
+    xdc.useModule("ti.sysbios.family.c7x.Mmu");
     Reset = xdc.useModule("xdc.runtime.Reset");
 
     Reset.fxns[Reset.fxns.length++] = Cache.startup;

@@ -43,4 +43,5 @@ requires ti.sysbios.interfaces;
  */
 package ti.sysbios.family.arm.f2838x [1,0,0,0] {
     module TimestampProvider;
+    module Timer;
 }

@@ -58,7 +58,7 @@ metaonly module A53F inherits gnu.targets.arm.ITarget {
     override readonly config Bool alignDirectiveSupported = true;
 
     override readonly config string rts = "gnu.targets.arm.rtsv8A";
-    override config string platform     = "ti.platforms.cortexA:SIMMAXWELL";
+    override config string platform     = "ti.platforms.cortexA:AM65X";
 
     override config string GCCTARG = "aarch64-elf";
 

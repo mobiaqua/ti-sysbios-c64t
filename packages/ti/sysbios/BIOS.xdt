@@ -39,18 +39,18 @@
 %var BIOS = xdc.module("ti.sysbios.BIOS");
 %var BIOS_module = '(&ti_sysbios_BIOS_Module__state__V)';
 %
-Void ti_sysbios_BIOS_atExitFunc__I(Int);
+Void ti_sysbios_BIOS_atExitFunc__I(Int stat);
 
 %var len = BIOS.startupFxns.length;
 %for (var i = 0; i < len; i++) {
 %    var cname = BIOS.startupFxns[i].$name;
 %    cname = cname.replace(/\./g,'_');
-extern Void `cname`();
+extern Void `cname`(Void);
 %}
 %if (len != 0) {
 
 %}
-Void ti_sysbios_BIOS_startFunc__I()
+Void ti_sysbios_BIOS_startFunc__I(Void)
 {
     /*
      *  Check if XDC runtime startup functions have been called. If not, then
@@ -122,7 +122,7 @@ Void ti_sysbios_BIOS_atExitFunc__I(Int notused)
  *  ======== BIOS_rtsLock ========
  *  Called by rts _lock() function
  */
-Void ti_sysbios_BIOS_rtsLock()
+Void ti_sysbios_BIOS_rtsLock(Void)
 {
     IArg key;
 %if (BIOS.mpeEnabled) {
@@ -130,7 +130,7 @@ Void ti_sysbios_BIOS_rtsLock()
 %}
 
     key = ti_sysbios_BIOS_RtsGateProxy_enter(`BIOS_module`->rtsGate);
-    if (`BIOS_module`->rtsGateCount == 0) {
+    if (`BIOS_module`->rtsGateCount == 0U) {
         `BIOS_module`->rtsGateKey = key;
     }
     /* Increment need not be atomic */
@@ -144,7 +144,7 @@ Void ti_sysbios_BIOS_rtsLock()
  *  ======== BIOS_rtsUnLock ========
  *  Called by rts _unlock() function
  */
-Void ti_sysbios_BIOS_rtsUnlock()
+Void ti_sysbios_BIOS_rtsUnlock(Void)
 {
 %if (BIOS.mpeEnabled) {
     ti_sysbios_hal_SysCall_enterPrivMode();
@@ -155,7 +155,7 @@ Void ti_sysbios_BIOS_rtsUnlock()
 %}
     `BIOS_module`->rtsGateCount--;
 
-    if (`BIOS_module`->rtsGateCount == 0) {
+    if (`BIOS_module`->rtsGateCount == 0U) {
         ti_sysbios_BIOS_RtsGateProxy_leave(`BIOS_module`->rtsGate, `BIOS_module`->rtsGateKey);
     }
 %if (BIOS.mpeEnabled) {
@@ -166,7 +166,7 @@ Void ti_sysbios_BIOS_rtsUnlock()
 /*
  *  ======== BIOS_nullFunc ========
  */
-Void ti_sysbios_BIOS_nullFunc__I()
+Void ti_sysbios_BIOS_nullFunc__I(Void)
 {
 }
 

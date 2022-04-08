@@ -37,6 +37,7 @@
 #include <xdc/runtime/Error.h>
 #include <xdc/runtime/Startup.h>
 #include <ti/sysbios/hal/Hwi.h>
+#include <ti/sysbios/family/c7x/Mmu.h>
 
 #include <c6x_migration.h>
 #include <c7x.h>
@@ -52,6 +53,8 @@
 Void Cache_startup()
 {
     Cache_setSize((Cache_Size *)&(Cache_initSize));
+
+    Mmu_startup();
 }
 
 /*
