@@ -1,6 +1,6 @@
 %%{
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2013-2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,8 +74,10 @@ Void ti_sysbios_utils_Load_update__E()
  */
 Void ti_sysbios_utils_Load_hwiBeginHook__E(ti_sysbios_interfaces_IHwi_Handle hwi)
 {
-% if (Load.hwiEnabled) {
+% if (Load.taskEnabled) {
     ti_sysbios_utils_Load_HookContext *pTaskEnv;
+% }
+% if (Load.hwiEnabled) {
     UInt32 delta;
     UInt coreId;
 % }

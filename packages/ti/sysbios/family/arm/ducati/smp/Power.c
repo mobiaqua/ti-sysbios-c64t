@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Texas Instruments Incorporated
+ * Copyright (c) 2012-2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,6 +74,8 @@ extern volatile UInt32 ti_sysbios_family_arm_ducati_smp_readySyncCore0;
 extern volatile UInt32 ti_sysbios_family_arm_ducati_smp_readySyncCore1;
 extern UInt32 ti_sysbios_family_arm_ducati_smp_waitResumeCore0;
 extern UInt32 ti_sysbios_family_arm_ducati_smp_waitResumeCore1;
+extern volatile UInt32 ti_sysbios_family_arm_ducati_smp_doneCore0;
+extern volatile UInt32 ti_sysbios_family_arm_ducati_smp_doneCore1;
 extern UInt32 ti_sysbios_family_arm_ducati_smp_doRestoreL2Core0;
 extern UInt32 ti_sysbios_family_arm_ducati_smp_doRestoreL2Core1;
 extern UInt32 ti_sysbios_family_arm_ducati_smp_startL2RAM;
@@ -480,6 +482,8 @@ UInt Power_doSuspend(Power_SuspendArgs * args)
     if ((args->pmMasterCore != 0) && (args->rendezvousResume)) {
         ti_sysbios_family_arm_ducati_smp_readySyncCore0 = 0;
         ti_sysbios_family_arm_ducati_smp_readySyncCore1 = 0;
+        ti_sysbios_family_arm_ducati_smp_doneCore0 = 0;
+        ti_sysbios_family_arm_ducati_smp_doneCore1 = 0;
     }
 
     /* check if should and wait for other core before go to WFI ... */
@@ -722,7 +726,19 @@ UInt Power_doSuspend(Power_SuspendArgs * args)
         }
     }
 
+    /* check/do final rendezvous before returning */
+    if (args->rendezvousResume) {
+        if (coreID == 0) {
+            ti_sysbios_family_arm_ducati_smp_doneCore0 = 1;
+            while (ti_sysbios_family_arm_ducati_smp_doneCore1
+                == 0) { asm(" nop"); };
+        }
+        else {
+            ti_sysbios_family_arm_ducati_smp_doneCore1 = 1;
+            while (ti_sysbios_family_arm_ducati_smp_doneCore0
+                == 0) { asm(" nop"); };
+        }
+    }
+
     return (reset);
 }
-
-

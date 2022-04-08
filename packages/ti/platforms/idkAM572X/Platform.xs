@@ -33,9 +33,6 @@ function getCpuDataSheet(cpuId)
         return (Utils.getCpuDataSheet(this.$module.M4));
     }
     else if (cpuId == "2") {
-        return (Utils.getCpuDataSheet(this.$module.EVE));
-    }
-    else if (cpuId == "3") {
         return (Utils.getCpuDataSheet(this.$module.GPP));
     }
     else {
@@ -64,54 +61,15 @@ function getExeContext(prog)
     cpu.memoryMap = Utils.assembleMemoryMap(cpu, this);
 
     if (this.codeMemory == undefined) {
-        switch(core) {
-            case "DSP":
-                this.codeMemory = "EXT_RAM";
-                break;
-            case "M4":
-                this.codeMemory = "EXT_RAM";
-                break;
-            case "EVE":
-                this.codeMemory = "EXT_RAM";
-                break;
-            case "GPP":
-                this.codeMemory = "EXT_RAM";
-                break;
-        }
+        this.codeMemory = "EXT_RAM";
     }
 
     if (this.dataMemory == undefined) {
-        switch(core) {
-            case "DSP":
-                this.dataMemory = "EXT_RAM";
-                break;
-            case "M4":
-                this.dataMemory = "EXT_RAM";
-                break;
-            case "EVE":
-                this.dataMemory = "DMEM";
-                break;
-            case "GPP":
-                this.dataMemory = "EXT_RAM";
-                break;
-        }
+        this.dataMemory = "EXT_RAM";
     }
 
     if (this.stackMemory == undefined) {
-        switch(core) {
-            case "DSP":
-                this.stackMemory = "EXT_RAM";
-                break;
-            case "M4":
-                this.stackMemory = "EXT_RAM";
-                break;
-            case "EVE":
-                this.stackMemory = "DMEM";
-                break;
-            case "GPP":
-                this.stackMemory = "EXT_RAM";
-                break;
-        }
+        this.stackMemory = "EXT_RAM";
     }
 
     // check for the overlap in the memory map
@@ -206,7 +164,6 @@ function instance$meta$init(name)
         args = thisMod[name];
     }
 
-    var arp32 = ["arp32"];
     var armChain = ["v7M", "v7M4"];
     var dspChain = ["62", "64", "64P", "674", "66"];
     var gppChain = ["v7A15"];
@@ -218,11 +175,6 @@ function instance$meta$init(name)
     for (var i = 0; i < armChain.length; i++) {
         if (armChain[i] == Program.build.target.isa) {
             args.core = "M4";
-        }
-    }
-    for (var i = 0; i < arp32.length; i++) {
-        if (arp32[i] == Program.build.target.isa) {
-            args.core = "EVE";
         }
     }
     for (var i = 0; i < gppChain.length; i++) {
@@ -260,18 +212,6 @@ function instance$meta$init(name)
 
     if ("stackMemory" in args) {
         this.stackMemory = args.stackMemory;
-    }
-
-    if (args.core == "EVE") {
-        /* add 'page' to the external memory map on ARP32(EVE) */
-        for (memory in this.externalMemoryMap) {
-            if (memory.match(/EVEVECS/)) {
-                this.externalMemoryMap[memory].page = 0;
-            }
-            else {
-                this.externalMemoryMap[memory].page = 1;
-            }
-        }
     }
 
     /* Save 'core' to avoid computing it again */

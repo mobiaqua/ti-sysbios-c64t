@@ -52,7 +52,7 @@
 ;  Power_standby(address)
 ;
 
-        .sect ".text:ti_sysbios_family_c66_vayu_Power_code"
+        .sect ".text:ti_sysbios_family_c66_vayu_Power_standby__I"
         .clink
 
 _ti_sysbios_family_c66_vayu_Power_standby__I:
@@ -67,6 +67,16 @@ _ti_sysbios_family_c66_vayu_Power_standby__I:
         stdw b13:b12, *a4++
         stdw b11:b10, *a4++
         stw  b3, *a4            ; save B3
+        nop                     ; pad the fetch packet
+
+        mfence                  ; mfence so all data writes land before idle
+        mvk  0x0300, b5         ; workaround for prefetch silicon bug with idle
+        mvkh 0x08000000, b5     ; even though we don't think it should affect
+        mvk 1, a4               ; us in this code since we do not expect to
+        stw a4, *b5             ; return here.
+        add 4, b5, b5
+        ldw *b5, b5
+        nop                     ; pad the fetch packet
 
         ; idle the CPU
         idle

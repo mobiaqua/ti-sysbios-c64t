@@ -57,6 +57,7 @@ ti_sysbios_family_arm_Mpu_disableAsm__I
         .asmfunc
         mrc     p15, #0, r0, c1, c0, #0  ; read SCTLR register
         bic     r0, r0, #0x1             ; clear bit 1 in r0
+        dsb
         mcr     p15, #0, r0, c1, c0, #0  ; mpu disabled (bit 1 = 0)
         isb                              ; flush instruction pipeline
 
@@ -92,7 +93,9 @@ ti_sysbios_family_arm_Mpu_enableAsm__I
         .asmfunc
         mrc     p15, #0, r0, c1, c0, #0  ; read SCTLR register
         orr     r0, r0, #0x1             ; set bit 1 in r0
+        dsb
         mcr     p15, #0, r0, c1, c0, #0  ; mpu enabled (bit 1 = 1)
+        isb                              ; flush instruction pipeline
 
         bx      r14
         .endasmfunc

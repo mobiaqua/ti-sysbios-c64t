@@ -33,8 +33,8 @@
  *  ======== _pthread_error.h ========
  */
 
-#ifndef ti_sysbios_posix__pthread_error_include
-#define ti_sysbios_posix__pthread_error_include
+#ifndef ti_sysbios_posix__pthread_error__include
+#define ti_sysbios_posix__pthread_error__include
 
 #ifdef __cplusplus
 extern "C" {

@@ -73,10 +73,10 @@
 #include <driverlib/rfc.h>
 #include <driverlib/sys_ctrl.h>
 #include <driverlib/driverlib_release.h>
+#include <driverlib/setup.h>
+#include <driverlib/ccfgread.h>
 
 #include "package/internal/Power.xdc.h"
-
-#define SCLK_LF_OPTION_RCOSC_LF         3  /* defined in cc26_ccfg.xls */
 
 /*
  *  Resource database records.  Each record contains:
@@ -663,24 +663,30 @@ Power_Status Power_sleep(Power_SleepState sleepState, UArg arg0, UArg arg1)
             /* 9. Request uLDO during standby */
             PRCMMcuUldoConfigure(true);
 
-            /* query constraints to determine if cache should be retained */
+            /* Query constraints to determine if cache should be retained */
             constraints = Power_getConstraintInfo();
             if ((constraints & Power_SB_VIMS_CACHE_RETAIN) != 0) {
                 retainCache = TRUE;
             }
 
-            /* 10. If don't want retention in standby, disable it now ... */
+            /* 10. If don't want VIMS retention in standby, disable it now... */
             if (retainCache == FALSE) {
-                /* 10.1 Get current VIMS mode */
-                modeVIMS = VIMSModeGet(VIMS_BASE);
-                /* 10.2 Wait if invalidate in progress... */
-                while (modeVIMS == VIMS_MODE_CHANGING) {
+
+                /* 10.1 Get the current VIMS mode */
+                do {
                     modeVIMS = VIMSModeGet(VIMS_BASE);
+                } while (modeVIMS == VIMS_MODE_CHANGING);
+
+                /* 10.2 If in a cache mode, turn VIMS off */
+                if ((modeVIMS == VIMS_MODE_ENABLED) ||
+                    (modeVIMS == VIMS_MODE_SPLIT)) {
+
+                    /* 10.3 Now turn off the VIMS */
+                    VIMSModeSet(VIMS_BASE, VIMS_MODE_OFF);
                 }
-                /* 10.3 Disable cache RAM retention */
+
+                /* 10.4 Now disable retention */
                 PRCMCacheRetentionDisable();
-                /* 10.4 Turn off the VIMS */
-                VIMSModeSet(VIMS_BASE, VIMS_MODE_OFF);
             }
 
             /* 11. Setup recharge parameters */
@@ -692,32 +698,26 @@ Power_Status Power_sleep(Power_SleepState sleepState, UArg arg0, UArg arg1)
             /* 13. Invoke deep sleep to go to STANDBY */
             PRCMDeepSleep();
 
-            /* 14. If didn't retain cache in standby, re-enable retention now */
+            /* 14. If didn't retain VIMS in standby, re-enable retention now */
             if (retainCache == FALSE) {
-                VIMSModeSet(VIMS_BASE, modeVIMS);
+
+                /* 14.1 If previously in a cache mode, restore the mode now */
+                if ((modeVIMS == VIMS_MODE_ENABLED) ||
+                    (modeVIMS == VIMS_MODE_SPLIT)) {
+                    VIMSModeSet(VIMS_BASE, modeVIMS);
+                }
+
+                /* 14.2 Re-enable retention */
                 PRCMCacheRetentionEnable();
             }
 
-            /*
-             * 15. Force power on of AUX to keep it on when system is not
-             * sleeping; this also counts as a write to the AON interface
-             * ensuring that a following sync of the AON interface will
-             * force an update of all registers
-             */
+            /* 15. Start forcing on power to AUX */
             AONWUCAuxWakeupEvent(AONWUC_AUX_WAKEUP);
-            while(!(AONWUCPowerStatusGet() & AONWUC_AUX_POWER_ON)) {};
 
-            /* 16. If XOSC_HF was forced off above, initiate switch back */
-            if (xosc_hf_active == TRUE) {
-                Power_XOSC_HF(ENABLE);
-            }
-
-            /* 17. Restore power domain states in effect before standby */
+            /* 16. Start re-powering power domains */
             PRCMPowerDomainOn(poweredDomains);
-            while (PRCMPowerDomainStatus(poweredDomains) !=
-                PRCM_DOMAIN_POWER_ON){};
 
-            /* 18. Restore deep sleep clocks of Crypto and DMA */
+            /* 17. Restore deep sleep clocks of Crypto and DMA */
             if (Power_getDependencyCount(PERIPH_CRYPTO)) {
                 PRCMPeripheralDeepSleepEnable(
                     Power_module->resourceDB[PERIPH_CRYPTO].driverlibID);
@@ -727,14 +727,18 @@ Power_Status Power_sleep(Power_SleepState sleepState, UArg arg0, UArg arg1)
                     Power_module->resourceDB[PERIPH_UDMA].driverlibID);
             }
 
-            /* 19. Make sure clock settings take effect */
+            /* 18. Make sure clock settings take effect */
             PRCMLoadSet();
 
-            /* 20. Release request for uLDO */
+            /* 19. Release request for uLDO */
             PRCMMcuUldoConfigure(false);
 
-            /* 21. Set transition state to EXITING_SLEEP */
+            /* 20. Set transition state to EXITING_SLEEP */
             Power_module->state = Power_EXITING_SLEEP;
+
+            /* 21. Wait until all power domains are back on */
+            while (PRCMPowerDomainStatus(poweredDomains) !=
+                PRCM_DOMAIN_POWER_ON){};
 
             /*
              * 22. Signal clients registered for early post-sleep notification;
@@ -747,25 +751,33 @@ Power_Status Power_sleep(Power_SleepState sleepState, UArg arg0, UArg arg1)
             AONIOCFreezeDisable();
             SysCtrlAonSync();
 
-            /* 24. Re-enable interrupts */
+            /* 24. Wait for AUX to power up */
+            while(!(AONWUCPowerStatusGet() & AONWUC_AUX_POWER_ON)) {};
+
+            /* 25. If XOSC_HF was forced off above, initiate switch back */
+            if (xosc_hf_active == TRUE) {
+                Power_XOSC_HF(ENABLE);
+            }
+
+            /* 26. Re-enable interrupts */
             CPUcpsie();
 
             /*
-             * 25. Signal all clients registered for late post-sleep
+             * 27. Signal all clients registered for late post-sleep
              * notification
              */
             status = Power_notify(postEventLate);
 
             /*
-             * 26. Now clear the transition state before re-enabling
+             * 28. Now clear the transition state before re-enabling
              * scheduler
              */
             Power_module->state = Power_ACTIVE;
 
-            /* 27. Re-enable Swi scheduling */
+            /* 29. Re-enable Swi scheduling */
             Swi_restore(swiKey);
 
-            /* 28. Adjust recharge parameters */
+            /* 30. Adjust recharge parameters */
             SysCtrlAdjustRechargeAfterPowerDown();
 
             /* re-enable Task scheduling */
@@ -826,13 +838,17 @@ Int ti_sysbios_family_arm_cc26xx_Power_Module_startup(Int status)
     if (Power_calibrateRCOSC_LF) {
 
         /* read the LF clock source from CCFG */
-        ccfgLfClkSrc = (HWREG(CCFG_BASE + CCFG_O_MODE_CONF) &
-            CCFG_MODE_CONF_SCLK_LF_OPTION_M) >> CCFG_MODE_CONF_SCLK_LF_OPTION_S;
+        ccfgLfClkSrc = CCFGRead_SCLK_LF_OPTION();
 
         /* verify RCOSC_LF is the LF clock source */
         if (ccfgLfClkSrc == SCLK_LF_OPTION_RCOSC_LF) {
             Power_module->calLF = true;
         }
+    }
+
+    /* if VIMS RAM is configured as GPRAM: set retention constraint */
+    if (!CCFGRead_DIS_GPRAM()) {
+        Power_setConstraint(Power_SB_VIMS_CACHE_RETAIN);
     }
 
     /* set standby disallow constraint pending LF clock quailifier disabling */

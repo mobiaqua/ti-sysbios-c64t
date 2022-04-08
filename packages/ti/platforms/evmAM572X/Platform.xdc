@@ -27,7 +27,7 @@
  *  model.  Once they are part of the model, these parameters are
  *  queried by a program's configuration script.
  *
- *  This particular platform has 1 Cortex-A15, 4 EVE's, 2 Benelli/IPU 
+ *  This particular platform has 1 Cortex-A15, 2 Benelli/IPU
  *  Sub-system (Dual M4's) and 2 C66x DSP's.
  */
 metaonly module Platform inherits xdc.platform.IPlatform
@@ -56,15 +56,6 @@ metaonly module Platform inherits xdc.platform.IPlatform
         revision:       "1.0",
     };
 
-    /* EVE */
-    readonly config xdc.platform.IExeContext.Cpu EVE = {
-        id:             "2",
-        clockRate:      532.0,
-        catalogName:    "ti.catalog.arp32",
-        deviceName:     "DRA7XX",
-        revision:       "1.0"
-    };
-
     /* GPP */
     readonly config xdc.platform.IExeContext.Cpu GPP = {
         id:             "3",
@@ -80,21 +71,21 @@ metaonly module Platform inherits xdc.platform.IPlatform
  *  ------------------------------------------------------------------------
  *              8000_0000  1000_0000  ( 256 MB) External Memory
  *
- *  0000_0000 0 8000_0000        100  ( 256  B) EVE1_VECS (vector table)
+ *  0000_0000 0 8000_0000        100  ( 256  B) --------
  *              8000_0100       FF00  ( ~64 KB) --------
- *  0000_0000   8001_0000        100  ( 256  B) EVE2_VECS (vector table)
+ *  0000_0000   8001_0000        100  ( 256  B) --------
  *              8001_0100       FF00  ( ~64 KB) --------
- *  0000_0000   8002_0000        100  ( 256  B) EVE3_VECS (vector table)
+ *  0000_0000   8002_0000        100  ( 256  B) --------
  *              8002_0100       FF00  ( ~64 KB) --------
- *  0000_0000   8003_0000        100  ( 256  B) EVE4_VECS (vector table)
+ *  0000_0000   8003_0000        100  ( 256  B) --------
  *              8003_0100    FE_FF00  ( ~16 MB) --------
- *            1 8100_0000    40_0000  (   4 MB) EVE1_PROG (code, data)
+ *            1 8100_0000    40_0000  (   4 MB) --------
  *              8140_0000    C0_0000  (  12 MB) --------
- *            2 8200_0000    40_0000  (   4 MB) EVE2_PROG (code, data)
+ *            2 8200_0000    40_0000  (   4 MB) --------
  *              8240_0000    C0_0000  (  12 MB) --------
- *            3 8300_0000    40_0000  (   4 MB) EVE3_PROG (code, data)
+ *            3 8300_0000    40_0000  (   4 MB) --------
  *              8340_0000    C0_0000  (  12 MB) --------
- *            4 8400_0000    40_0000  (   4 MB) EVE4_PROG (code, data)
+ *            4 8400_0000    40_0000  (   4 MB) --------
  *              8440_0000    C0_0000  (  12 MB) --------
  *            5 8500_0000   100_0000  (  16 MB) --------
  *            6 8600_0000   100_0000  (  16 MB) --------
@@ -148,82 +139,6 @@ metaonly module Platform inherits xdc.platform.IPlatform
         l1DMode: "32k",
         l1PMode: "32k",
         l2Mode: "128k"
-    };
-
-    readonly config Any EVE1 = {
-        externalMemoryMap: [
-            [ "EVEVECS", { /* name used by SYS/BIOS */
-                name: "EVEVECS", space: "code/data", access: "RWX",
-                base: 0x80000000, len: 0x100, page: 0,
-                comment: "EVE1 Vector Table (256 B)"
-            }],
-            [ "EVE1_PROG", {
-                name: "EVE1_PROG", space: "code/data", access: "RWX",
-                base: 0x81000000, len: 0x400000, page: 1,
-                comment: "EVE1 Program Memory (4 MB)"
-            }],
-            [ "SR_0", SR_0 ]
-        ],
-        codeMemory:  "EVE1_PROG",
-        dataMemory:  "EVE1_PROG",
-        stackMemory: "EVE1_PROG"
-    };
-
-    readonly config Any EVE2 = {
-        externalMemoryMap: [
-            [ "EVEVECS", { /* name used by SYS/BIOS */
-                name: "EVEVECS", space: "code/data", access: "RWX",
-                base: 0x80010000, len: 0x100, page: 0,
-                comment: "EVE2 Vector Table (256 B)"
-            }],
-            [ "EVE2_PROG", {
-                name: "EVE2_PROG", space: "code/data", access: "RWX",
-                base: 0x82000000, len: 0x400000, page: 1,
-                comment: "EVE2 Program Memory (4 MB)"
-            }],
-            [ "SR_0", SR_0 ]
-        ],
-        codeMemory:  "EVE2_PROG",
-        dataMemory:  "EVE2_PROG",
-        stackMemory: "EVE2_PROG"
-    };
-
-    readonly config Any EVE3 = {
-        externalMemoryMap: [
-            [ "EVEVECS", { /* name used by SYS/BIOS */
-                name: "EVEVECS", space: "code/data", access: "RWX",
-                base: 0x80020000, len: 0x100, page: 0,
-                comment: "EVE3 Vector Table (256 B)"
-            }],
-            [ "EVE3_PROG", {
-                name: "EVE3_PROG", space: "code/data", access: "RWX",
-                base: 0x83000000, len: 0x400000, page: 1,
-                comment: "EVE3 Program Memory (4 MB)"
-            }],
-            [ "SR_0", SR_0 ]
-        ],
-        codeMemory:  "EVE3_PROG",
-        dataMemory:  "EVE3_PROG",
-        stackMemory: "EVE3_PROG"
-    };
-
-    readonly config Any EVE4 = {
-        externalMemoryMap: [
-            [ "EVEVECS", { /* name used by SYS/BIOS */
-                name: "EVEVECS", space: "code/data", access: "RWX",
-                base: 0x80030000, len: 0x100, page: 0,
-                comment: "EVE4 Vector Table (256 B)"
-            }],
-            [ "EVE4_PROG", {
-                name: "EVE4_PROG", space: "code/data", access: "RWX",
-                base: 0x84000000, len: 0x400000, page: 1,
-                comment: "EVE4 Program Memory (4 MB)"
-            }],
-            [ "SR_0", SR_0 ]
-        ],
-        codeMemory:  "EVE4_PROG",
-        dataMemory:  "EVE4_PROG",
-        stackMemory: "EVE4_PROG"
     };
 
     readonly config Any IPU1 = {

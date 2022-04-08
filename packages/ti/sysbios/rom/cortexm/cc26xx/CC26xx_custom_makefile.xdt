@@ -204,10 +204,6 @@ endef
 
 all: `LIB`
 
-PHONY: intro
-intro:
-	@echo Preprocessing library source files ...
-
 %var asmSources = Build.getAsmFiles(TARGET.$name);
 %/* 
 % * pull in ALL ASM files
@@ -229,6 +225,7 @@ intro:
 % * build ALL C files for sysbios.lib
 % * and mangle the names of the ROM'd APIs in the non-ROM lib.
 % */
+%var printPreprocessingStarted = true;
 %for each (var s in sourcesLIB) {
 %   if (s.match(/_config.c/)) {
 %       var libPP = baseName(s) + "_lib.pp";
@@ -238,6 +235,14 @@ intro:
 %   }
 %   LIBPPS.push("mangled_" + libPP);
 mangled_`libPP`: `s`
+%/* 
+% * print "Preprocessing" banner on first generated config.c
+% * file rule to make sure it gets printed after a clean.
+% */
+%if (printPreprocessingStarted == true && libPP.match(/_config_lib.pp/)) {
+	@echo Preprocessing library source files ...
+%   printPreprocessingStarted = false;
+%}
 	@$(CC_PP) -ppl --output_file=`libPP` $(BIOS_DEFS) $(XOPTS) $(INCS) \
 	`srcName(s)`
 	@$(XDC_ROOT)/../xs -c `romModuleLibDir`../mangleCFile.xs `libPP` mangled_`libPP` romInternFuncs.txt "$(INTERN_FUNCS)"
@@ -251,14 +256,16 @@ sysbios.obj: `LIBPPS.join(" ")`
 	`s` \
 %}
 
-`LIB`: intro sysbios.obj `LIBASMOBJS.join(" ")`
-	@-$(call RM, $@)
-	@$(AR) $@ $(filter-out intro,$^)
+`LIB`: sysbios.obj `LIBASMOBJS.join(" ")`
+	@$(AR) $@ $^
 	@echo Library build complete.
 
 clean:
 %/* Force reconfig on CCS project after a clean so that config.c files are generated before gmake -k all */
 %if (environment["os.name"].match(/Windows.*/i)) {
 	@$(DEL) ..\makefile.libs
+%}
+%else {
+	@$(DEL) ../makefile.libs
 %}
 	@-$(call RM, *.obj)

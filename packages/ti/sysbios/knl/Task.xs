@@ -99,6 +99,7 @@ function module$use()
     Queue = xdc.useModule("ti.sysbios.knl.Queue");
     Idle = xdc.useModule("ti.sysbios.knl.Idle");
     Settings = xdc.module("ti.sysbios.family.Settings");
+    Build = xdc.module("ti.sysbios.Build");
 
     if (BIOS.smpEnabled == true) {
         Core = xdc.useModule("ti.sysbios.hal.Core");
@@ -168,6 +169,9 @@ function module$use()
      */
 
     Task.PARAMS.affinity = Task.defaultAffinity;
+
+    Build.ccArgs.$add("-Dti_sysbios_knl_Task_minimizeLatency__D=" +
+        (Task.minimizeLatency ? "TRUE" : "FALSE"));
 }
 
 /*
@@ -708,6 +712,17 @@ function viewInitBasic(view, obj)
         view.fxn.length = 1;
         /* Since we cant get label, get function address instead */
         view.fxn[0] = "0x" + Number(obj.fxn).toString(16);
+    }
+
+    try {
+        /*
+         * Special trap for pthreads.  Task arg0 contains the function.
+         */
+        if (view.fxn[0] == "_pthread_runStub") {
+            view.fxn = Program.lookupFuncName(Number(obj.arg0));
+        }
+    } catch (e) {
+        /* Leave function name as _pthread_runStub */
     }
 
     view.arg0 = obj.arg0;

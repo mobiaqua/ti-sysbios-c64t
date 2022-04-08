@@ -150,6 +150,14 @@ var devices = [
     "MSP430FR5967",
     "MSP430FR5968",
     "MSP430FR5969",
+    "MSP430FR5987",
+    "MSP430FR5988",
+    "MSP430FR5989",
+    "MSP430FR59891",
+    "MSP430FR6987",
+    "MSP430FR6988",
+    "MSP430FR6989",
+    "MSP430FR69891",
 ];
 
 var settings = {

@@ -41,6 +41,7 @@ var TimerProxy = null;
 var Swi = null;
 var BIOS = null;
 var Settings = null;
+var Build = null;
 
 /*
  *  ======== module$meta$init ========
@@ -65,6 +66,7 @@ function module$meta$init()
 function module$use()
 {
     BIOS = xdc.useModule('ti.sysbios.BIOS');
+    Build = xdc.module('ti.sysbios.Build');
     /* last parameter is true to disable expected cycle warnings  */
     Queue = xdc.useModule('ti.sysbios.knl.Queue');
     xdc.useModule('ti.sysbios.hal.Hwi');
@@ -119,6 +121,39 @@ function module$use()
             Clock.tickMode = Clock.TickMode_PERIODIC;
         }
     }
+
+    /* if app hasn't declared Clock_stop() behavior, choose a default */
+    if (!Clock.$written("stopCheckNext")) {
+
+        /* if cc26xx or cc13xx, check/trigger clock when next is stopped */
+        if (Program.cpu.deviceName.match(/^CC26/) ||
+            Program.cpu.deviceName.match(/^CC13/)) {
+            Clock.stopCheckNext = true;
+        }
+        else {
+            Clock.stopCheckNext = false;
+        }
+    }
+
+    /*
+     * if Clock.stopCheckNext is true, and BIOS.clockEnabled, and tick mode
+     * is TickMode_DYNAMIC ... create the trigger clock object
+     */
+    if (BIOS.clockEnabled && (Clock.tickMode == Clock.TickMode_DYNAMIC) &&
+        (Clock.stopCheckNext == true)) {
+        var clockParams = new Clock.Params();
+        clockParams.period = 0;
+        clockParams.startFlag = false;
+        Clock.triggerClock = Clock.create(Clock.triggerFunc, 1, clockParams);
+    }
+    else {
+        Clock.stopCheckNext = false;
+        Clock.triggerClock = null;
+    }
+
+    /* add -D to compile line with definition for Clock.stopCheckNext */
+    Build.ccArgs.$add("-Dti_sysbios_knl_Clock_stopCheckNext__D=" +
+        (Clock.stopCheckNext ? "TRUE" : "FALSE"));
 
     /* Make sure that the delegate module gets 'used' */    
     if (BIOS.clockEnabled && Clock.tickSource == Clock.TickSource_TIMER) {

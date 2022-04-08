@@ -176,6 +176,19 @@ function module$static$init(mod, params)
          *  (Task.$objects.length).
          */
         mod.taskEnv.length = Task.$instances.length + Task.$objects.length;
+
+        if (BIOS.smpEnabled) {
+            /*
+             *  If nothing is running on the other cores except the
+             *  Idle task, there will be no context switch to update
+             *  the Idle task's running time.  This can cause the CPU
+             *  load to be artificially high.  To fix this, call
+             *  Load_updateCurrentThreadTime() in the idle loop.
+             */
+            for (var i = 1; i < numCores; i++) {
+                Idle.addCoreFunc(Load.updateCurrentThreadTime, i);
+            }
+        }
     }
     else {
         mod.taskEnv.length = 0;

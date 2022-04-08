@@ -202,6 +202,7 @@ UInt Power_suspend(Power_Suspend level)
     ssContext.configINTC.AEGMUX0 = REG(AEGMUX0_REG);
     ssContext.configINTC.AEGMUX1 = REG(AEGMUX1_REG);
     ssContext.configINTC.INTDMASK = REG(INTDMASK_REG);
+    ssContext.configINTC.PDCCMD = REG(PDCCMD_REG);
     ssContext.configINTC.L2CFG = REG(L2CFG_REG);
     ssContext.configINTC.L1PCFG = REG(L1PCFG_REG);
     ssContext.configINTC.L1PCC = REG(L1PCC_REG);
@@ -500,6 +501,7 @@ UInt Power_suspend(Power_Suspend level)
         REG(AEGMUX0_REG) = ssContext.configINTC.AEGMUX0;
         REG(AEGMUX1_REG) = ssContext.configINTC.AEGMUX1;
         REG(INTDMASK_REG) = ssContext.configINTC.INTDMASK;
+        REG(PDCCMD_REG) = ssContext.configINTC.PDCCMD;
 
         /* restore PAMAP registers starting at PAMAP0 */
         wordPtr = (UInt32 *)(PAMAP0_REG);
@@ -608,6 +610,9 @@ UInt Power_suspend(Power_Suspend level)
         }
     }
     else {
+	/* restore PDCCMD to pre-standy state */
+        REG(PDCCMD_REG) = ssContext.configINTC.PDCCMD;
+
         /* restore caches to their pre-standby enable state */
         REG(L2CFG_REG) = ssContext.configINTC.L2CFG;
         REG(L1PCFG_REG) = ssContext.configINTC.L1PCFG;

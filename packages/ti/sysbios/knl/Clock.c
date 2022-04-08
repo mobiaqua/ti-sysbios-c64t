@@ -617,6 +617,11 @@ Void Clock_start(Clock_Object *obj)
 Void Clock_stop(Clock_Object *obj)
 {
     obj->active = FALSE;
+#if ti_sysbios_knl_Clock_stopCheckNext__D
+    if (obj->currTimeout == Clock_module->nextScheduledTick) {
+        Clock_start(Clock_triggerClock);
+    }
+#endif
 }
 
 /*
@@ -683,4 +688,11 @@ Void Clock_logTick()
 Bool Clock_isActive(Clock_Object *obj)
 {
     return (obj->active);
+}
+
+/*
+ *  ======== Clock_triggerFunc ========
+ */
+Void Clock_triggerFunc(UArg arg)
+{
 }

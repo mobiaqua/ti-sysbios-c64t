@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,7 @@ var objList = [
 
 var trgFilter = {
     field: "isa",
-    list: [ "v5T", "64P", "64T", "66",  "674"]
+    list: [ "v5T", "64P", "64T", "66", "674", "arp32"]
 };
 
 /* generate makefiles */

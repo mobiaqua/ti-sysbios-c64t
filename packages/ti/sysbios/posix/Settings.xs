@@ -51,7 +51,9 @@ function getCFiles(targetName)
              "pthread_cond.c",
              "pthread_mutex.c",
              "pthread_rwlock.c",
-             "semaphore.c"]);
+             "clock.c",
+             "semaphore.c",
+             "timer.c"]);
 }
 
 /*

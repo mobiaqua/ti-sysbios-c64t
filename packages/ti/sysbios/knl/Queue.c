@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2013-2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -109,6 +109,27 @@ Ptr Queue_get(Queue_Object *obj)
 }
 
 /*
+ *  ======== getTail ========
+ */
+Ptr Queue_getTail(Queue_Object *obj)
+{
+    Queue_Elem *elem;
+    UInt key;
+
+    key = Hwi_disable();
+
+    elem = obj->elem.prev;
+
+    obj->elem.prev = elem->prev;
+    elem->prev->next = &(obj->elem);
+
+    Hwi_restore(key);
+
+    return (elem);
+
+}
+
+/*
  *  ======== head ========
  */
 Ptr Queue_head(Queue_Object *obj)
@@ -161,6 +182,23 @@ Void Queue_put(Queue_Object *obj, Queue_Elem *elem)
     elem->prev = obj->elem.prev;
     obj->elem.prev->next = elem;
     obj->elem.prev = elem;
+
+    Hwi_restore(key);
+}
+
+/*
+ *  ======== putHead ========
+ */
+Void Queue_putHead(Queue_Object *obj, Queue_Elem *elem)
+{
+    UInt key;
+
+    key = Hwi_disable();
+
+    elem->prev = &(obj->elem);
+    elem->next = obj->elem.next;
+    obj->elem.next->prev = elem;
+    obj->elem.next = elem;
 
     Hwi_restore(key);
 }

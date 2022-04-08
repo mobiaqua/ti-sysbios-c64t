@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, Texas Instruments Incorporated
+ * Copyright (c) 2013-2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -472,6 +472,27 @@ module Clock
     config UInt32 tickPeriod;
 
     /*!
+     *  @_nodoc
+     *  ======== stopCheckNext ========
+     *  Boolean to control whether a check is made upon each Clock_stop() call
+     *  to determine if the Clock object being stopped is due to timeout on the
+     *  next scheduled tick.  If this feature is enabled, and the timeout
+     *  coincides with the next scheduled tick, then a special 'trigger' Clock
+     *  will be started to force a reschedule of the next tick, as soon as
+     *  possible. This feature is only applicable for Clock.TickMode_DYNAMIC.
+     *
+     *  For most use cases it is most efficient to simply stop
+     *  a Clock object, and then let the next scheduled tick occur naturally.
+     *  But some low power application use cases (that routinely stop the next
+     *  expiring Clock object) can benefit by scheduling an immediate tick, to
+     *  suppress the next scheduled tick.  The default value for most
+     *  targets is 'false', for cc26xx/cc13xx it is 'true'.  The default is
+     *  established in Clock.xs, if the application has not explicitly
+     *  specified a value.
+     */
+    metaonly config Bool stopCheckNext;
+
+    /*!
      *  ======== getTicks ========
      *  Time in Clock ticks
      *
@@ -913,6 +934,18 @@ internal:
      *  @param(arg)     Unused. Required to match signature of Hwi.FuncPtr
      */
     Void doTick(UArg arg);
+
+    /*
+     *  ======== triggerClock ========
+     *  Special Clock object created when Clock.stopCheckNext is 'true'.
+     */
+    config Clock.Handle triggerClock;
+
+    /*
+     *  ======== triggerFunc ========
+     *  Empty function used by Clock.triggerClock
+     */
+    Void triggerFunc(UArg arg);
 
     /*
      *  ======== Instance_State ========

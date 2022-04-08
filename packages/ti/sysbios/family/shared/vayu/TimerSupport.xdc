@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,6 +58,7 @@ import xdc.rov.ViewInfo;
  *  | A15          | 0x0202 (GPTimer 2 & 10)     |
  *  | DSP          | 0x0030 (GPTimer 5 & 6)      |
  *  | IPU(Dual-M4) | 0x050C (GPTimer 3,4,9 & 11) |
+ *  | ARP32        | 0x00C0 (GPTimer 7 & 8)      |
  *   --------------------------------------------
  *
  *  For TDA3XX devices:
@@ -65,7 +66,8 @@ import xdc.rov.ViewInfo;
  *  | Target       | Default availMask           |
  *   --------------------------------------------
  *  | DSP          | 0x0003 (GPTimer 1 & 2)      |
- *  | IPU(Dual-M4) | 0x050C (GPTimer 3 & 3)      |
+ *  | IPU(Dual-M4) | 0x000C (GPTimer 3 & 4)      |
+ *  | ARP32        | 0x00C0 (GPTimer 7 & 8)      |
  *   --------------------------------------------
  *  @p
  *

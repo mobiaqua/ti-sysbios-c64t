@@ -62,12 +62,12 @@ function module$meta$init()
      * set to true when the ROM is being built, and set to false by default
      * when a ROM application is being built.
      */
-    if (Build.buildROM == true) {
-        Build.buildROMApp = false;
-    }
-    else {
-        Build.buildROMApp = true;
-    }
+//    if (Build.buildROM == true) {
+//        Build.buildROMApp = false;
+//    }
+//    else {
+//        Build.buildROMApp = true;
+//    }
 
     var GetSet = xdc.module("xdc.services.getset.GetSet");
     GetSet.onSet(this, "romName", _setRomName);
@@ -194,6 +194,12 @@ function _setRomName(field, val)
 {
     var RomModule = null;
     switch (ROM.romName) {
+        case ROM.NO_ROM:
+	    RomModule = null; 
+            Build.buildROM = false;
+            Build.buildROMApp = false;
+            break;
+
         case ROM.CC2650:
             RomModule = xdc.useModule('ti.sysbios.rom.cortexm.cc26xx.CC26xx');
             break;

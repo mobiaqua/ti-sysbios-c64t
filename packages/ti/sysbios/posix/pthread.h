@@ -33,51 +33,19 @@
  *  ======== pthread.h ========
  */
 
-#ifndef ti_sysbios_posix_pthread_include
-#define ti_sysbios_posix_pthread_include
+#ifndef ti_sysbios_posix_pthread__include
+#define ti_sysbios_posix_pthread__include
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include <stdint.h>
-#include <time.h>
-#include <ti/sysbios/knl/Queue.h>
-#include <ti/sysbios/knl/Semaphore.h>
+
 #include <ti/sysbios/knl/Task.h>
 
-#if defined(__GNUC__) && !defined(__ti__)
-
-#include <sched.h>
-#include <time.h>
-
-#else
-
-/*
- *  Include definitions of timespec and clockid_t that would
- *  be in sys/types.h.  TI and IAR tool chains do not have a
- *  sys/types.h header file, while GNU toolchain does.  For
- *  GNU, sys/types.h is included in time.h.
- */
+#include <ti/sysbios/posix/types.h>
 #include <ti/sysbios/posix/_time.h>
-
-/*
- *  These defines would be in a sched.h, which TI and IAR
- *  toolchains don't have.
- */
-#define SCHED_FIFO 0
-#define SCHED_RR 0
-#define SCHED_OTHER 0
-
-/*
- *  ======== sched_param ========
- *  This was taken from sys/sched.h
- */
-struct sched_param {
-  int sched_priority; /* Thread execution priority */
-};
-
-#endif
 
 #define sched_get_priority_min() 1
 #define sched_get_priority_max() Task_numPriorities
@@ -107,81 +75,6 @@ struct sched_param {
 #define PTHREAD_PRIO_PROTECT        2
 
 #define PTHREAD_PROCESS_PRIVATE     0
-
-/*
- *  ======== pthread_attr_t ========
- */
-typedef struct pthread_attr_t {
-    int priority;
-    void *stack;
-    size_t stacksize;
-    size_t guardsize;
-    int  detachstate;
-} pthread_attr_t;
-
-typedef void *pthread_t;
-typedef void *pthread_mutex_t;
-
-/*
- *  ======== pthread_barrier_t ========
- */
-typedef struct pthread_barrier_t {
-    Semaphore_Struct  sem;
-    int               count;
-    int               pendCount;
-} pthread_barrier_t;
-
-/*
- *  ======== pthread_cond_t ========
- */
-typedef struct pthread_cond_t {
-    Queue_Struct     waitList;
-} pthread_cond_t;
-
-/*
- *  ======== pthread_rwlock_t ========
- */
-typedef struct pthread_rwlock_t {
-    /*
-     *  This semaphore must be acquired to obtain a write lock.
-     *  A readlock can be obtained if there is already a read lock
-     *  acquired, or by acquiring this semaphore.
-     */
-    Semaphore_Struct  sem;
-
-    /*
-     *  This semaphore is used to block readers when sem is in use
-     *  by a write lock.
-     */
-    Semaphore_Struct  readSem;
-
-    int       activeReaderCnt;   /* Number of read locks acquired */
-    int       blockedReaderCnt;  /* Number of readers blocked on readSem */
-
-    /*
-     *  The 'owner' is the writer holding the lock, or the first reader
-     *  that acquired the lock.
-     */
-    pthread_t owner;
-} pthread_rwlock_t;
-
-typedef uint32_t pthread_barrierattr_t;
-typedef uint32_t pthread_condattr_t;
-typedef uint32_t pthread_rwlockattr_t;
-typedef uint32_t pthread_once_t;
-
-typedef struct pthread_mutexattr_t {
-    int type;
-    int protocol;
-    int prioceiling;
-} pthread_mutexattr_t;
-
-struct _pthread_cleanup_context {
-    void    (*fxn)(void *);
-    void    *arg;
-    int     cancelType;
-    struct _pthread_cleanup_context *next;
-};
 
 /*
  *************************************************************************

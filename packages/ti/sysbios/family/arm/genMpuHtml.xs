@@ -92,21 +92,35 @@ function createTable(deviceTable, fileBase)
     for (var y = 0; y < sortedDeviceArray.length; y++) {
         var device = sortedDeviceArray[y];
 
-        // This is the beginning of the HTML table. Write this out *once*
-        // for each device
-        var tableStart =
-          "\"<h5>" + device + "</h5>\",\n" +
-          "\"<table border=1 cellpadding=3>\",\n" +
-          " \"<colgroup span=1></colgroup> <colgroup span=5 align=center></colgroup>\",\n" +
-          "   \"<tr><th> Mpu Region Id </th>" +
-          "<th> Base Address </th><th> Region Size </th>" +
-          "<th> Region Enabled </th><th> Bufferable </th>" +
-          "<th> Cacheable </th><th> Shareable </th><th> Tex </th>" +
-          "<th> NoExecute </th><th> AccessPermission </th></tr>\",\n";
-        fos.write(tableStart);
+        var numCores = 0;
+        for (var coreId in deviceTable[device]) {
+            numCores++;
+        }
+        for (var coreId in deviceTable[device]) {
+            var deviceTitle;
+            if (numCores > 1) {
+                deviceTitle = device + " " + coreId;
+            }
+            else {
+                deviceTitle = device;
+            }
 
-        // get the current device's MPU region settings array
-        var regionArray = deviceTable[device].regionSettings;
+            // This is the beginning of the HTML table. Write this out *once*
+            // for each device
+            var tableStart =
+              "\"<h5>" + deviceTitle + "</h5>\",\n" +
+              "\"<table border=1 cellpadding=3>\",\n" +
+              " \"<colgroup span=1></colgroup> <colgroup span=5 align=center></colgroup>\",\n" +
+              "   \"<tr><th> Mpu Region Id </th>" +
+              "<th> Base Address </th><th> Region Size </th>" +
+              "<th> Region Enabled </th><th> Bufferable </th>" +
+              "<th> Cacheable </th><th> Shareable </th><th> Tex </th>" +
+              "<th> NoExecute </th><th> AccessPermission </th>" +
+              "<th> SubregionDisableMask </th></tr>\",\n";
+            fos.write(tableStart);
+
+            // get the current device's MPU region settings array
+            var regionArray = deviceTable[device][coreId].regionSettings;
 
         // cycle thru all regions
         for (var i = 0; i < regionArray.length; i++){
@@ -119,24 +133,31 @@ function createTable(deviceTable, fileBase)
             var shareable = regionArray[i].shareable;
             var noExecute = regionArray[i].noExecute;
             var tex = regionArray[i].tex;
+            var subregionDisableMask = "0x" +
+                regionArray[i].subregionDisableMask.toString(16);
 
-            var regionSize =
-                Number(1 << ((regionArray[i].regionSize >>> 1) + 1)).toString(10) +
-                " Bytes";
-            regionSize = 1 << ((regionArray[i].regionSize >>> 1) + 1);
-            if ((regionSize / 1024) < 1) {
-                regionSize = Number(regionSize).toString(10) + " Bytes";
-            }
-            else if ((regionSize / (1024*1024)) < 1) {
-                regionSize = Number(regionSize / 1024).toString(10) + " KBytes";
-            }
-            else if ((regionSize / (1024*1024*1024)) < 1) {
-                regionSize = Number(regionSize / (1024*1024)).toString(10) +
-                    " MBytes";
+            var regionSize;
+            var sizeIdx = (regionArray[i].regionSize >>> 1) + 1;
+
+            if (sizeIdx < 32) {
+                regionSize = 1 << sizeIdx;
+                if ((regionSize / 1024) < 1) {
+                    regionSize = Number(regionSize).toString(10) + " Bytes";
+                }
+                else if ((regionSize / (1024*1024)) < 1) {
+                    regionSize = Number(regionSize / 1024).toString(10) + " KBytes";
+                }
+                else if ((regionSize / (1024*1024*1024)) < 1) {
+                    regionSize = Number(regionSize / (1024*1024)).toString(10) +
+                        " MBytes";
+                }
+                else {
+                    regionSize =
+                        Number(regionSize / (1024*1024*1024)).toString(10) + " GBytes";
+                }
             }
             else {
-                regionSize =
-                    Number(regionSize / (1024*1024*1024)).toString(10) + " GBytes";
+                regionSize = "4 GBytes";
             }
 
             var accPerm;
@@ -182,6 +203,8 @@ function createTable(deviceTable, fileBase)
                 noExecute +
                 "         </td><td> " +
                 accPerm +
+                "         </td><td> " +
+                subregionDisableMask +
                 "         </td></tr>\",\n";
         }
 
@@ -196,6 +219,8 @@ function createTable(deviceTable, fileBase)
         var tableEnd = " \"</table>\",\n";
         // write out this device's table to the script file
         fos.write(tableEnd);
+
+        } // for (var coreId in deviceTable[device]) ...
 
         // now we're done with this device's table, loop on to the next
         // device

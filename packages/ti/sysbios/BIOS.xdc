@@ -542,7 +542,7 @@ module BIOS
      *  When set to true, SYS/BIOS execution Log code is compiled into
      *  the custom library created when {@link #libType BIOS.libType}
      *  is set to {@link #LibType_Custom BIOS_LibType_Custom} or
-     *  {@link #LibType_Debug BIOS_LibType_Debug}.
+     *  {@link #LibType_Debug BIOS_LibType_Debug}. 
      *
      *  When set to false, all Log code is removed from
      *  the custom library created when BIOS.libType = BIOS.LibType_Custom
@@ -551,6 +551,13 @@ module BIOS
      *  significantly reduce the application's code size.
      *
      *  see {@link #libType BIOS.libType}.
+     *
+     *  @a(Warning) Since interrupts
+     *  are enabled when logs are generated, this setting will have the
+     *  side effect of requiring task stacks to be sized large enough
+     *  to absorb two interrupt contexts rather than one. 
+     *  See the discussion on task stacks in {@link ti.sysbios.knl.Task
+     *  Task} for more information.
      */
     metaonly config Bool logsEnabled = true;
 

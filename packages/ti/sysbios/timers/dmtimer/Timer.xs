@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -86,6 +86,10 @@ function getAsmFiles(targetName)
 
         case "ti.targets.elf.C64T":
             return (["Timer_asm.s64T"]);
+            break;
+
+        case "ti.targets.arp32.elf.ARP32":
+            return (["Timer_asm.sarp32"]);
             break;
 
 	default:
@@ -1758,6 +1762,256 @@ used by DSP */
                 ]
             },
         },
+        "ti.catalog.arp32": {
+            "DRA7XX": {
+                timer: [
+                    {
+                        name: "GPTimer1",
+                        baseAddr: 0x4AE18000,
+                        intNum:  37,
+                        eventId: -1,
+                        intFreq: {
+                            lo: 19200000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "GPTimer2",
+                        baseAddr: 0x48032000,
+                        intNum:  38,
+                        eventId: -1,
+                        intFreq: {
+                            lo: 19200000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "GPTimer3",
+                        baseAddr: 0x48034000,
+                        intNum:  37,
+                        eventId: -1,
+                        intFreq: {
+                            lo: 19200000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "GPTimer4",
+                        baseAddr: 0x48036000,
+                        intNum:  38,
+                        eventId: -1,
+                        intFreq: {
+                            lo: 19200000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "GPTimer5",
+                        baseAddr: 0x48820000,
+                        intNum:  37,
+                        eventId: -1,
+                        intFreq: {
+                            lo: 19200000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "GPTimer6",
+                        baseAddr: 0x48822000,
+                        intNum:  38,
+                        eventId: -1,
+                        intFreq: {
+                            lo: 19200000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "GPTimer7",
+                        baseAddr: 0x48824000,
+                        intNum:  37,
+                        eventId: -1,
+                        intFreq: {
+                            lo: 19200000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "GPTimer8",
+                        baseAddr: 0x48826000,
+                        intNum:  38,
+                        eventId: -1,
+                        intFreq: {
+                            lo: 19200000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "GPTimer9",
+                        baseAddr: 0x4803E000,
+                        intNum:  37,
+                        eventId: -1,
+                        intFreq: {
+                            lo: 19200000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "GPTimer10",
+                        baseAddr: 0x48086000,
+                        intNum:  38,
+                        eventId: -1,
+                        intFreq: {
+                            lo: 19200000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "GPTimer11",
+                        baseAddr: 0x48088000,
+                        intNum:  37,
+                        eventId: -1,
+                        intFreq: {
+                            lo: 19200000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "GPTimer12",
+                        baseAddr: 0x4AE20000,
+                        intNum:  38,
+                        eventId: -1,
+                        intFreq: {
+                            lo: 19200000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "GPTimer13",
+                        baseAddr: 0x48828000,
+                        intNum:  37,
+                        eventId: -1,
+                        intFreq: {
+                            lo: 19200000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "GPTimer14",
+                        baseAddr: 0x4882A000,
+                        intNum:  38,
+                        eventId: -1,
+                        intFreq: {
+                            lo: 19200000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "GPTimer15",
+                        baseAddr: 0x4882C000,
+                        intNum:  37,
+                        eventId: -1,
+                        intFreq: {
+                            lo: 19200000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "GPTimer16",
+                        baseAddr: 0x4882E000,
+                        intNum:  38,
+                        eventId: -1,
+                        intFreq: {
+                            lo: 19200000,
+                            hi: 0,
+                        },
+                    },
+                ]
+           },
+	   "TDA3XX" : {
+                timer: [
+                    {
+                        name: "GPTimer1",
+                        baseAddr: 0x4AE18000,
+                        intNum:  37,
+                        eventId: -1,
+                        intFreq: {
+                            lo: 19200000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "GPTimer2",
+                        baseAddr: 0x48032000,
+                        intNum:  38,
+                        eventId: -1,
+                        intFreq: {
+                            lo: 19200000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "GPTimer3",
+                        baseAddr: 0x48034000,
+                        intNum:  37,
+                        eventId: -1,
+                        intFreq: {
+                            lo: 19200000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "GPTimer4",
+                        baseAddr: 0x48036000,
+                        intNum:  38,
+                        eventId: -1,
+                        intFreq: {
+                            lo: 19200000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "GPTimer5",
+                        baseAddr: 0x48820000,
+                        intNum:  37,
+                        eventId: -1,
+                        intFreq: {
+                            lo: 19200000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "GPTimer6",
+                        baseAddr: 0x48822000,
+                        intNum:  38,
+                        eventId: -1,
+                        intFreq: {
+                            lo: 19200000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "GPTimer7",
+                        baseAddr: 0x48824000,
+                        intNum:  37,
+                        eventId: -1,
+                        intFreq: {
+                            lo: 19200000,
+                            hi: 0,
+                        },
+                    },
+                    {
+                        name: "GPTimer8",
+                        baseAddr: 0x48826000,
+                        intNum:  38,
+                        eventId: -1,
+                        intFreq: {
+                            lo: 19200000,
+                            hi: 0,
+                        },
+                    },
+                ]
+           },
+        },
     };
 
     deviceTable["ti.catalog.c6000.nda"]["Tesla"] =
@@ -1837,6 +2091,9 @@ used by DSP */
 
     deviceTable["ti.catalog.c6000"]["Vayu"] =
         deviceTable["ti.catalog.c6000"]["DRA7XX"];
+
+    deviceTable["ti.catalog.arp32"]["Vayu"] =
+        deviceTable["ti.catalog.arp32"]["DRA7XX"];
 }
 
 /*

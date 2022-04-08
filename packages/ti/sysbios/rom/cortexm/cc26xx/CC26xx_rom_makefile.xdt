@@ -359,11 +359,12 @@ mangled_BIOS_rom.obj: `ROMPPS.join(" ")`
 	@echo ROM Build Stage 2: create the executable ROM image "rom.obj".
 	@echo lnk`TARGET.suffix` `ROM_EXEC`
 	@$(LNK) --output_file=`ROM_EXEC` -m rtos_rom.map `TestName`_p`TARGET.suffix`.obj `TestName`.obj mangled_BIOS_rom.obj `ROMASMOBJS.join(" ")` `RomModule.libDir`../`TestName`.cmd `TestName`_p`TARGET.suffix`.xdl $(LIBS) $(RTSLIB)
-	@strip -o rtos_rom.elf -R .data -R .sysbios_rom_data -R .bss -R .stack -R .ccfg -R .const -R .text -R .bigc_text -R .vecs -R .bootVecs -R .resetVecs -R .cc26xx_boot_text -R .mangled_apis_text -R .sysbios_rom_const `ROM_EXEC`
-	@objcopy -R .data -R .resetVecs -R .text -R .bigc_text -R .mangled_apis_text -R .const -R .cc26xx_boot_text -R .ccfg -R .vecs -R .bss -R .data -R .stack `ROM_EXEC` rtos_rom.out
 	@$(CP) `ROM_EXEC` "`RomModule.libDir`"
-	@$(CP) rtos_rom.elf "`RomModule.libDir`"
 	@$(CP) rtos_rom.map "`RomModule.libDir`"
+#	@echo Create symbols-only rom.out for application debugging
+#	@strip -o rtos_rom.elf -R .data -R .sysbios_rom_data -R .bss -R .stack -R .ccfg -R .const -R .text -R .bigc_text -R .vecs -R .bootVecs -R .resetVecs -R .cc26xx_boot_text -R .mangled_apis_text -R .sysbios_rom_const `ROM_EXEC`
+#	@objcopy -R .data -R .resetVecs -R .text -R .bigc_text -R .mangled_apis_text -R .const -R .cc26xx_boot_text -R .ccfg -R .vecs -R .bss -R .data -R .stack `ROM_EXEC` rtos_rom.out
+#	@$(CP) rtos_rom.elf "`RomModule.libDir`"
 	@echo Extract sysbios_rom_text, sysbios_rom_const, sysbios_rom_data
 	@$(OBJDUMP) -t -j .sysbios_rom_text  `ROM_EXEC` | grep " g " > sysbios_rom_text
 	@$(OBJDUMP) -t -j .sysbios_rom_const `ROM_EXEC` | grep " g " > sysbios_rom_const

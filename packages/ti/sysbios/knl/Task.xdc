@@ -56,14 +56,6 @@ import ti.sysbios.knl.Queue;
  *  parallel within a single C program; in reality, concurrency is achieved
  *  by switching the processor from one task to another.
  *
- *  When you create a task, it is provided with its own run-time stack,
- *  used for storing local variables as well as for further nesting of
- *  function calls. Each stack must be large enough to handle normal
- *  subroutine calls and one task preemption context.
- *  A task preemption context is the context that gets saved when one task
- *  preempts another as a result of an interrupt thread readying
- *  a higher-priority task.
- *
  *  All tasks executing within a single program share a common set of
  *  global variables, accessed according to the standard rules of scope
  *  defined for C functions.
@@ -86,6 +78,27 @@ import ti.sysbios.knl.Queue;
  *  than the priority of any ready task. Conversely, the running task
  *  is preempted and re-scheduled for execution whenever there exists
  *  some ready task of higher priority.
+ *
+ *  @a(Task Stacks)
+ *
+ *  When you create a task, it is provided with its own run-time stack,
+ *  used for storing local variables as well as for further nesting of
+ *  function calls. Each stack must be large enough to handle normal
+ *  subroutine calls and one task preemption context.
+ *  A task preemption context is the context that gets saved when one task
+ *  preempts another as a result of an interrupt thread readying
+ *  a higher-priority task.
+ *
+ *  See sections 3.5.3 and 7.5 of the BIOS User's Guide for further
+ *  discussions regarding task stack sizing.
+ *
+ *  Certain system configuration settings will result in
+ *  task stacks needing to be large enough to absorb two interrupt
+ *  contexts rather than just one. 
+ *  Setting {@link ti.sysbios.BIOS#logsEnabled BIOS.logsEnabled} to 'true'
+ *  or installing any Task hooks will have the side effect of allowing
+ *  up to two interrupt contexts to be placed on a task stack. Also
+ *  see {@link #minimizeLatency Task.minimizeLatency}.
  *
  *  @a(Task Deletion)
  *
@@ -188,8 +201,13 @@ import ti.sysbios.knl.Queue;
  *  Hook functions can only be configured statically.
  *
  *  If you define more than one set of hook functions, all the functions
- *  of a particular type will be run when a Swi triggers that type of
+ *  of a particular type will be run when a Task triggers that type of
  *  hook.
+ *
+ *  @a(Warning)
+ *  Configuring ANY Task hook function will have the side effect of allowing
+ *  up to two interrupt contexts beings saved on a task stack. Be careful
+ *  to size your task stacks accordingly.
  *
  *  @p(html)
  *  <B>Register Function</B>
@@ -749,6 +767,31 @@ module Task
      *  @see #allBlockedFunc
      */
     metaonly config Bool enableIdleTask = true;
+
+    /*!
+     *  Reduce interrupt latency by enabling interrupts
+     *  within the Task scheduler.
+     *
+     *  By default, interrupts are disabled within certain critical
+     *  sections of the task scheduler when switching to a different
+     *  task thread. This default behavior guarantees that a task stack
+     *  will only ever absorb ONE ISR context. Nested interrupts all run
+     *  on the shared Hwi stack.
+     *
+     *  While most users find this behavior desirable, the resulting
+     *  impact on interrupt latency is too great for certain applications.
+     *
+     *  By setting this parameter to 'true', the worst case interrupt latency
+     *  imposed by the kernel will be reduced but will result in task stacks
+     *  needing to be sized to accommodate one additional interrupt context.
+     *
+     *  See sections 3.5.3 and 7.5 of the BIOS User's Guide for further
+     *  discussions regarding task stack sizing.
+     *
+     *  Also see {@link ti.sysbios.BIOS#logsEnabled BIOS.logsEnabled}
+     *  and the discussion on Task hooks.
+     */
+    metaonly config Bool minimizeLatency = false;
 
     /*!
      *  Idle task stack size in MAUs.

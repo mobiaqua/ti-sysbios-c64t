@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -76,6 +76,19 @@ function getDefaultHwiDelegate()
 function getDefaultTimerDelegate()
 {
     return("ti.sysbios.family.arp32.Timer");
+}
+
+/*
+ *  ======== getDefaultTimerSupportDelegate ========
+ */
+function getDefaultTimerSupportDelegate()
+{
+    /*
+     *  The default arp32 Timer does not use nor have a TimerSupport module.
+     *  This TimerSupport module is needed when the user decides to use
+     *  the dmtimer.
+     */
+    return("ti.sysbios.family.shared.vayu.TimerSupport");
 }
 
 /*

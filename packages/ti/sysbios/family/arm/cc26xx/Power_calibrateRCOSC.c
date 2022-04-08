@@ -148,9 +148,8 @@ Bool Power_initiateCalibration()
     doneCal = FALSE;
 #endif
 
-    /* set contraints to prohibit powering down during calibration sequence */
+    /* set contraint to prohibit standby during calibration sequence */
     Power_setConstraint(Power_SB_DISALLOW);
-    Power_setConstraint(Power_IDLE_PD_DISALLOW);
 
     /* set dependency to keep XOSC_HF active during calibration sequence */
     Power_setDependency(XOSC_HF);
@@ -478,9 +477,8 @@ Void Power_doCalibrate(Void)
             /* release AUX semaphore */
             HWREG(AUX_SMPH_BASE + AUX_SMPH_O_SMPH1) = 1;
 
-            /* release the power down constraints and XOSC_HF dependency */
+            /* release the standby constraint and XOSC_HF dependency */
             Power_releaseDependency(XOSC_HF);
-            Power_releaseConstraint(Power_IDLE_PD_DISALLOW);
             Power_releaseConstraint(Power_SB_DISALLOW);
 
             /* set next state */

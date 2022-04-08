@@ -133,6 +133,7 @@ internal:
         UInt32 AEGMUX0;
         UInt32 AEGMUX1;
         UInt32 INTDMASK;
+        UInt32 PDCCMD;
         UInt32 PAMAP[16];
         UInt32 L2CFG;
         UInt32 L1PCFG;

@@ -94,7 +94,7 @@ Void Task_schedule()
             if (Task_checkStackFlag) {
                 Task_checkStacks(prevTask, curTask);
             }
-	
+
 #if !defined(ti_sysbios_knl_Task_DISABLE_ALL_HOOKS) \
     || (xdc_runtime_Log_DISABLE_ALL == 0)
             /* It's safe to enable intrs here */
@@ -113,6 +113,9 @@ Void Task_schedule()
 
             /* Hard-disable intrs - this fxn is called with them disabled */
             Hwi_disable();
+#elif (ti_sysbios_knl_Task_minimizeLatency__D == TRUE)
+            Hwi_enable();
+            Hwi_disable();	
 #endif
             Task_SupportProxy_swap((Ptr)&prevTask->context,
                             (Ptr)&curTask->context);

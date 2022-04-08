@@ -930,10 +930,10 @@ function viewNvicFetch(that)
 }
 
 /*
- *  ======== viewInitBasic ========
- *  Initialize the 'Basic' Task instance view.
+ *  ======== viewFillBasicInfo ========
+ *  Fill in the 'Basic' Task instance view.
  */
-function viewInitBasic(view, obj)
+function viewFillBasicInfo(view, obj)
 {
     var Hwi = xdc.useModule('ti.sysbios.family.arm.m3.Hwi');
     var Program = xdc.useModule('xdc.rov.Program');
@@ -976,9 +976,6 @@ function viewInitBasic(view, obj)
             shift : 0
         }
     }
-
-    /* Add constructed Hwis to ROV object list */
-    viewScanDispatchTable(this, 'Basic');
 
     var pri = viewGetPriority(this, Math.abs(obj.intNum));
 
@@ -1023,6 +1020,18 @@ function viewInitBasic(view, obj)
 }
 
 /*
+ *  ======== viewInitBasic ========
+ *  Initialize the 'Basic' Task instance view.
+ */
+function viewInitBasic(view, obj)
+{
+    /* Add constructed Hwis to ROV object list */
+    viewScanDispatchTable(this, 'Basic');
+
+    viewFillBasicInfo(view, obj);
+}
+
+/*
  *  ======== viewInitDetailed ========
  *  Initialize the 'Detailed' Task instance view.
  */
@@ -1034,8 +1043,11 @@ function viewInitDetailed(view, obj)
     var BIOS = xdc.useModule('ti.sysbios.BIOS');
     var biosModConfig = Program.getModuleConfig(BIOS.$name);
 
+    /* Add constructed Hwis to ROV object list */
+    viewScanDispatchTable(this, 'Detailed');
+
     /* Detailed view builds off basic view. */
-    viewInitBasic(view, obj);
+    viewFillBasicInfo(view, obj);
 
     view.irp = obj.irp;
 

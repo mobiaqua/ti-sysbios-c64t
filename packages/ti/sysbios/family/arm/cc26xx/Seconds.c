@@ -59,7 +59,7 @@ UInt32 Seconds_get(Void)
 
     key = Hwi_disable();
 
-    curSeconds = HWREG(AON_RTC_BASE + AON_RTC_O_SEC);
+    curSeconds = AONRTCSecGet();
 
     curSeconds = (curSeconds - Seconds_module->refSeconds) +
         Seconds_module->setSeconds;
@@ -76,17 +76,15 @@ UInt32 Seconds_getTime(Seconds_Time *ts)
 {
     volatile UInt32 seconds;
     volatile UInt32 subseconds;
-    UInt32 temp;
+    UInt64 temp;
     UInt64 nsecs;
 
-    /* read seconds and subseconds, watching for rollover into seconds count */
-    seconds = HWREG(AON_RTC_BASE + AON_RTC_O_SEC);
-    do {
-        subseconds = HWREG(AON_RTC_BASE + AON_RTC_O_SUBSEC);
-        temp = seconds;
-        seconds = HWREG(AON_RTC_BASE + AON_RTC_O_SEC);
-    } while(seconds != temp);
+    /* read current RTC count */
+    temp = AONRTCCurrent64BitValueGet();
+    seconds = (UInt32) (temp >> 32);
+    subseconds = (UInt32) (temp & 0xFFFFFFFF);
 
+    /* adjust seconds count with refSeconds and setSeconds */
     seconds = (seconds - Seconds_module->refSeconds) +
         Seconds_module->setSeconds;
 
@@ -114,7 +112,7 @@ Void Seconds_set(UInt32 seconds)
 
     key = Hwi_disable();
 
-    Seconds_module->refSeconds = HWREG(AON_RTC_BASE + AON_RTC_O_SEC);
+    Seconds_module->refSeconds = AONRTCSecGet();
 
     Seconds_module->setSeconds = seconds;
 

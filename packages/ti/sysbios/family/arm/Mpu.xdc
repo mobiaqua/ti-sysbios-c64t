@@ -55,7 +55,7 @@ import xdc.rov.ViewInfo;
  *  possible to overlap different memory regions with higher region numbers
  *  enjoying higher priority than lower region numbers i.e. region 15 has
  *  a higher priority than region 14, and if both were overlapping, the
- *  overlapped memory regions attributes would be defined by region 15's
+ *  overlapped memory region's attributes would be defined by region 15's
  *  entry.
  *
  *  The protection attributes for each region include attributes such as
@@ -67,9 +67,75 @@ import xdc.rov.ViewInfo;
  *  {@link ./doc-files/MpuRegions.html MPU Region Settings} table for
  *  a list of default settings used for various supported devices.
  *
- *  @p(blist)
- *      -See the {@link http://infocenter.arm.com/help/topic/com.arm.doc.ddi0406c/index.html ARM v7AR Architecture Reference Manual}
- *       for more info.
+ *  @a(Memory region attributes)
+ *  Memory regions can be configured as different memory types by setting
+ *  the {@link #RegionAttrs bufferable}, {@link #RegionAttrs cacheable} and
+ *  {@link #RegionAttrs tex} (type extension) fields of the {@link #RegionAttrs}
+ *  structure which is passed as an argument to
+ *  {@link #setRegion Mpu_setRegion()} function. The three memory types
+ *  supported by the hardware are "Normal" (cacheable), "Device" and
+ *  "Strongly-ordered" memory. "Device" and "Strongly-ordered" memory types
+ *  are recommended for mapping peripheral address space like memory-mapped
+ *  registers. These two types ensure that the memory accesses to the
+ *  peripheral memory are not performed speculatively, are not repeated and
+ *  are performed in order. The "Normal" memory type is recommended for mapping
+ *  memory regions storing application code and data.
+ *
+ *  Here are some common settings for the {@link #RegionAttrs bufferable},
+ *  {@link #RegionAttrs cacheable} and {@link #RegionAttrs tex} fields to
+ *  define different memory region types:
+ *
+ *  @p(code)
+ *  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ *  + Memory Type                             | bufferable | cacheable | tex +
+ *  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ *  + Shareable Strongly-ordered memory       |    false   |   false   |  0  +
+ *  +-----------------------------------------+------------+-----------+-----+
+ *  + Shareable Device memory                 |    true    |   false   |  0  +
+ *  +-----------------------------------------+------------+-----------+-----+
+ *  + Outer & Inner Non-cacheable             |    false   |   false   |  1  +
+ *  +-----------------------------------------+------------+-----------+-----+
+ *  + Outer & Inner Write-back Write-allocate |    true    |   true    |  1  +
+ *  + cacheable                               |            |           |     +
+ *  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ *  @p
+ *
+ *  For an exhaustive list of all different memory type settings and a
+ *  detailed explanation of the memory region attributes, please read the
+ *  'Protected Memory System Architecture (PMSA)' chapter of the
+ *  {@link http://infocenter.arm.com/help/topic/com.arm.doc.ddi0406c/index.html ARM v7AR Architecture Reference Manual}.
+ *
+ *  @a(Changing shareability attributes of a cacheable memory region)
+ *  If changing the shareability attribute of a cacheable memory region,
+ *  it is possible for coherency problems to arise. In order to avoid possible
+ *  coherency errors, the below sequence should be followed to change the
+ *  shareability attributes of the memory region:
+ *  - Make the memory region nNon-cacheable and outer-shareable
+ *  - Clean and invalidate the memory region from the cache
+ *  - Change the shareability attribute to the desired value
+ *
+ *  @a(Examples)
+ *  Example showing how to set attributes for a given memory region using
+ *  *.cfg script:
+ *
+ *  @p(code)
+ *  var Mpu = xdc.useModule('ti.sysbios.family.arm.Mpu');
+ *
+ *  // Mark memory region as normal outer and inner write-back
+ *  // and write-through cacheable
+ *  var attrs = new Mpu.RegionAttrs();
+ *  Mpu.initRegionAttrsMeta(attrs);
+ *  attrs.enable = true;
+ *  attrs.bufferable = true;
+ *  attrs.cacheable = true;
+ *  attrs.shareable = false;
+ *  attrs.noExecute = false;
+ *  attrs.accPerm = 6;  // Read-only at PL1 and PL0
+ *  attrs.tex = 1;
+ *
+ *  // Set attributes for memory region of size 4MB starting at address 0x0
+ *  // using MPU region Id 0 to store the attributes.
+ *  Mpu.setRegionMeta(0, 0x00000000, Mpu.RegionSize_4M, attrs);
  *  @p
  *
  *  @p(html)
@@ -122,29 +188,29 @@ module Mpu
     // -------- ROV views --------
 
     /*! @_nodoc */
-    metaonly struct PageView {
+    metaonly struct RegionAttrsView {
+        UInt8       RegionIdx;
+        Bool        Enabled;
+        String      BaseAddress;
+        String      Size;
         Bool        Bufferable;
         Bool        Cacheable;
         Bool        Shareable;
         Bool        Noexecute;
         String      AccessPerm;
         String      Tex;
+        String      SubregionDisableMask;
     };
 
     @Facet
     metaonly config ViewInfo.Instance rovViewInfo =
         ViewInfo.create({
             viewMap: [
-                ['Level1View', {
+                ['MpuRegionAttrsView', {
                     type: ViewInfo.MODULE_DATA,
-                    viewInitFxn: 'viewLevel1Page',
-                    structName: 'PageView'
+                    viewInitFxn: 'viewMpuRegionAttrs',
+                    structName: 'RegionAttrsView'
                 }],
-                ['Level2View', {
-                    type: ViewInfo.TREE_TABLE,
-                    viewInitFxn: 'viewLevel2Page',
-                    structName: 'PageView'
-                }]
            ]
        });
 
@@ -196,14 +262,16 @@ module Mpu
      *  Manual for more details.
      */
     struct RegionAttrs {
-        Bool  enable;          /*! is MPU region enabled                      */
-        Bool  bufferable;      /*! is memory region bufferable (B)            */
-        Bool  cacheable;       /*! is memory region cacheable (C)             */
-        Bool  shareable;       /*! is memory region shareable (S)             */
-        Bool  noExecute;       /*! is memory region not executable (XN )      */
-        UInt8 accPerm;         /*! access permission bits value 0-7 (AP[2:0]) */
-        UInt8 tex;             /*! memory region attr type extension field
-                                   (TEX[2:0])                                 */
+        Bool  enable;               /*! is MPU region enabled                */
+        Bool  bufferable;           /*! is memory region bufferable (B)      */
+        Bool  cacheable;            /*! is memory region cacheable (C)       */
+        Bool  shareable;            /*! is memory region shareable (S)       */
+        Bool  noExecute;            /*! is memory region not executable (XN) */
+        UInt8 accPerm;              /*! access permission bits value 0-7
+                                        (AP[2:0])                            */
+        UInt8 tex;                  /*! memory region attr type extension
+                                        field (TEX[2:0])                     */
+        UInt8 subregionDisableMask; /*! disable mask for all 8 subregions    */
     };
 
     /*!
@@ -231,13 +299,14 @@ module Mpu
      *  privileged mode (PL1) only.
      */
     config RegionAttrs defaultAttrs = {
-        enable: true,                   /* true by default  */
-        bufferable: false,              /* false by default */
-        cacheable: false,               /* false by default */
-        shareable: false,               /* false by default */
-        noExecute: false,               /* false by default */
-        accPerm: 1,                     /* allow read/write access at PL1 */
-        tex: 1                          /* 1 by default */
+        enable: true,                   /* true by default                   */
+        bufferable: false,              /* false by default                  */
+        cacheable: false,               /* false by default                  */
+        shareable: false,               /* false by default                  */
+        noExecute: false,               /* false by default                  */
+        accPerm: 1,                     /* allow read/write access at PL1    */
+        tex: 1,                         /* 1 by default                      */
+        subregionDisableMask: 0         /* no subregions disabled by default */
     };
 
     /*!

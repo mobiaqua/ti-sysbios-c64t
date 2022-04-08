@@ -1,3 +1,4 @@
+
 %%{
 /*
  * Copyright (c) 2015, Texas Instruments Incorporated
@@ -53,6 +54,10 @@ Void ti_sysbios_BIOS_startFunc__I()
 {
     xdc_runtime_System_atexit(
         (xdc_runtime_System_AtexitHandler)ti_sysbios_BIOS_atExitFunc__I);
+%/* 
+% * Invoke BIOS.startupFxns, (mostly Timer_start() calls
+% * for statically created timers).
+% */
 %for (var i = 0; i < len; i++) {
 %    var cname = BIOS.startupFxns[i].$name;
 %    cname = cname.replace(/\./g,'_');
@@ -63,6 +68,10 @@ Void ti_sysbios_BIOS_startFunc__I()
 %}
 %if ((BIOS.swiEnabled == true) && (xdc.om['ti.sysbios.knl'].Swi.$used > 0)) {
     ti_sysbios_knl_Swi_startup();
+%}
+%if ((BIOS.taskEnabled == true) && (xdc.om['ti.sysbios.utils'].Load.$used > 0) &&
+%     (xdc.om['ti.sysbios.utils'].Load.taskEnabled)) {
+    ti_sysbios_utils_Load_startup();
 %}
 %if ((BIOS.taskEnabled == true) && (xdc.om['ti.sysbios.knl'].Task.$used >0)) {
     ti_sysbios_knl_Task_startup();

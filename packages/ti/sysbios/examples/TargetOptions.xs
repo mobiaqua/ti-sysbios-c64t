@@ -122,11 +122,28 @@ var targetOptions = {
                 compilerBuildOptions: "",
                 linkerBuildOptions: "",
                 devices: {
-                    "GENERIC": {
+                    "RM57D8XX": {
+                        cfgPrefix: "rm57d8xx/",
                         deviceId: ".*(RM57D8).*",
                         platform: "ti.platforms.cortexR:$DeviceId$",
                         linkerCommandFile: "ti/platforms/cortexR/include/" +
                             "$DeviceId$.cmd",
+                        productGroup: "RM57D8xx",
+                    },
+                    "RM57D8XX_CORE0": {
+                        cfgPrefix: "rm57d8xx_core0/",
+                        deviceId: ".*(RM57D8).*",
+                        platform: "ti.platforms.cortexR:$DeviceId$",
+                        linkerCommandFile: "ti/platforms/cortexR/include/" +
+                            "$DeviceId$.cmd",
+                        productGroup: "RM57D8xx",
+                    },
+                    "RM57D8XX_CORE1": {
+                        cfgPrefix: "rm57d8xx_core1/",
+                        deviceId: ".*(RM57D8).*",
+                        platform: "ti.platforms.cortexR:$DeviceId$_Core1",
+                        linkerCommandFile: "ti/platforms/cortexR/include/" +
+                            "$DeviceId$_Core1.cmd",
                         productGroup: "RM57D8xx",
                     }
                 }

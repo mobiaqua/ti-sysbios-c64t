@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2013-2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -342,7 +342,10 @@ instance:
 
     /*!
      *  ======== dequeue ========
-     *  Remove the element from the front of queue and return elem.
+     *  Remove the element from the front of queue and return elem.  If the
+     *  queue is empty, the return value of Queue_dequeue() will be non-NULL,
+     *  due to the Queue implementation.  Use Queue_empty() to determine
+     *  whether or not the Queue is empty before calling Queue_dequeue().
      *
      *  @b(returns)             pointer to former first element
      */
@@ -369,11 +372,28 @@ instance:
      *  Get element from front of queue (atomically).
      *
      *  This function removes the element from the front of queue and returns
-     *  a pointer to it.
+     *  a pointer to it.  If the queue is empty, the return value of
+     *  Queue_get() will be non-NULL, due to the Queue implementation.
+     *  Use Queue_empty() to determine whether or not the Queue is empty before
+     *  calling Queue_get().
      *
      *  @b(returns)             pointer to former first element
      */
     Ptr get();
+
+    /*!
+     *  ======== getTail ========
+     *  Get the element at the end of the queue (atomically).
+     *
+     *  This function removes the element at the end of queue and returns
+     *  a pointer to it.  If the queue is empty, the return value of
+     *  Queue_getTail() will be non-NULL, due to the Queue implementation.
+     *  Use Queue_empty() to determine whether or not the Queue is empty before
+     *  calling Queue_getTail().
+     *
+     *  @b(returns)             pointer to former end element
+     */
+    Ptr getTail();
 
     /*!
      *  ======== head ========
@@ -381,7 +401,9 @@ instance:
      *
      *  This function returns a pointer to the element at the front of queue.
      *  The element is not removed from the queue.
-     *  Returns pointer to Queue_Object if queue is empty.
+     *  Due to the Queue implementation, the return value will be non-NULL
+     *  if the Queue is empty.  Use Queue_empty() to determine whether or
+     *  not the Queue is empty before calling Queue_head().
      *
      *  @b(returns)             pointer to first element
      */
@@ -415,6 +437,14 @@ instance:
      *  @param(elem)            pointer to new queue element
      */
     metaonly Void putMeta(Elem* elem);
+
+    /*!
+     *  ======== putHead ========
+     *  Put element at the front of the queue (atomically).
+     *
+     *  @param(elem)            pointer to new queue element
+     */
+    Void putHead(Elem *elem);
 
     /*!
      *  ======== nextMeta ========

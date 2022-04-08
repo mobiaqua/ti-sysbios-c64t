@@ -55,8 +55,12 @@
 #endif
 
 #include <ti/sysbios/posix/pthread.h>
+#include <ti/sysbios/posix/types.h>
+#include <ti/sysbios/posix/_time.h>
+
 #include <ti/sysbios/posix/_pthread.h>
 #include <ti/sysbios/posix/_pthread_error.h>
+
 #include <ti/sysbios/posix/Settings.h>
 
 #include <time.h>

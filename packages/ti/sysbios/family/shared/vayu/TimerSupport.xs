@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,6 +61,9 @@ function module$meta$init()
         else if (Program.build.target.name == "A15F") {
             TimerSupport.availMask = 0x0202;
         }
+        else if (Program.build.target.name == "ARP32") {
+            TimerSupport.availMask = 0x00C0;
+        }
     }
     else if (Program.cpu.deviceName == "TDA3XX") {
         if (Program.build.target.name == "C66") {
@@ -68,6 +71,9 @@ function module$meta$init()
         }
         else if (Program.build.target.name == "M4") {
             TimerSupport.availMask = 0x0C;
+        }
+        else if (Program.build.target.name == "ARP32") {
+            TimerSupport.availMask = 0x00C0;
         }
     }
 
@@ -90,6 +96,7 @@ function module$meta$init()
 function module$use()
 {
     if (((Program.build.target.name != "C66") &&
+         (Program.build.target.name != "ARP32") &&
          (Program.build.target.name != "M4") &&
          (Program.build.target.name != "A15F")) ||
         ((Program.cpu.deviceName == "TDA3XX") &&
@@ -102,6 +109,12 @@ function module$use()
 
     if (Program.build.target.name == "M4") {
         Wugen = xdc.useModule('ti.sysbios.family.arm.ducati.Wugen');
+    }
+
+    if (Program.build.target.name == "ARP32") {
+	var IntXbar = xdc.useModule('ti.sysbios.family.shared.vayu.IntXbar');
+        IntXbar.connectIRQMeta(5, 38);
+        IntXbar.connectIRQMeta(6, 39);
     }
 }
 

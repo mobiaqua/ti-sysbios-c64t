@@ -301,8 +301,10 @@ int pthread_create(pthread_t *newthread, const pthread_attr_t *attr,
     taskParams.stack = pAttr->stack;
     taskParams.stackSize = pAttr->stacksize + pAttr->guardsize;
 
-    taskParams.arg0 = (UArg)arg;
+    /* Save the function in arg0 for ROV */
+    taskParams.arg0 = (UArg)startroutine;
     taskParams.arg1 = (UArg)thread;
+    taskParams.env = arg;
     taskParams.priority = -1;
 
     thread->detached = (pAttr->detachstate == PTHREAD_CREATE_JOINABLE) ? 0 : 1;
@@ -650,10 +652,13 @@ void _pthread_cleanup_push(struct _pthread_cleanup_context *context,
  */
 static void _pthread_runStub(UArg arg0, UArg arg1)
 {
+//    Queue_Elem   qElem;
     UInt         key;
+    Ptr          arg;
     pthread_Obj *thread = (pthread_Obj *)(xdc_uargToPtr(arg1));
 
-    thread->ret = thread->fxn(xdc_uargToPtr(Task_getArg0(thread->task)));
+    arg = Task_getEnv(thread->task);
+    thread->ret = thread->fxn(arg);
 
     /* Pop and execute the cleanup handlers */
     while (thread->cleanupList != NULL) {

@@ -84,3 +84,14 @@ function module$use()
 
     Core.numCores = Core.CoreProxy.numCores;
 }
+
+/*
+ *  ======== module$static$init ========
+ */
+function module$static$init(mod, params)
+{
+    Build = xdc.module("ti.sysbios.Build");
+
+    /* add -D to compile line to optimize exception code */
+    Build.ccArgs.$add("-Dti_sysbios_hal_Core_numCores__D=" + Core.numCores);
+}

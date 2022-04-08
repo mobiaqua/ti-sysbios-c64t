@@ -7141,6 +7141,80 @@ peripheralsTable["MSP430FR596x_FR586x"] = [
     }
 ];
 
+peripheralsTable["MSP430FR598x_FR698x"] = [
+    {
+        factory: "ti.catalog.msp430.peripherals.clock.CS_A",
+        params: {name: "clock", baseAddr: 0x160,
+                 hasLFXT1: true, hasHFXT1: false, hasXT2: true, hasVLO: true,
+                 baseAddr: 0x160, maxCpuFrequency: 16000000}
+    },
+    {
+        factory: "ti.catalog.msp430.peripherals.watchdog.WDT_A",
+        required: ["clock"],
+        params: {name: "watchdog", baseAddr: 0x15c}
+    },
+    {
+        factory: "ti.catalog.msp430.peripherals.timer.Timer0_A3",
+        required: ["clock"],
+        params: {name: "Timer0_A3", baseAddr: 0x340, intNum: 44, numberOfTimers: 3,
+                 interruptSource: [{registerName: "TAIE",    priority: 43, priorityName: "Timer0_A3 CCR1-2"},
+                                   {registerName: "CCIE.0",  priority: 44, priorityName: "Timer0_A3 CCR0"},
+                                   {registerName: "CCIE.1",  priority: 43, priorityName: "Timer0_A3 CCR1-2"},
+                                   {registerName: "CCIE.2",  priority: 43, priorityName: "Timer0_A3 CCR1-2"}
+                ]
+        }
+    },
+    {
+        factory: "ti.catalog.msp430.peripherals.timer.Timer1_A3",
+        required: ["clock"],
+        params: {name: "Timer1_A3", baseAddr: 0x380, intNum: 39, numberOfTimers: 3,
+                 interruptSource: [{registerName: "TAIE",    priority: 38, priorityName: "Timer1_A3 CCR1-2"},
+                                   {registerName: "CCIE.0",  priority: 39, priorityName: "Timer1_A3 CCR0"},
+                                   {registerName: "CCIE.1",  priority: 38, priorityName: "Timer1_A3 CCR1-2"},
+                                   {registerName: "CCIE.2",  priority: 38, priorityName: "Timer1_A3 CCR1-2"}
+                ]
+        }
+    },
+    {
+        factory: "ti.catalog.msp430.peripherals.timer.Timer0_B7",
+        required: ["clock"],
+        params: {name: "Timer0_B7", baseAddr: 0x3c0, intNum: 51, numberOfTimers: 7,
+                 interruptSource: [{registerName: "TBIE",    priority: 50, priorityName: "Timer0_B7 CCR1-6"},
+                                   {registerName: "CCIE.0",  priority: 51, priorityName: "Timer0_B7 CCR0"},
+                                   {registerName: "CCIE.1",  priority: 50, priorityName: "Timer0_B7 CCR1-6"},
+                                   {registerName: "CCIE.2",  priority: 50, priorityName: "Timer0_B7 CCR1-6"},
+                                   {registerName: "CCIE.3",  priority: 50, priorityName: "Timer0_B7 CCR1-6"},
+                                   {registerName: "CCIE.4",  priority: 50, priorityName: "Timer0_B7 CCR1-6"},
+                                   {registerName: "CCIE.5",  priority: 50, priorityName: "Timer0_B7 CCR1-6"},
+                                   {registerName: "CCIE.6",  priority: 50, priorityName: "Timer0_B7 CCR1-6"}
+                ]
+        }
+    },
+    {
+        factory: "ti.catalog.msp430.peripherals.timer.Timer2_A2",
+        required: ["clock"],
+        params: {name: "Timer2_A2", baseAddr: 0x400, intNum: 36, numberOfTimers: 2, isInternal: true,
+                 interruptSource: [{registerName: "TAIE",    priority: 35, priorityName: "Timer2_A2 CCR1"},
+                                   {registerName: "CCIE.0",  priority: 36, priorityName: "Timer2_A2 CCR0"},
+                                   {registerName: "CCIE.1",  priority: 35, priorityName: "Timer2_A2 CCR1"}
+                ]
+        }
+    },
+    {
+        factory: "ti.catalog.msp430.peripherals.timer.Timer3_A5",
+        required: ["clock"],
+        params: {name: "Timer3_A5", baseAddr: 0x440, intNum: 33, numberOfTimers: 5, isInternal: true,
+                 interruptSource: [{registerName: "TAIE",    priority: 32, priorityName: "Timer3_A5 CCR1-4"},
+                                   {registerName: "CCIE.0",  priority: 33, priorityName: "Timer3_A5 CCR0"},
+                                   {registerName: "CCIE.1",  priority: 32, priorityName: "Timer3_A5 CCR1-4"},
+                                   {registerName: "CCIE.2",  priority: 32, priorityName: "Timer3_A5 CCR1-4"},
+                                   {registerName: "CCIE.3",  priority: 32, priorityName: "Timer3_A5 CCR1-4"},
+                                   {registerName: "CCIE.4",  priority: 32, priorityName: "Timer3_A5 CCR1-4"}
+                ]
+        }
+    }
+];
+
 /*
  *  ======== instance$meta$init ========
  */
@@ -7642,6 +7716,13 @@ function instance$meta$init(revision)
         );
         Boot.configureDCO = true;
         tableEntry = "MSP430FR596x_FR586x";
+    }
+    else if (this.$private.realDevice.match(/^MSP430FR(6|5)98\d/)) {
+        this.peripherals["interruptController"] = IC.create(
+            {name: "interruptController", baseAddr: 0xFF90, numInterrupts: 56}
+        );
+        Boot.configureDCO = true;
+        tableEntry = "MSP430FR598x_FR698x";
     }
     else {
         this.$module.$logFatal("Device " + revision + " is not supported.",

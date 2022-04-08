@@ -42,13 +42,10 @@ var objList = [
     "pthread_cond.c",
     "pthread_mutex.c",
     "pthread_rwlock.c",
+    "clock.c",
     "semaphore.c",
+    "timer.c",
 ];
-
-//var trgFilter = {
-//    field: "isa",
-//    list: [ "v7M4" ]      /* build for all M4 targets ... */
-//};
 
 /* generate makefiles */
 //BiosBuild.buildLibs(objList, undefined, trgFilter, arguments);
@@ -66,12 +63,15 @@ Pkg.otherFiles = [
     "pthread_cond.c",
     "pthread_mutex.c",
     "pthread_rwlock.c",
+    "clock.c",
+    "semaphore.c",
+    "timer.c",
     "pthread.h",
     "_pthread.h",
     "_pthread_error.h",
     "_time.h",
     "semaphore.h",
-    "semaphore.c",
+    "types.h",
     "Settings.xdc",
     "Settings.xs",
     "Settings.h"

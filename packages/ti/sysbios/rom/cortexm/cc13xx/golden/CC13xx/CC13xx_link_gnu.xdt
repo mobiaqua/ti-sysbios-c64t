@@ -251,7 +251,6 @@ ti_sysbios_knl_Task_SupportProxy_getStackAlignment__E = 0x1001c2f1;
 ti_sysbios_family_arm_m3_Hwi_create = 0x1001ab15;
 xdc_runtime_Timestamp_SupportProxy_get32__E = 0x1001c82d;
 ti_sysbios_family_arm_m3_Hwi_destruct = 0x1001c25d;
-ti_sysbios_knl_Clock_stop__E = 0x1001c221;
 ti_sysbios_family_arm_m3_Hwi_doTaskRestore__I = 0x1001c20f;
 ti_sysbios_knl_Swi_run__I = 0x1001afd9;
 ti_sysbios_family_arm_cc26xx_Timer_Module__startupDone__S = 0x1001bb45;

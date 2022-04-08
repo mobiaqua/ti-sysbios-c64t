@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -124,6 +124,13 @@ function module$meta$init()
         id          : rootString + ".targetsTI.c28",
         name        : "28x Specific Examples",
         description : "28x specific SYS/BIOS Examples",
+        groups      : [rootString + ".targetsTI"],
+    });
+
+    Examples.templateGroupArr.$add({
+        id          : rootString + ".targetsTI.rm57d8xx_dualCoreExamples",
+        name        : "Dual Core Examples",
+        description : "RM57D8xx Dual Core SYS/BIOS Examples",
         groups      : [rootString + ".targetsTI"],
     });
 

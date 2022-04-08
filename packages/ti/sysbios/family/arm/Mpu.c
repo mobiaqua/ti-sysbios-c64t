@@ -41,7 +41,7 @@
 #include <ti/sysbios/hal/Hwi.h>
 
 #if (defined xdc_target__isaCompatible_v7R)
-#include <ti/sysbios/family/arm/r5/Cache.h>
+#include <ti/sysbios/family/arm/v7r/Cache.h>
 #else
 #include <ti/sysbios/hal/CacheNull.h>
 #endif
@@ -144,6 +144,7 @@ Void Mpu_initRegionAttrs(Mpu_RegionAttrs *attrs)
     attrs->noExecute = Mpu_defaultAttrs.noExecute;
     attrs->accPerm = Mpu_defaultAttrs.accPerm;
     attrs->tex = Mpu_defaultAttrs.tex;
+    attrs->subregionDisableMask = Mpu_defaultAttrs.subregionDisableMask;
 }
 
 /*
@@ -160,8 +161,6 @@ Void setRegion(UInt8 regionId, Ptr regionBaseAddr,
     Assert_isTrue(attrs != NULL, Mpu_A_nullPointer);
     Assert_isTrue(regionId < Mpu_numRegions, Mpu_A_invalidRegionId);
 
-    // TODO Add subregion support
-
     enabled = Mpu_isEnabled();
 
     /* disable the MPU (if already disabled, does nothing) */
@@ -170,7 +169,8 @@ Void setRegion(UInt8 regionId, Ptr regionBaseAddr,
     /* Round down base address to a 4-byte aligned address */
     baseAddressReg = (UInt32)regionBaseAddr & 0xFFFFFFFC;
 
-    sizeAndEnableReg = regionSize | (attrs->enable);
+    sizeAndEnableReg = (attrs->subregionDisableMask << 8) | regionSize |
+                       (attrs->enable);
 
     regionAttrsReg = (attrs->noExecute << 12) | (attrs->accPerm << 8) |
         (attrs->tex << 3) | (attrs->shareable << 2) | (attrs->cacheable << 1) |

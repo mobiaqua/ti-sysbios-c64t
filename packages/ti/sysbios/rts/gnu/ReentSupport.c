@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,7 @@
 #include <xdc/runtime/Memory.h>
 #include <xdc/runtime/Types.h>
 #include <xdc/runtime/Error.h>
+#include <xdc/runtime/Startup.h>
 
 #include <ti/sysbios/BIOS.h>
 #include <ti/sysbios/hal/Hwi.h>
@@ -48,6 +49,26 @@
 
 #include <reent.h>
 #include <string.h>
+
+/*
+ *  ======== ReentSupport_Module_startup ========
+ */
+Int ReentSupport_Module_startup (Int phase)
+{
+    /*
+     * Create a dummy lock object (defined in sys/lock.h) and try to
+     * initialize its fields to ensure we are using the correct header
+     * file include path. If the wrong header files are used (that do
+     * not have the correct lock structure definitions), a compiler
+     * error will be generated.
+     */
+    volatile _LOCK_T lock;
+
+    lock.init_done = 1;
+    lock = lock;        /* Suppress unused variable compiler warning */
+
+    return (Startup_DONE);
+}
 
 /*
  *************************************************************************

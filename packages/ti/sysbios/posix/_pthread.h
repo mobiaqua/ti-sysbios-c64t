@@ -33,8 +33,8 @@
  *  ======== _pthread.h ========
  */
 
-#ifndef ti_sysbios_posix__pthread_include
-#define ti_sysbios_posix__pthread_include
+#ifndef ti_sysbios_posix__pthread__include
+#define ti_sysbios_posix__pthread__include
 
 #ifdef __cplusplus
 extern "C" {
@@ -96,9 +96,6 @@ typedef struct pthread_Obj {
 
 #define _pthread_getRunningPriority(pthread) \
     (Task_getPri(((pthread_Obj *)(pthread))->task))
-
-#define _pthread_getSchedPriority(pthread) \
-    (((pthread_Obj *)(pthread))->priority)
 
 #define _pthread_getTaskHandle(pthread) \
     (((pthread_Obj *)(pthread))->task)

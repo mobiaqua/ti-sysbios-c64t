@@ -14,7 +14,6 @@
  *  ======== package.xdc ========
  *
  */
-requires ti.catalog.arp32;
 requires ti.catalog.c6000;
 requires ti.catalog.arm.cortexm4;
 requires ti.catalog.arm.cortexa15;

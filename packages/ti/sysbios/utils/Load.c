@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, Texas Instruments Incorporated
+ * Copyright (c) 2012-2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -605,6 +605,32 @@ UInt32 Load_setMinIdle(UInt32 new)
     UInt32 old = Load_module->minIdle;
     Load_module->minIdle = new;
     return (old);
+}
+
+/*
+ *  ======== Load_startup ========
+ */
+Void Load_startup()
+{
+    UInt32 curTime;
+    Queue_Elem *qElem;
+    Load_HookContext *pTaskEnv;
+
+    /* Update each task hook context */
+    if (Load_taskEnabled) {
+        qElem = Queue_head(Load_Module_State_taskList());
+        while (qElem != (Queue_Elem *)Load_Module_State_taskList()) {
+            pTaskEnv = (Load_HookContext *)Task_getHookContext(
+                ((Load_HookContext *)qElem)->threadHandle,
+                Load_module->taskHId);
+            Assert_isTrue(pTaskEnv == (Load_HookContext *)qElem, NULL);
+
+            curTime = Timestamp_get32();
+            pTaskEnv->timeOfLastUpdate = curTime;
+
+            qElem = Queue_next(qElem);
+        }
+    }
 }
 
 /*

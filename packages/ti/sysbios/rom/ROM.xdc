@@ -104,6 +104,7 @@ package ti.sysbios.rom;
 metaonly module ROM
 {
     enum RomName {
+	NO_ROM,		/*! Default for NOT building against a ROM */
         CC2650,         /*! Use for all CC26xx devices */
 	CC1350,         /*! Use for all CC13xx devices */
 	CC2650_FLASH,	/*! THIS OPTION IS NOT SUPPORTED! */
@@ -116,7 +117,7 @@ metaonly module ROM
      *  Currently only 'ROM.CC2650' and
      *  'ROM.CC1350' are supported.
      */
-    metaonly config RomName romName;
+    metaonly config RomName romName = NO_ROM;
 
     /*!  @_nodoc */
     metaonly config String configDefs[];

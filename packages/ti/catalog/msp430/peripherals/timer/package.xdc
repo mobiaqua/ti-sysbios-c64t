@@ -22,7 +22,7 @@ package ti.catalog.msp430.peripherals.timer [1, 0, 0] {
     module Timer_B3;
     module Timer_B7, Timer0_B7;
     module Timer0_B3, Timer1_B3, Timer2_B3;
-    module Timer2_A2, Timer3_A2;
+    module Timer2_A2, Timer3_A2, Timer3_A5;
     interface ITimer, ITimer_A, ITimer_B;
 }
 /*

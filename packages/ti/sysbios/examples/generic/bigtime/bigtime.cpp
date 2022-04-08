@@ -1,6 +1,6 @@
 /*
  *  ======== bigtime.cpp ========
- *  In this program, C++ is used to create a real-time clock/calendar. 
+ *  In this program, C++ is used to create a real-time clock/calendar.
  *  The C++ class object, Clock, is driven by a variety
  *  of SYS/BIOS objects: two Clock objects, two Task objects, and an
  *  Idle object. Each SYS/BIOS object has its own instantiation
@@ -14,16 +14,17 @@
  *  runs, it advances its timer by one second.  This results in an
  *  accurate clock.  On the other hand, idlClock runs with every pass
  *  through the idle loop.  Therefore, the number of seconds passed for
- *  its attached timer indicates the time spent in the idle loop. 
- *  See the SYS/BIOS configuration file for more information on the 
+ *  its attached timer indicates the time spent in the idle loop.
+ *  See the SYS/BIOS configuration file for more information on the
  *  SYS/BIOS objects.
  *
- *  To view the effects of this program, open RTA RAW Logs and halt target.
+ *  To view the effects of this program, halt the target and open RTOS Object
+ *  View (ROV).  View the output in ROV under the LoggerBuf records.
  *  
  *  You can experiment with advancing Clock at different rates
  *  by changing the Clock::tick function.
  *
- *         
+ *
  */
 
 #include <xdc/std.h>
@@ -31,6 +32,7 @@
 #include <xdc/runtime/Log.h>
 #include <xdc/runtime/Diags.h>
 #include <xdc/runtime/System.h>
+
 #include <ti/sysbios/BIOS.h>
 #include <ti/sysbios/knl/Semaphore.h>
 #include <ti/sysbios/knl/Task.h>
@@ -42,22 +44,22 @@ class Clock {
          // data
          int id;
          double ticks;
-         int microsecond; 
+         int microsecond;
          int millisecond;
          int second;
-         int minute;      
+         int minute;
          int hour;
          int day;
          int month;
          int year;
          int century;
          int millenium;
-         Diags_Mask clockLog;     
-                                
+         Diags_Mask clockLog;
+
     public:
-        // methods         
+        // methods
         Clock(int newId);  // Constructor
-        ~Clock();                           // Destructor                                          
+        ~Clock();          // Destructor
         void tick();
         long getTicks();
         int getId();
@@ -71,16 +73,16 @@ class Clock {
         int getYear();
         int getCentury();
         int getMillenium();
-        void setMicrosecond();          
+        void setMicrosecond();
         void setMillisecond();
-        void setSecond();               
+        void setSecond();
         void setMinute();
-        void setHour(); 
+        void setHour();
         void setDay();
         void setMonth();
         void setYear();
         void setCentury();
-        void setMillenium(); 
+        void setMillenium();
 };
 
 String months[12] = { "January", "February", "March",
@@ -115,7 +117,7 @@ Clock cl4(4);  /* task clock */
 Int main()
 {
     Log_info0("bigTime started.");
-    
+
     BIOS_start();    /* does not return */
     return(0);
 }
@@ -127,10 +129,10 @@ Int main()
  *  Clock::tick()
  */
 void clockTask(UArg arg)
-{   
+{
     Clock *clock = (Clock *)arg;
     int count = 0;
-   
+
     if (clock->getId() == 3) {
         for(;;) {             // task id = 3
             Semaphore_pend(sem0, BIOS_WAIT_FOREVER);
@@ -138,7 +140,7 @@ void clockTask(UArg arg)
             if(count == 50) {
                 Task_sleep(25);
                 count = 0;
-            } 
+            }
             count++;
             Semaphore_post(sem1);
         }
@@ -149,7 +151,7 @@ void clockTask(UArg arg)
             if(count == 50) {
                 Task_sleep(25);
                 count = 0;
-            }   
+            }
             clock->tick();
             count++;
             Semaphore_post(sem0);
@@ -158,7 +160,7 @@ void clockTask(UArg arg)
 }
 
 
- 
+
 /*
  * ======== clockPrd ========
  * Wrapper function for PRD objects calling
@@ -167,10 +169,10 @@ void clockTask(UArg arg)
 void clockPrd(UArg arg)
 {
     Clock *clock = (Clock *)arg;
-	
+
     clock->tick();
     return;
-} 
+}
 
 
 /*
@@ -179,23 +181,23 @@ void clockPrd(UArg arg)
  * Clock::tick()
  */
 void clockIdle(void)
-{ 
+{
     cl0.tick();
     return;
-} 
+}
 
 
 /*
  * Clock methods
  */
 Clock::Clock(int newId)
-{  
+{
     id = newId;
     ticks = 0;
-    microsecond = 0; 
+    microsecond = 0;
     millisecond = 0;
     second = 0;
-    minute = 0; 
+    minute = 0;
     hour = 0;
     day = 19;
     month = 8;
@@ -219,30 +221,30 @@ void Clock::tick()
 
     /*
      * Change selected function to alter clock rate
-     */ 
+     */
 //  setMicrosecond();
 //  setMillisecond();
-    setSecond(); 
+    setSecond();
 //  setMinute();
-//  setDay(); 
+//  setDay();
     return;
 }
 
 void Clock::setMicrosecond()
 {
     if (microsecond >= 999) {
-        setMillisecond(); 
+        setMillisecond();
         microsecond = 0;
     }
     else {
         microsecond++;
     }
-        
+
     return;
 }
- 
+
 void Clock::setMillisecond()
-{ 
+{
     if (millisecond >= 999) {
         setSecond();
         millisecond = 0;
@@ -257,7 +259,7 @@ void Clock::setMillisecond()
 void Clock::setSecond()
 {
     if (second == 59) {
-        setMinute(); 
+        setMinute();
         second = 0;
     }
     else {
@@ -294,7 +296,7 @@ void Clock::setHour()
 }
 
 void Clock::setDay()
-{ 
+{
     bool thirtydays = false;
     bool feb = false;
     bool leap = false;
@@ -314,9 +316,9 @@ void Clock::setDay()
      * If a year is divisible by 4 and by 100, it is a leap year only
      * if it is also divisible by 400.
      */
-    if ((year%4 == 0 && year%100 != 0) || 
+    if ((year%4 == 0 && year%100 != 0) ||
             (year%4 == 0 && year%100 == 0 && year%400 == 0)) {
-        leap = true; 
+        leap = true;
     }
 
     if ((day == 28) && (feb) && (!leap)) {
@@ -331,7 +333,7 @@ void Clock::setDay()
         setMonth();
         day = 1;
     }
-    else if ((day == 31) && (thirtydays == false)) { 
+    else if ((day == 31) && (thirtydays == false)) {
         setMonth();
         day = 1;
     }
@@ -356,7 +358,7 @@ void Clock::setMonth()
 }
 
 void Clock::setYear()
-{ 
+{
     year++;
     if ((year%100) == 0) {
         setCentury();
@@ -366,7 +368,7 @@ void Clock::setYear()
 }
 
 void Clock::setCentury()
-{ 
+{
     century++;
     if ((century%10) == 0) {
         setMillenium();
@@ -377,7 +379,7 @@ void Clock::setCentury()
 
 void Clock::setMillenium()
 {
-    millenium++; 
+    millenium++;
 
     return;
 }
@@ -441,4 +443,3 @@ int Clock::getMillenium()
 {
     return millenium;
 }
-

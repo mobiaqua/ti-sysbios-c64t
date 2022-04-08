@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2013-2015, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -699,6 +699,13 @@ module Load
      */
     @DirectCall
     Void idleFxnPwr();
+
+    /*!
+     *  @_nodoc
+     *  ======== Load_startup ========
+     *  Initialize thread load update times.
+     */
+    Void startup();
 
     /* -------- Hook Functions -------- */
 

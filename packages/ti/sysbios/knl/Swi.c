@@ -376,15 +376,21 @@ Void Swi_restoreHwi(UInt swiKey)
 
     if (swiKey == FALSE) {
         if (Swi_module->curSet) {
+            /* latency reduction */ 
+            Hwi_enable();
+            Hwi_disable();
+
             /* Remember current Swi priority */
             curQ = Swi_module->curQ;
 
             /* determine current highest priority Q */
             maxQ = (Queue_Handle)((UInt8 *)(Swi_module->readyQ) +
-                        (UInt)(Intrinsics_maxbit(Swi_module->curSet)*(2*sizeof(Ptr))));
-
-            /* Run all Swis of higher priority than the current Swi priority */
-            /* Will pre-empt any currently running swi. */
+                    (UInt)(Intrinsics_maxbit(Swi_module->curSet) *
+                    (2*sizeof(Ptr))));
+            /* 
+             * Run all Swis of higher priority than the current Swi priority
+             * Will pre-empt any currently running swi.
+             */
             while (maxQ > curQ) {
                 swi = (Swi_Object *)Queue_dequeue(maxQ);
 
@@ -399,7 +405,8 @@ Void Swi_restoreHwi(UInt swiKey)
                     break;
                 }
                 maxQ = (Queue_Handle)((UInt8 *)(Swi_module->readyQ) +
-                        (UInt)(Intrinsics_maxbit(Swi_module->curSet)*(2*sizeof(Ptr))));
+                        (UInt)(Intrinsics_maxbit(Swi_module->curSet) *
+                        (2*sizeof(Ptr))));
             }
         }
         Swi_module->locked = FALSE;
