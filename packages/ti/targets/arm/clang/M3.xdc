@@ -1,10 +1,10 @@
 /*
- *  Copyright 2019 by Texas Instruments Incorporated.
+ *  Copyright 2020 by Texas Instruments Incorporated.
  *
  */
 
 /*
- * Copyright (c) 2018-2019, Texas Instruments Incorporated
+ * Copyright (c) 2018-2020, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -119,26 +119,18 @@ metaonly module M3 inherits ti.targets.arm.elf.IArm {
     /*
      *  ======== profiles ========
      */
-    /*
-     * The compiler option -gdwarf-3 needs to be passed to workaround a
-     * known bug in TI LLVM compiler generation of debug information.
-     * See JIRA CODEGEN-4536 for more info.
-     */
     override config xdc.bld.ITarget.OptionSet profiles[string] = [
         ["debug", {
             compileOpts: {
-                copts: "-gdwarf-3",
-                defs:  "-D_DEBUG_=1",
-            },
-            linkOpts: "-gdwarf-3",
+                copts: "-g",
+                defs:  "-D_DEBUG_=1"
+            }
         }],
-
         ["release", {
             compileOpts: {
-                copts: " -O2 ",
-            },
-            linkOpts: " ",
-        }],
+                copts: "-g -Oz"
+            }
+        }]
     ];
 }
 /*

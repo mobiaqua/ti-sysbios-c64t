@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Texas Instruments Incorporated
+ * Copyright (c) 2013-2019, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -649,7 +649,7 @@ UInt32 Timer_getCurrentTick(Timer_Object *obj, Bool saveFlag)
  */
 Void Timer_getFreq(Timer_Object *obj, Types_FreqHz *freq)
 {
-    if (obj->extFreq.lo != NULL) {
+    if (obj->extFreq.lo != 0U) {
         *freq = obj->extFreq;
     }
     else {

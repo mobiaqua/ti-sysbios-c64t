@@ -1,5 +1,5 @@
 ;
-;  Copyright (c) 2019, Texas Instruments Incorporated
+;  Copyright (c) 2019-2020, Texas Instruments Incorporated
 ;  All rights reserved.
 ;
 ;  Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,9 @@
 ti_sysbios_family_c7x_Mmu_init__I
         .asmfunc
 
-        mvc.s1   a4, TBR0
+        mv.l1    a5, a0
+  [!a0] mvc.s1   a4, TBR0_S
+  [ a0] mvc.s1   a4, TBR0
 ||      ret.b1
 
         .endasmfunc
@@ -64,7 +66,9 @@ ti_sysbios_family_c7x_Mmu_isEnabled__E
 ti_sysbios_family_c7x_Mmu_setTCR__I
         .asmfunc
 
-        mvc.s1   a4, TCR0
+        mv.l1    a5, a0
+  [!a0] mvc.s1   a4, TCR0_S
+  [ a0] mvc.s1   a4, TCR0
 ||      ret.b1
 
         .endasmfunc
@@ -89,10 +93,11 @@ ti_sysbios_family_c7x_Mmu_setMAIRAsm__I
         shld.l1  a4, 3, a4
         shld.l1  a5, a4, a5
         mvk64.l1 0xff, a6
-        mvc.s1   MAR, a7
+        mvc.s1   MAR_S, a7
         shld.l1  a6, a4, a6
         andnd.l1 a6, a7, a4
         ord.l1   a4, a5, a4
+        mvc.s1   a4, MAR_S
         mvc.s1   a4, MAR
 ||      ret.b1
 

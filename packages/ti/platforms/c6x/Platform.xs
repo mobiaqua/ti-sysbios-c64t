@@ -198,5 +198,10 @@ function instance$meta$init(name)
             this.CPU.deviceName = "C674";
             this.CPU.clockRate = 600;
         }
+        else if (this.deviceName.match(/^TPR12/)) {
+            this.CPU.catalogName = "ti.catalog.c6000";
+            this.CPU.deviceName = "C66";
+            this.CPU.clockRate = 500;
+        }
     }
 }

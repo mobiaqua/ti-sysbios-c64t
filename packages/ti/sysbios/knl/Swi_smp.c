@@ -60,7 +60,7 @@
 #define TASK_RESTORE Swi_taskRestore
 #endif
 
-#ifdef __ti__
+#if defined(__ti__) && !defined(__clang__)
 /* disable unused local variable warning during optimized compile */
 #pragma diag_suppress=179
 #endif

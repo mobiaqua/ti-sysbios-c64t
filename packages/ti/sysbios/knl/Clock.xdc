@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Texas Instruments Incorporated
+ * Copyright (c) 2013-2019, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -226,11 +226,13 @@ import xdc.runtime.Log;
  */
 
 @DirectCall
+/* REQ_TAG(SYSBIOS-520) */
 @ModuleStartup
 @InstanceInitStatic /* Construct/Destruct CAN becalled at runtime */
 @InstanceFinalize   /* generate call to Clock_Instance_finalize on delete */
 @Template("./Clock.xdt")
 
+/* REQ_TAG(SYSBIOS-519) */
 module Clock
 {
     /*!
@@ -341,6 +343,7 @@ module Clock
      *  @p
      *
      */
+    /* REQ_TAG(SYSBIOS-523) */
     proxy TimerProxy inherits ti.sysbios.interfaces.ITimer;
 
     /*!
@@ -467,6 +470,7 @@ module Clock
      *  config parameter value is accessible in runtime C code as
      *  "Clock_tickPeriod".
      */
+    /* REQ_TAG(SYSBIOS-522) */
     config UInt32 tickPeriod;
 
     /*!
@@ -642,6 +646,7 @@ module Clock
      *  @param(arg0)    Unused. required to match Swi.FuncPtr
      *  @param(arg1)    Unused. required to match Swi.FuncPtr
      */
+    /* REQ_TAG(SYSBIOS-525) */
     Void workFunc(UArg arg0, UArg arg1);
 
     /*!
@@ -784,6 +789,8 @@ instance:
      *                    ticks)
      */
     create(FuncPtr clockFxn, UInt timeout);
+
+    /* REQ_TAG(SYSBIOS-521) */
 
     /*!
      *  ======== startFlag ========
@@ -989,6 +996,7 @@ internal:
      *
      *  @param(arg)     Unused. Required to match signature of Hwi.FuncPtr
      */
+    /* REQ_TAG(SYSBIOS-531) */
     Void doTick(UArg arg);
 
     /*
@@ -1014,6 +1022,15 @@ internal:
         volatile Bool   active;         // active/idle flag
         FuncPtr         fxn;            // instance function
         UArg            arg;            // function arg
+
+        /*
+         *  For a periodic clock, this is initially set to timeout when
+         *  the clock is started.  Once timeout expires, it will be set
+         *  to the period.  For a one-shot clock, this will always be
+         *  timeout.  This is used by Clock_getTimeout() to determine
+         *  the remaining time until the clock is posted.
+         */
+        UInt32          timeoutTicks;
     };
 
     /*

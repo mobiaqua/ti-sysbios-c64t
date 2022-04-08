@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, Texas Instruments Incorporated
+ * Copyright (c) 2017-2020, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,11 @@ var Exception = null;
 
 if (xdc.om.$name == "cfg") {
     var deviceTable = {
+        "AM64.*": {
+            vimBaseAddress              : 0x2FFF0000,
+            resetVectorAddress          : 0x00000000,
+            numInterrupts               : 512
+        },
         "AM65.*": {
             vimBaseAddress              : 0x40F80000,
             resetVectorAddress          : 0x00000000,
@@ -53,6 +58,11 @@ if (xdc.om.$name == "cfg") {
         },
         "J7.*_MAIN": {
             vimBaseAddress              : 0x0FF80000,
+            resetVectorAddress          : 0x00000000,
+            numInterrupts               : 512
+        },
+        "TPR12": {
+            vimBaseAddress              : 0x2080000,
             resetVectorAddress          : 0x00000000,
             numInterrupts               : 512
         },

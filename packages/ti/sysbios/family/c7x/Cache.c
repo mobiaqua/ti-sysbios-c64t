@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2019, Texas Instruments Incorporated
+ * Copyright (c) 2015-2020, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
 #include <xdc/runtime/Assert.h>
 #include <xdc/runtime/Error.h>
 #include <xdc/runtime/Startup.h>
-#include <ti/sysbios/hal/Hwi.h>
+#include <ti/sysbios/family/c7x/Hwi.h>
 #include <ti/sysbios/family/c7x/Mmu.h>
 
 #include <c6x_migration.h>
@@ -106,6 +106,10 @@ Void Cache_disable(Bits16 type)
 Void Cache_setSize(Cache_Size *size)
 {
     UInt        mask;
+
+    if (ti_sysbios_family_c7x_Hwi_getCXM__E() != Hwi_TSR_CXM_SecureSupervisor) {
+        return;
+    }
 
     /* critical section -- disable interrupts */
     mask = Hwi_disable();

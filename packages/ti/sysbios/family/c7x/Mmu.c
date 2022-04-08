@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019, Texas Instruments Incorporated
+ * Copyright (c) 2016-2020, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,7 @@
 #include <xdc/std.h>
 #include <xdc/runtime/Assert.h>
 
-#include <ti/sysbios/hal/Hwi.h>
-
+#include <ti/sysbios/family/c7x/Hwi.h>
 #include <ti/sysbios/family/c7x/Cache.h>
 
 
@@ -65,6 +64,18 @@ extern UInt64 *Mmu_level1Table;
 extern UInt64  Mmu_tableArray[];
 extern UInt64  Mmu_tableArraySlot;
 
+#if ti_sysbios_family_c7x_Hwi_bootToNonSecure__D
+
+#define Mmu_level1Table_NS    ti_sysbios_family_c7x_Mmu_level1Table_NS
+#define Mmu_tableArray_NS     ti_sysbios_family_c7x_Mmu_tableArray_NS
+#define Mmu_tableArraySlot_NS ti_sysbios_family_c7x_Mmu_tableArraySlot_NS
+
+extern UInt64 *Mmu_level1Table_NS;
+extern UInt64  Mmu_tableArray_NS[];
+extern UInt64  Mmu_tableArraySlot_NS;
+
+#endif
+
 /*
  * TODO Pending work
  * =================
@@ -88,12 +99,12 @@ Void Mmu_addBlockEntry(UInt8 level, UInt64 *tablePtr, UInt16 tableIdx,
     }
 
     desc |= ((UInt64)(mapAttrs->attrIndx & 0x7) << 2) |
-            ((UInt64)(0x0 << 5)) |  /* NS bit */
+            ((UInt64)(mapAttrs->ns << 5)) |
             ((UInt64)(mapAttrs->accessPerm & 0x3) << 6) |
             ((UInt64)(mapAttrs->shareable & 0x3) << 8) |
             ((UInt64)(0x1) << 10) |  /* access flag */
             ((UInt64)(!(mapAttrs->global) & 0x1) << 11) | 
-            ((UInt64)(paddr & ~((1UL << Mmu_configInfo.tableOffset[level]) - 1))) |
+            ((UInt64)(paddr & ~((1 << Mmu_configInfo.tableOffset[level]) - 1))) |
             ((UInt64)(!(mapAttrs->privExecute) & 0x1) << 53) |
             ((UInt64)(!(mapAttrs->userExecute) & 0x1) << 54);
 
@@ -104,11 +115,11 @@ Void Mmu_addBlockEntry(UInt8 level, UInt64 *tablePtr, UInt16 tableIdx,
  *  ======== Mmu_addTableEntry ========
  */
 UInt64* Mmu_addTableEntry(UInt64 *tablePtr, UInt16 tableIdx,
-    Mmu_MapAttrs *mapAttrs)
+    Mmu_MapAttrs *mapAttrs, Bool secure)
 {
     UInt64 desc, *newTable;
 
-    newTable = Mmu_allocTable();
+    newTable = Mmu_allocTable(secure);
     if (newTable == NULL) {
         return (NULL);
     }
@@ -123,17 +134,32 @@ UInt64* Mmu_addTableEntry(UInt64 *tablePtr, UInt16 tableIdx,
 /*
  *  ======== Mmu_allocTable ========
  */
-UInt64* Mmu_allocTable()
+UInt64* Mmu_allocTable(Bool secure)
 {
     UInt64 *table;
     UInt i, tableLen = (Mmu_granuleSize >> 3);
+    UInt64 *slot;
 
-    if (Mmu_tableArraySlot == (~0)) {
+    if (secure) {
+        table = &Mmu_tableArray[tableLen * Mmu_tableArraySlot];
+        slot = &Mmu_tableArraySlot;
+    }
+#if ti_sysbios_family_c7x_Hwi_bootToNonSecure__D
+    else {
+        table = &Mmu_tableArray_NS[tableLen * Mmu_tableArraySlot_NS];
+        slot = &Mmu_tableArraySlot_NS;
+    }
+#else
+    else {
+        return (NULL);
+    }
+#endif
+
+    if (*slot == (~0)) {
         return (NULL);
     }
 
-    table = &Mmu_tableArray[tableLen * Mmu_tableArraySlot];
-    Mmu_tableArraySlot = *table;
+    *slot = *table;
 
     /* Zero-out level 1 table */
     for (i = 0; i < tableLen; i++) {
@@ -225,7 +251,8 @@ Void Mmu_enableI()
         "\t mvc.s1      SCR, a3                  \n"
         "\t nop                                  \n"
         "\t ord.l1      a2, a3, a3               \n"
-        "\t mvc.s1      a3, SCR");
+        "\t mvc.s1      a3, SCR                  \n"
+        "\t mvc.s1      a3, SCR_S");
 }
 
 /*
@@ -245,6 +272,7 @@ Void Mmu_initMapAttrs(Mmu_MapAttrs *attrs)
     /* Assert that attrs != NULL */
     Assert_isTrue(attrs != NULL, Mmu_A_nullPointer);
 
+    attrs->ns = Mmu_defaultMapAttrs.ns;
     attrs->accessPerm = Mmu_defaultMapAttrs.accessPerm;
     attrs->privExecute = Mmu_defaultMapAttrs.privExecute;
     attrs->userExecute = Mmu_defaultMapAttrs.userExecute;
@@ -256,9 +284,10 @@ Void Mmu_initMapAttrs(Mmu_MapAttrs *attrs)
 /*
  *  ======== Mmu_map ========
  */
-Bool Mmu_map(UInt64 vaddr, UInt64 paddr, SizeT size, Mmu_MapAttrs *mapAttrs)
+Bool Mmu_map(UInt64 vaddr, UInt64 paddr, SizeT size, Mmu_MapAttrs *mapAttrs, Bool secure)
 {
     UInt key;
+    UInt64 *tablePtr;
     Bool retStatus, enabled;
 
     /* Assert that mapAttrs != NULL */
@@ -281,13 +310,26 @@ Bool Mmu_map(UInt64 vaddr, UInt64 paddr, SizeT size, Mmu_MapAttrs *mapAttrs)
     /* disable the MMU (if already disabled, does nothing) */
     Mmu_disable();
 
+    if (secure) {
+        tablePtr = Mmu_level1Table;
+    }
+#if ti_sysbios_family_c7x_Hwi_bootToNonSecure__D
+    else {
+        tablePtr = Mmu_level1Table_NS;
+    }
+#else
+    else {
+        return (FALSE);
+    }
+#endif
+
     if (Mmu_configInfo.noLevel0Table) {
-        retStatus = Mmu_tableWalk(1, Mmu_level1Table, &vaddr, &paddr,
-            &size, mapAttrs);
+        retStatus = Mmu_tableWalk(1, tablePtr, &vaddr, &paddr,
+            &size, mapAttrs, secure);
     }
     else {
-        retStatus = Mmu_tableWalk(0, Mmu_level1Table, &vaddr, &paddr,
-            &size, mapAttrs);
+        retStatus = Mmu_tableWalk(0, tablePtr, &vaddr, &paddr,
+            &size, mapAttrs, secure);
     }
 
     /* Ensure all translation table updates have been observed */
@@ -326,7 +368,7 @@ Void Mmu_readBlockEntry(UInt8 level, UInt64 *tablePtr, UInt16 tableIdx,
     mapAttrs->userExecute = !((desc >> 54) & 0x1);
 
     *paddr = desc & (UInt64)Mmu_PADDR_MASK &
-        ~((1UL << Mmu_configInfo.tableOffset[level]) - 1);
+        ~((1 << Mmu_configInfo.tableOffset[level]) - 1);
 }
 
 /*
@@ -354,6 +396,7 @@ Void Mmu_startup()
 {
     UInt64 tcr = 0;
     UInt i, tableLen = Mmu_configInfo.tableLength;
+    UInt mode;
 
     /* Initialize MAIR */
     Mmu_setMAIRAsm(0, Mmu_MAIR0);
@@ -386,7 +429,11 @@ Void Mmu_startup()
           Mmu_OUTER_CACHEABLE | Mmu_INNER_CACHEABLE |
           ((64 - Mmu_PA_MAX_WIDTH) << 1) | Mmu_WALK_EN;
 
-    Mmu_setTCR(tcr);
+    mode = ti_sysbios_family_c7x_Hwi_getCXM__E();
+    if (mode == Hwi_TSR_CXM_SecureSupervisor) {
+        Mmu_setTCR(tcr, 1);
+    }
+    Mmu_setTCR(tcr, 0);
 
     /*
      *  When running in SMP mode, the MMU table init should be done
@@ -399,16 +446,33 @@ Void Mmu_startup()
         /* Initialize table array */
         for (i = 0; i < Mmu_tableArrayLen; i++) {
             Mmu_tableArray[tableLen * i] = i + 1;
+#if ti_sysbios_family_c7x_Hwi_bootToNonSecure__D
+            Mmu_tableArray_NS[tableLen * i] = i + 1;
+#endif
         }
         Mmu_tableArray[tableLen * (i - 1)] = (~0);
         Mmu_tableArraySlot = 0;
 
         /* Allocate level1 Table */
-        Mmu_level1Table = Mmu_allocTable();
+        Mmu_level1Table = Mmu_allocTable(1);
+
+#if ti_sysbios_family_c7x_Hwi_bootToNonSecure__D
+        Mmu_tableArray_NS[tableLen * (i - 1)] = (~0);
+        Mmu_tableArraySlot_NS = 0;
+
+        /* Allocate level1 Table */
+        Mmu_level1Table_NS = Mmu_allocTable(0);
+#endif
 //    }
 
     /* Install MMU translation tables */
-    Mmu_init(Mmu_level1Table);
+    if (mode == Hwi_TSR_CXM_SecureSupervisor) {
+        Mmu_init(Mmu_level1Table, 1);
+    }
+
+#if ti_sysbios_family_c7x_Hwi_bootToNonSecure__D
+    Mmu_init(Mmu_level1Table_NS, 0);
+#endif
 
     /*
      * Call init function. This function is part of the application and will
@@ -424,13 +488,17 @@ Void Mmu_startup()
     if (Mmu_enableMMU) {
         Mmu_enableI();
     }
+
+    if (Hwi_bootToNonSecure) {
+        Hwi_secureStart();
+    }
 }
 
 /*
  *  ======== Mmu_tableWalk ========
  */
 Bool Mmu_tableWalk(UInt8 level, UInt64 *tablePtr, UInt64 *vaddr, UInt64 *paddr,
-    SizeT *size, Mmu_MapAttrs *mapAttrs)
+    SizeT *size, Mmu_MapAttrs *mapAttrs, Bool secure)
 {
     UInt64 desc;
     UInt16 tableIdx;
@@ -440,7 +508,7 @@ Bool Mmu_tableWalk(UInt8 level, UInt64 *tablePtr, UInt64 *vaddr, UInt64 *paddr,
     UInt64 *nextLevelTablePtr;
 
     blockTranslation = TRUE;
-    blockSize = 1UL << Mmu_configInfo.tableOffset[level];
+    blockSize = 1 << Mmu_configInfo.tableOffset[level];
     if ((level == 0) ||
        ((level == 1) && (Mmu_granuleSize != Mmu_GranuleSize_4KB))) {
         blockTranslation = FALSE;
@@ -466,7 +534,7 @@ Bool Mmu_tableWalk(UInt8 level, UInt64 *tablePtr, UInt64 *vaddr, UInt64 *paddr,
                 nextLevelTablePtr = (UInt64 *)(Mmu_PADDR_MASK & desc &
                     ~(UInt64)(Mmu_granuleSize - 1));
                 retStatus = Mmu_tableWalk(level + 1, nextLevelTablePtr,
-                    vaddr, paddr, size, mapAttrs);
+                    vaddr, paddr, size, mapAttrs, secure);
                 if (!retStatus) {
                     return (FALSE);
                 }
@@ -486,7 +554,7 @@ Bool Mmu_tableWalk(UInt8 level, UInt64 *tablePtr, UInt64 *vaddr, UInt64 *paddr,
                 }
 
                 nextLevelTablePtr =
-                    Mmu_addTableEntry(tablePtr, tableIdx, mapAttrs);
+                    Mmu_addTableEntry(tablePtr, tableIdx, mapAttrs, secure);
                 if (nextLevelTablePtr == NULL) {
                     return (FALSE);
                 }
@@ -497,11 +565,11 @@ Bool Mmu_tableWalk(UInt8 level, UInt64 *tablePtr, UInt64 *vaddr, UInt64 *paddr,
                      * added and merged with the old block entry.
                      */
                     Mmu_tableWalk(level + 1, nextLevelTablePtr, &vaddrCopy,
-                        &paddrCopy, &sizeCopy, &mapAttrsCopy);
+                        &paddrCopy, &sizeCopy, &mapAttrsCopy, secure);
                 }
 
                 retStatus = Mmu_tableWalk(level + 1, nextLevelTablePtr,
-                    vaddr, paddr, size, mapAttrs);
+                    vaddr, paddr, size, mapAttrs, secure);
                 if (!retStatus) {
                     return (FALSE);
                 }
@@ -530,24 +598,71 @@ Void Mmu_initFuncDefault()
 
     Mmu_initMapAttrs(&attrs);
 
+    /*
+     * Setup secure mappings
+     */
+
     attrs.attrIndx = Mmu_AttrIndx_MAIR0;
-    ret = Mmu_map(0x02400000, 0x02400000, 0x000c0000, &attrs); /* dmtimer     */
+    attrs.ns = 0;
+
+    ret = Mmu_map(0x02400000, 0x02400000, 0x000c0000, &attrs, 1); /* dmtimer */
     if (!ret) {
         goto fail;
     }
 
-    ret = Mmu_map(0x02800000, 0x02800000, 0x00010000, &attrs); /* uart        */
+    ret = Mmu_map(0x02800000, 0x02800000, 0x00001000, &attrs, 1); /* uart    */
     if (!ret) {
         goto fail;
     }
 
-    ret = Mmu_map(0x78000000, 0x78000000, 0x08000000, &attrs); /* clec        */
+    ret = Mmu_map(0x78000000, 0x78000000, 0x08000000, &attrs, 1); /* clec    */
     if (!ret) {
         goto fail;
     }
 
     attrs.attrIndx = Mmu_AttrIndx_MAIR7;
-    ret = Mmu_map(0x60000000, 0x60000000, 0x18000000, &attrs); /* msmc        */
+
+    ret = Mmu_map(0x60000000, 0x60000000, 0x18000000, &attrs, 1); /* msmc    */
+    if (!ret) {
+        goto fail;
+    }
+
+    ret = Mmu_map(0x80000000, 0x80000000, 0x00800000, &attrs, 1); /* ddr     */
+    if (!ret) {
+        goto fail;
+    }
+
+    /*
+     * Setup non-secure mappings
+     */
+
+    attrs.attrIndx = Mmu_AttrIndx_MAIR0;
+    attrs.ns = 1;
+
+    ret = Mmu_map(0x02400000, 0x02400000, 0x000c0000, &attrs, 0); /* dmtimer */
+    if (!ret) {
+        goto fail;
+    }
+
+    ret = Mmu_map(0x02800000, 0x02800000, 0x00001000, &attrs, 0); /* uart    */
+    if (!ret) {
+        goto fail;
+    }
+
+    ret = Mmu_map(0x78000000, 0x78000000, 0x08000000, &attrs, 0); /* clec    */
+    if (!ret) {
+        goto fail;
+    }
+
+    attrs.attrIndx = Mmu_AttrIndx_MAIR7;
+
+    ret = Mmu_map(0x60000000, 0x60000000, 0x18000000, &attrs, 0); /* msmc    */
+    if (!ret) {
+        goto fail;
+    }
+
+    /* Secure code that transitions to non-secure */
+    ret = Mmu_map(0x80000000, 0x80000000, 0x00800000, &attrs, 0); /* ddr     */
     if (!ret) {
         goto fail;
     }

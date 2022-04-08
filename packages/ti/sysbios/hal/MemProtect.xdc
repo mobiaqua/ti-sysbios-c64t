@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Texas Instruments Incorporated
+ * Copyright (c) 2017-2019, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -210,6 +210,7 @@ package ti.sysbios.hal;
  *  This function destructs a previously constructed execution domain.
  */
 
+/* REQ_TAG(SYSBIOS-1019) */
 @CustomHeader
 module MemProtect
 {

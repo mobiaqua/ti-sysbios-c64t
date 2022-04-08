@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Texas Instruments Incorporated
+ * Copyright (c) 2017-2020, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -100,9 +100,7 @@ Int MemProtect_constructDomain(MemProtect_Struct *obj, MemProtect_Acl *acl,
 
         flags = acl[i].flags;
 
-#if defined(__TI_COMPILER_VERSION__)
         regionSize = (30 - __clz(length)) << 1;
-#endif
 
         regionAttrs = MemProtect_parseFlags(flags);
         if (regionAttrs == (~0)) {
@@ -272,9 +270,7 @@ Void MemProtect_programMpuEntry(UInt8 id, UInt32 begin, UInt32 end,
 
     baseAddress = begin;
     regionSize = end - begin;
-#if defined(__TI_COMPILER_VERSION__)
     regionSize = (30 - __clz(regionSize)) << 1;
-#endif
     regionAttrs = MemProtect_parseFlags(flags);
 
     rbar = (baseAddress & (~0x1F)) | MPU_VALID | (i & MPU_REGION_MASK);

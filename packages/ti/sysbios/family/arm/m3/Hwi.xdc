@@ -262,6 +262,7 @@ import ti.sysbios.interfaces.IHwi;
 @ModuleStartup      /* generate a call to startup function */
 @InstanceInitStatic /* allow constructs in static only systems */
 
+/* REQ_TAG(SYSBIOS-1006) */
 module Hwi inherits ti.sysbios.interfaces.IHwi
 {
     // -------- Module Constants --------
@@ -934,6 +935,7 @@ module Hwi inherits ti.sysbios.interfaces.IHwi
      *  being the zero-latency, non-maskable interrupt priority.
      *  All other priorities are disabled with Hwi_disable().
      */
+    /* REQ_TAG(SYSBIOS-1007), REQ_TAG(SYSBIOS-1008) */
     config UInt disablePriority;
 
     /*!
@@ -1526,5 +1528,6 @@ internal:   /* not for client use */
                                             // changed vnvic regs to nvic
         UInt8           intAffinity[];      // smp int-to-coreId mappings
         UInt32          intAffinityMasks[][]; // smp per-core NVIC register masks
+        VectorFuncPtr   vectorTable[];      // Vector table
     };
 }

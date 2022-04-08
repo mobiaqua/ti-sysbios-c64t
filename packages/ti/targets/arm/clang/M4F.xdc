@@ -1,10 +1,10 @@
 /*
- *  Copyright 2019 by Texas Instruments Incorporated.
+ *  Copyright 2020 by Texas Instruments Incorporated.
  *
  */
 
 /*
- * Copyright (c) 2018-2019, Texas Instruments Incorporated
+ * Copyright (c) 2018-2020, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,7 @@
 metaonly module M4F inherits ti.targets.arm.elf.IArm {
     override readonly config string name        = "M4F";
     override readonly config string suffix      = "m4f";
-    override readonly config string isa         = "v7M";
+    override readonly config string isa         = "v7M4";
     override readonly config string rts         = "ti.targets.arm.rtsarm";
     override config string platform   = "ti.platforms.cortexM:MTL1_VSOC:1";
     override config String stdInclude = "ti/targets/arm/clang/std.h";
@@ -119,26 +119,18 @@ metaonly module M4F inherits ti.targets.arm.elf.IArm {
     /*
      *  ======== profiles ========
      */
-    /*
-     * The compiler option -gdwarf-3 needs to be passed to workaround a
-     * known bug in TI LLVM compiler generation of debug information.
-     * See JIRA CODEGEN-4536 for more info.
-     */
     override config xdc.bld.ITarget.OptionSet profiles[string] = [
         ["debug", {
             compileOpts: {
-                copts: "-gdwarf-3",
-                defs:  "-D_DEBUG_=1",
-            },
-            linkOpts: "-gdwarf-3",
+                copts: "-g",
+                defs:  "-D_DEBUG_=1"
+            }
         }],
-
         ["release", {
             compileOpts: {
-                copts: " -O2 ",
-            },
-            linkOpts: " ",
-        }],
+                copts: "-g -Oz"
+            }
+        }]
     ];
 }
 /*

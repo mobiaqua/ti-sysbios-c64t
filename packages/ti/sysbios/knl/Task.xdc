@@ -1833,7 +1833,7 @@ instance:
     config Bool privileged = true;
 
     /*! Domain Handle */
-    /* REQ_TAG(SYSBIOS-575) */
+    /* REQ_TAG(SYSBIOS-570) */
     config Ptr domain = null;
 
     // -------- Handle Functions --------

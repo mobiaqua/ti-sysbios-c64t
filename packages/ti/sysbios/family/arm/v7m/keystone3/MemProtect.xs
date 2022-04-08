@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Texas Instruments Incorporated
+ * Copyright (c) 2017-2019, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@ function getCFiles(targetName)
 {
     switch(targetName) {
         case "ti.targets.arm.elf.M3":
+        case "gnu.targets.arm.M3":
             return (["MemProtect.c"]);
         default:
             return (null);

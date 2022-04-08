@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, Texas Instruments Incorporated
+ * Copyright (c) 2015-2020, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -155,6 +155,17 @@ module Hwi inherits ti.sysbios.interfaces.IHwi
 
     /*! @_nodoc Hwi plug function type definition. */
     typedef Void (*PlugFuncPtr)(void);
+
+    enum TSR_CXM {
+        TSR_CXM_GuestUser,
+        TSR_CXM_GuestSupervisor,
+        TSR_CXM_RootUser,
+        TSR_CXM_RootSupervisor,
+        TSR_CXM_SecureUser,
+        TSR_CXM_SecureSupervisor
+    };
+
+    config Bool bootToNonSecure = true;
 
     /*!
      *  ======== BasicView ========
@@ -529,7 +540,16 @@ module Hwi inherits ti.sysbios.interfaces.IHwi
      */
     Void setPriority(UInt intNum, UInt priority);
 
+    /*!
+     *  ======== getCXM ========
+     *
+     *  Return the current context mode (TSR.CXM field)
+     */
+    TSR_CXM getCXM();
+
     Void setCOP(Int cop);
+
+    Void secureStart();
 
 instance:
 
@@ -595,6 +615,9 @@ instance:
 
 internal:   /* not for client use */
 
+    config Ptr vectorTableBase;
+    config Ptr vectorTableBase_SS;
+
     /*
      * Swi and Task module function pointers.
      * Used to decouple Hwi from Swi and Task when
@@ -627,9 +650,6 @@ internal:   /* not for client use */
 
     /* assembly language code that switches SP and calls dispatchCore */
     Void switchAndDispatch(Int intNum);
-
-    /* setup a secure context */
-    Void setupSC();
 
     /*
      *  ======== postInit ========
@@ -676,7 +696,6 @@ internal:   /* not for client use */
                                     // Task's SP during ISR execution
         /* ROM */
         Char        *isrStack;      // Points to isrStack address
-        Ptr         vectorTableBase;// ti_sysbios_family_c64_Hwi0
         Int         scw;            // secure context word
 
         Handle      dispatchTable[NUM_INTERRUPTS];  // dispatch table

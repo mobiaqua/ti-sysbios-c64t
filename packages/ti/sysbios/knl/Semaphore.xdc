@@ -148,9 +148,11 @@ import ti.sysbios.knl.Clock;
 
 @CustomHeader
 @DirectCall
+/* REQ_TAG(SYSBIOS-501) */
 @InstanceFinalize       /* to destruct queue */
 @InstanceInitStatic     /* Construct/Destruct CAN becalled at runtime */
 
+/* REQ_TAG(SYSBIOS-500) */
 module Semaphore
 {
     /*!
@@ -334,6 +336,7 @@ instance:
      */
     create(Int count);
 
+    /* REQ_TAG(SYSBIOS-502) */
     /*!
      *  ======== event ========
      *  Event instance to use if non-NULL
@@ -392,6 +395,7 @@ instance:
      *
      *  @b(returns)             current semaphore count
      */
+    /* REQ_TAG(SYSBIOS-508) */
     Int getCount();
 
     /*!
@@ -423,6 +427,7 @@ instance:
      *
      *  @b(returns)         TRUE if successful, FALSE if timeout
      */
+    /* REQ_TAG(SYSBIOS-504) */
     Bool pend(UInt32 timeout);
 
     /*!
@@ -435,6 +440,7 @@ instance:
      *  the semaphore count and returns. In the case of a binary semaphore,
      *  the count has a maximum value of one.
      */
+    /* REQ_TAG(SYSBIOS-503) */
     Void post();
 
     /*!

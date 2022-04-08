@@ -23,9 +23,9 @@ requires xdc.bld;
  */
 package ti.targets.elf [1,0,0] {
     interface ITarget;
-    module C64P, C674, C64T, C67P;
-    module C64P_big_endian, C674_big_endian;
-    module C66, C66_big_endian;
+    module C64P, C674;
+    module C66;
+    module C71;
     module C28_float;
 }
 /*

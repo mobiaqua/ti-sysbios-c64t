@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016, Texas Instruments Incorporated
+ * Copyright (c) 2013-2019, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,7 +57,8 @@ interface ITimer
     typedef Void (*FuncPtr)(UArg);
 
     /*! Const used to specify any timer */
-    const UInt ANY = ~0;
+    /* REQ_TAG(SYSBIOS-1038) */
+    const UInt ANY = ~0U;
 
     /*! 
      *  Timer Start Modes
@@ -89,6 +90,7 @@ interface ITimer
      *  is intended only for use by the Clock module when it is operating in
      *  TickMode_DYNAMIC; it is not applicable for user-created Timer instances.
      */
+    /* REQ_TAG(SYSBIOS-1026) */
     enum RunMode {
         RunMode_CONTINUOUS,     /*! periodic and continuous */
         RunMode_ONESHOT,        /*! one-shot */
@@ -160,6 +162,7 @@ interface ITimer
      *
      *  @b(returns)     Number of timer peripherals.
      */
+    /* REQ_TAG(SYSBIOS-1030) */
     UInt getNumTimers();
 
     /*! 
@@ -168,6 +171,7 @@ interface ITimer
      *
      *  @b(returns)     timer status
      */
+    /* REQ_TAG(SYSBIOS-1032) */
     Status getStatus(UInt id);
 
     /*! 
@@ -206,6 +210,7 @@ instance:
      *                  or {@link #ANY}
      *  @param(tickFxn) function that runs upon timer expiry.
      */
+    /* REQ_TAG(SYSBIOS-1022) */
     create(Int id, FuncPtr tickFxn);
 
     /*!
@@ -220,6 +225,7 @@ instance:
      *
      *  Default is {@link #StartMode_AUTO}.
      */
+    /* REQ_TAG(SYSBIOS-1039) */
     config StartMode startMode = StartMode_AUTO;
 
     /*!
@@ -312,6 +318,7 @@ instance:
      *  @a(side effects)
      *  Enables the timer's interrupt.
      */
+    /* REQ_TAG(SYSBIOS-1036) */
     Void start();
 
     /*!
@@ -338,6 +345,7 @@ instance:
      *  @a(side effects)
      *  Disables the timer's interrupt.
      */
+    /* REQ_TAG(SYSBIOS-1037) */
     Void stop();
 
     /*!
@@ -368,6 +376,7 @@ instance:
      *
      *  @param(period)          period in timer counts
      */
+    /* REQ_TAG(SYSBIOS-1034) */
     Void setPeriod(UInt32 period);
 
     /*!
@@ -398,6 +407,7 @@ instance:
      *
      *  @param(period)          period in microseconds
      */
+    /* REQ_TAG(SYSBIOS-1035) */
     Bool setPeriodMicroSecs(UInt32 microsecs);
 
     /*!
@@ -406,6 +416,7 @@ instance:
      *
      *  @b(returns)     period in timer counts
      */
+    /* REQ_TAG(SYSBIOS-1031) */
     UInt32 getPeriod();
 
     /*!
@@ -414,6 +425,7 @@ instance:
      *
      *  @b(returns)     timer counter value
      */
+    /* REQ_TAG(SYSBIOS-1027) */
     UInt32 getCount();
 
     /*!
@@ -426,6 +438,7 @@ instance:
      *
      *  @param(freq)    frequency in Hz
      */
+    /* REQ_TAG(SYSBIOS-1028) */
     Void getFreq(xdc.runtime.Types.FreqHz *freq);
 
     /*!
@@ -435,6 +448,7 @@ instance:
      *  @param(arg)     pointer for returning Timer's function argument
      *  @b(returns)     Timer's function
      */
+    /* REQ_TAG(SYSBIOS-1029) */
     FuncPtr getFunc(UArg *arg);
 
     /*!
@@ -447,6 +461,7 @@ instance:
      *  @param(fxn)     pointer to function
      *  @param(arg)     argument to function
      */
+    /* REQ_TAG(SYSBIOS-1033) */
     Void setFunc(FuncPtr fxn, UArg arg);
 
     /*!

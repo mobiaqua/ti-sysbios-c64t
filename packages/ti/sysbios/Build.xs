@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2019 Texas Instruments Incorporated - http://www.ti.com
+ * Copyright (c) 2015-2020 Texas Instruments Incorporated - http://www.ti.com
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,11 @@ var custom28xOpts = " -q -mo ";
 var custom6xOpts = " -q -mi10 -mo -pdr -pden -pds=238 -pds=880 -pds1110 ";
 var customARP32xOpts = " -q --gen_func_subsections ";
 var customArmOpts = " -q -ms --opt_for_speed=2 ";
+
+/*
+ * '-Wno-buildin-requires-header' is a workaround to suppress pthread.h
+ * warnings. This should be removed. Removal is tracked by TIRTOS-1906.
+ */
 var customArmClangM33Opts = " ";
 var customArmClangM33FOpts = " ";
 var customArmClangM3Opts = " ";
@@ -319,6 +324,7 @@ var biosPackages = [
     "ti.sysbios.family.arm.v8a.smp",
     "ti.sysbios.family.arm.v8m",
     "ti.sysbios.family.arm.v8m.mtl",
+    "ti.sysbios.family.arm.vxm",
     "ti.sysbios.family.c28",
     "ti.sysbios.family.c28.f28m35x",
     "ti.sysbios.family.c28.f2837x",
@@ -410,12 +416,7 @@ function getDefaultCustomCCOpts()
         }
     }
     else if (Program.build.target.$name.match(/clang/)) {
-        /*
-         * Do not produce debug information to avoid a known issues with
-         * TI LLVM tools. See https://jira.itg.ti.com/browse/CODEGEN-4691
-         * for more info.
-         */
-        customCCOpts += " -O3 ";
+        customCCOpts += " -Oz -g ";
         /* add any target unique CC options provided in config.bld */
         customCCOpts = Program.build.target.ccOpts.prefix + " " + customCCOpts;
         customCCOpts += Program.build.target.ccOpts.suffix + " ";
@@ -444,7 +445,7 @@ function getDefaultCustomCCOpts()
             customCCOpts = customCCOpts.replace("-Ohz","--debug");
         }
         else if (Program.build.target.$name.match(/clang/)) {
-            customCCOpts = customCCOpts.replace(" -O3","-gdwarf-3");
+            customCCOpts = customCCOpts.replace(" -Oz","");
         }
         else {
             customCCOpts = customCCOpts.replace(" -o3","");
@@ -889,7 +890,7 @@ function getCommandLineDefs()
      * absorb all the "-Dxyz"'s and "--define"'s in the compiler command line
      */
     for (i = 0; i < tokens.length; i++) {
-        if (tokens[i].match(/-D/) || tokens[i].match(/--define/)) {
+        if (tokens[i].match(/^-D/) || tokens[i].match(/--define/)) {
             defs += tokens[i];
             if (tokens[i] == "-D") {
                 defs += tokens[++i];  /* intentionally removes spaces for IAR Assembler */

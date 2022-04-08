@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019, Texas Instruments Incorporated
+ * Copyright (c) 2014-2020, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -193,9 +193,12 @@ function module$use()
 {
     xdc.useModule("ti.sysbios.hal.Hwi");
     xdc.useModule("ti.sysbios.family.c7x.Mmu");
+    Hwi = xdc.useModule("ti.sysbios.family.c7x.Hwi");
     Reset = xdc.useModule("xdc.runtime.Reset");
 
-    Reset.fxns[Reset.fxns.length++] = Cache.startup;
+    if (!Hwi.bootToNonSecure) {
+        Reset.fxns[Reset.fxns.length++] = Cache.startup;
+    }
 
     /*
      *  Override the original sizes if we find the cache settings
