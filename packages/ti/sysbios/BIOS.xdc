@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, Texas Instruments Incorporated
+ * Copyright (c) 2015-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -240,29 +240,26 @@ module BIOS
      *  SYS/BIOS library selection options
      *
      *  This enumeration defines all the SYS/BIOS library types
-     *  provided by the product.  You can select the library type by setting
+     *  supported by the product.  You can select the library type by setting
      *  the {@link #libType BIOS.libType} configuration parameter.
      *
-     *  @field(LibType_Instrumented) The library supplied is prebuilt with
-     *  logging and assertions enabled.
+     *  @field(LibType_Instrumented) The library is built with logging and
+     *  assertions enabled.
      *
-     *  @field(LibType_NonInstrumented) The library supplied is prebuilt
-     *  with logging and assertions disabled.
+     *  @field(LibType_NonInstrumented) The library is built with logging and
+     *  assertions disabled.
      *
-     *  @field(LibType_Custom) This option builds the
-     *  SYS/BIOS library from sources using the options specified by
-     *  {@link #customCCOpts}. Only the modules and APIs that your application
-     *  needs to access are contained in the resulting executable. Program
-     *  optimization is performed to reduce the size of the executable and improve
-     *  its performance. Enough debug information is retained to allow you to
-     *  step through the application code in CCS and locate global variables.
+     *  @field(LibType_Custom) The library is built using the options
+     *  specified by {@link #customCCOpts}. Program optimization is performed
+     *  to reduce the size of the executable and improve its performance.
+     *  Enough debug information is retained to allow you to step through the
+     *  application code in CCS and locate global variables.
      *
-     *  @field(LibType_Debug) This option is similar to the LibType_Custom option
-     *  in that it builds the SYS/BIOS library from sources and omits modules and
-     *  APIs that your code does not use. However, no program
-     *  optimization is performed. The resulting executable is fully debuggable,
-     *  and you can step into SYS/BIOS code. The tradeoff is that the executable
-     *  is larger and runs slower than builds that use the LibType_Custom option.
+     *  @field(LibType_Debug) This setting is similar to the LibType_Custom
+     *  setting, however, no program optimization is performed. The resulting
+     *  executable is fully debuggable, and you can step into SYS/BIOS code.
+     *  The tradeoff is that the executable is larger and runs slower than
+     *  builds that use the LibType_Custom option.
      *
      *  @see #libType
      */
@@ -340,10 +337,9 @@ module BIOS
      *  ======== libType ========
      *  SYS/BIOS Library type
      *
-     *  The SYS/BIOS runtime is provided in the form of a library that is
+     *  The SYS/BIOS runtime is built in the form of a library that is
      *  linked with your application.  Several forms of this library are
-     *  provided with the SYS/BIOS product.  In addition, there is an
-     *  option to build the library from source.  This configuration parameter
+     *  supported by the SYS/BIOS product.  This configuration parameter
      *  allows you to select the form of the SYS/BIOS library to use.
      *
      *  The default value of libType is
@@ -360,7 +356,7 @@ module BIOS
      *  {@link #LibType_Custom BIOS_LibType_Custom} or
      *  {@link #LibType_Debug BIOS_LibType_Debug},
      *  this string contains the options passed to the compiler during any
-     *  re-build of the SYS/BIOS sources.
+     *  build of the SYS/BIOS sources.
      *
      *  In addition to the options
      *  specified by `BIOS.customCCOpts`, several `-D` and `-I` options are also
@@ -707,7 +703,7 @@ module BIOS
      *  Example: A macro hex value of 0x64501 implies that the SYS/BIOS
      *  product version number is 6.45.01
      */
-    const UInt32 version = 0x64606;
+    const UInt32 version = 0x65000;
 
     /*!
      *  ======== addUserStartupFunction ========

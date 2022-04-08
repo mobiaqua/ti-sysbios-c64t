@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, Texas Instruments Incorporated
+ * Copyright (c) 2015-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -94,6 +94,8 @@ SECTIONS
     .econst             : > FLASHA | FLASHB PAGE = 0
     .switch             : > FLASHA | FLASHB PAGE = 0
     .args               : > FLASHA | FLASHB PAGE = 0
+
+    .reset              : > RESET,  PAGE = 0, TYPE = DSECT
 
     Filter_RegsFile     : > RAMGS0 | RAMGS1 | RAMGS2 | RAMGS3 PAGE = 1
 }

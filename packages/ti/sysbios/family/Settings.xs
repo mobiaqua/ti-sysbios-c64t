@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, Texas Instruments Incorporated
+ * Copyright (c) 2015-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@ var family = {
     "ti.targets.elf.C66_big_endian" :           "c64p",
     "ti.targets.elf.C674" :                     "c64p",
     "ti.targets.elf.C67P" :                     "c67p",
+    "ti.targets.elf.C64T" :                     "c64p",
     "ti.targets.msp430.elf.MSP430X" :           "msp430",
     "iar.targets.msp430.MSP430" :               "msp430",
     "iar.targets.msp430.MSP430X_small" :        "msp430",
@@ -279,6 +280,11 @@ function unsupportedTargetCheck(mod)
              (Program.build.target.name == "C64P_big_endian")) {
         mod.$logError(Program.build.target.$name + " is no longer supported. " +
             "Please use SYS/BIOS 6.42.03 or older.", mod);
+        throw Error();
+    }
+    else if (Program.build.target.$name == "ti.targets.C674") {
+        mod.$logError(Program.build.target.$name + " is no longer supported. " +
+            "Please use ti.targets.elf.C674 instead.", mod);
         throw Error();
     }
     else if (Program.build.target.$name ==

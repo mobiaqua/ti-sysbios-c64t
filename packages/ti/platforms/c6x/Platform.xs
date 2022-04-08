@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Texas Instruments Incorporated
+ * Copyright (c) 2016-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -184,7 +184,8 @@ function instance$meta$init(name)
             this.CPU.catalogName = "ti.catalog.c6000";
             this.CPU.deviceName = "C674";
         }
-        else if (this.deviceName.match(/^AR16/)) {
+        else if (this.deviceName.match(/^AR16/) ||
+                 this.deviceName.match(/^IR16/)) {
             this.CPU.catalogName = "ti.catalog.c6000";
             this.CPU.deviceName = "C674";
             this.CPU.clockRate = 600;

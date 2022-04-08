@@ -52,7 +52,7 @@ SECTIONS
     .text       : > FLASH | FLASH2
 #ifdef __TI_COMPILER_VERSION__
 #if __TI_COMPILER_VERSION__ >= 15009000
-    .TI.ramfunc : {} > load=FLASH | FLASH2, run=C03SRAM | C415SRAM, table(BINIT)
+    .TI.ramfunc : load=FLASH | FLASH2, run=C03SRAM | C415SRAM, table(BINIT)
 #endif
 #endif
     .cinit      : > FLASH | FLASH2

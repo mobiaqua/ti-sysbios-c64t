@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, Texas Instruments Incorporated
+ * Copyright (c) 2015-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,10 +53,10 @@
 #define ti_sysbios_posix_Settings_supportsMutexPriority__D TRUE
 #endif
 
-#include <ti/sysbios/posix/pthread.h>
-#include <ti/sysbios/posix/_pthread.h>
-#include <ti/sysbios/posix/_time.h>
-#include <ti/sysbios/posix/_pthread_error.h>
+#include "pthread.h"
+#include "_pthread.h"
+#include "time.h"
+#include "errno.h"
 
 static Void timerFxn(UArg arg);
 static Void *timerThreadFxn(Void *arg);

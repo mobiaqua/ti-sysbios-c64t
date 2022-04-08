@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2016, Texas Instruments Incorporated
+ * Copyright (c) 2014-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -255,6 +255,28 @@ function viewGetCurrentClockTick()
     var period64 = Math.floor(0x100000000 * tickPeriod / 1000000);
     var ticks = 0;
 
+    /*
+     * ROV2 brings realtime reads of target memory and registers while a
+     * program is running.  Attempting such reads of the RTC shadow registers
+     * can freeze program execution in some cases. This problem may be
+     * addressed in the future by automatically returning a read error when
+     * realtime reads of these registers are attempted.  In the meantime, as
+     * a workaround a global Boolean (DISABLE_READ_RTC) will be
+     * set when ROV2 is in use.  In the code below, if this flag is defined and
+     * set to 'true', an error will be thrown instead of attempting to read
+     * the registers; this error will be interpreted as the Timer view code
+     * does not support dynamic tick computation, so the most recently updated
+     * tick count in Clock module state will be used instead, with a stale data
+     * indication. If DISABLE_READ_RTC is defined but set to 'false', or
+     * undefined, the RTC registers will be read and the tick count computed
+     * and returned.
+     */
+    if (typeof DISABLE_READ_RTC !== 'undefined') {
+        if (DISABLE_READ_RTC == true) {
+            throw 'RTC reads disabled';
+        }
+    }
+
     try {
         var SEC = Program.fetchArray(
             { type: 'xdc.rov.support.ScalarStructs.S_UInt32', isScalar: true },
@@ -262,15 +284,18 @@ function viewGetCurrentClockTick()
         var SUBSEC = Program.fetchArray(
             { type: 'xdc.rov.support.ScalarStructs.S_UInt32', isScalar: true },
             Number("0x4009200C"), 1, false);
+
+        /*
+         * only 51 bits resolution in JavaScript; break into SEC & SUBSEC
+         * pieces
+         */
+        ticks = SUBSEC / period64;                    /* ticks from SUBSEC */
+        ticks = ticks + (SEC * 1000000 / tickPeriod); /* plus ticks from SEC */
+        ticks = Math.floor(ticks);                    /* clip total */
     }
     catch (e) {
         print("Error: Problem fetching RTC values: " + e.toString());
     }
-
-    /* only 51 bits resolution in JavaScript; break into SEC & SUBSEC pieces */
-    ticks = SUBSEC / period64;                    /* ticks from SUBSEC */
-    ticks = ticks + (SEC * 1000000 / tickPeriod); /* plus ticks from SEC */
-    ticks = Math.floor(ticks);                    /* clip total */
 
     return ticks;
 }
@@ -306,6 +331,11 @@ function viewInitDevice(view, obj)
     var tNames = ["RTC"];
 
     view.device = tNames[obj.id];
+
+    if ((typeof DISABLE_READ_RTC != "undefined") && DISABLE_READ_RTC) {
+      Program.displayError(view, 'devAddr', "Realtime read of RTC is disabled");
+      return;
+    }
 
     try {
         var timerRawView = Program.scanRawView('ti.sysbios.family.arm.cc26xx.Timer');

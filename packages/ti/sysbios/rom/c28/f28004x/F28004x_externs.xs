@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,8 +53,8 @@ ROM.generatedFuncs.$add("ti_sysbios_hal_Timer_TimerProxy_getNumTimers__E");
 ROM.generatedFuncs.$add("ti_sysbios_hal_Timer_TimerProxy_getPeriod__E");
 ROM.generatedFuncs.$add("ti_sysbios_hal_Timer_TimerProxy_getStatus__E");
 ROM.generatedFuncs.$add("ti_sysbios_hal_Timer_TimerProxy_Module__startupDone__S");
-ROM.generatedFuncs.$add("ti_sysbios_hal_Timer_TimerProxy_Object__create__S");
-ROM.generatedFuncs.$add("ti_sysbios_hal_Timer_TimerProxy_Object__delete__S");
+ROM.generatedFuncs.$add("null"); /* was ti_sysbios_hal_Timer_TimerProxy_Object__create__S */
+ROM.generatedFuncs.$add("null"); /* was ti_sysbios_hal_Timer_TimerProxy_Object__delete__S */
 ROM.generatedFuncs.$add("ti_sysbios_hal_Timer_TimerProxy_setFunc__E");
 ROM.generatedFuncs.$add("ti_sysbios_hal_Timer_TimerProxy_setNextTick__E");
 ROM.generatedFuncs.$add("ti_sysbios_hal_Timer_TimerProxy_setPeriod__E");
@@ -70,7 +70,7 @@ ROM.generatedFuncs.$add("ti_sysbios_knl_Clock_TimerProxy_getNumTimers__E");
 ROM.generatedFuncs.$add("ti_sysbios_knl_Clock_TimerProxy_getPeriod__E");
 ROM.generatedFuncs.$add("ti_sysbios_knl_Clock_TimerProxy_getStatus__E");
 ROM.generatedFuncs.$add("ti_sysbios_knl_Clock_TimerProxy_Module__startupDone__S");
-ROM.generatedFuncs.$add("ti_sysbios_knl_Clock_TimerProxy_Object__delete__S");
+ROM.generatedFuncs.$add("null"); /* was ti_sysbios_knl_Clock_TimerProxy_Object__delete__S */
 ROM.generatedFuncs.$add("ti_sysbios_knl_Clock_TimerProxy_setNextTick__E");
 ROM.generatedFuncs.$add("ti_sysbios_knl_Clock_TimerProxy_setPeriodMicroSecs__E");
 ROM.generatedFuncs.$add("ti_sysbios_knl_Clock_TimerProxy_start__E");

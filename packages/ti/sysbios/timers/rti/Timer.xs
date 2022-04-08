@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, Texas Instruments Incorporated
+ * Copyright (c) 2015-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -104,6 +104,13 @@ if (xdc.om.$name == "cfg" || typeof(genCdoc) != "undefined") {
 
     deviceTable["ti.catalog.arm.cortexr4"]["AR16XX"] =
         deviceTable["ti.catalog.arm.cortexr4"]["AR14XX"];
+    deviceTable["ti.catalog.arm.cortexr4"]["IR14XX"] =
+        deviceTable["ti.catalog.arm.cortexr4"]["AR14XX"];
+    deviceTable["ti.catalog.arm.cortexr4"]["IR16XX"] =
+        deviceTable["ti.catalog.arm.cortexr4"]["AR14XX"];
+
+    deviceTable["ti.catalog.c6000"]["IR16XX"] =
+        deviceTable["ti.catalog.c6000"]["AR16XX"];
 }
 
 /*

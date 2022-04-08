@@ -369,15 +369,17 @@ Void Cache_enable(Bits16 type)
 
     Cache_getSize(&size);
 
-    if (type == Cache_Type_L1P) {
+    if (type & Cache_Type_L1P) {
         Cache_getL1PInitSize(&size);
         Cache_setSize(&size);
     }
-    else if (type == Cache_Type_L1D) {
+
+    if (type & Cache_Type_L1D) {
         Cache_getL1DInitSize(&size);
         Cache_setSize(&size);
     }
-    else {
+
+    if (type & Cache_Type_L2) {
 #ifdef ti_sysbios_BIOS_useSK__D
         /*
          *  Assumes that the Cache comes up in normal mode.
@@ -387,7 +389,6 @@ Void Cache_enable(Bits16 type)
 #else
         /* set the L2 mode to normal */
         Cache_setMode(Cache_Type_L2, Cache_Mode_NORMAL);
-
 #endif
     }
 }
@@ -402,19 +403,19 @@ Void Cache_disable(Bits16 type)
 {
     Cache_Size size;
 
+    /* Only L1 is supported, reject any other type */
+    Assert_isTrue((type & ~Cache_Type_L1) == 0, NULL);
+
     Cache_getSize(&size);
 
-    if (type == Cache_Type_L1P) {
+    if (type & Cache_Type_L1P) {
         size.l1pSize = Cache_L1Size_0K;
         Cache_setSize(&size);
     }
-    else if (type == Cache_Type_L1D) {
+
+    if (type & Cache_Type_L1D) {
         size.l1dSize = Cache_L1Size_0K;
         Cache_setSize(&size);
-    }
-    else {
-        /* Disable of L2 Cache here is not allowed */
-        Assert_isTrue(FALSE, NULL);
     }
 }
 

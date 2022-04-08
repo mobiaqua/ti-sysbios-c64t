@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2016, Texas Instruments Incorporated
+ * Copyright (c) 2014-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -430,6 +430,16 @@ instance:
      *  @param(msg)     message pointer
      *  @param(timeout) maximum duration in system clock ticks
      *  @b(returns)     TRUE if successful, FALSE if timeout
+     *
+     *  @a(NOTE)
+     *  The operation of adding a message to the mailbox and signalling
+     *  the task (if any) waiting on the mailbox is not atomic. This can
+     *  result in a priority inversion with respect to message delivery.
+     *  This can for example affect the order of message delivery for 2
+     *  tasks with different priorities. The lower priority task's message
+     *  may be delivered first while the higher priority task's message
+     *  may not unblock the task waiting on the mailbox until the lower
+     *  priority task resumes and completes its Mailbox_post() call.
      */
     Bool post(Ptr msg, UInt32 timeout);
 

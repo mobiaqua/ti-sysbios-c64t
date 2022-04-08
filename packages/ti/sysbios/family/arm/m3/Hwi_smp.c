@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018 Texas Instruments Incorporated
+ * Copyright (c) 2015-2017 Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -185,21 +185,22 @@ Int Hwi_Instance_init(Hwi_Object *hwi, Int intNum,
      * for postInit(), encode irp with enableInt
      * and useDispatcher info.
      */
-
     hwi->irp = 0;
 
+    /* encode 'enableInt' in bit 0 */
     if (params->enableInt) {
         hwi->irp = 0x1;
     }
 
+    /* encode 'useDispatcher' in bit 1 */
     if (params->useDispatcher) {
         hwi->irp |= 0x2;
     }
 
     status = Hwi_postInit(hwi, eb);
 
-    if (Error_check(eb)) {
-        return (3 + status);
+    if (status) {
+        return (2 + status);
     }
 
     return (0);
@@ -219,14 +220,24 @@ Int Hwi_postInit (Hwi_Object *hwi, Error_Block *eb)
 
 #ifndef ti_sysbios_hal_Hwi_DISABLE_ALL_HOOKS
     Int i;
+    Error_Block *leb;
+
+    if (eb != Error_IGNORE) {
+        leb = eb;
+    }
+    else {
+        Error_Block localEB;
+        Error_init(&localEB);
+        leb = &localEB;
+    }
 
     for (i = 0; i < Hwi_hooks.length; i++) {
         hwi->hookEnv[i] = (Ptr)0;
         if (Hwi_hooks.elem[i].createFxn != NULL) {
-            Hwi_hooks.elem[i].createFxn((IHwi_Handle)hwi, eb);
+            Hwi_hooks.elem[i].createFxn((IHwi_Handle)hwi, leb);
 
-            if (Error_check(eb)) {
-                return (i);
+            if (Error_check(leb)) {
+                return (i + 1);
             }
         }
     }
@@ -282,7 +293,7 @@ Int Hwi_postInit (Hwi_Object *hwi, Error_Block *eb)
 #ifndef ti_sysbios_hal_Hwi_DISABLE_ALL_HOOKS
                 return (Hwi_hooks.length); /* unwind all Hwi_hooks */
 #else
-                return (0);
+                return (1);
 #endif
             }
         }
@@ -311,13 +322,19 @@ Void Hwi_Instance_finalize(Hwi_Object *hwi, Int status)
 {
     UInt intNum;
 
-    if (status == 1) {  /* failed Hwi_create */
+    if (status == 1) {  /* vector in use */
         return;
     }
 
 #ifndef ti_sysbios_hal_Hwi_DISABLE_ALL_HOOKS
     if (Hwi_hooks.length > 0) {
         Int i, cnt;
+
+        /* return if failed to allocate Hook Env */
+        if (status == 2) {
+            return;
+        }
+
         if (status == 0) {
             cnt = Hwi_hooks.length;
         }
@@ -714,7 +731,7 @@ Bool Hwi_getCoreStackInfo(Hwi_StackInfo *stkInfo, Bool computeStackDepth,
 
     /* Copy the stack base address and size */
     if (coreId == 0) {
-        stkInfo->hwiStackSize = (SizeT)Hwi_module->isrStackSize;
+        stkInfo->hwiStackSize = Hwi_module->isrStackSize;
         stkInfo->hwiStackBase = Hwi_module->isrStackBase;
     }
     else {

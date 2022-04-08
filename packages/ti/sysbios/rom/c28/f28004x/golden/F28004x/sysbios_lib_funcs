@@ -13,8 +13,6 @@
 00000000 t .text:_ti_sysbios_BIOS_RtsGateProxy_enter__E__mangled__
 00000000 t .text:_ti_sysbios_BIOS_RtsGateProxy_Handle__label__S__mangled__
 00000000 t .text:_ti_sysbios_BIOS_RtsGateProxy_leave__E__mangled__
-00000000 t .text:_ti_sysbios_BIOS_RtsGateProxy_Object__create__S
-00000000 t .text:_ti_sysbios_BIOS_RtsGateProxy_Object__delete__S__mangled__
 00000000 t .text:_ti_sysbios_BIOS_RtsGateProxy_Proxy__abstract__S
 00000000 t .text:_ti_sysbios_BIOS_RtsGateProxy_Proxy__delegate__S
 00000000 t .text:_ti_sysbios_BIOS_RtsGateProxy_query__E__mangled__
@@ -60,7 +58,6 @@
 00000000 t .text:_ti_sysbios_family_c28_Hwi_Module_startup__E__mangled__
 00000000 t .text:_ti_sysbios_family_c28_Hwi_Object__create__S__mangled__
 00000000 t .text:_ti_sysbios_family_c28_Hwi_Object__delete__S__mangled__
-00000000 t .text:_ti_sysbios_family_c28_Hwi_Object__destruct__S
 00000000 t .text:_ti_sysbios_family_c28_Hwi_Object__first__S
 00000000 t .text:_ti_sysbios_family_c28_Hwi_Object__get__S__mangled__
 00000000 t .text:_ti_sysbios_family_c28_Hwi_Object__next__S
@@ -91,7 +88,7 @@
 00000000 t .text:_ti_sysbios_family_c28_TaskSupport_swap__E
 00000000 t .text:_ti_sysbios_family_c28_Timer_checkOverflow__I__mangled__
 00000000 t .text:_ti_sysbios_family_c28_Timer_construct
-00000000 t .text:_ti_sysbios_family_c28_Timer_create
+00000000 t .text:_ti_sysbios_family_c28_Timer_create__mangled__
 00000000 t .text:_ti_sysbios_family_c28_Timer_delete
 00000000 t .text:_ti_sysbios_family_c28_Timer_destruct
 00000000 t .text:_ti_sysbios_family_c28_Timer_getCount__E__mangled__
@@ -112,9 +109,8 @@
 00000000 t .text:_ti_sysbios_family_c28_Timer_Instance_init__E__mangled__
 00000000 t .text:_ti_sysbios_family_c28_Timer_Module__startupDone__S__mangled__
 00000000 t .text:_ti_sysbios_family_c28_Timer_Module_startup__E__mangled__
-00000000 t .text:_ti_sysbios_family_c28_Timer_Object__create__S__mangled__
+00000000 t .text:_ti_sysbios_family_c28_Timer_Object__create__S
 00000000 t .text:_ti_sysbios_family_c28_Timer_Object__delete__S__mangled__
-00000000 t .text:_ti_sysbios_family_c28_Timer_Object__destruct__S
 00000000 t .text:_ti_sysbios_family_c28_Timer_Object__first__S
 00000000 t .text:_ti_sysbios_family_c28_Timer_Object__get__S
 00000000 t .text:_ti_sysbios_family_c28_Timer_Object__next__S
@@ -144,7 +140,6 @@
 00000000 t .text:_ti_sysbios_gates_GateHwi_Module__startupDone__S
 00000000 t .text:_ti_sysbios_gates_GateHwi_Object__create__S__mangled__
 00000000 t .text:_ti_sysbios_gates_GateHwi_Object__delete__S__mangled__
-00000000 t .text:_ti_sysbios_gates_GateHwi_Object__destruct__S
 00000000 t .text:_ti_sysbios_gates_GateHwi_Object__first__S
 00000000 t .text:_ti_sysbios_gates_GateHwi_Object__get__S
 00000000 t .text:_ti_sysbios_gates_GateHwi_Object__next__S
@@ -162,7 +157,6 @@
 00000000 t .text:_ti_sysbios_gates_GateMutex_Module__startupDone__S
 00000000 t .text:_ti_sysbios_gates_GateMutex_Object__create__S__mangled__
 00000000 t .text:_ti_sysbios_gates_GateMutex_Object__delete__S__mangled__
-00000000 t .text:_ti_sysbios_gates_GateMutex_Object__destruct__S
 00000000 t .text:_ti_sysbios_gates_GateMutex_Object__first__S
 00000000 t .text:_ti_sysbios_gates_GateMutex_Object__get__S
 00000000 t .text:_ti_sysbios_gates_GateMutex_Object__next__S
@@ -185,7 +179,7 @@
 00000000 t .text:_ti_sysbios_hal_Hwi_getTaskSP__E__mangled__
 00000000 t .text:_ti_sysbios_hal_Hwi_Handle__label__S
 00000000 t .text:_ti_sysbios_hal_Hwi_HwiProxy_clearInterrupt__E__mangled__
-00000000 t .text:_ti_sysbios_hal_Hwi_HwiProxy_create__mangled__
+00000000 t .text:_ti_sysbios_hal_Hwi_HwiProxy_create
 00000000 t .text:_ti_sysbios_hal_Hwi_HwiProxy_delete
 00000000 t .text:_ti_sysbios_hal_Hwi_HwiProxy_disableInterrupt__E__mangled__
 00000000 t .text:_ti_sysbios_hal_Hwi_HwiProxy_enableInterrupt__E__mangled__
@@ -195,8 +189,6 @@
 00000000 t .text:_ti_sysbios_hal_Hwi_HwiProxy_getStackInfo__E__mangled__
 00000000 t .text:_ti_sysbios_hal_Hwi_HwiProxy_getTaskSP__E__mangled__
 00000000 t .text:_ti_sysbios_hal_Hwi_HwiProxy_Module__startupDone__S__mangled__
-00000000 t .text:_ti_sysbios_hal_Hwi_HwiProxy_Object__create__S__mangled__
-00000000 t .text:_ti_sysbios_hal_Hwi_HwiProxy_Object__delete__S__mangled__
 00000000 t .text:_ti_sysbios_hal_Hwi_HwiProxy_Params__init__S__mangled__
 00000000 t .text:_ti_sysbios_hal_Hwi_HwiProxy_post__E__mangled__
 00000000 t .text:_ti_sysbios_hal_Hwi_HwiProxy_Proxy__abstract__S
@@ -214,7 +206,6 @@
 00000000 t .text:_ti_sysbios_hal_Hwi_Module_startup__E__mangled__
 00000000 t .text:_ti_sysbios_hal_Hwi_Object__create__S
 00000000 t .text:_ti_sysbios_hal_Hwi_Object__delete__S
-00000000 t .text:_ti_sysbios_hal_Hwi_Object__destruct__S
 00000000 t .text:_ti_sysbios_hal_Hwi_Object__first__S
 00000000 t .text:_ti_sysbios_hal_Hwi_Object__get__S
 00000000 t .text:_ti_sysbios_hal_Hwi_Object__next__S
@@ -247,7 +238,6 @@
 00000000 t .text:_ti_sysbios_hal_Timer_Module_startup__E__mangled__
 00000000 t .text:_ti_sysbios_hal_Timer_Object__create__S
 00000000 t .text:_ti_sysbios_hal_Timer_Object__delete__S
-00000000 t .text:_ti_sysbios_hal_Timer_Object__destruct__S
 00000000 t .text:_ti_sysbios_hal_Timer_Object__first__S
 00000000 t .text:_ti_sysbios_hal_Timer_Object__get__S
 00000000 t .text:_ti_sysbios_hal_Timer_Object__next__S
@@ -273,7 +263,6 @@
 00000000 t .text:_ti_sysbios_heaps_HeapNull_Module__startupDone__S
 00000000 t .text:_ti_sysbios_heaps_HeapNull_Object__create__S
 00000000 t .text:_ti_sysbios_heaps_HeapNull_Object__delete__S
-00000000 t .text:_ti_sysbios_heaps_HeapNull_Object__destruct__S
 00000000 t .text:_ti_sysbios_heaps_HeapNull_Object__first__S
 00000000 t .text:_ti_sysbios_heaps_HeapNull_Object__get__S
 00000000 t .text:_ti_sysbios_heaps_HeapNull_Object__next__S
@@ -299,7 +288,6 @@
 00000000 t .text:_ti_sysbios_knl_Clock_Module_startup__E__mangled__
 00000000 t .text:_ti_sysbios_knl_Clock_Object__create__S
 00000000 t .text:_ti_sysbios_knl_Clock_Object__delete__S
-00000000 t .text:_ti_sysbios_knl_Clock_Object__destruct__S
 00000000 t .text:_ti_sysbios_knl_Clock_Object__first__S
 00000000 t .text:_ti_sysbios_knl_Clock_Object__get__S
 00000000 t .text:_ti_sysbios_knl_Clock_Object__next__S
@@ -333,7 +321,6 @@
 00000000 t .text:_ti_sysbios_knl_Event_Module__startupDone__S
 00000000 t .text:_ti_sysbios_knl_Event_Object__create__S
 00000000 t .text:_ti_sysbios_knl_Event_Object__delete__S
-00000000 t .text:_ti_sysbios_knl_Event_Object__destruct__S
 00000000 t .text:_ti_sysbios_knl_Event_Object__first__S
 00000000 t .text:_ti_sysbios_knl_Event_Object__get__S
 00000000 t .text:_ti_sysbios_knl_Event_Object__next__S
@@ -363,7 +350,6 @@
 00000000 t .text:_ti_sysbios_knl_Mailbox_Module_startup__E__mangled__
 00000000 t .text:_ti_sysbios_knl_Mailbox_Object__create__S
 00000000 t .text:_ti_sysbios_knl_Mailbox_Object__delete__S
-00000000 t .text:_ti_sysbios_knl_Mailbox_Object__destruct__S
 00000000 t .text:_ti_sysbios_knl_Mailbox_Object__first__S
 00000000 t .text:_ti_sysbios_knl_Mailbox_Object__get__S__mangled__
 00000000 t .text:_ti_sysbios_knl_Mailbox_Object__next__S
@@ -390,7 +376,6 @@
 00000000 t .text:_ti_sysbios_knl_Queue_next__E__mangled__
 00000000 t .text:_ti_sysbios_knl_Queue_Object__create__S__mangled__
 00000000 t .text:_ti_sysbios_knl_Queue_Object__delete__S
-00000000 t .text:_ti_sysbios_knl_Queue_Object__destruct__S__mangled__
 00000000 t .text:_ti_sysbios_knl_Queue_Object__first__S
 00000000 t .text:_ti_sysbios_knl_Queue_Object__get__S__mangled__
 00000000 t .text:_ti_sysbios_knl_Queue_Object__next__S
@@ -410,7 +395,6 @@
 00000000 t .text:_ti_sysbios_knl_Semaphore_Module__startupDone__S
 00000000 t .text:_ti_sysbios_knl_Semaphore_Object__create__S__mangled__
 00000000 t .text:_ti_sysbios_knl_Semaphore_Object__delete__S
-00000000 t .text:_ti_sysbios_knl_Semaphore_Object__destruct__S__mangled__
 00000000 t .text:_ti_sysbios_knl_Semaphore_Object__first__S
 00000000 t .text:_ti_sysbios_knl_Semaphore_Object__get__S
 00000000 t .text:_ti_sysbios_knl_Semaphore_Object__next__S
@@ -442,7 +426,6 @@
 00000000 t .text:_ti_sysbios_knl_Swi_Module_startup__E__mangled__
 00000000 t .text:_ti_sysbios_knl_Swi_Object__create__S
 00000000 t .text:_ti_sysbios_knl_Swi_Object__delete__S
-00000000 t .text:_ti_sysbios_knl_Swi_Object__destruct__S
 00000000 t .text:_ti_sysbios_knl_Swi_Object__first__S
 00000000 t .text:_ti_sysbios_knl_Swi_Object__get__S__mangled__
 00000000 t .text:_ti_sysbios_knl_Swi_Object__next__S
@@ -496,7 +479,6 @@
 00000000 t .text:_ti_sysbios_knl_Task_objectCheck__I
 00000000 t .text:_ti_sysbios_knl_Task_Object__create__S
 00000000 t .text:_ti_sysbios_knl_Task_Object__delete__S__mangled__
-00000000 t .text:_ti_sysbios_knl_Task_Object__destruct__S
 00000000 t .text:_ti_sysbios_knl_Task_Object__first__S__mangled__
 00000000 t .text:_ti_sysbios_knl_Task_Object__get__S__mangled__
 00000000 t .text:_ti_sysbios_knl_Task_Object__next__S__mangled__

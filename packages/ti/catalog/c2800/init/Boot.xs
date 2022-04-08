@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Texas Instruments Incorporated
+ * Copyright (c) 2016-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -128,6 +128,7 @@ function getFrequency()
     if (Boot.configurePll == true) {
 
         var divider;
+        var OSCCLK_multiplier;
 
         if ( (Boot.pllType == Boot.Type_282xx_283xx) ||
              (Boot.pllType == Boot.Type_2802x_2803x_2806x) ) {
@@ -146,7 +147,14 @@ function getFrequency()
                 Boot.$logError("Invalid divide value specified for pllstsDIVSEL.", Boot, "pllstsDIVSEL");
             }
 
-            return((Boot.pllOSCCLK * Boot.pllcrDIV * 1000000) / divider);
+            if (Boot.pllcrDIV == 0) {
+                OSCCLK_multiplier = 1;
+            }
+            else {
+                OSCCLK_multiplier = Boot.pllcrDIV;
+            }
+
+            return((Boot.pllOSCCLK * OSCCLK_multiplier * 1000000) / divider);
         }
 
         else if (Boot.pllType == Boot.Type_2834x) {

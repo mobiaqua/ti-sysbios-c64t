@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2014-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -85,6 +85,7 @@ var ccOpts = {
 
     "ti.targets.arm.elf.Arm9"         : " -ms -g ",
     "ti.targets.arm.elf.A8Fnv"        : " -ms -g ",
+    "ti.targets.arm.elf.R4F"          : " -ms -g ",
     "ti.targets.arm.elf.M3"           : " -ms -g ",
     "ti.targets.arm.elf.M4"           : " -ms -g ",
     "ti.targets.arm.elf.M4F"          : " -ms -g ",

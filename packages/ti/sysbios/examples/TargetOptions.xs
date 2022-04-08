@@ -331,7 +331,7 @@ var targetOptions = {
         "EVE": {
             /* Variant */
             "ARP32": {
-                deviceId: "",
+                deviceId: "EVE|ARP32",
                 cfgPrefix: "default/",
                 linkerCommandFile: "",
                 compilerBuildOptions: "",

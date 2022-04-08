@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, Texas Instruments Incorporated
+ * Copyright (c) 2015-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,7 +60,7 @@ var settings = {
             cacheDelegate : "ti.sysbios.family.c64p.Cache",
             coreDelegate : null,
             clockTickPeriod : 1000,
-            targets : [ "ti.targets.C674", "ti.targets.elf.C674" ]
+            targets : [ "ti.targets.elf.C674" ]
         },
         "DM37XX": {
             hwiDelegate : "ti.sysbios.family.c64p.Hwi",
@@ -99,7 +99,7 @@ var settings = {
             cacheDelegate : "ti.sysbios.family.c64p.Cache",
             coreDelegate : null,
             clockTickPeriod : 1000,
-            targets : [ "ti.targets.C674", "ti.targets.elf.C674" ]
+            targets : [ "ti.targets.elf.C674" ]
         },
         "DRA7XX": {
             hwiDelegate : "ti.sysbios.family.c64p.Hwi",
@@ -125,7 +125,7 @@ var settings = {
             cacheDelegate : "ti.sysbios.family.c64p.Cache",
             coreDelegate : "ti.sysbios.hal.CoreNull",
             clockTickPeriod : 1000,
-            targets : [ "ti.targets.C674", "ti.targets.elf.C674" ]
+            targets : [ "ti.targets.elf.C674" ]
         },
     }
 }
@@ -185,8 +185,10 @@ settings.device["TMS320C6742"]    = settings.device["TMS320DA830"];
 settings.device["TMS320C6746"]    = settings.device["TMS320DA830"];
 settings.device["TMS320C6748"]    = settings.device["TMS320DA830"];
 
-settings.device["Vayu"]         = settings.device["DRA7XX"];
-settings.device["TDA3XX"]       = settings.device["DRA7XX"];
+settings.device["Vayu"]           = settings.device["DRA7XX"];
+settings.device["TDA3XX"]         = settings.device["DRA7XX"];
+
+settings.device["IR16XX"]         = settings.device["AR16XX"];
 
 /*
  *  ======== deviceSupportCheck ========

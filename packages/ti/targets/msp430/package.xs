@@ -1,5 +1,5 @@
 /* 
- *  Copyright (c) 2008 Texas Instruments and others.
+ *  Copyright (c) 2008-2017 Texas Instruments and others.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -23,6 +23,9 @@
  */
 function init()
 {
+    /* Remove target checks */
+    environment["xdc.cfg.check.exclude"] = ".*";
+
     /* initialize module configuration params that are computed */
     var ma = this.$modules;
     for (var i = 0; i < ma.length; i++) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -163,10 +163,15 @@ function module$meta$init()
         /*
          * 28x targets have limited memory and require Task stacks to
          * be placed in memory entirely below the address 0x10000.
-         * Setting 'sectionName' to '.ebss:taskStackSection' accomplishes
-         * this.
+         * Setting 'sectionName' to '.ebss:taskStackSection' (or
+         * '.bss:taskStackSection' for ELF) accomplishes this.
          */
-        BIOS.heapSection =".ebss:taskStackSection";
+        if (Program.build.target.$name.match(/elf/)) {
+            BIOS.heapSection =".bss:taskStackSection";
+        }
+        else {
+            BIOS.heapSection =".ebss:taskStackSection";
+        }
     }
 
     Memory = xdc.module("xdc.runtime.Memory");
@@ -239,16 +244,26 @@ function module$use()
     /*
      * For 28x, if not using the generic platform, the stacksMemory is defined
      * and should be used.  If using generic platform, we have to rely on the
-     * placement of .ebss to be at a low address so task stacks fall below
-     * the 0xffff page boundary.  If stack is above 0x10000, we get a runtime
-     * error.
+     * placement of .ebss (or .bss for ELF) to be at a low address so task
+     * stacks fall below the 0xffff page boundary.  If stack is above 0x10000,
+     * we get a runtime error.
      */
     if ( (Program.build.target.name.match(/28/)) &&
-            (Program.platform.stackMemory != undefined) &&
-            (Program.sectMap[".ebss:taskStackSection"] === undefined) ) {
-        Program.sectMap[".ebss:taskStackSection"] = new Program.SectionSpec();
-        Program.sectMap[".ebss:taskStackSection"].loadSegment =
-            Program.platform.stackMemory;
+            (Program.platform.stackMemory != undefined) ) {
+
+        if (Program.build.target.$name.match(/elf/)) {
+           sect = ".bss";
+        }
+        else {
+           sect = ".ebss";
+        }
+
+        if (Program.sectMap[sect + ":taskStackSection"] === undefined) {
+            Program.sectMap[sect + ":taskStackSection"] =
+                new Program.SectionSpec();
+            Program.sectMap[sect + ":taskStackSection"].loadSegment =
+                Program.platform.stackMemory;
+        }
     }
 
     /* Bring in Settings module for bios 6 osal */

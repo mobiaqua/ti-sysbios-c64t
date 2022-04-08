@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, Texas Instruments Incorporated
+ * Copyright (c) 2015-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -432,7 +432,8 @@ instance:
      *
      *  @HeapMem
      *  The actual block returned may be larger than requested to satisfy
-     *  alignment requirements
+     *  alignment requirements, and its size will always be a multiple of
+     *  the size of the HeapMem_Header data structure (usually 8 bytes)
      *
      *  HeapMem_alloc() will lock the heap using the HeapMem Gate while it
      *  traverses the list of free blocks to find a large enough block for
@@ -441,9 +442,10 @@ instance:
      *  HeapMem_alloc() should not be called directly.  Application code
      *  should use Memory_alloc() with a HeapMem_Handle as the first
      *  parameter.  Among other things, Memory_alloc() makes sure that the
-     *  alignment parameter is greater than or equal to the maximum alignment
-     *  required for data structures for a given C compiler (8 bytes in many
-     *  cases). HeapMem_alloc() may crash if you pass a smaller alignment.
+     *  alignment parameter is greater than or equal to the minimum alignment
+     *  required for the HeapMem_Header data structure for a given C compiler
+     *  (8 bytes in most cases). HeapMem_alloc() may crash if you pass a
+     *  smaller alignment.
      *
      *  Guidelines for using large heaps and multiple alloc() calls.
      *  @p(blist)

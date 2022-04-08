@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018, Texas Instruments Incorporated
+ * Copyright (c) 2015-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1537,8 +1537,8 @@ Int Task_Instance_init(Task_Object *tsk, Task_FuncPtr fxn,
 
     status = Task_postInit(tsk, eb);
 
-    if (Error_check(eb)) {
-        return (3 + status);
+    if (status != 0) {
+        return (2 + status);
     }
 
     return (0);   /* no failure states */
@@ -1570,8 +1570,8 @@ Int Task_postInit(Task_Object *tsk, Error_Block *eb)
                 (Task_SupportProxy_FuncPtr)Task_exit,
                 eb);
 
-    if (Error_check(eb)) {
-        return (0);
+    if (tsk->context == NULL) {
+        return (1);
     }
 
     tsk->mode = Task_Mode_READY;
@@ -1584,13 +1584,24 @@ Int Task_postInit(Task_Object *tsk, Error_Block *eb)
     }
 
 #ifndef ti_sysbios_knl_Task_DISABLE_ALL_HOOKS
+    Error_Block *leb;
+
+    if (eb != Error_IGNORE) {
+        leb = eb;
+    }
+    else {
+        Error_Block localEB;
+        Error_init(&localEB);
+        leb = &localEB;
+    }
+
     for (i = 0; i < Task_hooks.length; i++) {
         tsk->hookEnv[i] = (Ptr)0;
         if (Task_hooks.elem[i].createFxn != NULL) {
-            Task_hooks.elem[i].createFxn(tsk, eb);
+            Task_hooks.elem[i].createFxn(tsk, leb);
 
-            if (Error_check(eb)) {
-                return (i);
+            if (Error_check(leb)) {
+                return (i + 2);
             }
         }
     }
@@ -1714,7 +1725,12 @@ Void Task_Instance_finalize(Task_Object *tsk, Int status)
         return;
     }
 
-    /* status == 0 or status == 3 - in both cases create hook was called */
+    /* return if Task_SupportProxy_start() failed to construct a task stack image */
+    if (status == 3) {
+        return;
+    }
+
+    /* status == 0 or status == 4 - in both cases create hook was called */
 
 #ifndef ti_sysbios_knl_Task_DISABLE_ALL_HOOKS
     /* free any allocated Hook Envs */
@@ -1723,7 +1739,7 @@ Void Task_Instance_finalize(Task_Object *tsk, Int status)
             cnt = Task_hooks.length;
         }
         else {
-            cnt = status - 3;   /* # successful createFxn() calls */
+            cnt = status - 4;   /* # successful createFxn() calls */
         }
 
         /*
@@ -1874,14 +1890,12 @@ Void Task_stat(Task_Object *tsk, Task_Stat *statbuf)
  */
 Void Task_block(Task_Object *tsk)
 {
-    UInt curset, hwiKey, mask;
-    Queue_Object *readyQ;
+    UInt hwiKey;
+    Queue_Object *readyQ = tsk->readyQ;
+    UInt curset = Task_module->smpCurSet[tsk->affinity];
+    UInt mask = tsk->mask;
 
     hwiKey = Hwi_disable();
-
-    readyQ = tsk->readyQ;
-    curset = Task_module->smpCurSet[tsk->affinity];
-    mask = tsk->mask;
 
     /*
      * Can be used by Task_setAffinity() to move a blocked task

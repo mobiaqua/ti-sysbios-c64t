@@ -1,6 +1,6 @@
 %%{
 /*
- * Copyright (c) 2016, Texas Instruments Incorporated
+ * Copyright (c) 2016-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -95,8 +95,9 @@ SECTIONS {
 
 %var platform = xdc.module('ti.platforms.simplelink.Platform');
 %if (!platform.useGnuRomLinkCmd) {
-    .data : {
+    .data : ALIGN(4) {
         *(.data*)
+        . = ALIGN(4);
     } > REGION_DATA AT> REGION_TEXT
     __data_end__ = __data_start__ + SIZEOF(.data);
 

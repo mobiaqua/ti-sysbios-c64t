@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2016, Texas Instruments Incorporated
+ * Copyright (c) 2014-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -211,25 +211,6 @@ var deviceTable = {
             mmuModule : "ti.sysbios.family.arm.a8.Mmu",
             clockTickPeriod : 1000,
             targets : [ "ti.targets.arm.elf.A8Fnv", "gnu.targets.arm.A8F" ]
-        },
-    },
-    "ti.catalog.arm.cortexm0": {
-        "RF432S0xx": {
-            hwiDelegate : "ti.sysbios.family.arm.v6m.Hwi",
-            timerDelegate : "ti.sysbios.family.arm.v6m.Timer",
-            clockTimerDelegate : "ti.sysbios.family.arm.v6m.Timer",
-            timestampDelegate : "ti.sysbios.family.arm.v6m.TimestampProvider",
-            taskSupportDelegate : "ti.sysbios.family.arm.v6m.TaskSupport",
-            intrinsicsSupportDelegate : "ti.sysbios.family.arm.v6m.IntrinsicsSupport",
-            mmuModule : null,
-            cacheDelegate : null,
-            powerDelegate : null,
-            secondsDelegate : null,
-            coreDelegate : null,
-            bootModule : null,
-            clockTickPeriod : 1000,
-            targets : [ "ti.targets.arm.elf.M0",
-                        "gnu.targets.arm.M0", "iar.targets.arm.M0" ]
         },
     },
     "ti.catalog.arm.cortexm3": {
@@ -492,9 +473,6 @@ deviceTable["ti.catalog.arm.cortexa8"]["AM335.*"]  = deviceTable["ti.catalog.arm
 /* Avoid duplicate entries in delegates.html file */
 delete(deviceTable["ti.catalog.arm.cortexa8"]["TMS320C3430"]);
 
-
-deviceTable["ti.catalog.arm.cortexm0"]["TM0SXX"] = deviceTable["ti.catalog.arm.cortexm0"]["RF432S0xx"];
-
 deviceTable["ti.catalog.arm.cortexm3"]["CortexM3"] = deviceTable["ti.catalog.arm"]["CortexM3"];
 deviceTable["ti.catalog.arm.cortexm3"]["OMAP5430"]  = deviceTable["ti.catalog.arm.cortexm3"]["OMAP4430"];
 deviceTable["ti.catalog.arm.cortexm3"]["CC2538.*"]  = deviceTable["ti.catalog.arm.cortexm3"]["CC2538SF53"];
@@ -521,6 +499,8 @@ deviceTable["ti.catalog.arm.cortexm4"]["CC26.*"]    = deviceTable["ti.catalog.ar
 deviceTable["ti.catalog.arm.cortexr5"]["RM57D8.*"] = deviceTable["ti.catalog.arm.cortexr5"]["RM57D8XX"];
 deviceTable["ti.catalog.arm.cortexr5"]["RM57L8.*"] = deviceTable["ti.catalog.arm.cortexr5"]["RM57D8XX"];
 deviceTable["ti.catalog.arm.cortexr4"]["AR16XX"] = deviceTable["ti.catalog.arm.cortexr4"]["AR14XX"];
+deviceTable["ti.catalog.arm.cortexr4"]["IR14XX"] = deviceTable["ti.catalog.arm.cortexr4"]["AR14XX"];
+deviceTable["ti.catalog.arm.cortexr4"]["IR16XX"] = deviceTable["ti.catalog.arm.cortexr4"]["AR14XX"];
 
 /* MSP432 devices */
 deviceTable["ti.catalog.arm.cortexm4"]["MSP432.*"] = deviceTable["ti.catalog.arm.cortexm4"]["MSP432P401R"];

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, Texas Instruments Incorporated
+ * Copyright (c) 2015-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,10 +44,6 @@ function getSects()
     switch(ROM.romName) {
         case ROM.F28004x:
             romModName = "F28004x";
-            break;
-
-        case ROM.F28004x_P2:
-            romModName = "F28004x_P2";
             break;
     }
 

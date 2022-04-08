@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, Texas Instruments Incorporated
+ * Copyright (c) 2015-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,44 +36,10 @@
 #ifndef ti_sysbios_posix__pthread_error__include
 #define ti_sysbios_posix__pthread_error__include
 
+#include <ti/sysbios/posix/errno.h>
+
 #ifdef __cplusplus
 extern "C" {
-#endif
-
-#ifndef EPERM
-#define EPERM        1  /* Do not have permission to do the operation  */
-#endif
-
-#ifndef EAGAIN
-#define EAGAIN       11  /* Semaphore not available, MQueue Full */
-#endif
-
-#ifndef ENOMEM
-#define ENOMEM       12 /* Cannot allocate memory */
-#endif
-
-#ifndef EBUSY
-#define EBUSY        16  /* Device busy */
-#endif
-
-#ifndef EINVAL
-#define EINVAL       22  /* Invalid argument */
-#endif
-
-#ifndef ENOSPC
-#define ENOSPC       28  /* No space left on device */
-#endif
-
-#ifndef EDEADLK
-#define EDEADLK      45  /* Deadlock condition  */
-#endif
-
-#ifndef ENOSYS
-#define ENOSYS       88  /* Function not implemented */
-#endif
-
-#ifndef ETIMEDOUT
-#define ETIMEDOUT    116 /* Timed out waiting for resource */
 #endif
 
 #ifdef __cplusplus

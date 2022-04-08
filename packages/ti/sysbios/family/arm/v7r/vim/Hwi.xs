@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, Texas Instruments Incorporated
+ * Copyright (c) 2015-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,6 +78,8 @@ if (xdc.om.$name == "cfg") {
     deviceTable["RM57L8.*"] = deviceTable["RM57L8xx"];
     deviceTable["RM48L.*"] = deviceTable["RM57L8xx"];
     deviceTable["AR16XX"] = deviceTable["AR14XX"];
+    deviceTable["IR14XX"] = deviceTable["AR14XX"];
+    deviceTable["IR16XX"] = deviceTable["AR14XX"];
 }
 
 /*
@@ -647,7 +649,12 @@ function viewInitBasic(view, obj)
     viewScanDispatchTable(this, 'Basic');
 
     view.halHwiHandle =  halHwi.viewGetHandle(obj.$addr);
-    view.label = Program.getShortName(obj.$label);
+    if (view.halHwiHandle != null) {
+        view.label = Program.getShortName(halHwi.viewGetLabel(obj.$addr));
+    }
+    else {
+        view.label = Program.getShortName(obj.$label);
+    }
     view.intNum = obj.intNum;
 
     if (obj.type == Hwi.Type_FIQ) {

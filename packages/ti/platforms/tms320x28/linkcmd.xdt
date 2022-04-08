@@ -1,6 +1,6 @@
 %%{
 /*
- * Copyright (c) 2016, Texas Instruments Incorporated
+ * Copyright (c) 2016-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -72,18 +72,20 @@
 -l"`$args[i]`"
 %}
 
-%/* aliases interfere with whole_program and are unnecessary in this case */
-%var PlatformMod = xdc.module('ti.platforms.tms320x28.Platform');
-%if ((prog.build.profile.match(/whole_program/) == null) &&
-%    (PlatformMod.genAliases == true)) {
-`_utils.genAliases(prog)`
+%if (Program.build.target.$name.match(/ti.targets.elf/)) {
+/*
+ * The xdc.meta section is causing grief for C28x ELF CG tools
+--retain="*(xdc.meta)"
+*/
 %}
-
+%else {
+`_utils.genAliases(prog)`
 %/* There are symbols that exist when linking for ELF, but they need to
 % * be referenced in both ELF and COFF builds, so we need to create them here
 % * for COFF targets.
 % */
 `_utils.genElfSymbols(prog)`
+%}
 
 --args `utils.toHex(prog.argSize)`
 -heap  `utils.toHex(prog.heap)`
@@ -105,12 +107,22 @@
 %for (var sym in prog.symbol) {
     %var inst = prog.symbol[sym];
     %if (typeof(inst) == 'number') {
+        %if (Program.build.target.$name.match(/ti.targets.elf/)) {
+`xdc.loadCapsule("ti/targets/elf/ITarget.xs").asmName(sym)` = `inst`;
+        %}
+        %else {
 `this.build.target.asmName(sym)` = `inst`;
+        %}
     %}
     %else {
         %var objTab = inst.$module.$name.replace(/\./g, '_') + '_Object__table__V';
         %var off = prog.$capsule.instSize(inst) * inst.$index;
+        %if (Program.build.target.$name.match(/ti.targets.elf/)) {
+`xdc.loadCapsule("ti/targets/elf/ITarget.xs").asmName(sym)` = `xdc.loadCapsule("ti/targets/elf/ITarget.xs").asmName(objTab)` + `off`;
+        %}
+        %else {
 `this.build.target.asmName(sym)` = `this.build.target.asmName(objTab)` + `off`;
+        %}
     %}
 %}
 
@@ -121,7 +133,12 @@
 SECTIONS
 {
 %/get section allocations */
-%var sections = _utils.genSections(prog);
+%if (Program.build.target.$name.match(/ti.targets.elf/)) {
+    %var sections = xdc.loadCapsule("ti/targets/elf/linkUtils.xs").genElfSections(prog);
+%}
+%else {
+    %var sections = _utils.genSections(prog);
+%}
 %sections = sections.replace(/^\s*xdc.meta\:\s.*$/m, "");
 %sections = sections.replace(/^\s*xdc.noload\:\s.*$/m, "");
 `sections`

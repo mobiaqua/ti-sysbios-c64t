@@ -43,7 +43,7 @@
 #define __extern extern
 #endif
 
-#define ti_sysbios_xdcruntime_ThreadSupport___VERS 160
+#define ti_sysbios_xdcruntime_ThreadSupport___VERS 200
 
 
 /*
@@ -146,138 +146,255 @@ typedef struct ti_sysbios_xdcruntime_ThreadSupport_Args__create {
 /* Module__diagsEnabled */
 typedef xdc_Bits32 CT__ti_sysbios_xdcruntime_ThreadSupport_Module__diagsEnabled;
 __extern __FAR__ const CT__ti_sysbios_xdcruntime_ThreadSupport_Module__diagsEnabled ti_sysbios_xdcruntime_ThreadSupport_Module__diagsEnabled__C;
+#ifdef ti_sysbios_xdcruntime_ThreadSupport_Module__diagsEnabled__CR
+#define ti_sysbios_xdcruntime_ThreadSupport_Module__diagsEnabled__C (*((CT__ti_sysbios_xdcruntime_ThreadSupport_Module__diagsEnabled*)(xdcRomConstPtr + ti_sysbios_xdcruntime_ThreadSupport_Module__diagsEnabled__C_offset)))
+#else
+#define ti_sysbios_xdcruntime_ThreadSupport_Module__diagsEnabled (ti_sysbios_xdcruntime_ThreadSupport_Module__diagsEnabled__C)
+#endif
 
 /* Module__diagsIncluded */
 typedef xdc_Bits32 CT__ti_sysbios_xdcruntime_ThreadSupport_Module__diagsIncluded;
 __extern __FAR__ const CT__ti_sysbios_xdcruntime_ThreadSupport_Module__diagsIncluded ti_sysbios_xdcruntime_ThreadSupport_Module__diagsIncluded__C;
+#ifdef ti_sysbios_xdcruntime_ThreadSupport_Module__diagsIncluded__CR
+#define ti_sysbios_xdcruntime_ThreadSupport_Module__diagsIncluded__C (*((CT__ti_sysbios_xdcruntime_ThreadSupport_Module__diagsIncluded*)(xdcRomConstPtr + ti_sysbios_xdcruntime_ThreadSupport_Module__diagsIncluded__C_offset)))
+#else
+#define ti_sysbios_xdcruntime_ThreadSupport_Module__diagsIncluded (ti_sysbios_xdcruntime_ThreadSupport_Module__diagsIncluded__C)
+#endif
 
 /* Module__diagsMask */
 typedef xdc_Bits16 *CT__ti_sysbios_xdcruntime_ThreadSupport_Module__diagsMask;
 __extern __FAR__ const CT__ti_sysbios_xdcruntime_ThreadSupport_Module__diagsMask ti_sysbios_xdcruntime_ThreadSupport_Module__diagsMask__C;
+#ifdef ti_sysbios_xdcruntime_ThreadSupport_Module__diagsMask__CR
+#define ti_sysbios_xdcruntime_ThreadSupport_Module__diagsMask__C (*((CT__ti_sysbios_xdcruntime_ThreadSupport_Module__diagsMask*)(xdcRomConstPtr + ti_sysbios_xdcruntime_ThreadSupport_Module__diagsMask__C_offset)))
+#else
+#define ti_sysbios_xdcruntime_ThreadSupport_Module__diagsMask (ti_sysbios_xdcruntime_ThreadSupport_Module__diagsMask__C)
+#endif
 
 /* Module__gateObj */
 typedef xdc_Ptr CT__ti_sysbios_xdcruntime_ThreadSupport_Module__gateObj;
 __extern __FAR__ const CT__ti_sysbios_xdcruntime_ThreadSupport_Module__gateObj ti_sysbios_xdcruntime_ThreadSupport_Module__gateObj__C;
+#ifdef ti_sysbios_xdcruntime_ThreadSupport_Module__gateObj__CR
+#define ti_sysbios_xdcruntime_ThreadSupport_Module__gateObj__C (*((CT__ti_sysbios_xdcruntime_ThreadSupport_Module__gateObj*)(xdcRomConstPtr + ti_sysbios_xdcruntime_ThreadSupport_Module__gateObj__C_offset)))
+#else
+#define ti_sysbios_xdcruntime_ThreadSupport_Module__gateObj (ti_sysbios_xdcruntime_ThreadSupport_Module__gateObj__C)
+#endif
 
 /* Module__gatePrms */
 typedef xdc_Ptr CT__ti_sysbios_xdcruntime_ThreadSupport_Module__gatePrms;
 __extern __FAR__ const CT__ti_sysbios_xdcruntime_ThreadSupport_Module__gatePrms ti_sysbios_xdcruntime_ThreadSupport_Module__gatePrms__C;
+#ifdef ti_sysbios_xdcruntime_ThreadSupport_Module__gatePrms__CR
+#define ti_sysbios_xdcruntime_ThreadSupport_Module__gatePrms__C (*((CT__ti_sysbios_xdcruntime_ThreadSupport_Module__gatePrms*)(xdcRomConstPtr + ti_sysbios_xdcruntime_ThreadSupport_Module__gatePrms__C_offset)))
+#else
+#define ti_sysbios_xdcruntime_ThreadSupport_Module__gatePrms (ti_sysbios_xdcruntime_ThreadSupport_Module__gatePrms__C)
+#endif
 
 /* Module__id */
 typedef xdc_runtime_Types_ModuleId CT__ti_sysbios_xdcruntime_ThreadSupport_Module__id;
 __extern __FAR__ const CT__ti_sysbios_xdcruntime_ThreadSupport_Module__id ti_sysbios_xdcruntime_ThreadSupport_Module__id__C;
+#ifdef ti_sysbios_xdcruntime_ThreadSupport_Module__id__CR
+#define ti_sysbios_xdcruntime_ThreadSupport_Module__id__C (*((CT__ti_sysbios_xdcruntime_ThreadSupport_Module__id*)(xdcRomConstPtr + ti_sysbios_xdcruntime_ThreadSupport_Module__id__C_offset)))
+#else
+#define ti_sysbios_xdcruntime_ThreadSupport_Module__id (ti_sysbios_xdcruntime_ThreadSupport_Module__id__C)
+#endif
 
 /* Module__loggerDefined */
 typedef xdc_Bool CT__ti_sysbios_xdcruntime_ThreadSupport_Module__loggerDefined;
 __extern __FAR__ const CT__ti_sysbios_xdcruntime_ThreadSupport_Module__loggerDefined ti_sysbios_xdcruntime_ThreadSupport_Module__loggerDefined__C;
+#ifdef ti_sysbios_xdcruntime_ThreadSupport_Module__loggerDefined__CR
+#define ti_sysbios_xdcruntime_ThreadSupport_Module__loggerDefined__C (*((CT__ti_sysbios_xdcruntime_ThreadSupport_Module__loggerDefined*)(xdcRomConstPtr + ti_sysbios_xdcruntime_ThreadSupport_Module__loggerDefined__C_offset)))
+#else
+#define ti_sysbios_xdcruntime_ThreadSupport_Module__loggerDefined (ti_sysbios_xdcruntime_ThreadSupport_Module__loggerDefined__C)
+#endif
 
 /* Module__loggerObj */
 typedef xdc_Ptr CT__ti_sysbios_xdcruntime_ThreadSupport_Module__loggerObj;
 __extern __FAR__ const CT__ti_sysbios_xdcruntime_ThreadSupport_Module__loggerObj ti_sysbios_xdcruntime_ThreadSupport_Module__loggerObj__C;
+#ifdef ti_sysbios_xdcruntime_ThreadSupport_Module__loggerObj__CR
+#define ti_sysbios_xdcruntime_ThreadSupport_Module__loggerObj__C (*((CT__ti_sysbios_xdcruntime_ThreadSupport_Module__loggerObj*)(xdcRomConstPtr + ti_sysbios_xdcruntime_ThreadSupport_Module__loggerObj__C_offset)))
+#else
+#define ti_sysbios_xdcruntime_ThreadSupport_Module__loggerObj (ti_sysbios_xdcruntime_ThreadSupport_Module__loggerObj__C)
+#endif
 
 /* Module__loggerFxn0 */
 typedef xdc_runtime_Types_LoggerFxn0 CT__ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn0;
 __extern __FAR__ const CT__ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn0 ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn0__C;
+#ifdef ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn0__CR
+#define ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn0__C (*((CT__ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn0*)(xdcRomConstPtr + ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn0__C_offset)))
+#else
+#define ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn0 (ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn0__C)
+#endif
 
 /* Module__loggerFxn1 */
 typedef xdc_runtime_Types_LoggerFxn1 CT__ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn1;
 __extern __FAR__ const CT__ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn1 ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn1__C;
+#ifdef ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn1__CR
+#define ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn1__C (*((CT__ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn1*)(xdcRomConstPtr + ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn1__C_offset)))
+#else
+#define ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn1 (ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn1__C)
+#endif
 
 /* Module__loggerFxn2 */
 typedef xdc_runtime_Types_LoggerFxn2 CT__ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn2;
 __extern __FAR__ const CT__ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn2 ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn2__C;
+#ifdef ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn2__CR
+#define ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn2__C (*((CT__ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn2*)(xdcRomConstPtr + ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn2__C_offset)))
+#else
+#define ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn2 (ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn2__C)
+#endif
 
 /* Module__loggerFxn4 */
 typedef xdc_runtime_Types_LoggerFxn4 CT__ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn4;
 __extern __FAR__ const CT__ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn4 ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn4__C;
+#ifdef ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn4__CR
+#define ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn4__C (*((CT__ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn4*)(xdcRomConstPtr + ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn4__C_offset)))
+#else
+#define ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn4 (ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn4__C)
+#endif
 
 /* Module__loggerFxn8 */
 typedef xdc_runtime_Types_LoggerFxn8 CT__ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn8;
 __extern __FAR__ const CT__ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn8 ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn8__C;
-
-/* Module__startupDoneFxn */
-typedef xdc_Bool (*CT__ti_sysbios_xdcruntime_ThreadSupport_Module__startupDoneFxn)(void);
-__extern __FAR__ const CT__ti_sysbios_xdcruntime_ThreadSupport_Module__startupDoneFxn ti_sysbios_xdcruntime_ThreadSupport_Module__startupDoneFxn__C;
+#ifdef ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn8__CR
+#define ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn8__C (*((CT__ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn8*)(xdcRomConstPtr + ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn8__C_offset)))
+#else
+#define ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn8 (ti_sysbios_xdcruntime_ThreadSupport_Module__loggerFxn8__C)
+#endif
 
 /* Object__count */
 typedef xdc_Int CT__ti_sysbios_xdcruntime_ThreadSupport_Object__count;
 __extern __FAR__ const CT__ti_sysbios_xdcruntime_ThreadSupport_Object__count ti_sysbios_xdcruntime_ThreadSupport_Object__count__C;
+#ifdef ti_sysbios_xdcruntime_ThreadSupport_Object__count__CR
+#define ti_sysbios_xdcruntime_ThreadSupport_Object__count__C (*((CT__ti_sysbios_xdcruntime_ThreadSupport_Object__count*)(xdcRomConstPtr + ti_sysbios_xdcruntime_ThreadSupport_Object__count__C_offset)))
+#else
+#define ti_sysbios_xdcruntime_ThreadSupport_Object__count (ti_sysbios_xdcruntime_ThreadSupport_Object__count__C)
+#endif
 
 /* Object__heap */
 typedef xdc_runtime_IHeap_Handle CT__ti_sysbios_xdcruntime_ThreadSupport_Object__heap;
 __extern __FAR__ const CT__ti_sysbios_xdcruntime_ThreadSupport_Object__heap ti_sysbios_xdcruntime_ThreadSupport_Object__heap__C;
+#ifdef ti_sysbios_xdcruntime_ThreadSupport_Object__heap__CR
+#define ti_sysbios_xdcruntime_ThreadSupport_Object__heap__C (*((CT__ti_sysbios_xdcruntime_ThreadSupport_Object__heap*)(xdcRomConstPtr + ti_sysbios_xdcruntime_ThreadSupport_Object__heap__C_offset)))
+#else
+#define ti_sysbios_xdcruntime_ThreadSupport_Object__heap (ti_sysbios_xdcruntime_ThreadSupport_Object__heap__C)
+#endif
 
 /* Object__sizeof */
 typedef xdc_SizeT CT__ti_sysbios_xdcruntime_ThreadSupport_Object__sizeof;
 __extern __FAR__ const CT__ti_sysbios_xdcruntime_ThreadSupport_Object__sizeof ti_sysbios_xdcruntime_ThreadSupport_Object__sizeof__C;
+#ifdef ti_sysbios_xdcruntime_ThreadSupport_Object__sizeof__CR
+#define ti_sysbios_xdcruntime_ThreadSupport_Object__sizeof__C (*((CT__ti_sysbios_xdcruntime_ThreadSupport_Object__sizeof*)(xdcRomConstPtr + ti_sysbios_xdcruntime_ThreadSupport_Object__sizeof__C_offset)))
+#else
+#define ti_sysbios_xdcruntime_ThreadSupport_Object__sizeof (ti_sysbios_xdcruntime_ThreadSupport_Object__sizeof__C)
+#endif
 
 /* Object__table */
 typedef xdc_Ptr CT__ti_sysbios_xdcruntime_ThreadSupport_Object__table;
 __extern __FAR__ const CT__ti_sysbios_xdcruntime_ThreadSupport_Object__table ti_sysbios_xdcruntime_ThreadSupport_Object__table__C;
+#ifdef ti_sysbios_xdcruntime_ThreadSupport_Object__table__CR
+#define ti_sysbios_xdcruntime_ThreadSupport_Object__table__C (*((CT__ti_sysbios_xdcruntime_ThreadSupport_Object__table*)(xdcRomConstPtr + ti_sysbios_xdcruntime_ThreadSupport_Object__table__C_offset)))
+#else
+#define ti_sysbios_xdcruntime_ThreadSupport_Object__table (ti_sysbios_xdcruntime_ThreadSupport_Object__table__C)
+#endif
 
 /* E_priority */
-#define ti_sysbios_xdcruntime_ThreadSupport_E_priority (ti_sysbios_xdcruntime_ThreadSupport_E_priority__C)
 typedef xdc_runtime_Error_Id CT__ti_sysbios_xdcruntime_ThreadSupport_E_priority;
 __extern __FAR__ const CT__ti_sysbios_xdcruntime_ThreadSupport_E_priority ti_sysbios_xdcruntime_ThreadSupport_E_priority__C;
+#ifdef ti_sysbios_xdcruntime_ThreadSupport_E_priority__CR
+#define ti_sysbios_xdcruntime_ThreadSupport_E_priority (*((CT__ti_sysbios_xdcruntime_ThreadSupport_E_priority*)(xdcRomConstPtr + ti_sysbios_xdcruntime_ThreadSupport_E_priority__C_offset)))
+#else
+#define ti_sysbios_xdcruntime_ThreadSupport_E_priority (ti_sysbios_xdcruntime_ThreadSupport_E_priority__C)
+#endif
 
 /* L_start */
-#define ti_sysbios_xdcruntime_ThreadSupport_L_start (ti_sysbios_xdcruntime_ThreadSupport_L_start__C)
 typedef xdc_runtime_Log_Event CT__ti_sysbios_xdcruntime_ThreadSupport_L_start;
 __extern __FAR__ const CT__ti_sysbios_xdcruntime_ThreadSupport_L_start ti_sysbios_xdcruntime_ThreadSupport_L_start__C;
+#ifdef ti_sysbios_xdcruntime_ThreadSupport_L_start__CR
+#define ti_sysbios_xdcruntime_ThreadSupport_L_start (*((CT__ti_sysbios_xdcruntime_ThreadSupport_L_start*)(xdcRomConstPtr + ti_sysbios_xdcruntime_ThreadSupport_L_start__C_offset)))
+#else
+#define ti_sysbios_xdcruntime_ThreadSupport_L_start (ti_sysbios_xdcruntime_ThreadSupport_L_start__C)
+#endif
 
 /* L_finish */
-#define ti_sysbios_xdcruntime_ThreadSupport_L_finish (ti_sysbios_xdcruntime_ThreadSupport_L_finish__C)
 typedef xdc_runtime_Log_Event CT__ti_sysbios_xdcruntime_ThreadSupport_L_finish;
 __extern __FAR__ const CT__ti_sysbios_xdcruntime_ThreadSupport_L_finish ti_sysbios_xdcruntime_ThreadSupport_L_finish__C;
+#ifdef ti_sysbios_xdcruntime_ThreadSupport_L_finish__CR
+#define ti_sysbios_xdcruntime_ThreadSupport_L_finish (*((CT__ti_sysbios_xdcruntime_ThreadSupport_L_finish*)(xdcRomConstPtr + ti_sysbios_xdcruntime_ThreadSupport_L_finish__C_offset)))
+#else
+#define ti_sysbios_xdcruntime_ThreadSupport_L_finish (ti_sysbios_xdcruntime_ThreadSupport_L_finish__C)
+#endif
 
 /* L_join */
-#define ti_sysbios_xdcruntime_ThreadSupport_L_join (ti_sysbios_xdcruntime_ThreadSupport_L_join__C)
 typedef xdc_runtime_Log_Event CT__ti_sysbios_xdcruntime_ThreadSupport_L_join;
 __extern __FAR__ const CT__ti_sysbios_xdcruntime_ThreadSupport_L_join ti_sysbios_xdcruntime_ThreadSupport_L_join__C;
+#ifdef ti_sysbios_xdcruntime_ThreadSupport_L_join__CR
+#define ti_sysbios_xdcruntime_ThreadSupport_L_join (*((CT__ti_sysbios_xdcruntime_ThreadSupport_L_join*)(xdcRomConstPtr + ti_sysbios_xdcruntime_ThreadSupport_L_join__C_offset)))
+#else
+#define ti_sysbios_xdcruntime_ThreadSupport_L_join (ti_sysbios_xdcruntime_ThreadSupport_L_join__C)
+#endif
 
 /* lowestPriority */
+typedef xdc_UInt CT__ti_sysbios_xdcruntime_ThreadSupport_lowestPriority;
+__extern __FAR__ const CT__ti_sysbios_xdcruntime_ThreadSupport_lowestPriority ti_sysbios_xdcruntime_ThreadSupport_lowestPriority__C;
+#ifdef ti_sysbios_xdcruntime_ThreadSupport_lowestPriority__CR
+#define ti_sysbios_xdcruntime_ThreadSupport_lowestPriority (*((CT__ti_sysbios_xdcruntime_ThreadSupport_lowestPriority*)(xdcRomConstPtr + ti_sysbios_xdcruntime_ThreadSupport_lowestPriority__C_offset)))
+#else
 #ifdef ti_sysbios_xdcruntime_ThreadSupport_lowestPriority__D
 #define ti_sysbios_xdcruntime_ThreadSupport_lowestPriority (ti_sysbios_xdcruntime_ThreadSupport_lowestPriority__D)
 #else
 #define ti_sysbios_xdcruntime_ThreadSupport_lowestPriority (ti_sysbios_xdcruntime_ThreadSupport_lowestPriority__C)
-typedef xdc_UInt CT__ti_sysbios_xdcruntime_ThreadSupport_lowestPriority;
-__extern __FAR__ const CT__ti_sysbios_xdcruntime_ThreadSupport_lowestPriority ti_sysbios_xdcruntime_ThreadSupport_lowestPriority__C;
+#endif
 #endif
 
 /* belowNormalPriority */
+typedef xdc_UInt CT__ti_sysbios_xdcruntime_ThreadSupport_belowNormalPriority;
+__extern __FAR__ const CT__ti_sysbios_xdcruntime_ThreadSupport_belowNormalPriority ti_sysbios_xdcruntime_ThreadSupport_belowNormalPriority__C;
+#ifdef ti_sysbios_xdcruntime_ThreadSupport_belowNormalPriority__CR
+#define ti_sysbios_xdcruntime_ThreadSupport_belowNormalPriority (*((CT__ti_sysbios_xdcruntime_ThreadSupport_belowNormalPriority*)(xdcRomConstPtr + ti_sysbios_xdcruntime_ThreadSupport_belowNormalPriority__C_offset)))
+#else
 #ifdef ti_sysbios_xdcruntime_ThreadSupport_belowNormalPriority__D
 #define ti_sysbios_xdcruntime_ThreadSupport_belowNormalPriority (ti_sysbios_xdcruntime_ThreadSupport_belowNormalPriority__D)
 #else
 #define ti_sysbios_xdcruntime_ThreadSupport_belowNormalPriority (ti_sysbios_xdcruntime_ThreadSupport_belowNormalPriority__C)
-typedef xdc_UInt CT__ti_sysbios_xdcruntime_ThreadSupport_belowNormalPriority;
-__extern __FAR__ const CT__ti_sysbios_xdcruntime_ThreadSupport_belowNormalPriority ti_sysbios_xdcruntime_ThreadSupport_belowNormalPriority__C;
+#endif
 #endif
 
 /* normalPriority */
+typedef xdc_UInt CT__ti_sysbios_xdcruntime_ThreadSupport_normalPriority;
+__extern __FAR__ const CT__ti_sysbios_xdcruntime_ThreadSupport_normalPriority ti_sysbios_xdcruntime_ThreadSupport_normalPriority__C;
+#ifdef ti_sysbios_xdcruntime_ThreadSupport_normalPriority__CR
+#define ti_sysbios_xdcruntime_ThreadSupport_normalPriority (*((CT__ti_sysbios_xdcruntime_ThreadSupport_normalPriority*)(xdcRomConstPtr + ti_sysbios_xdcruntime_ThreadSupport_normalPriority__C_offset)))
+#else
 #ifdef ti_sysbios_xdcruntime_ThreadSupport_normalPriority__D
 #define ti_sysbios_xdcruntime_ThreadSupport_normalPriority (ti_sysbios_xdcruntime_ThreadSupport_normalPriority__D)
 #else
 #define ti_sysbios_xdcruntime_ThreadSupport_normalPriority (ti_sysbios_xdcruntime_ThreadSupport_normalPriority__C)
-typedef xdc_UInt CT__ti_sysbios_xdcruntime_ThreadSupport_normalPriority;
-__extern __FAR__ const CT__ti_sysbios_xdcruntime_ThreadSupport_normalPriority ti_sysbios_xdcruntime_ThreadSupport_normalPriority__C;
+#endif
 #endif
 
 /* aboveNormalPriority */
+typedef xdc_UInt CT__ti_sysbios_xdcruntime_ThreadSupport_aboveNormalPriority;
+__extern __FAR__ const CT__ti_sysbios_xdcruntime_ThreadSupport_aboveNormalPriority ti_sysbios_xdcruntime_ThreadSupport_aboveNormalPriority__C;
+#ifdef ti_sysbios_xdcruntime_ThreadSupport_aboveNormalPriority__CR
+#define ti_sysbios_xdcruntime_ThreadSupport_aboveNormalPriority (*((CT__ti_sysbios_xdcruntime_ThreadSupport_aboveNormalPriority*)(xdcRomConstPtr + ti_sysbios_xdcruntime_ThreadSupport_aboveNormalPriority__C_offset)))
+#else
 #ifdef ti_sysbios_xdcruntime_ThreadSupport_aboveNormalPriority__D
 #define ti_sysbios_xdcruntime_ThreadSupport_aboveNormalPriority (ti_sysbios_xdcruntime_ThreadSupport_aboveNormalPriority__D)
 #else
 #define ti_sysbios_xdcruntime_ThreadSupport_aboveNormalPriority (ti_sysbios_xdcruntime_ThreadSupport_aboveNormalPriority__C)
-typedef xdc_UInt CT__ti_sysbios_xdcruntime_ThreadSupport_aboveNormalPriority;
-__extern __FAR__ const CT__ti_sysbios_xdcruntime_ThreadSupport_aboveNormalPriority ti_sysbios_xdcruntime_ThreadSupport_aboveNormalPriority__C;
+#endif
 #endif
 
 /* highestPriority */
+typedef xdc_UInt CT__ti_sysbios_xdcruntime_ThreadSupport_highestPriority;
+__extern __FAR__ const CT__ti_sysbios_xdcruntime_ThreadSupport_highestPriority ti_sysbios_xdcruntime_ThreadSupport_highestPriority__C;
+#ifdef ti_sysbios_xdcruntime_ThreadSupport_highestPriority__CR
+#define ti_sysbios_xdcruntime_ThreadSupport_highestPriority (*((CT__ti_sysbios_xdcruntime_ThreadSupport_highestPriority*)(xdcRomConstPtr + ti_sysbios_xdcruntime_ThreadSupport_highestPriority__C_offset)))
+#else
 #ifdef ti_sysbios_xdcruntime_ThreadSupport_highestPriority__D
 #define ti_sysbios_xdcruntime_ThreadSupport_highestPriority (ti_sysbios_xdcruntime_ThreadSupport_highestPriority__D)
 #else
 #define ti_sysbios_xdcruntime_ThreadSupport_highestPriority (ti_sysbios_xdcruntime_ThreadSupport_highestPriority__C)
-typedef xdc_UInt CT__ti_sysbios_xdcruntime_ThreadSupport_highestPriority;
-__extern __FAR__ const CT__ti_sysbios_xdcruntime_ThreadSupport_highestPriority ti_sysbios_xdcruntime_ThreadSupport_highestPriority__C;
+#endif
 #endif
 
 
@@ -317,8 +434,8 @@ struct ti_sysbios_xdcruntime_ThreadSupport_Struct {
 
 /* Fxns__ */
 struct ti_sysbios_xdcruntime_ThreadSupport_Fxns__ {
-    xdc_runtime_Types_Base* __base;
-    const xdc_runtime_Types_SysFxns2 *__sysp;
+    const xdc_runtime_Types_Base* __base;
+    const xdc_runtime_Types_SysFxns2* __sysp;
     xdc_runtime_knl_IThreadSupport_Handle (*self)(xdc_runtime_Error_Block*);
     xdc_Bool (*start)(xdc_runtime_Error_Block*);
     xdc_Bool (*yield)(xdc_runtime_Error_Block*);
@@ -335,9 +452,13 @@ struct ti_sysbios_xdcruntime_ThreadSupport_Fxns__ {
     xdc_Bool (*stat)(ti_sysbios_xdcruntime_ThreadSupport_Handle, xdc_runtime_knl_IThreadSupport_Stat*, xdc_runtime_Error_Block*);
     xdc_runtime_Types_SysFxns2 __sfxns;
 };
+#ifndef ti_sysbios_xdcruntime_ThreadSupport_Module__FXNS__CR
 
 /* Module__FXNS__C */
 __extern const ti_sysbios_xdcruntime_ThreadSupport_Fxns__ ti_sysbios_xdcruntime_ThreadSupport_Module__FXNS__C;
+#else
+#define ti_sysbios_xdcruntime_ThreadSupport_Module__FXNS__C (*(xdcRomConstPtr + ti_sysbios_xdcruntime_ThreadSupport_Module__FXNS__C_offset))
+#endif
 
 
 /*
@@ -355,6 +476,22 @@ __extern xdc_Int ti_sysbios_xdcruntime_ThreadSupport_Instance_init__E(ti_sysbios
 xdc__CODESECT(ti_sysbios_xdcruntime_ThreadSupport_Instance_finalize__E, "ti_sysbios_xdcruntime_ThreadSupport_Instance_finalize")
 __extern void ti_sysbios_xdcruntime_ThreadSupport_Instance_finalize__E( ti_sysbios_xdcruntime_ThreadSupport_Object* , int );
 
+/* create */
+xdc__CODESECT(ti_sysbios_xdcruntime_ThreadSupport_create, "ti_sysbios_xdcruntime_ThreadSupport_create")
+__extern ti_sysbios_xdcruntime_ThreadSupport_Handle ti_sysbios_xdcruntime_ThreadSupport_create( xdc_runtime_knl_IThreadSupport_RunFxn fxn, const ti_sysbios_xdcruntime_ThreadSupport_Params *__prms, xdc_runtime_Error_Block *__eb );
+
+/* construct */
+xdc__CODESECT(ti_sysbios_xdcruntime_ThreadSupport_construct, "ti_sysbios_xdcruntime_ThreadSupport_construct")
+__extern void ti_sysbios_xdcruntime_ThreadSupport_construct( ti_sysbios_xdcruntime_ThreadSupport_Struct *__obj, xdc_runtime_knl_IThreadSupport_RunFxn fxn, const ti_sysbios_xdcruntime_ThreadSupport_Params *__prms, xdc_runtime_Error_Block *__eb );
+
+/* delete */
+xdc__CODESECT(ti_sysbios_xdcruntime_ThreadSupport_delete, "ti_sysbios_xdcruntime_ThreadSupport_delete")
+__extern void ti_sysbios_xdcruntime_ThreadSupport_delete(ti_sysbios_xdcruntime_ThreadSupport_Handle *instp);
+
+/* destruct */
+xdc__CODESECT(ti_sysbios_xdcruntime_ThreadSupport_destruct, "ti_sysbios_xdcruntime_ThreadSupport_destruct")
+__extern void ti_sysbios_xdcruntime_ThreadSupport_destruct(ti_sysbios_xdcruntime_ThreadSupport_Struct *obj);
+
 /* Handle__label__S */
 xdc__CODESECT(ti_sysbios_xdcruntime_ThreadSupport_Handle__label__S, "ti_sysbios_xdcruntime_ThreadSupport_Handle__label__S")
 __extern xdc_runtime_Types_Label *ti_sysbios_xdcruntime_ThreadSupport_Handle__label__S( xdc_Ptr obj, xdc_runtime_Types_Label *lab );
@@ -365,31 +502,11 @@ __extern xdc_Bool ti_sysbios_xdcruntime_ThreadSupport_Module__startupDone__S( vo
 
 /* Object__create__S */
 xdc__CODESECT(ti_sysbios_xdcruntime_ThreadSupport_Object__create__S, "ti_sysbios_xdcruntime_ThreadSupport_Object__create__S")
-__extern xdc_Ptr ti_sysbios_xdcruntime_ThreadSupport_Object__create__S( xdc_Ptr __oa, xdc_SizeT __osz, xdc_Ptr __aa, const xdc_UChar *__pa, xdc_SizeT __psz, xdc_runtime_Error_Block *__eb );
-
-/* create */
-xdc__CODESECT(ti_sysbios_xdcruntime_ThreadSupport_create, "ti_sysbios_xdcruntime_ThreadSupport_create")
-__extern ti_sysbios_xdcruntime_ThreadSupport_Handle ti_sysbios_xdcruntime_ThreadSupport_create( xdc_runtime_knl_IThreadSupport_RunFxn fxn, const ti_sysbios_xdcruntime_ThreadSupport_Params *__prms, xdc_runtime_Error_Block *__eb );
-
-/* construct */
-xdc__CODESECT(ti_sysbios_xdcruntime_ThreadSupport_construct, "ti_sysbios_xdcruntime_ThreadSupport_construct")
-__extern void ti_sysbios_xdcruntime_ThreadSupport_construct( ti_sysbios_xdcruntime_ThreadSupport_Struct *__obj, xdc_runtime_knl_IThreadSupport_RunFxn fxn, const ti_sysbios_xdcruntime_ThreadSupport_Params *__prms, xdc_runtime_Error_Block *__eb );
+__extern xdc_Ptr ti_sysbios_xdcruntime_ThreadSupport_Object__create__S( xdc_CPtr __aa, const xdc_UChar *__pa, xdc_SizeT __psz, xdc_runtime_Error_Block *__eb );
 
 /* Object__delete__S */
 xdc__CODESECT(ti_sysbios_xdcruntime_ThreadSupport_Object__delete__S, "ti_sysbios_xdcruntime_ThreadSupport_Object__delete__S")
 __extern xdc_Void ti_sysbios_xdcruntime_ThreadSupport_Object__delete__S( xdc_Ptr instp );
-
-/* delete */
-xdc__CODESECT(ti_sysbios_xdcruntime_ThreadSupport_delete, "ti_sysbios_xdcruntime_ThreadSupport_delete")
-__extern void ti_sysbios_xdcruntime_ThreadSupport_delete(ti_sysbios_xdcruntime_ThreadSupport_Handle *instp);
-
-/* Object__destruct__S */
-xdc__CODESECT(ti_sysbios_xdcruntime_ThreadSupport_Object__destruct__S, "ti_sysbios_xdcruntime_ThreadSupport_Object__destruct__S")
-__extern xdc_Void ti_sysbios_xdcruntime_ThreadSupport_Object__destruct__S( xdc_Ptr objp );
-
-/* destruct */
-xdc__CODESECT(ti_sysbios_xdcruntime_ThreadSupport_destruct, "ti_sysbios_xdcruntime_ThreadSupport_destruct")
-__extern void ti_sysbios_xdcruntime_ThreadSupport_destruct(ti_sysbios_xdcruntime_ThreadSupport_Struct *obj);
 
 /* Object__get__S */
 xdc__CODESECT(ti_sysbios_xdcruntime_ThreadSupport_Object__get__S, "ti_sysbios_xdcruntime_ThreadSupport_Object__get__S")
@@ -509,7 +626,7 @@ static inline xdc_runtime_knl_IThreadSupport_Handle ti_sysbios_xdcruntime_Thread
 static inline ti_sysbios_xdcruntime_ThreadSupport_Handle ti_sysbios_xdcruntime_ThreadSupport_Handle_downCast( xdc_runtime_knl_IThreadSupport_Handle i )
 {
     xdc_runtime_knl_IThreadSupport_Handle i2 = (xdc_runtime_knl_IThreadSupport_Handle)i;
-    return (void*)i2->__fxns == (void*)&ti_sysbios_xdcruntime_ThreadSupport_Module__FXNS__C ? (ti_sysbios_xdcruntime_ThreadSupport_Handle)i : 0;
+    return (const void*)i2->__fxns == (const void*)&ti_sysbios_xdcruntime_ThreadSupport_Module__FXNS__C ? (ti_sysbios_xdcruntime_ThreadSupport_Handle)i : (ti_sysbios_xdcruntime_ThreadSupport_Handle)0;
 }
 
 /* Handle_from_xdc_runtime_knl_IThreadSupport */
@@ -538,19 +655,21 @@ static inline CT__ti_sysbios_xdcruntime_ThreadSupport_Module__id ti_sysbios_xdcr
 /* Module_hasMask */
 static inline xdc_Bool ti_sysbios_xdcruntime_ThreadSupport_Module_hasMask( void ) 
 {
-    return ti_sysbios_xdcruntime_ThreadSupport_Module__diagsMask__C != NULL;
+    return (xdc_Bool)(ti_sysbios_xdcruntime_ThreadSupport_Module__diagsMask__C != NULL);
 }
 
 /* Module_getMask */
 static inline xdc_Bits16 ti_sysbios_xdcruntime_ThreadSupport_Module_getMask( void ) 
 {
-    return ti_sysbios_xdcruntime_ThreadSupport_Module__diagsMask__C != NULL ? *ti_sysbios_xdcruntime_ThreadSupport_Module__diagsMask__C : 0;
+    return ti_sysbios_xdcruntime_ThreadSupport_Module__diagsMask__C != NULL ? *ti_sysbios_xdcruntime_ThreadSupport_Module__diagsMask__C : (xdc_Bits16)0;
 }
 
 /* Module_setMask */
 static inline xdc_Void ti_sysbios_xdcruntime_ThreadSupport_Module_setMask( xdc_Bits16 mask ) 
 {
-    if (ti_sysbios_xdcruntime_ThreadSupport_Module__diagsMask__C != NULL) *ti_sysbios_xdcruntime_ThreadSupport_Module__diagsMask__C = mask;
+    if (ti_sysbios_xdcruntime_ThreadSupport_Module__diagsMask__C != NULL) {
+        *ti_sysbios_xdcruntime_ThreadSupport_Module__diagsMask__C = mask;
+    }
 }
 
 /* Params_init */
@@ -650,7 +769,9 @@ struct ti_sysbios_xdcruntime_ThreadSupport_Object {
 };
 
 /* Instance_State_join_sem */
+#ifndef ti_sysbios_xdcruntime_ThreadSupport_Instance_State_join_sem__OR
 __extern __FAR__ const xdc_SizeT ti_sysbios_xdcruntime_ThreadSupport_Instance_State_join_sem__O;
+#endif
 static inline ti_sysbios_knl_Semaphore_Handle ti_sysbios_xdcruntime_ThreadSupport_Instance_State_join_sem(ti_sysbios_xdcruntime_ThreadSupport_Object *obj)
 {
     return (ti_sysbios_knl_Semaphore_Handle)(((char*)obj) + ti_sysbios_xdcruntime_ThreadSupport_Instance_State_join_sem__O);
