@@ -185,14 +185,17 @@ function instance$meta$init(name)
             this.CPU.clockRate = 300;
         }
 
-        if (this.deviceName.match(/^RM48/) ||
-            this.deviceName.match(/^AR16/) ||
-            this.deviceName.match(/^AR14/)) {
+        if (this.deviceName.match(/^RM48/)) {
             this.CPU.catalogName = "ti.catalog.arm.cortexr4";
             this.CPU.deviceName = "CortexR";
             this.CPU.clockRate = 300;
         }
 
-        //TODO Add boot module
+        if (this.deviceName.match(/^AR16/) ||
+            this.deviceName.match(/^AR14/)) {
+            this.CPU.catalogName = "ti.catalog.arm.cortexr4";
+            this.CPU.deviceName = "CortexR";
+            this.CPU.clockRate = 200;
+        }
     }
 }

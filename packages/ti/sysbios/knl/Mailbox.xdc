@@ -235,7 +235,7 @@ instance:
      *  Be careful with the msgSize parameter!  The 'msg' pointer passed to
      *  {@link #pend()} must point to a buffer whose size matches this msgSize
      *  parameter.  {@link #pend()} does a blind copy of size 'msgSize' into
-     *  the destination pointer, so he destination buffer must be big enough to
+     *  the destination pointer, so the destination buffer must be big enough to
      *  handle this copy.
      *
      */

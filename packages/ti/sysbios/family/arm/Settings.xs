@@ -432,7 +432,7 @@ var deviceTable = {
             timestampDelegate : "ti.sysbios.family.arm.a15.TimestampProvider",
             taskSupportDelegate : "ti.sysbios.family.arm.TaskSupport",
             intrinsicsSupportDelegate : "ti.sysbios.family.arm.IntrinsicsSupport",
-            bootModule : "ti.sysbios.family.arm.v7r.tms570.Boot",
+            bootModule : null,
             mmuModule : "ti.sysbios.family.arm.MPU",
             cacheDelegate : null,
             powerDelegate : null,

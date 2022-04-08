@@ -56,7 +56,6 @@ function getAsmFiles(targetName)
             return (["Timer_asm_gnu.sv7A"]);
             break;
 
-        case "ti.targets.C64P":
         case "ti.targets.elf.C64P":
             return (["Timer_asm.s64P"]);
             break;

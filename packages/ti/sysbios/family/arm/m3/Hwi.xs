@@ -166,7 +166,7 @@ if (xdc.om.$name == "cfg") {
             numInterrupts : 16 + 179,
             numPriorities : 8,
             resetVectorAddress : 0x20004000,
-            vectorTableAddress : 0x20004000,
+            vectorTableAddress : 0x20000000,
         },
         "CC3220SF": {
             numInterrupts : 16 + 179,
@@ -288,8 +288,9 @@ function module$meta$init()
 
     if (!Program.build.target.$name.match(/gnu/)) {
         /* create our .vecs & .resetVecs SectionSpecs */
-        Program.sectMap[".vecs"] = new Program.SectionSpec();
         Program.sectMap[".resetVecs"] = new Program.SectionSpec();
+        Program.sectMap[".vecs"] = new Program.SectionSpec();
+        Program.sectMap[".vecs"].type = "NOLOAD";
     }
 
     /*
@@ -568,7 +569,12 @@ function module$static$init(mod, params)
     mod.isrStack = null;
     mod.isrStackBase = $externPtr('__TI_STACK_BASE');
     /* Overriden by Hwi_initIsrStackSize() if IAR */
-    mod.isrStackSize = Program.stack;
+    if (Program.build.target.$name.match(/iar/)) {
+        mod.isrStackSize = null;
+    }
+    else {
+        mod.isrStackSize = $externPtr('__TI_STACK_SIZE');
+    }
 
     mod.dispatchTable = $externPtr('ti_sysbios_family_arm_m3_Hwi_dispatchTable[0]');
 
@@ -1122,28 +1128,21 @@ function viewInitDetailed(view, obj)
 function viewGetStackInfo()
 {
     var IHwi = xdc.useModule('ti.sysbios.interfaces.IHwi');
+    var Program = xdc.useModule('xdc.rov.Program');
+    var Hwi = xdc.useModule('ti.sysbios.family.arm.m3.Hwi');
 
     var stackInfo = new IHwi.StackInfo();
 
-    /* Fetch the Hwi stack */
+    /* Fetch needed info from Hwi module state */
     try {
-        if (Program.build.target.$name.match(/iar/)) {
-            var size = Program.getSymbolValue("CSTACK$$Length");
-            if (size == -1) {
-
-                size = Program.getSymbolValue("CSTACK$$Limit")
-                           - Program.getSymbolValue("CSTACK$$Base");
-            }
-            var stackBase = Program.getSymbolValue("CSTACK$$Base");
-        }
-        else {
-            var size = Program.getSymbolValue("__STACK_SIZE");
-        if (size == -1) {
-        size = Program.getSymbolValue("__TI_STACK_SIZE");
-        }
-            var stackBase = Program.getSymbolValue("__stack");
-        }
-        var stackData = Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UChar', isScalar: true}, stackBase, size);
+        var hwiRawView = Program.scanRawView('ti.sysbios.family.arm.m3.Hwi');
+        var size = Number(hwiRawView.modState.isrStackSize);
+        var stackBase = hwiRawView.modState.isrStackBase;
+        var stackData = Program.fetchArray(
+            {
+                type: 'xdc.rov.support.ScalarStructs.S_UChar',
+                isScalar: true
+            }, stackBase, size);
     }
     catch (e) {
         stackInfo.hwiStackSize = 0;     /* signal error to caller */
@@ -1161,7 +1160,7 @@ function viewGetStackInfo()
 
     stackInfo.hwiStackPeak = size - index;
     stackInfo.hwiStackSize = size;
-    stackInfo.hwiStackBase = stackBase;
+    stackInfo.hwiStackBase = Number(stackBase);
 
     return (stackInfo);
 }

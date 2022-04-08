@@ -39,12 +39,12 @@ Pkg.makePrologue = "\ninclude custom.mak";
 var BiosBuild = xdc.loadCapsule("ti/sysbios/Build.xs");
 
 var objList = [
-    "Timer",
+    "Timer"
 ];
 
 var trgFilter = {
     field: "isa",
-    list: [ "v7R", "674" ]      /* build for all R5 and AR16XX C674 targets */
+    list: [ "v7R", "674" ] /* build for all R4, R5 and AR16XX C674 targets */
 };
 
 /* generate makefiles */
@@ -53,8 +53,8 @@ BiosBuild.buildLibs(objList, undefined, trgFilter, arguments);
 /* generate smp makefiles */
 BiosBuild.buildLibs(objList, undefined, trgFilter, ["profile=smp"]);
 
-Pkg.otherFiles = ["package.bld", "Timer.xml", "linkcmd.xdt", "Timer_link.xdt",
-                  "custom.mak", "doc-files", "genTimerHtml.xs"];
+Pkg.otherFiles = ["package.bld", "Timer.xml", "custom.mak", "doc-files",
+                  "genTimerHtml.xs"];
 
 /* include source files in the release package */
 Pkg.attrs.exportSrc = true;

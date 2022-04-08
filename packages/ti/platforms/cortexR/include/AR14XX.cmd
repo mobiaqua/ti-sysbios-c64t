@@ -15,22 +15,22 @@
 /*----------------------------------------------------------------------------*/
 /* Memory Map                                                                 */
 MEMORY{
-    VECTORS (X)  : origin=0x00000000 length=0x00000100
-    FLASH0  (RX) : origin=0x00000100 length=0x00017F00
-    FLASH1  (RX) : origin=0x00018000 length=0x00008000
-    RAM     (RW) : origin=0x08000000 length=0x00030000
+    VECTORS  (X)  : origin=0x00000000 length=0x00000100
+    PROG_RAM (RX) : origin=0x00000100 length=0x0001FF00
+    DATA_RAM (RW) : origin=0x08000000 length=0x00010000
+    L3_RAM (RW)   : origin=0x51030000 length=0x00030000
 }
 
 /*----------------------------------------------------------------------------*/
 /* Section Configuration                                                      */
 SECTIONS{
     .intvecs : {} > VECTORS
-    .text    : {} > FLASH0 | FLASH1
-    .const   : {} > FLASH0 | FLASH1
-    .cinit   : {} > FLASH0 | FLASH1
-    .pinit   : {} > FLASH0 | FLASH1
-    .bss     : {} > RAM
-    .data    : {} > RAM
-    .stack   : {} > RAM
+    .text    : {} > PROG_RAM ALIGN(8)
+    .const   : {} > PROG_RAM ALIGN(8)
+    .cinit   : {} > PROG_RAM ALIGN(8)
+    .pinit   : {} > PROG_RAM ALIGN(8)
+    .bss     : {} > DATA_RAM
+    .data    : {} > DATA_RAM
+    .stack   : {} > DATA_RAM
 }
 /*----------------------------------------------------------------------------*/

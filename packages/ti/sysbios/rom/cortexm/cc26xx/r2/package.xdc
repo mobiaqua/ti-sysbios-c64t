@@ -40,5 +40,5 @@ requires ti.sysbios.rom;
  * ======== ti.sysbios.rom.cortexm.cc26xx.r2 ========
  */
 package ti.sysbios.rom.cortexm.cc26xx.r2 [1,0,0,0] {
-    module CC26xx_r2;
+    module CC26xx;
 }

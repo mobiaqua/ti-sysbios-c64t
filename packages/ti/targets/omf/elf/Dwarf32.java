@@ -655,7 +655,6 @@ public class Dwarf32
     private Types getBaseType(HashMap<Integer, Types> typesMap, int type)
     {
         Types currType, newType;
-
         if ((currType = typesMap.get(type)) == null) {
             return (null);
         }
@@ -694,7 +693,6 @@ public class Dwarf32
             /* if this entry is an array variable, directType will have elnum
              * larger than 0,
              */
-
             Types directType = typesMap.get(entry.getValue());
             /* directType should normally never be null, but we don't extract
              * information about each type to typesMap. Arrays are, for example,
@@ -716,6 +714,14 @@ public class Dwarf32
             if (directType != null && directType.elnum > 0) {
                 counter = directType.elnum;
                 offset = directType.elsize;
+                if (counter > 1 && offset == 0 && typeObj.elsize > 0) {
+                    /* It's an array but we don't know an element's size.
+                     * We'll look into the basic definition of a type. We only
+                     * care about aggregate types and they are the ones that
+                     * might have size recorded.
+                     */
+                    offset = typeObj.elsize;
+                }
             }
 
             /* This loop goes through globals and checks if any of them, or any
@@ -726,7 +732,6 @@ public class Dwarf32
                 if (offset > 0) {
                     nm = varName + "." + i;
                 }
-
                 getVariableByType(typeRegEx, typeObj, nm, i * offset, varList,
                                   0);
             }
@@ -767,6 +772,7 @@ public class Dwarf32
             varList.add(var);
         }
         else if (typeObj.subtypes != null) {
+
             for (Map.Entry<Integer, Integer> st: typeObj.subtypes.entrySet()) {
                 Types subType = this.getBaseType(typesMap, st.getValue());
                 if (subType == null) {
@@ -896,6 +902,7 @@ public class Dwarf32
              */
             Types aggregateType = null;
             int aggregateOffset = 0;
+            int structSize = 0;
             int arraySize = 0;
             int arrayLen = 0;
             for (int j = 0;
@@ -929,6 +936,22 @@ public class Dwarf32
 
                 /* Is it either a variable or type DIE? */
                 String tagName = getTagName(abbrevRec.tag);
+                if (structMemberActive && !(tagName.matches("DW_TAG_member"))) {
+                    /* no more members in a structure, it's time to add the
+                     * structure type to the list.
+                     */
+                    structMemberActive = false;
+                    typesMap.put(aggregateOffset, aggregateType);
+                }
+
+                if (arrayTypeActive
+                    && !(tagName.matches("DW_TAG_subrange_type"))) {
+                    arrayTypeActive = false;
+                    if (arrayLen != 0) {
+                        typesMap.put(aggregateOffset, aggregateType);
+                    }
+                }
+
                 if (tagName.matches("DW_TAG_variable")) {
                     isVar = true;
                 }
@@ -936,6 +959,7 @@ public class Dwarf32
                     isStructureType = true;
                     aggregateType = new Types();
                     aggregateOffset = dieOffset;
+                    structSize = 0;
                 }
                 else if (tagName.matches(".*array_type")) {
                     isArrayType = true;
@@ -949,27 +973,18 @@ public class Dwarf32
                     typeObj = new Types();
                 }
 
-                if (structMemberActive && !(tagName.matches("DW_TAG_member"))) {
-                    /* no more members in a structure, it's time to add the
-                     * structure type to the list.
-                     */
-                    structMemberActive = false;
-                    typesMap.put(aggregateOffset, aggregateType);
-                }
-
-                if (arrayTypeActive
-                    && !(tagName.matches("DW_TAG_subrange_type"))) {
-                    arrayTypeActive = false;
-                    if (arraySize != 0 && arrayLen != 0) {
-                        typesMap.put(aggregateOffset, aggregateType);
-                    }
-                }
-                /* Loop through DIE attributes */ 
+                /* Loop through DIE attributes */
                 for (int k = 0; k < abbrevRec.attrs.length; k++) {
                     int form = abbrevRec.attrs[k].form;
                     int size = forms[form].size;
                     String name = getAttrName(abbrevRec.attrs[k].id);
                     String value = "";
+                    /* There are cases when we know we are reading an integer,
+                     * and that the value will be copied to another integer.
+                     * So, instead of converting to and from 'value', we use
+                     * 'intValue'.
+                     */
+                    int intValue = 0;
 
                     if (size > 0) {
                         if (form == DW_FORM_strp) {
@@ -1036,18 +1051,26 @@ public class Dwarf32
                              */
                             value = Integer.toString(bsize);
 
-                            /* We are intrested only in the last value for a
-                             * structure member offset. The first value is a
-                             * code '0x23'.
+                            if (form == DW_FORM_data1 || form == DW_FORM_data2)
+                            {
+                                intValue = bsize;
+                            }
+                            /* Blocks contain the operations. We are interested
+                             * in them because member offsets in structures are
+                             * sometimes encoded that way.
+                             * The first value that we read is an operation
+                             * code. The code '0x23' means that the operation is
+                             * DW_OP_plus_uconst, with only one operand in
+                             * ULEB128 format. Other operations could be used
+                             * here and we should add them eventually.
                              */
-                            if (form == DW_FORM_block1 || form == DW_FORM_block2
+                            else if (form == DW_FORM_block1
+                                || form == DW_FORM_block2
                                 || form == DW_FORM_block4) {
-                                int code = info.get();
                                 bsize--;
                                 value = "";
-                                if (name == "DW_AT_data_member_location"
-                                    && structMemberActive && code == 35) {
-                                    memberOffset = readULEB128(info);
+                                if (info.get() == 35) {
+                                    intValue = readULEB128(info);
                                 }
                                 else {
                                     info.position(info.position() + bsize);
@@ -1072,11 +1095,17 @@ public class Dwarf32
                             case DW_FORM_block:
                             case DW_FORM_exprloc: {
                                 int bsize = readULEB128(info);
+                                bsize--;
                                 value = ""; /* just to be sure */
-                                while (bsize != 0) {
-                                    /* equivalent to integer shifting */
-                                    value += Integer.toString(info.get());
-                                    bsize--;
+                                if (info.get() == 35) {
+                                    intValue = readULEB128(info);
+                                }
+                                else {
+                                    while (bsize != 0) {
+                                        /* equivalent to integer shifting */
+                                        value += Integer.toString(info.get());
+                                        bsize--;
+                                    }
                                 }
                                 break;
                             }
@@ -1110,11 +1139,19 @@ public class Dwarf32
                     else if (name == "DW_AT_type") {
                         atType = value;
                     }
+
                     if (arrayTypeActive && name == "DW_AT_upper_bound") {
                         arrayLen = Integer.parseInt(value) + 1;
                     }
-                    if (isArrayType && name == "DW_AT_byte_size") {
+                    else if (structMemberActive
+                        && name == "DW_AT_data_member_location") {
+                        memberOffset = intValue;
+                    }
+                    else if (isArrayType && name == "DW_AT_byte_size") {
                         arraySize = Integer.parseInt(value);
+                    }
+                    else if (isStructureType && name == "DW_AT_byte_size") {
+                        structSize = Integer.parseInt(value);
                     }
 
                 } /* finished looping through attributes for a DIE */
@@ -1164,12 +1201,13 @@ public class Dwarf32
                     aggregateType.name = atName;
                     aggregateType.type = Integer.parseInt(atType);
                     aggregateType.subtypes = new HashMap<Integer, Integer>();
-                    aggregateType.elsize = 0;
+                    aggregateType.elsize = structSize;
                     aggregateType.elnum = 0;
                     structMemberActive = true;
                 }
             }
         }
+        //printTypes();
     }
 
     /*
@@ -1248,7 +1286,7 @@ public class Dwarf32
         /* Create a String from the buffer and return it. */
         return (new String(stringBuf, 0, strLen));
     }
- 
+
     /*
      *  ======== readSLEB128 ========
      *  Read Signed Little Endian Base 128 data
@@ -1261,21 +1299,21 @@ public class Dwarf32
         int  result = 0;
         int  shift = 0;
         int  size = 32;       /* number of bits */
-        
+
         /* 32 bit can be spread across 5 bytes: 4 7 7 7 7 bits */
         for (int i = 0; i < 5; i++, shift +=7) {
             byt = buf.get();
             result |= (0x7f & byt) << shift;
             if ((0x80 & byt) == 0) {
                 break;
-            }  
+            }
         }
         /* sign padding */
         if ((shift < 32) && (0x40 & byt) == 1) {
             result |= - (1 << shift);
         }
 
-        return (result);           
+        return (result);
     }
 
     /*

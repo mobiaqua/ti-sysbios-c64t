@@ -11,7 +11,6 @@
  * */
 /*
  *  ======== C64T.xdc ========
- *
  */
 
 import xdc.bld.ITarget2;

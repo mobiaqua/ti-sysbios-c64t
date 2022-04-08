@@ -39,24 +39,25 @@ var ROM = xdc.module("ti.sysbios.rom.ROM");
 function getSects()
 {
     var romModName;
+    var romDir = "golden/";
 
     switch(ROM.romName) {
         case ROM.CC2640R2F:
-            romModName = "CC26xx_r2";
+            romModName = "CC26xx";
             break;
     }
 
     if (Build.buildROMApp == true) {
         if (Program.build.target.$name.match(/iar/)) {
-            return (String(this.packageBase + "golden/" + romModName +
+            return (String(this.packageBase + romDir + romModName +
                 "/" + romModName + "_link_iar.xdt"));
         }
         else if (Program.build.target.$name.match(/gnu/)) {
-            return (String(this.packageBase + "golden/" + romModName +
+            return (String(this.packageBase + romDir + romModName +
                 "/" + romModName + "_link_gnu.xdt"));
         }
         else {
-            return (String(this.packageBase + "golden/" + romModName +
+            return (String(this.packageBase + romDir + romModName +
                 "/" + romModName + "_link_ti.xdt"));
         }
     }

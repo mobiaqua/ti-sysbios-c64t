@@ -144,6 +144,17 @@ interface ITimer
     metaonly config Bool defaultDynamic = false;
 
     /*! 
+     *  @_nodoc
+     *  Computes and returns the corresponding Clock tick.  Used by ROV for
+     *  some Timer implementations when Clock is operating in TickMode_DYNAMIC.
+     *  This capability is limited to only a few Timer implementations, and
+     *  this function is not implemented for most Timers.
+     *
+     *  @b(returns)     Clock tick
+     */
+    metaonly UInt32 viewGetCurrentClockTick();
+
+    /*!
      *  ======== getNumTimers ========
      *  Returns number of timer peripherals on the platform.
      *

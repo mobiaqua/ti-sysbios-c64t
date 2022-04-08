@@ -688,7 +688,7 @@ UInt32 Timer_getPeriod(Timer_Object *obj)
  */
 Timer_Status Timer_getStatus(UInt timerId)
 {
-    Assert_isTrue(timerId < Timer_numTimerDevices, NULL);
+    Assert_isTrue(timerId < (UInt)Timer_numTimerDevices, NULL);
 
     if (Timer_module->availMask & (0x1 << timerId)) {
         return (Timer_Status_FREE);
@@ -703,7 +703,7 @@ Timer_Status Timer_getStatus(UInt timerId)
  */
 Timer_Handle Timer_getHandle(UInt timerId)
 {
-    Assert_isTrue((timerId < Timer_numTimerDevices), NULL);
+    Assert_isTrue((timerId < (UInt)Timer_numTimerDevices), NULL);
     return (Timer_module->handles[timerId]);
 }
 

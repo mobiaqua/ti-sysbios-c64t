@@ -1,13 +1,13 @@
 /* 
- *  Copyright (c) 2008-2016 Texas Instruments and others.
+ *  Copyright (c) 2008-2016 Texas Instruments Incorporated
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *  Contributors:
  *      Texas Instruments - initial implementation
- * 
+ *
  * */
 /*
  *  ======== ti/targets/std.h ========
@@ -38,7 +38,7 @@
         #define xdc__ARG__
         typedef int xdc_Arg;    /* deprecated, but compatible with BIOS 5.x */
     #endif
-#endif    
+#endif
 
 /*
  * xdc__LONGLONG__ indicates if compiler supports 'long long' type
@@ -166,9 +166,19 @@ typedef uintptr_t       xdc_UArg;
 /*
  *  ======== xdc__META ========
  */
-#define xdc__META(n,s) \
+#if (defined(_TMS320C6X) && (__TI_COMPILER_VERSION__ < 8001000)) \
+    || (defined(_TMS320C28X) && (__TI_COMPILER_VERSION__ < 6004000)) \
+    || defined (__ARP32__)
+
+#define xdc__META(n,s)                               \
     ti_targets_mkPragma(DATA_SECTION(n, "xdc.meta")) \
     const char (n)[] = {s}
+#else
+
+#define xdc__META(n,s)                               \
+    ti_targets_mkPragma(DATA_SECTION(n, "xdc.meta")) \
+    const char (n)[] = {(s)} /* unnecessary ()'s for MISRA checkers */
+#endif
 
 /*
  *  ======== __ti__ ========

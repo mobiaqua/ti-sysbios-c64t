@@ -72,7 +72,7 @@ typedef uintptr_t       xdc_UArg;
  *  ======== xdc__META ========
  */
 #if (__VER__ >= 7010000)
-#define xdc__META(n,s) __no_alloc const char (n)[] @ "xdc.meta" = {s}
+#define xdc__META(n,s) __no_alloc const char (n)[] @ "xdc.meta" = {(s)}
 #endif
 
 #endif /* iar_targets_arm_STD_ */

@@ -415,6 +415,18 @@ public class Elf32 implements xdc.rta.IOFReader, xdc.rov.ISymbolTable
         }
 
         /*
+         *  ======== isLocalAbsolute ========
+         */
+        boolean isLocalAbsolute()
+        {
+            if (st_info == STT_NOTYPE) {
+                return (true);
+            }
+
+            return (false);
+        }
+
+        /*
          *  ======== isLocalCode ========
          */
         boolean isLocalCode()
@@ -834,7 +846,7 @@ public class Elf32 implements xdc.rta.IOFReader, xdc.rov.ISymbolTable
             entry.read(symTabBuffer);
 
             /* If this is a data or program symbol ... */
-            if (entry.isAbsolute()
+            if (entry.isAbsolute() || entry.isLocalAbsolute()
                 || entry.isData() || entry.isLocalData()
                 || entry.isCode() || entry.isLocalCode()) {
                                 
@@ -845,7 +857,7 @@ public class Elf32 implements xdc.rta.IOFReader, xdc.rov.ISymbolTable
                     readStringFromBuffer(symStrTabBuffer, entry.st_name, 1);
 
                 /* skip code symbols that are not valid C/C++ identifiers */
-                if (entry.isLocalCode()) {
+                if (entry.isLocalCode() || entry.isLocalAbsolute()) {
                     if (!cIdent.reset(entry.name).matches()) {
                         continue;
                     }

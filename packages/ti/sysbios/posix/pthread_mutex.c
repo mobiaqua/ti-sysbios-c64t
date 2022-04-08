@@ -200,7 +200,7 @@ int pthread_mutexattr_setprioceiling(pthread_mutexattr_t *attr,
         const int prioceiling)
 {
 #if ti_sysbios_posix_Settings_supportsMutexPriority__D
-    if ((prioceiling >= Task_numPriorities) || (prioceiling < 1)) {
+    if ((prioceiling >= (int)Task_numPriorities) || (prioceiling < 1)) {
         /* Bad priority value */
         return (EINVAL);
     }
@@ -383,7 +383,7 @@ int pthread_mutex_setprioceiling(pthread_mutex_t *mutex, int prioceiling,
         return (EINVAL);
     }
 
-    if ((prioceiling >= Task_numPriorities) || (prioceiling < 1)) {
+    if ((prioceiling >= (int)Task_numPriorities) || (prioceiling < 1)) {
         /* Bad priority value */
         return (EINVAL);
     }

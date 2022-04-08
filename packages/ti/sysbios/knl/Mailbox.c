@@ -323,7 +323,7 @@ Bool Mailbox_post(Mailbox_Object *obj, Ptr msg, UInt32 timeout)
  */
 Int Mailbox_postInit(Mailbox_Object *obj, SizeT blockSize)
 {
-    Int i;
+    UInt i;
     Queue_Handle freeQue;
     Char *buf = obj->buf;
 

@@ -145,37 +145,14 @@
 #      define xdc_target_name__ M4
 #    endif
 
-#  elif defined(__TI_TMS470_V7R4__)
+#  elif defined(__TI_TMS470_V7R4__) || defined(__TI_ARM_V7R4__)
      /* Defined to 1 if Cortex-R4 is targeted (the -mv7R4 option is used); */
-#    if defined(__big_endian__)
-#      if defined(__16bis__)
-#        if defined(__TI_VFP_SUPPORT__)
-#          define xdc_target_name__ R4Ft_big_endian
-#        else
-#          define xdc_target_name__ R4t_big_endian
-#        endif
-#      else
-#        if defined(__TI_VFP_SUPPORT__)
-#          define xdc_target_name__ R4F_big_endian
-#        else
-#          define xdc_target_name__ R4_big_endian
-#        endif
-#      endif
-#    else
-#      if defined(__16bis__)
-#        if defined(__TI_VFP_SUPPORT__)
-#          define xdc_target_name__ R4Ft
-#        else
-#          define xdc_target_name__ R4t
-#        endif
-#      else
-#        if defined(__TI_VFP_SUPPORT__)
-#          define xdc_target_name__ R4F
-#        else
-#          define xdc_target_name__ R4
-#        endif
-#      endif
-#    endif
+#    define xdc_target_name__ R4F
+
+#  elif defined(__TI_ARM_V7R5__)
+     /* Defined to 1 if Cortex-R5 is targeted (the -mv7R5 option is used); */
+#    define xdc_target_name__ R5F
+
 #  endif
 
 /*

@@ -176,7 +176,7 @@ int pthread_attr_setschedparam(pthread_attr_t *attr,
 {
     int     priority = schedparam->sched_priority;
 
-    if ((priority >= Task_numPriorities) || (priority == 0) ||
+    if ((priority >= (int)Task_numPriorities) || (priority == 0) ||
             (priority < -1)) {
         /* Bad priority value */
         return (EINVAL);
@@ -592,7 +592,7 @@ int pthread_setschedparam(pthread_t pthread, int policy,
     int                 maxPri;
 #endif
 
-    if ((priority >= Task_numPriorities) || ((priority == 0)) ||
+    if ((priority >= (int)Task_numPriorities) || ((priority == 0)) ||
             (priority < -1)) {
         /* Bad priority value */
         return (EINVAL);

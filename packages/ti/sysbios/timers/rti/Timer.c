@@ -81,7 +81,7 @@
  */
 UInt Timer_getNumTimers()
 {
-    return (Timer_NUM_TIMER_DEVICES);
+    return (Timer_numTimerDevices);
 }
 
 /*
@@ -89,7 +89,7 @@ UInt Timer_getNumTimers()
  */
 Timer_Status Timer_getStatus(UInt timerId)
 {
-    Assert_isTrue(timerId < Timer_NUM_TIMER_DEVICES, Timer_A_invalidTimer);
+    Assert_isTrue(timerId < Timer_numTimerDevices, Timer_A_invalidTimer);
 
     if (Timer_module->availMask & (0x1 << timerId)) {
         return (Timer_Status_FREE);
@@ -130,9 +130,10 @@ Int Timer_Module_startup(status)
 {
     Int i;
     Timer_Object *obj;
+    Timer_DeviceRegs *deviceRegs;
 
     if (Timer_startupNeeded) {
-        for (i = 0; i < Timer_NUM_TIMER_DEVICES; i++) {
+        for (i = 0; i < Timer_numTimerDevices; i++) {
             obj = Timer_module->handles[i];
             /* if timer was statically created/constructed */
             if ((obj != NULL) && (obj->staticInst)) {
@@ -141,11 +142,14 @@ Int Timer_Module_startup(status)
         }
     }
 
-    if (!Timer_continueOnSuspend) {
-        Timer_deviceRegs.RTIGCTRL &= TIMER_GCTRL_NOCOS;
-    }
-    else {
-        Timer_deviceRegs.RTIGCTRL |= TIMER_GCTRL_COS;
+    for (i = 0; i < Timer_numTimerDevices; i += 2) {
+        deviceRegs = (Timer_DeviceRegs *)Timer_module->device[i].baseAddr;
+        if (!Timer_continueOnSuspend) {
+            deviceRegs->RTIGCTRL &= TIMER_GCTRL_NOCOS;
+        }
+        else {
+            deviceRegs->RTIGCTRL |= TIMER_GCTRL_COS;
+        }
     }
 
     return (Startup_DONE);
@@ -163,7 +167,7 @@ Void Timer_startup()
     Timer_Object *obj;
 
     if (Timer_startupNeeded) {
-        for (i = 0; i < Timer_NUM_TIMER_DEVICES; i++) {
+        for (i = 0; i < Timer_numTimerDevices; i++) {
             obj = Timer_module->handles[i];
             /* if timer was statically created/constructed */
             if ((obj != NULL) && (obj->staticInst)) {
@@ -180,7 +184,7 @@ Void Timer_startup()
  */
 Timer_Handle Timer_getHandle(UInt id)
 {
-    Assert_isTrue((id < Timer_NUM_TIMER_DEVICES), NULL);
+    Assert_isTrue((id < Timer_numTimerDevices), NULL);
     return (Timer_module->handles[id]);
 }
 
@@ -203,7 +207,7 @@ Int Timer_Instance_init(Timer_Object *obj, Int id, Timer_FuncPtr tickFxn, const 
     Hwi_Params hwiParams;
     UInt tempId = 0xffff;
 
-    if (id >= Timer_NUM_TIMER_DEVICES) {
+    if (id >= Timer_numTimerDevices) {
         if (id != Timer_ANY) {
             Error_raise(eb, Timer_E_invalidTimer, id, 0);
             return (1);
@@ -212,7 +216,7 @@ Int Timer_Instance_init(Timer_Object *obj, Int id, Timer_FuncPtr tickFxn, const 
 
     key = Hwi_disable();
     if (id == -1) {
-        for (i = 0; i < Timer_NUM_TIMER_DEVICES; i++) {
+        for (i = 0; i < Timer_numTimerDevices; i++) {
             if ((Timer_anyMask & (1 << i))
                 && (Timer_module->availMask & (1 << i))) {
                 Timer_module->availMask &= ~(1 << i);
@@ -245,7 +249,7 @@ Int Timer_Instance_init(Timer_Object *obj, Int id, Timer_FuncPtr tickFxn, const 
     obj->period = params->period;
     obj->periodType = params->periodType;
     obj->arg = params->arg;
-    obj->intNum = Timer_intNumDef[obj->id];
+    obj->intNum = Timer_module->device[obj->id].intNum;
     obj->tickFxn = tickFxn;
     obj->createHwi = params->createHwi;
 
@@ -262,8 +266,8 @@ Int Timer_Instance_init(Timer_Object *obj, Int id, Timer_FuncPtr tickFxn, const 
             Hwi_Params_init(&hwiParams);
         }
 
-        if (Timer_evtIdDef[obj->id] != 0) {
-            hwiParams.eventId = Timer_evtIdDef[obj->id];
+        if (Timer_module->device[obj->id].eventId != 0) {
+            hwiParams.eventId = Timer_module->device[obj->id].eventId;
         }
 
         if (obj->runMode == Timer_RunMode_ONESHOT) {
@@ -341,6 +345,9 @@ Void Timer_reconfig (Timer_Object *obj, Timer_FuncPtr tickFxn,
 Int Timer_postInit (Timer_Object *obj, Error_Block *eb)
 {
     UInt key;
+    Timer_DeviceRegs *deviceRegs;
+
+    deviceRegs = (Timer_DeviceRegs *)Timer_module->device[obj->id].baseAddr;
 
     key = Hwi_disable();
 
@@ -358,17 +365,17 @@ Int Timer_postInit (Timer_Object *obj, Error_Block *eb)
     }
 
     /* Set prescaler, enable interrupt and select counter for comparator */
-    if (obj->id == 0) {
-        /* Use internal up-counter to clock free-running counter 0 */
-        Timer_deviceRegs.RTITBCTRL &= TIMER_TBCTRL_TBEXT;
-        Timer_deviceRegs.RTICPUC0 = obj->prescale;
-        Timer_deviceRegs.RTISETINTENA |= TIMER_SETINTENA_INT0;
-        Timer_deviceRegs.RTICOMPCTRL &= TIMER_COMPCTRL_SEL0;
+    if (obj->id & 0x1) {
+        deviceRegs->RTICPUC1 = obj->prescale;
+        deviceRegs->RTISETINTENA |= TIMER_SETINTENA_INT1;
+        deviceRegs->RTICOMPCTRL |= TIMER_COMPCTRL_SEL1;
     }
     else {
-        Timer_deviceRegs.RTICPUC1 = obj->prescale;
-        Timer_deviceRegs.RTISETINTENA |= TIMER_SETINTENA_INT1;
-        Timer_deviceRegs.RTICOMPCTRL |= TIMER_COMPCTRL_SEL1;
+        /* Use internal up-counter to clock free-running counter 0 */
+        deviceRegs->RTITBCTRL &= TIMER_TBCTRL_TBEXT;
+        deviceRegs->RTICPUC0 = obj->prescale;
+        deviceRegs->RTISETINTENA |= TIMER_SETINTENA_INT0;
+        deviceRegs->RTICOMPCTRL &= TIMER_COMPCTRL_SEL0;
     }
 
     Hwi_restore(key);
@@ -428,29 +435,32 @@ Void Timer_Instance_finalize(Timer_Object *obj, Int status)
 Void Timer_initDevice(Timer_Object *obj)
 {
     UInt key;
+    Timer_DeviceRegs *deviceRegs;
+
+    deviceRegs = (Timer_DeviceRegs *)Timer_module->device[obj->id].baseAddr;
 
     key = Hwi_disable();
-    if (obj->id == 0) {
-        Timer_deviceRegs.RTIGCTRL &= TIMER_GCTRL_CNT0EN;
+    if (obj->id & 0x1) {
+        deviceRegs->RTIGCTRL &= (~TIMER_GCTRL_CNT1EN);
         if (obj->hwi) {
             Hwi_disableInterrupt(obj->intNum);
             Hwi_clearInterrupt(obj->intNum);
-            Timer_deviceRegs.RTIINTFLAG = TIMER_INTFLAG_INT0;
+            deviceRegs->RTIINTFLAG = TIMER_INTFLAG_INT1;
         }
-        Timer_deviceRegs.RTIUDCP0 = 0;
-        Timer_deviceRegs.RTICOMP0 = 0;
-        Timer_deviceRegs.RTICPUC0 = 0;
+        deviceRegs->RTIUDCP1 = 0;
+        deviceRegs->RTICOMP1 = 0;
+        deviceRegs->RTICPUC1 = 0;
     }
     else {
-        Timer_deviceRegs.RTIGCTRL &= TIMER_GCTRL_CNT1EN;
+        deviceRegs->RTIGCTRL &= (~TIMER_GCTRL_CNT0EN);
         if (obj->hwi) {
             Hwi_disableInterrupt(obj->intNum);
             Hwi_clearInterrupt(obj->intNum);
-            Timer_deviceRegs.RTIINTFLAG = TIMER_INTFLAG_INT1;
+            deviceRegs->RTIINTFLAG = TIMER_INTFLAG_INT0;
         }
-        Timer_deviceRegs.RTIUDCP1 = 0;
-        Timer_deviceRegs.RTICOMP1 = 0;
-        Timer_deviceRegs.RTICPUC1 = 0;
+        deviceRegs->RTIUDCP0 = 0;
+        deviceRegs->RTICOMP0 = 0;
+        deviceRegs->RTICPUC0 = 0;
     }
     Hwi_restore(key);
 }
@@ -467,35 +477,28 @@ Void Timer_initDevice(Timer_Object *obj)
 Void Timer_start(Timer_Object *obj)
 {
     UInt key;
+    Timer_DeviceRegs *deviceRegs;
+
+    deviceRegs = (Timer_DeviceRegs *)Timer_module->device[obj->id].baseAddr;
 
     key = Hwi_disable();
-    if (obj->id == 0) {
-        Timer_deviceRegs.RTIUC0 = 0;
-        Timer_deviceRegs.RTIFRC0 = 0;
+    if (obj->id & 0x1) {
+        deviceRegs->RTIUC1 = 0;
+        deviceRegs->RTIFRC1 = 0;
         if (obj->hwi) {
-            if (obj->id == 0) {
-                Timer_deviceRegs.RTIINTFLAG = TIMER_INTFLAG_INT0;
-            }
-            else {
-                Timer_deviceRegs.RTIINTFLAG = TIMER_INTFLAG_INT1;
-            }
+            deviceRegs->RTIINTFLAG = TIMER_INTFLAG_INT1;
             Hwi_enableInterrupt(obj->intNum);
         }
-        Timer_deviceRegs.RTIGCTRL |= TIMER_GCTRL_CNT0EN;
+        deviceRegs->RTIGCTRL |= TIMER_GCTRL_CNT1EN;
     }
     else {
-        Timer_deviceRegs.RTIUC1 = 0;
-        Timer_deviceRegs.RTIFRC1 = 0;
+        deviceRegs->RTIUC0 = 0;
+        deviceRegs->RTIFRC0 = 0;
         if (obj->hwi) {
-            if (obj->id == 0) {
-                Timer_deviceRegs.RTIINTFLAG = TIMER_INTFLAG_INT0;
-            }
-            else {
-                Timer_deviceRegs.RTIINTFLAG = TIMER_INTFLAG_INT1;
-            }
+            deviceRegs->RTIINTFLAG = TIMER_INTFLAG_INT0;
             Hwi_enableInterrupt(obj->intNum);
         }
-        Timer_deviceRegs.RTIGCTRL |= TIMER_GCTRL_CNT1EN;
+        deviceRegs->RTIGCTRL |= TIMER_GCTRL_CNT0EN;
     }
     Hwi_restore(key);
 }
@@ -510,15 +513,19 @@ Void Timer_start(Timer_Object *obj)
 Void Timer_stop(Timer_Object *obj)
 {
     UInt key;
+    Timer_DeviceRegs *deviceRegs;
+
+    deviceRegs = (Timer_DeviceRegs *)Timer_module->device[obj->id].baseAddr;
 
     key = Hwi_disable();
-    if (obj->id == 0) {
-        Timer_deviceRegs.RTIGCTRL &= (~TIMER_GCTRL_CNT0EN);
+    if (obj->id & 0x1) {
+        deviceRegs->RTIGCTRL &= (~TIMER_GCTRL_CNT1EN);
     }
     else {
-        Timer_deviceRegs.RTIGCTRL &= (~TIMER_GCTRL_CNT1EN);
+        deviceRegs->RTIGCTRL &= (~TIMER_GCTRL_CNT0EN);
     }
     Hwi_restore(key);
+
     if (obj->hwi) {
         Hwi_disableInterrupt(obj->intNum);
     }
@@ -539,10 +546,10 @@ Bool Timer_setPeriodMicroSecs(Timer_Object *obj, UInt32 period)
      * set period register
      */
     Timer_stop(obj);
-    /* Today ARM R5 support less than 4.2GHz */
+    /* Today all targets that use this module support less than 4.2GHz */
     Timer_getFreq(obj, &freqHz);
 
-    freqKHz = (freqHz.lo / (obj->prescale + 1)) / 1000;
+    freqKHz = freqHz.lo / 1000;
     if (Timer_checkOverflow(freqKHz, period / 1000)) {
         return (FALSE);
     }
@@ -562,16 +569,20 @@ Bool Timer_setPeriodMicroSecs(Timer_Object *obj, UInt32 period)
 Void Timer_setPeriod(Timer_Object *obj, UInt32 period)
 {
     UInt key;
+    Timer_DeviceRegs *deviceRegs;
+
+    deviceRegs = (Timer_DeviceRegs *)Timer_module->device[obj->id].baseAddr;
 
     Timer_stop(obj);
+
     key = Hwi_disable();
-    if (obj->id == 0) {
-        Timer_deviceRegs.RTIUDCP0 = period;
-        Timer_deviceRegs.RTICOMP0 = period;
+    if (obj->id & 0x1) {
+        deviceRegs->RTIUDCP1 = period;
+        deviceRegs->RTICOMP1 = period;
     }
     else {
-        Timer_deviceRegs.RTIUDCP1 = period;
-        Timer_deviceRegs.RTICOMP1 = period;
+        deviceRegs->RTIUDCP0 = period;
+        deviceRegs->RTICOMP0 = period;
     }
     Hwi_restore(key);
 }
@@ -581,11 +592,15 @@ Void Timer_setPeriod(Timer_Object *obj, UInt32 period)
  */
 UInt32 Timer_getPeriod(Timer_Object *obj)
 {
-    if (obj->id == 0) {
-        return (Timer_deviceRegs.RTIUDCP0);
+    Timer_DeviceRegs *deviceRegs;
+
+    deviceRegs = (Timer_DeviceRegs *)Timer_module->device[obj->id].baseAddr;
+
+    if (obj->id & 0x1) {
+        return (deviceRegs->RTIUDCP1);
     }
     else {
-        return (Timer_deviceRegs.RTIUDCP1);
+        return (deviceRegs->RTIUDCP0);
     }
 }
 
@@ -594,11 +609,15 @@ UInt32 Timer_getPeriod(Timer_Object *obj)
  */
 UInt32 Timer_getCount(Timer_Object *obj)
 {
-    if (obj->id == 0) {
-        return (Timer_deviceRegs.RTIFRC0);
+    Timer_DeviceRegs *deviceRegs;
+
+    deviceRegs = (Timer_DeviceRegs *)Timer_module->device[obj->id].baseAddr;
+
+    if (obj->id & 0x1) {
+        return (deviceRegs->RTIFRC1);
     }
     else {
-        return (Timer_deviceRegs.RTIFRC1);
+        return (deviceRegs->RTIFRC0);
     }
 }
 
@@ -607,11 +626,15 @@ UInt32 Timer_getCount(Timer_Object *obj)
  */
 Void Timer_ackInterrupt(Timer_Object *obj)
 {
-    if (obj->id == 0) {
-        Timer_deviceRegs.RTIINTFLAG = TIMER_INTFLAG_INT0;
+    Timer_DeviceRegs *deviceRegs;
+
+    deviceRegs = (Timer_DeviceRegs *)Timer_module->device[obj->id].baseAddr;
+
+    if (obj->id & 0x1) {
+        deviceRegs->RTIINTFLAG = TIMER_INTFLAG_INT1;
     }
     else {
-        Timer_deviceRegs.RTIINTFLAG = TIMER_INTFLAG_INT1;
+        deviceRegs->RTIINTFLAG = TIMER_INTFLAG_INT0;
     }
 }
 
@@ -664,12 +687,12 @@ Void Timer_getFreq(Timer_Object *obj, Types_FreqHz *freq)
 {
     if (obj->extFreq.lo) {
         Assert_isTrue((obj->extFreq.hi == 0), NULL);
-        freq->lo = obj->extFreq.lo;
+        freq->lo = (obj->extFreq.lo) / (obj->prescale + 1);
         freq->hi = 0;
     }
     else {
-        Assert_isTrue((Timer_intFreq.hi == 0), NULL);
-        freq->lo = Timer_intFreq.lo;
+        Assert_isTrue((Timer_module->intFreqs[obj->id].hi == 0), NULL);
+        freq->lo = Timer_module->intFreqs[obj->id].lo / (obj->prescale + 1);
         freq->hi = 0;
     }
 }
@@ -708,9 +731,20 @@ Void Timer_trigger(Timer_Object *obj, UInt32 cycles)
     UInt key;
     UInt64 period;
     UInt64 numCyclesPerTick;
+    UInt64 cpuCounts, timerCounts;
+    Types_FreqHz timerfreq, cpufreq;
 
-    /* Timer frequency is half of CPU frequency */
-    numCyclesPerTick = (2 * (obj->prescale + 1));
+    /* get CPU frequency */
+    BIOS_getCpuFreq(&cpufreq);
+    cpuCounts = (UInt64)cpufreq.hi << 32;
+    cpuCounts |=  cpufreq.lo;
+
+    /* get Timer frequency */
+    Timer_getFreq(obj, &timerfreq);
+    timerCounts = (UInt64)timerfreq.hi << 32;
+    timerCounts |= timerfreq.lo;
+
+    numCyclesPerTick = cpuCounts / timerCounts;
     period = ((UInt64)cycles) / numCyclesPerTick;
 
     /* Account for division error */

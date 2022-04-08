@@ -772,7 +772,7 @@ UInt32 Timer_getPeriod(Timer_Object *obj)
  */
 Timer_Status Timer_getStatus(UInt timerId)
 {
-    Assert_isTrue(timerId < (Timer_numTimerDevices >> 1), NULL);
+    Assert_isTrue(timerId < (UInt)(Timer_numTimerDevices >> 1), NULL);
 
     /* both halves must be FREE to return FREE */
     if (timerId < 16) {

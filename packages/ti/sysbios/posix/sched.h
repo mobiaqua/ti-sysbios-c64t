@@ -76,7 +76,7 @@ struct sched_param {
  */
 
 #define sched_get_priority_min() 1
-#define sched_get_priority_max() Task_numPriorities
+#define sched_get_priority_max() (Task_numPriorities - 1)
 
 extern int sched_yield(void);
 

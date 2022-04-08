@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Texas Instruments Incorporated
+ * Copyright (c) 2013-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@
  *
  *  This script is used to generate the html code for the Timer mapping tables
  *  found in the Timer module's cdoc.
+ *
  *
  */
 
@@ -84,8 +85,8 @@ function createTable(deviceTable, fileBase)
     for (var catalog in deviceTable) {
 
         // skip all NDA catalogs
-        if (catalog == "ti.catalog.c7000" ||
-            catalog == "ti.catalog.arm.cortexa53") {
+        if (catalog == "ti.catalog.c6000.nda" ||
+            catalog == "ti.catalog.arm.nda") {
             continue;
         }
 
@@ -105,55 +106,64 @@ function createTable(deviceTable, fileBase)
         for (var y = 0; y < sortedDeviceArray.length; y++) {
             var device = sortedDeviceArray[y];
 
-            var numCores = 0;
-            for (var coreId in deviceTable[catalog][device]) {
-                numCores++;
+            // This is the beginning of the HTML table. Write this out *once*
+            // for each device
+            var tableStart =
+              "\"<h5>" + device + "</h5>\",\n" +
+              "\"<table border=1 cellpadding=3>\",\n" +
+              " \"<colgroup span=1></colgroup> <colgroup span=5 align=center></colgroup>\",\n" +
+              "   \"<tr><th> Timer ID </th><th> Timer Name </th><th> Timer Base Address </th>" +
+              "<th> Timer Interrupt Number </th><th> Timer Event Id </th></tr>\",\n";
+            fos.write(tableStart);
+
+            // get the current device's timer array
+            var timerArray = deviceTable[catalog][device].timer;
+
+            // cycle thru all timers for this device
+            for (var currTimer = 0; currTimer < timerArray.length; currTimer++){
+
+                // sometimes the timer name is undefined.  if so, print "-"
+                // instead of 'undefined':
+                var currTimerName = (timerArray[currTimer].name == undefined) ?
+                        "-" : timerArray[currTimer].name;
+
+                var baseAddrString = (timerArray[currTimer].intNum[0] == -1) ?
+                        "Unsupported" : "0x" + timerArray[currTimer].baseAddr.toString(16);
+
+                var intNumString = timerArray[currTimer].intNum.toString(10);
+
+                var eventIdString = (timerArray[currTimer].eventId == -1) ?
+                        "Not used" : timerArray[currTimer].eventId.toString(10);
+
+                // write out a row for each timer in the device, substituting
+                // values from the timer array into the html table
+                tableRows += "   \"<tr><td> " + currTimer +
+                    "        </td><td> " +
+                    currTimerName +
+                    "   </td><td> " +
+                    // print address in hex
+                    baseAddrString +
+                    "         </td><td> " +
+                    intNumString +
+                    "         </td><td> " +
+                    eventIdString +
+                    "         </td></tr>\",\n";
             }
-            for (var coreId in deviceTable[catalog][device]) {
-                var deviceTitle;
-                if (numCores > 1) {
-                    deviceTitle = device + " " + coreId;
-                }
-                else {
-                    deviceTitle = device;
-                }
 
-                // This is the beginning of the HTML table. Write this out *once*
-                // for each device
-                var tableStart =
-                  "\"<h5>" + deviceTitle + "</h5>\",\n" +
-                  "\"<table border=1 cellpadding=3>\",\n" +
-                  " \"<colgroup span=1></colgroup> <colgroup span=5 align=center></colgroup>\",\n" +
-                  "   \"<tr><th> Timer ID </th><th> Timer Interrupt Number </th></tr>\",\n";
-                fos.write(tableStart);
+            // write out all of the rows we just generated for this device
+            fos.write(tableRows);
 
-                // get the current device's timer interrupt array
-                var timerIntArray = deviceTable[catalog][device][coreId].timerIntNums;
+            // reset the rows for the next device
+            tableRows = "";
 
-                for (var i = 0; i < timerIntArray.length; i++) {
-                    // write out a row for each timer in the device, substituting
-                    // values from the timer array into the html table
-                    tableRows += "   \"<tr><td> " + i +
-                        "        </td><td> " +
-                        timerIntArray[i] +
-                        "         </td></tr>\",\n";
-                }
+            // This is the end of the HTML table. Write this out *once* for each
+            // device
+            var tableEnd = " \"</table>\",\n";
+            // write out this device's table to the script file
+            fos.write(tableEnd);
 
-                // write out all of the rows we just generated for this device
-                fos.write(tableRows);
-
-                // reset the rows for the next device
-                tableRows = "";
-
-                // This is the end of the HTML table. Write this out *once* for each
-                // device
-                var tableEnd = " \"</table>\",\n";
-                // write out this device's table to the script file
-                fos.write(tableEnd);
-
-                // now we're done with this device's table, loop on to the next
-                // device
-            }
+            // now we're done with this device's table, loop on to the next
+            // device
 
         } // for (var device in deviceTable) ...
     }

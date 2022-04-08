@@ -243,7 +243,11 @@ Int Hwi_postInit (Hwi_Object *hwi, Error_Block *eb)
     if (((hwi->irp & 0x2) == 0) ||
         (hwi->priority < Hwi_disablePriority)) {
         Hwi_plug(hwi->intNum, (Void *)(UArg)hwi->fxn);
-        /* encode useDispatcher == FALSE as a negative intNum */
+        /*
+         * encode useDispatcher == FALSE as a negative intNum
+         * This is done to inform ROV that this is a non-dispatched interrupt
+         * without adding a new field to the Hwi object.
+         */
         hwi->intNum = 0 - hwi->intNum;
     }
     else {
@@ -332,7 +336,13 @@ Void Hwi_Instance_finalize(Hwi_Object *hwi, Int status)
     }
 #endif
 
-    intNum = hwi->intNum;
+    /* compensate for encoded intNum */
+    if (hwi->intNum < 0) {
+        intNum = 0 - hwi->intNum;
+    }
+    else {
+        intNum = hwi->intNum;
+    }
 
     Hwi_disableInterrupt(intNum);
     Hwi_plug(intNum, (Void *)(UArg)Hwi_nullIsrFunc);
@@ -671,7 +681,7 @@ Bool Hwi_getStackInfo(Hwi_StackInfo *stkInfo, Bool computeStackDepth)
     Bool stackOverflow;
 
     /* Copy the stack base address and size */
-    stkInfo->hwiStackSize = Hwi_module->isrStackSize;
+    stkInfo->hwiStackSize = (SizeT)Hwi_module->isrStackSize;
     stkInfo->hwiStackBase = Hwi_module->isrStackBase;
 
     isrSP = stkInfo->hwiStackBase;
@@ -1026,7 +1036,7 @@ Void Hwi_excFillContext(UInt *excStack)
             if (BIOS_swiEnabled) {
                 excContext->threadHandle = (Ptr)Swi_self();
                 stack = Hwi_module->isrStackBase;
-                stackSize = Hwi_module->isrStackSize;
+                stackSize = (SizeT)Hwi_module->isrStackSize;
             }
             break;
         }
@@ -1034,13 +1044,13 @@ Void Hwi_excFillContext(UInt *excStack)
             excContext->threadHandle =
                 (Ptr)Hwi_getHandle((UInt)(excContext->psr) & 0xff);
             stack = Hwi_module->isrStackBase;
-            stackSize = Hwi_module->isrStackSize;
+            stackSize = (SizeT)Hwi_module->isrStackSize;
             break;
         }
         case BIOS_ThreadType_Main: {
             excContext->threadHandle = NULL;
             stack = Hwi_module->isrStackBase;
-            stackSize = Hwi_module->isrStackSize;
+            stackSize = (SizeT)Hwi_module->isrStackSize;
             break;
         }
     }
@@ -1549,4 +1559,3 @@ Void Hwi_doTaskRestore(UInt swiTskKey)
         TASK_RESTORE(swiTskKey >> 8);   /* returns with ints disabled */
     }
 }
-

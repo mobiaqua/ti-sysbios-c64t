@@ -83,7 +83,9 @@
 
 --args `utils.toHex(prog.argSize)`
 -heap  `utils.toHex(prog.heap)`
+%if (prog.stack != 0) {
 -stack `utils.toHex(prog.stack)`
+%}
 
 /*
  * Linker command file contributions from all loaded packages:

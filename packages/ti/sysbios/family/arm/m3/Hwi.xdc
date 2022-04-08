@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1369,7 +1369,7 @@ internal:   /* not for client use */
         Ptr             excStack[];         // Exception thread stack
         Ptr             isrStack;           // Points to isrStack address
         Ptr             isrStackBase;       // = __TI_STACK_BASE
-        SizeT           isrStackSize;       // = Program.stack
+        Ptr             isrStackSize;       // = Program.stack
         Ptr             vectorTableBase;    // Points to base of vector table
         UInt            swiTaskKeys;        // dispatcher Swi and Task key storage
         Ptr             dispatchTable;      // Ptr to dispatchTable or sparseInterruptTable

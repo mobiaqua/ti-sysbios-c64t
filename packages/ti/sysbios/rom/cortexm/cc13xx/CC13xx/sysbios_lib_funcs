@@ -250,12 +250,14 @@
 00000000 g     F .text:ti_sysbios_hal_Hwi_startup__E__mangled__	00000000 .hidden ti_sysbios_hal_Hwi_startup__E__mangled__
 00000000 g     F .text:ti_sysbios_hal_Hwi_switchFromBootStack__E__mangled__	00000000 .hidden ti_sysbios_hal_Hwi_switchFromBootStack__E__mangled__
 00000000 g     F .text:ti_sysbios_heaps_HeapMem_alloc__E__mangled__	00000000 .hidden ti_sysbios_heaps_HeapMem_alloc__E__mangled__
+00000000 g     F .text:ti_sysbios_heaps_HeapMem_allocUnprotected__E__mangled__	00000000 .hidden ti_sysbios_heaps_HeapMem_allocUnprotected__E__mangled__
 00000000 g     F .text:ti_sysbios_heaps_HeapMem_construct	00000000 .hidden ti_sysbios_heaps_HeapMem_construct
 00000000 g     F .text:ti_sysbios_heaps_HeapMem_create	00000000 .hidden ti_sysbios_heaps_HeapMem_create
 00000000 g     F .text:ti_sysbios_heaps_HeapMem_delete	00000000 .hidden ti_sysbios_heaps_HeapMem_delete
 00000000 g     F .text:ti_sysbios_heaps_HeapMem_destruct	00000000 .hidden ti_sysbios_heaps_HeapMem_destruct
 00000000 g     F .text:ti_sysbios_heaps_HeapMem_enter__E	00000000 .hidden ti_sysbios_heaps_HeapMem_enter__E
 00000000 g     F .text:ti_sysbios_heaps_HeapMem_free__E__mangled__	00000000 .hidden ti_sysbios_heaps_HeapMem_free__E__mangled__
+00000000 g     F .text:ti_sysbios_heaps_HeapMem_freeUnprotected__E__mangled__	00000000 .hidden ti_sysbios_heaps_HeapMem_freeUnprotected__E__mangled__
 00000000 g     F .text:ti_sysbios_heaps_HeapMem_getExtendedStats__E	00000000 .hidden ti_sysbios_heaps_HeapMem_getExtendedStats__E
 00000000 g     F .text:ti_sysbios_heaps_HeapMem_getStats__E__mangled__	00000000 .hidden ti_sysbios_heaps_HeapMem_getStats__E__mangled__
 00000000 g     F .text:ti_sysbios_heaps_HeapMem_Handle__label__S__mangled__	00000000 .hidden ti_sysbios_heaps_HeapMem_Handle__label__S__mangled__

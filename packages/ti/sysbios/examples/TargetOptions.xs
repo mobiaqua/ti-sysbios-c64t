@@ -100,7 +100,7 @@ var targetOptions = {
                         deviceId: "~.*(Cortex A|TM4C|TM4E|LM3|F28M3|LM4|" +
                             "RM4|TMS570LS|ARM7|ARM11|Generic|EVMDMRX45X" +
                             "|CC13|CC25|CM25|CC26|CC32|TMS470M|DM350|DM357|" +
-                            "DM368|P401R|RM57D8).*",
+                            "DM368|P401R|RM57D8|AM57|TDA2|TDA3).*",
                     }
                 }
             },
@@ -195,6 +195,13 @@ var targetOptions = {
                         linkerCommandFile:"ti/platforms/simplelink/include/" +
                             "$DeviceId$.cmd",
                         productGroup: "SimpleLink"
+                    },
+                    "DRA7XX": {
+                        deviceVariant: "Cortex_M4",
+                        deviceId: ".*(AM57|TDA2|TDA3).*",
+                        platform: "",
+                        linkerCommandFile: "",
+                        productGroup: "Sitara"
                     }
                 }
             },
@@ -261,7 +268,13 @@ var targetOptions = {
                 productGroup: "C2000",
                 devices: {
                     "GENERIC": {
-                        deviceId: "~.*(F28M3|Generic|G00883).*",
+                        deviceId: "~((.*(F28M3|Generic|G00883|" +
+                            "TMS320C280|TMS320C281|TMS320C282|" +
+                            "TMS320F2801|TMS320F2802|TMS320F2803|" +
+                            "TMS320F2804|TMS320F2823).*)|TMS320F2801|" +
+                            "TMS320F2802|TMS320F2806|TMS320F2808|" +
+                            "TMS320F2809|TMS320F2810|TMS320F2811|" +
+                            "TMS320F2812)",
                         platform: "ti.platforms.tms320x28:$DeviceId$",
                         linkerCommandFile: "ti/platforms/tms320x28/include/" +
                             "$DeviceId$.cmd",
@@ -271,6 +284,26 @@ var targetOptions = {
                         platform: "ti.platforms.concertoC28:$DeviceId$",
                         linkerCommandFile: "ti/platforms/concertoC28/include/" +
                             "$DeviceId$.cmd"
+                    }
+                }
+            },
+            "C28_Large": {
+                cfgPrefix: "c28/",
+                target: "ti.targets.C28_large",
+                compilerBuildOptions: "",
+                linkerBuildOptions: "",
+                productGroup: "C2000",
+                devices: {
+                    "GENERIC": {
+                        deviceId: "(.*(TMS320C280|TMS320C281|TMS320C282|" +
+                            "TMS320F2801|TMS320F2802|TMS320F2803|" +
+                            "TMS320F2804|TMS320F2823).*)|TMS320F2801|" +
+                            "TMS320F2802|TMS320F2806|TMS320F2808|" +
+                            "TMS320F2809|TMS320F2810|TMS320F2811|" +
+                            "TMS320F2812",
+                        platform: "ti.platforms.tms320x28:$DeviceId$",
+                        linkerCommandFile: "ti/platforms/tms320x28/include/" +
+                            "$DeviceId$.cmd",
                     }
                 }
             }
@@ -420,6 +453,7 @@ var targetOptions = {
                 devices: {
                     "SEMIHOST": {
                         cfgPrefix: "cortexm_semihost/",
+                        deviceId: "~.*(CC26|CC13).*",
                         platform: "ti.platforms.tiva:$DeviceId$",
                         linkerCommandFile: "ti/platforms/tiva/include_gnu/" +
                             "$DeviceId$.lds",
@@ -483,7 +517,7 @@ var targetOptions = {
                             "/libs/install-native/arm-none-eabi/lib/" +
                             "armv7e-m:${ProjName}} -lgcc -lc -lm -lrdimon",
                         productGroup: "SimpleLink"
-                    },
+                    }
                 }
             },
             "M4F": {

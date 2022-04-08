@@ -43,51 +43,64 @@ if (xdc.om.$name == "cfg" || typeof(genCdoc) != "undefined") {
     var deviceTable = {
         "ti.catalog.arm.cortexr4": {
             "RM48L.*": {
-                "Core0": {
-                    rtiBaseAddress  : 0xFFFFFC00,
-                    timerIntNums    : [ 2, 3 ]
-                }
+                timer : [
+                    {
+                        name: "RTI Timer0",
+                        baseAddr: 0xFFFFFC00,
+                        intNum: 2,
+                        eventId: -1,
+                        intFreqDivFactor: 2
+                    },
+                    {
+                        name: "RTI Timer1",
+                        baseAddr: 0xFFFFFC00,
+                        intNum: 3,
+                        eventId: -1,
+                        intFreqDivFactor: 2
+                    }
+                ]
             },
             "AR14XX": {
-                "Core0": {
-                    rtiBaseAddress  : 0xFFFFFC00,
-                    timerIntNums    : [ 2, 3 ]
-                }
-            }
-        },
-        "ti.catalog.arm.cortexr5": {
-            "RM57D8xx": {
-                "Core0": {
-                    rtiBaseAddress  : 0xFFFFFC00,
-                    timerIntNums    : [ 2, 3 ]
-                },
-                "Core1": {
-                    rtiBaseAddress  : 0xFFFFEE00,
-                    timerIntNums    : [ 2, 3 ]
-                }
-            },
-            "RM57L8xx": {
-                "Core0": {
-                    rtiBaseAddress  : 0xFFFFFC00,
-                    timerIntNums    : [ 2, 3 ]
-                }
+                timer : [
+                    {
+                        name: "RTI Timer0",
+                        baseAddr: 0xFFFFFC00,
+                        intNum: 2,
+                        eventId: -1,
+                        intFreqDivFactor: 1
+                    },
+                    {
+                        name: "RTI Timer1",
+                        baseAddr: 0xFFFFFC00,
+                        intNum: 3,
+                        eventId: -1,
+                        intFreqDivFactor: 1
+                    }
+                ]
             }
         },
         "ti.catalog.c6000": {
             "AR16XX": {
-                "Core0": {
-                    rtiBaseAddress  : 0x02020000,
-                    timerIntNums    : [ 14, 15 ],
-                    timerEvtIds     : [ 75, 76 ]
-                }
+                timer : [
+                    {
+                        name: "RTI2 Timer0",
+                        baseAddr: 0x02020000,
+                        intNum: 14,
+                        eventId: 75,
+                        intFreqDivFactor: 1
+                    },
+                    {
+                        name: "RTI2 Timer1",
+                        baseAddr: 0x02020000,
+                        intNum: 15,
+                        eventId: 76,
+                        intFreqDivFactor: 1
+                    }
+                ]
             }
         }
     };
 
-    deviceTable["ti.catalog.arm.cortexr5"]["RM57D8[a-zA-Z0-9]+"] =
-        deviceTable["ti.catalog.arm.cortexr5"]["RM57D8xx"];
-    deviceTable["ti.catalog.arm.cortexr5"]["RM57L8[a-zA-Z0-9]+"] =
-        deviceTable["ti.catalog.arm.cortexr5"]["RM57L8xx"];
     deviceTable["ti.catalog.arm.cortexr4"]["AR16XX"] =
         deviceTable["ti.catalog.arm.cortexr4"]["AR14XX"];
 }
@@ -101,14 +114,14 @@ function deviceSupportCheck()
     /* look for exact match first */
     for (device in deviceTable[catalogName]) {
         if (device == Program.cpu.deviceName) {
-            return (device);
+            return (deviceTable[catalogName][device].timer);
         }
     }
 
     /* now look for a wildcard match */
     for (device in deviceTable[catalogName]) {
         if (Program.cpu.deviceName.match(device)) {
-            return (device);
+            return (deviceTable[catalogName][device].timer);
         }
     }
 
@@ -134,16 +147,19 @@ function module$meta$init()
     Timer.common$.fxntab = false;
 
     catalogName = Program.cpu.catalogName;
-    Timer.intNumDef[0] = deviceTable[catalogName][device]["Core0"].timerIntNums[0];
-    Timer.intNumDef[1] = deviceTable[catalogName][device]["Core0"].timerIntNums[1];
-    var timerEvtIds = deviceTable[catalogName][device]["Core0"].timerEvtIds;
-    if (timerEvtIds != undefined) {
-        Timer.evtIdDef[0] = deviceTable[catalogName][device]["Core0"].timerEvtIds[0];
-        Timer.evtIdDef[1] = deviceTable[catalogName][device]["Core0"].timerEvtIds[1];
-    }
-    else {
-        Timer.evtIdDef[0] = 0;
-        Timer.evtIdDef[1] = 0;
+
+    device = deviceSupportCheck();
+
+    Timer.intFreqs.length = device.length;
+    Timer.numTimerDevices = device.length;
+    Timer.timerSettings.length = device.length;
+    Timer.anyMask = (1 << device.length) - 1;
+
+    for (var i=0; i < device.length; i++) {
+        Timer.timerSettings[i].baseAddr = $addr(device[i].baseAddr);
+        Timer.timerSettings[i].intNum = device[i].intNum;
+        Timer.timerSettings[i].eventId = device[i].eventId;
+        Timer.timerSettings[i].name = device[i].name;
     }
 }
 
@@ -152,10 +168,7 @@ function module$meta$init()
  */
 function module$use()
 {
-    BIOS = xdc.useModule('ti.sysbios.BIOS');
     Hwi = xdc.useModule('ti.sysbios.hal.Hwi');
-    var Settings = xdc.module("ti.sysbios.family.Settings");
-    Core = xdc.module(Settings.getDefaultCoreDelegate());
 
     device = deviceSupportCheck();
 
@@ -169,15 +182,6 @@ function module$use()
         }
         throw new Error ("Unsupported device!");
     }
-
-    if (!Timer.$written("rtiBaseAddress")) {
-        if (Core.id == 0) {
-            Timer.rtiBaseAddress = deviceTable[catalogName][device]["Core0"].rtiBaseAddress;
-        }
-        else {
-            Timer.rtiBaseAddress = deviceTable[catalogName][device]["Core1"].rtiBaseAddress;
-        }
-    }
 }
 
 /*
@@ -185,23 +189,34 @@ function module$use()
  */
 function module$static$init(mod, params)
 {
-    /* availMask has 2 bits set for the two timers */
-    mod.availMask = 0x3;
+    BIOS = xdc.module('ti.sysbios.BIOS');
+
+    mod.availMask = (1 << Timer.numTimerDevices) - 1;
 
     if (params.anyMask > mod.availMask) {
         Timer.$logError("Incorrect anyMask (" + params.anyMask
             + "). Should be <= " + mod.availMask + ".", Timer, "anyMask");
     }
 
-    mod.handles.length = Timer.NUM_TIMER_DEVICES;
-    for (var i = 0; i < Timer.NUM_TIMER_DEVICES; i++) {
-        mod.handles[i] = null;
-    }
+    mod.device.length = Timer.numTimerDevices;
+    mod.intFreqs.length = Timer.numTimerDevices;
+    mod.handles.length = Timer.numTimerDevices;
+    for (var i = 0; i < Timer.numTimerDevices; i++) {
+        mod.device[i].baseAddr = Timer.timerSettings[i].baseAddr;
+        mod.device[i].intNum = Timer.timerSettings[i].intNum;
+        mod.device[i].eventId = Timer.timerSettings[i].eventId;
 
-    /* Initialize Timer.intFreq if not set by cfg. */
-    if (Timer.intFreq.$written("lo") != true) {
-        var cpuFreq = BIOS.getCpuFreqMeta();
-        Timer.intFreq.lo = cpuFreq.lo / 2;
+        if (Timer.intFreqs[i].lo == undefined) {
+            mod.intFreqs[i].lo = BIOS.cpuFreq.lo / device[i].intFreqDivFactor;
+            mod.intFreqs[i].hi = BIOS.cpuFreq.hi;
+        }
+        else {
+            /* set the frequency for each Timer */
+            mod.intFreqs[i].lo = Timer.intFreqs[i].lo;
+            mod.intFreqs[i].hi = Timer.intFreqs[i].hi;
+        }
+
+        mod.handles[i] = null;
     }
 
     /*
@@ -222,14 +237,14 @@ function instance$static$init(obj, id, tickFxn, params)
 
     obj.staticInst = true;
 
-    if ((id >= Timer.NUM_TIMER_DEVICES)) {
+    if ((id >= Timer.numTimerDevices)) {
         if (id != Timer.ANY) {
             Timer.$logFatal("Invalid Timer ID " + id + "!", this);
         }
     }
 
     if (id == Timer.ANY) {
-        for (var i = 0; i < Timer.NUM_TIMER_DEVICES; i++) {
+        for (var i = 0; i < Timer.numTimerDevices; i++) {
             if ((Timer.anyMask & (1 << i)) && (modObj.availMask & (1 << i))) {
                 modObj.availMask &= ~(1 << i);
                 obj.id = i;
@@ -251,7 +266,7 @@ function instance$static$init(obj, id, tickFxn, params)
     obj.prescale = params.prescale;
     obj.period = params.period;
     obj.periodType = params.periodType;
-    obj.intNum = Timer.intNumDef[obj.id];
+    obj.intNum = Timer.timerSettings[obj.id].intNum;
     obj.arg = params.arg;
     obj.tickFxn = tickFxn;
     obj.extFreq.lo = params.extFreq.lo;
@@ -262,11 +277,9 @@ function instance$static$init(obj, id, tickFxn, params)
         if (!params.hwiParams) {
             params.hwiParams = new Hwi.Params();
         }
-        var hwiParams = params.hwiParams;
 
-        if (Timer.evtIdDef[obj.id] != 0) {
-            hwiParams.eventId = Timer.evtIdDef[obj.id];
-        }
+        var hwiParams = params.hwiParams;
+        hwiParams.eventId = Timer.timerSettings[obj.id].eventId;
 
         if (obj.runMode == Timer.RunMode_ONESHOT) {
             if (hwiParams.maskSetting == Hwi.MaskingOption_NONE) {
@@ -341,7 +354,7 @@ function viewInitBasic(view)
     /* Get the Timer module config to get the number of timer devices. */
     var modCfg = Program.getModuleConfig('ti.sysbios.timers.rti.Timer');
 
-    var numTimers = modCfg.NUM_TIMER_DEVICES;
+    var numTimers = modCfg.numTimerDevices;
 
     /*
      * Retrieve the raw view to get at the module state.
@@ -349,13 +362,21 @@ function viewInitBasic(view)
      */
     var rawView = Program.scanRawView('ti.sysbios.timers.rti.Timer');
 
+    var deviceObj = Program.fetchArray(rawView.modState.device$fetchDesc,
+            rawView.modState.device, numTimers);
+
     var timerHandlesAddr = rawView.modState.handles;
+    var intFreqsAddr = rawView.modState.intFreqs;
 
     var ScalarStructs = xdc.useModule('xdc.rov.support.ScalarStructs');
 
     /* Retrieve the array of timer handles */
     var timerHandles = Program.fetchArray(ScalarStructs.S_Ptr$fetchDesc,
                                           timerHandlesAddr, numTimers);
+
+    /* Retrieve the array of timer frequencies */
+    var intFreqs = Program.fetchArray(rawView.modState.intFreqs$fetchDesc,
+                        rawView.modState.intFreqs, numTimers);
 
     /*
      * Scan the timerHandles array for non-zero Timer handles
@@ -374,8 +395,15 @@ function viewInitBasic(view)
                 elem.label      = Program.fetchString(obj.__name, true);
             }
 
-            var freqKHz =
-                ((biosMod.cpuFreq.lo / 2) / (obj.prescale + 1)) / 1000;
+            var timerFreq;
+            if (obj.extFreq.lo) {
+                timerFreq = (obj.extFreq.lo) / (obj.prescale + 1);
+            }
+            else {
+                timerFreq = (intFreqs[obj.id].lo) / (obj.prescale + 1);
+            }
+
+            var freqKHz = timerFreq / 1000;
             if (obj.periodType == Timer.PeriodType_COUNTS) {
                 elem.periodInCounts = obj.period;
                 elem.periodInMicroSecs = (obj.period * 1000) / (freqKHz);
@@ -387,12 +415,18 @@ function viewInitBasic(view)
 
             elem.halTimerHandle = halTimer.viewGetHandle(obj.$addr);
             elem.id             = obj.id;
+            elem.name           = modCfg.timerSettings[obj.id].name;
             elem.startMode      = getEnumString(obj.startMode);
             elem.runMode        = getEnumString(obj.runMode);
             elem.intNum         = obj.intNum;
             elem.tickFxn        = Program.lookupFuncName(Number(obj.tickFxn));
             elem.arg            = obj.arg;
-            elem.extFreq        = Number(obj.extFreq.lo).toString(10);
+            elem.extFreq        =
+                Number(obj.extFreq.lo / (obj.prescale + 1)).toString(10);
+
+            var device = Program.fetchStruct(rawView.modState.device$fetchDesc,
+                deviceObj[obj.id].$addr);
+            elem.eventId = Number(device.eventId);
 
             if (obj.createHwi) {
                 elem.hwiHandle  = "0x" + Number(obj.hwi).toString(16);
@@ -416,20 +450,27 @@ function viewInitDevice(view, obj)
     var Program = xdc.useModule('xdc.rov.Program');
     var Timer = xdc.useModule('ti.sysbios.timers.rti.Timer');
     var modCfg = Program.getModuleConfig('ti.sysbios.timers.rti.Timer');
+    var timerRawView = Program.scanRawView('ti.sysbios.timers.rti.Timer');
+    var modState = timerRawView.modState;
 
     view.id          = obj.id;
     view.device      = "timer"+view.id;
     view.intNum      = obj.intNum;
     view.runMode     = getEnumString(obj.runMode);
 
-    var timerAddr    = modCfg.rtiBaseAddress;
-    view.devAddr     = "0x" + timerAddr.toString(16);
+    var deviceObj = Program.fetchArray(modState.device$fetchDesc,
+            modState.device, modCfg.numTimerDevices);
+
+    var device = Program.fetchStruct(modState.device$fetchDesc,
+            deviceObj[obj.id].$addr);
+
+    view.devAddr = "0x" + Number(device.baseAddr).toString(16);
 
     try {
         if (deviceRegs === undefined) {
             deviceRegs = Program.fetchStruct(
                             Timer.DeviceRegs$fetchDesc,
-                            timerAddr,
+                            device.baseAddr,
                             false
                          );
         }
@@ -438,25 +479,9 @@ function viewInitDevice(view, obj)
         print("Error: Problem fetching Timer Registers: " + e.toString());
     }
 
-    if (view.id == 0) {
-        /* udcp0 */
-        view.period = deviceRegs.RTIUDCP0;
-        /* comp0 - frc0 */
-        view.remainingCount = deviceRegs.RTICOMP0 - deviceRegs.RTIFRC0;
-
-        /* gctrl */
-        if (deviceRegs.RTIGCTRL & 1) {
-            view.state = "Enabled";
-        }
-        else {
-            view.state = "Disabled";
-        }
-    }
-    else {
+    if (view.id & 0x1) {
         /* udcp1 */
         view.period = deviceRegs.RTIUDCP1;
-        /* comp1 - frc1 */
-        view.remainingCount = deviceRegs.RTICOMP1 - deviceRegs.RTIFRC1;
 
         /* gctrl */
         if (deviceRegs.RTIGCTRL & 2) {
@@ -466,7 +491,18 @@ function viewInitDevice(view, obj)
             view.state = "Disabled";
         }
     }
-    view.currCount = view.period - view.remainingCount;
+    else {
+        /* udcp0 */
+        view.period = deviceRegs.RTIUDCP0;
+
+        /* gctrl */
+        if (deviceRegs.RTIGCTRL & 1) {
+            view.state = "Enabled";
+        }
+        else {
+            view.state = "Disabled";
+        }
+    }
 }
 
 /*
@@ -475,5 +511,19 @@ function viewInitDevice(view, obj)
  */
 function viewInitModule(view, obj)
 {
-    view.availMask = Number(obj.availMask).toString(2);
+    var Program = xdc.useModule('xdc.rov.Program');
+    var Timer = Program.getModuleConfig('ti.sysbios.timers.rti.Timer');
+    var numTimers = Timer.numTimerDevices;
+
+    // construct "intFrequency" ROV field
+    var intFreqs =
+        Program.fetchArray(obj.intFreqs$fetchDesc, obj.intFreqs, numTimers);
+
+    for (var i = 0; i < numTimers; i++) {
+        // combine high and low frequency values into a single value
+        view.intFrequency.$add("Timer " + i + ":" +
+                (Number(intFreqs[i].hi << 32) + Number(intFreqs[i].lo)));
+    }
+
+    view.availMask = Number(obj.availMask).toString(2) + "b";
 }

@@ -380,6 +380,11 @@ mangled_BIOS_rom.obj: `ROMPPS.join(" ")`
 	@$(CP) sysbios_rom_text "`RomModule.libDir`"
 	@$(CP) sysbios_rom_const "`RomModule.libDir`"
 	@$(CP) sysbios_rom_data "`RomModule.libDir`"
+	@echo Extract ROM footprint info from rtos_rom.map file.
+	@$(XDC_ROOT)/../xs -c `RomModule.libDir`../processMapFile.xs rtos_rom.map rtos_rom.txt rtos_flash.txt rtos_ram.txt
+	@$(CP) rtos_rom.txt "`RomModule.libDir`"
+	@$(CP) rtos_flash.txt "`RomModule.libDir`"
+	@$(CP) rtos_ram.txt "`RomModule.libDir`"
 	@echo Create list of functions to remove from `LIB`.
 	@$(XDC_ROOT)/../xs -c `RomModule.libDir`../createRomFuncs.xs  sysbios_rom_text romInternFuncs.txt romInternFuncs.keep
 	@sort romInternFuncs.keep > romFuncs.txt

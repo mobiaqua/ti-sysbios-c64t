@@ -33,9 +33,6 @@
  *  ======== package.bld ========
  */
 
-/* use custom.mak to generate default MPU region settings html file for cdoc */
-Pkg.makePrologue = "\ninclude custom.mak";
-
 var BiosBuild = xdc.loadCapsule("ti/sysbios/Build.xs");
 
 var objList = [
@@ -122,8 +119,7 @@ BiosBuild.buildLibs(objList, undefined, trgFilter, arguments);
 BiosBuild.buildLibs(objList, undefined, trgFilter, ["profile=smp"]);
 
 Pkg.otherFiles = ["package.bld", "linkcmd.xdt", "Hwi_link.xdt", "doc-files", 
-                  "armSettings.xs", "Settings.xml", "MPU.xml", "genMpuHtml.xs",
-                  "custom.mak", "MPU_link.xdt"];
+                  "armSettings.xs", "Settings.xml", "MPU.xml", "MPU_link.xdt"];
 
 /* include source files in the release package */
 Pkg.attrs.exportSrc = true;

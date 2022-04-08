@@ -36,6 +36,7 @@
 var Hwi = null;
 var BIOS = null;
 var Core = null;
+var Build = null;
 var Memory = null;
 var device = null;
 var Exception = null;
@@ -49,21 +50,27 @@ if (xdc.om.$name == "cfg") {
             resetVectorAddress  : 0x00000000,
             vectorTable0Address : 0x00000100,
             vectorTable1Address : 0x00200000,
-            numInterrupts       : 128
+            numInterrupts       : 128,
+            errataInitEsm       : false,
+            resetVIM            : false
         },
         "RM57L8xx": {
             lockstepDevice      : true,
             vimBaseAddress      : 0xFFFFFDEC,
             vimRamAddress       : 0xFFF82000,
             resetVectorAddress  : 0x00000000,
-            numInterrupts       : 128
+            numInterrupts       : 128,
+            errataInitEsm       : false,
+            resetVIM            : false,
         },
         "AR14XX": {
             lockstepDevice      : true,
             vimBaseAddress      : 0xFFFFFDEC,
             vimRamAddress       : 0xFFF82000,
             resetVectorAddress  : 0x00000000,
-            numInterrupts       : 128
+            numInterrupts       : 128,
+            errataInitEsm       : true,
+            resetVIM            : true
         }
     }
 
@@ -136,6 +143,8 @@ function module$meta$init()
         throw new Error ("Unsupported device!");
     }
 
+    Hwi.errataInitEsm = device.errataInitEsm;
+    Hwi.resetVIM = device.resetVIM;
     Hwi.lockstepDevice = device.lockstepDevice;
 
     if (!Hwi.lockstepDevice) {
@@ -195,6 +204,10 @@ function module$meta$init()
     Hwi.dataAbortFunc = Exception.excHandlerDataAsm;
 
     Hwi.reservedFunc = Exception.excHandlerAsm;
+
+    Hwi.irqFunc = Hwi.dispatchIRQ;
+
+    Hwi.phantomFunc = Hwi.phantomIntHandler;
 }
 
 /*
@@ -204,6 +217,7 @@ function module$use()
 {
     BIOS = xdc.useModule('ti.sysbios.BIOS');
     Core = xdc.useModule('ti.sysbios.family.arm.v7r.tms570.Core');
+    Build = xdc.useModule('ti.sysbios.Build');
     Memory = xdc.useModule('xdc.runtime.Memory');
 
     xdc.useModule('xdc.runtime.Log');
@@ -285,7 +299,6 @@ function module$use()
 function module$static$init(mod, params)
 {
     mod.vimRam = device.vimRamAddress;
-    mod.irp = 0;
     mod.taskSP = null;
     mod.isrStack = null;
     mod.isrStackBase = $externPtr('__TI_STACK_BASE');
@@ -317,30 +330,19 @@ function module$static$init(mod, params)
         Memory.staticPlace(mod.fiqStack, align, params.fiqStackSection);
     }
 
-    /*
-     * round stackSize up to the nearest multiple of the alignment.
-     */
-    var irqStackSize =
-        (params.irqStackSize + align - 1) & -align;
-    if (irqStackSize != params.irqStackSize) {
-        Hwi.$logWarning("stack size was adjusted to guarantee proper" +
-            " alignment", this, "Hwi.irqStackSize");
-    }
-
-    mod.irqStackSize = irqStackSize;
-
-    if (params.irqStack) {
-        mod.irqStack = params.irqStack;
-    }
-    else {
-        mod.irqStack.length = params.irqStackSize;
-        Memory.staticPlace(mod.irqStack, align,
-            params.irqStackSection);
-    }
-
     for (var i = 0; i < 4; i++) {
         mod.zeroLatencyFIQMask[i] = 0xffffffff;
     }
+
+    /* add -D to compile line to optimize exception code */
+    Build.ccArgs.$add("-Dti_sysbios_family_arm_v7r_vim_Hwi_lockstepDevice__D=" +
+        (Hwi.lockstepDevice ? "TRUE" : "FALSE"));
+
+    Build.ccArgs.$add("-Dti_sysbios_family_arm_v7r_vim_Hwi_errataInitEsm__D=" +
+        (Hwi.errataInitEsm ? "TRUE" : "FALSE"));
+
+    Build.ccArgs.$add("-Dti_sysbios_family_arm_v7r_vim_Hwi_resetVIM__D=" +
+        (Hwi.resetVIM ? "TRUE" : "FALSE"));
 }
 
 /*
@@ -395,7 +397,6 @@ function instance$static$init(obj, intNum, fxn, params)
     obj.intNum = intNum;
     obj.irp = null;
     obj.type = params.type;
-    obj.useDispatcher = params.useDispatcher;
 
     if (params.enableInt) {
         Hwi.intReqEnaSet[intNum >>> 5] |= (1 << (intNum % 32));
@@ -410,9 +411,8 @@ function instance$static$init(obj, intNum, fxn, params)
         mod.zeroLatencyFIQMask[index] &= ~(1 << offset);
     }
 
-    if (obj.useDispatcher && (Hwi.dispatcherAutoNestingSupport == false) &&
+    if ((Hwi.dispatcherAutoNestingSupport == false) &&
         (params.maskSetting != Hwi.MaskingOption_ALL)) {
-        // TODO should we warn or just cdoc this ???
         Hwi.$logWarning("With dispatcherAutoNestingSupport, only " +
                         "Hwi.MaskingOption_ALL is supported.",
                         this, "maskSetting");
@@ -652,11 +652,9 @@ function viewInitBasic(view, obj)
 
     if (obj.type == Hwi.Type_FIQ) {
         view.type = "FIQ";
-        view.useDispatcher = false;
     }
     else {
         view.type = "IRQ";
-        view.useDispatcher = obj.useDispatcher;
     }
 
     var fxn = Program.lookupFuncName(Number(obj.fxn));

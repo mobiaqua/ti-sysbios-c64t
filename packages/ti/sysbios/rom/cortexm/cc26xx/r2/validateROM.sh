@@ -9,7 +9,7 @@
 TMPDIR=$(pwd)/ValidateROM
 mkdir $TMPDIR
 
-DEVICE=CC26xx_r2
+DEVICE=CC26xx
 ROMDIR=$TMPDIR/$DEVICE
 OBJDUMP=/db/vendors/linaro/gcc-arm-none-eabi-4_8-2014q3/bin/arm-none-eabi-objdump
 mkdir $ROMDIR

@@ -91,7 +91,7 @@ typedef xdc_IArg            xdc_Arg;
 #if !defined(xdc_target__os_MacOS)
   #define xdc__META(n,s) \
     __attribute__ ((section ("xdc.meta"))) \
-    const char (n)[] = {s}
+    const char (n)[] = {(s)}
 #endif
 
 #if (xdc_target__sizeof_IArg > xdc_target__sizeof_Ptr) \

@@ -45,7 +45,7 @@ extern "C" {
 #endif
 
 #ifndef EAGAIN
-#define EAGAIN       11  /* Semaphore not available */
+#define EAGAIN       11  /* Semaphore not available, MQueue Full */
 #endif
 
 #ifndef ENOMEM
@@ -60,12 +60,16 @@ extern "C" {
 #define EINVAL       22  /* Invalid argument */
 #endif
 
+#ifndef ENOSPC
+#define ENOSPC       28  /* No space left on device */
+#endif
+
 #ifndef EDEADLK
-#define EDEADLK      45 /* Deadlock condition  */
+#define EDEADLK      45  /* Deadlock condition  */
 #endif
 
 #ifndef ENOSYS
-#define ENOSYS       88 /* Function not implemented */
+#define ENOSYS       88  /* Function not implemented */
 #endif
 
 #ifndef ETIMEDOUT

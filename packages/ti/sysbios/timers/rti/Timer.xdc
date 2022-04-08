@@ -47,6 +47,10 @@ import ti.sysbios.hal.Hwi;
  *  ======== Timer ========
  *  RTI Timer Peripheral Manager.
  *
+ *  This Timer module manages the RTI timer peripheral(s) available on the ARM
+ *  and C6000 devices (see {@link ./doc-files/TimerTables.html Timer Mapping Tables}
+ *  for supported device information).
+ *
  *  @p(html)
  *  <h3> Calling Context </h3>
  *  <table border="1" cellpadding="3">
@@ -100,13 +104,18 @@ module Timer inherits ti.sysbios.interfaces.ITimer
     /*! Max value of Timer period for PeriodType_COUNTS*/
     const UInt MAX_PERIOD = 0xffffffff;
 
-    /*! Number of timer peripherals on chip */
-    const Int NUM_TIMER_DEVICES = 2;
-
     /*! @_nodoc
      *  Min instructions to use in trigger().
      */
     const Int MIN_SWEEP_PERIOD = 8;
+
+    /*! Timer Settings. */
+    metaonly struct TimerSetting {
+        Ptr baseAddr;   /*! specify the base address  */
+        Int intNum;     /*! specify which interrupt vector */
+        Int eventId;    /*! specify which event number to use */
+        String name;    /*! specify the timer name */
+    };
 
     /*! @_nodoc */
     @XmlDtd
@@ -114,11 +123,13 @@ module Timer inherits ti.sysbios.interfaces.ITimer
         Ptr         halTimerHandle;
         String      label;
         UInt        id;
+        String      name;
         String      startMode;
         String      runMode;
         UInt        periodInCounts;
         UInt        periodInMicroSecs;
         UInt        intNum;
+        Int         eventId;
         String      tickFxn[];
         UArg        arg;
         String      extFreq;
@@ -133,14 +144,13 @@ module Timer inherits ti.sysbios.interfaces.ITimer
         UInt        intNum;
         String      runMode;
         UInt        period;
-        UInt        currCount;
-        UInt        remainingCount;
         String      state;
     };
 
     /*! @_nodoc */
     metaonly struct ModuleView {
         String      availMask;      /* available 32-bit timer halves */
+        String      intFrequency[]; /* internal frequency in Hz */
     }
 
     /*! @_nodoc */
@@ -212,15 +222,10 @@ module Timer inherits ti.sysbios.interfaces.ITimer
         {msg: "E_cannotSupport: Timer cannot support requested period %d"};
 
     /*!
-     * Timer base address
-     */
-    metaonly config Ptr rtiBaseAddress;
-
-    /*!
      *  ======== anyMask ========
      *  Available mask to be used when select = Timer_ANY
      */
-    config UInt anyMask = 0x3;
+    config UInt anyMask;
 
     /*!
      *  ======== continueOnSuspend ========
@@ -232,26 +237,34 @@ module Timer inherits ti.sysbios.interfaces.ITimer
     config Bool continueOnSuspend = false;
 
     /*!
-     *  ======== intFreq ========
-     *  Default internal timer input clock frequency.
+     *  ======== intFreqs ========
+     *  Default internal timer input clock frequency array.
      *
-     *  @a(NOTE)
-     *  By default, the RTI timer clock source is VCLK which is configured
-     *  to run at 1/2 the CPU frequency (GCLK). If the clock divide ratios
-     *  are changed, then this config param can be used to configure this
-     *  module to run at a different frequency.
+     *  This array can be used to change the input clock frequency
+     *  for a particular timer.
+     *
+     *  For example, if it is required to change the input clock frequency
+     *  for timer id 1 to 200MHz on a device that has 2 timers, the
+     *  intFreqs[1] config param can be set to {hi:0, lo:200000000} in the
+     *  config script.
      *
      *  @p(code)
      *  var Timer = xdc.useModule('ti.sysbios.timers.rti.Timer');
-     *  Timer.intFreq.lo = 50000000; // = (CPU freq / 2)
-     *  Timer.intFreq.hi = 0;
+     *  Timer.intFreqs[1].lo = 200000000; // = CPU freq
+     *  Timer.intFreqs[1].hi = 0;
      *  @p
      */
-    config Types.FreqHz intFreq = {lo: 0, hi: 0};
+    metaonly config Types.FreqHz intFreqs[];
+
+    /*!
+     *  ======== timerSettings ========
+     *  Global Control configuration for each physical timer.
+     */
+    metaonly config TimerSetting timerSettings[] = [];
 
     /*!
      *  @_nodoc
-     *  RTI timer registers. Symbol "Timer_deviceRegs" is a physical device.
+     *  RTI timer registers.
      */
     struct DeviceRegs {
         UInt32 RTIGCTRL;        /*! 0x00h */
@@ -304,8 +317,6 @@ module Timer inherits ti.sysbios.interfaces.ITimer
         UInt32 RTICOMP3CLR;     /*! 0xBCh */
     };
 
-    extern volatile DeviceRegs deviceRegs;
-
     /*!
      *  ======== oneShotStub ========
      *  @_nodoc
@@ -350,7 +361,7 @@ instance:
      *  number corresponding to the timer Id (see
      *  {@link ./doc-files/TimerTables.html Timer Mapping Tables}).
      *
-     *  Here's an example for the Cortex-R5 target that creates a custom
+     *  Here's an example for the Cortex-R4 target that creates a custom
      *  Hwi of FIQ type and sets "Timer.createHwi" param to false when
      *  creating a Timer object, in order to prevent the Timer module from
      *  creating a Hwi.
@@ -446,6 +457,13 @@ instance:
 
 internal:   /* not for client use */
 
+    /*! Information about timer */
+    struct TimerDevice {
+        Int  intNum;
+        Int  eventId;
+        Ptr  baseAddr;
+    };
+
     /*!
      *  ======== startupNeeded ========
      *  Flag used to prevent misc code from being brought in
@@ -453,15 +471,11 @@ internal:   /* not for client use */
      */
     config UInt startupNeeded = false;
 
-    /*
-     * array of Timer intNums
+    /*!
+     *  ======== numTimerDevices ========
+     *  The number of logical timers on a device.
      */
-    config UInt8 intNumDef[2];
-
-    /*
-     * array of Timer eventIds
-     */
-    config UInt8 evtIdDef[2];
+    config Int numTimerDevices;
 
     /*
      *  ======== initDevice ========
@@ -498,6 +512,8 @@ internal:   /* not for client use */
 
     struct Module_State {
         UInt            availMask;      /* available peripherals */
+        TimerDevice     device[];       /* timer device information */
+        Types.FreqHz    intFreqs[];     /* internal frequency in Hz */
         Handle          handles[];      /* array of handles based on id */
     }
 }

@@ -52,8 +52,9 @@ typedef void *mqd_t;
  *  Message queue attributes.
  */
 typedef struct mq_attr {
-    long    mq_flags;    /* Message queue flags.  */
-    long    mq_maxmsg;   /* Maximum number of messages.  */
+    long    mq_flags;    /* Message queue description flags: 0 or O_NONBLOCK.
+                            Initialized from oflag argument of mq_open(). */
+    long    mq_maxmsg;   /* Maximum number of messages on queue.  */
     long    mq_msgsize;  /* Maximum message size. */
     long    mq_curmsgs;  /* Number of messages currently queued. */
 } mq_attr;
@@ -73,24 +74,24 @@ typedef unsigned mode_t;  /* TODO: sys/stat.h? */
  *  of ssize_t (signed version of size_t, negative value indicates error).
  *  ssize_t is a POSIX type, not standard C.
  */
-extern int mq_close(mqd_t desc);
-extern int mq_getattr(mqd_t desc, struct mq_attr *pAttrs);
-extern int mq_notify(mqd_t desc, const struct sigevent *pEvt);
-extern mqd_t mq_open(const char *name, int flags, ...);
-extern long mq_receive(mqd_t desc, char *msg, size_t msgLen,
-        unsigned *msgPrio);
-extern int mq_send(mqd_t desc, const char *msg, size_t msgLen,
-        unsigned msgPrio);
-extern int mq_setattr(mqd_t desc, const struct mq_attr *pAttrs,
-        struct mq_attr *pOldAttrs);
-extern long mq_timedreceive(mqd_t desc, char *msg, size_t msgLen,
-        unsigned *msgPrio, const struct timespec *ts);
-extern int mq_timedsend(mqd_t desc, const char *msg, size_t msgLen,
-        unsigned msgPrio, const struct timespec *ts);
+extern int mq_close(mqd_t mqdes);
+extern int mq_getattr(mqd_t mqdes, struct mq_attr *mqstat);
+extern int mq_notify(mqd_t mqdes, const struct sigevent *notification);
+extern mqd_t mq_open(const char *name, int oflags, ...);
+extern long mq_receive(mqd_t mqdes, char *msg_ptr, size_t msg_len,
+        unsigned int *msg_prio);
+extern int mq_send(mqd_t mqdes, const char *msg_ptr, size_t msg_len,
+        unsigned int msg_prio);
+extern int mq_setattr(mqd_t mqdes, const struct mq_attr *mqstat,
+        struct mq_attr *omqstat);
+extern long mq_timedreceive(mqd_t mqdes, char *msg_ptr, size_t msg_len,
+        unsigned int *msg_prio, const struct timespec *abstime);
+extern int mq_timedsend(mqd_t mqdes, const char *msg_ptr, size_t msg_len,
+        unsigned int msg_prio, const struct timespec *abstime);
 extern int mq_unlink(const char *name);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  /* ti_sysbios_posix_pthread__include */
+#endif  /* ti_sysbios_posix_mqueue__include */
