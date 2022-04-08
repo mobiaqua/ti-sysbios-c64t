@@ -36,7 +36,7 @@ echo all regressions passed.
 rm -rf $tmp
 exit 0
 #
-#  @(#) ti.targets.omf.elf; 1,0,0,0; 1-29-2016 17:06:30; /db/ztree/library/trees/xdctargets/xdctargets-k09/src/ xlibrary
+#  @(#) ti.targets.omf.elf; 1,0,0,0; 6-8-2016 17:30:52; /db/ztree/library/trees/xdctargets/xdctargets-l00/src/ xlibrary
 
 #
 

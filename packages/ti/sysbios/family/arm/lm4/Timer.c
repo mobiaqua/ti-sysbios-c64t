@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Texas Instruments Incorporated
+ * Copyright (c) 2014-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -569,7 +569,8 @@ Void Timer_start(Timer_Object *obj)
 
     /* Timer_RunMode_CONTINUOUS */
     if (obj->runMode == Timer_RunMode_CONTINUOUS) {
-        Timer_write(obj->altclk, &timer->GPTMTAILR, obj->period);
+        /* sub 1 from period to compensate for extra count during reload */
+        Timer_write(obj->altclk, &timer->GPTMTAILR, obj->period - 1);
         Timer_write(obj->altclk, &timer->GPTMTAMR, amr | 0x2); /* periodic */
     }
 

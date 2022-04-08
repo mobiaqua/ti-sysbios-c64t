@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Texas Instruments Incorporated
+ * Copyright (c) 2014-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -91,7 +91,6 @@ UInt32 Timer_getMaxTicks(Timer_Object *obj)
     UInt32 ticks;
     UInt64 temp;
 
-    /* for PG1 max suppress for only 1 hour */
     temp = (UInt64)(MAX_SKIP) / obj->period64;
 
     /* clip value to Clock tick count limit of 32-bits */

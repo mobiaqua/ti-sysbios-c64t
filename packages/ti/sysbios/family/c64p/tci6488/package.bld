@@ -42,7 +42,7 @@ var objList = [
 
 var trgFilter = {
     field: "isa",
-    list: [ "64P", "66" ]
+    list: [ "66" ]
 };
 
 /* generate makefiles */

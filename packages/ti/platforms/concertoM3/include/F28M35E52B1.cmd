@@ -57,7 +57,7 @@ SECTIONS
     .pinit      : > FLASH
     .binit      : > FLASH
     .init_array : > FLASH
-    
+
     /* Initalized sections go in Flash */
     .const      : > FLASH
 

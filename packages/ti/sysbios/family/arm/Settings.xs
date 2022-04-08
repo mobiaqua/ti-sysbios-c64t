@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Texas Instruments Incorporated
+ * Copyright (c) 2014-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -393,8 +393,8 @@ var deviceTable = {
     "ti.catalog.arm.cortexr5": {
         "RM57D8XX": {
             hwiDelegate : "ti.sysbios.family.arm.v7r.vim.Hwi",
-            timerDelegate : "ti.sysbios.family.arm.v7r.rti.Timer",
-            clockTimerDelegate : "ti.sysbios.family.arm.v7r.rti.Timer",
+            timerDelegate : "ti.sysbios.timers.rti.Timer",
+            clockTimerDelegate : "ti.sysbios.timers.rti.Timer",
             timestampDelegate : "ti.sysbios.family.arm.a15.TimestampProvider",
             taskSupportDelegate : "ti.sysbios.family.arm.TaskSupport",
             intrinsicsSupportDelegate : "ti.sysbios.family.arm.IntrinsicsSupport",
@@ -411,8 +411,24 @@ var deviceTable = {
     "ti.catalog.arm.cortexr4": {
         "RM48L5XX": {
             hwiDelegate : "ti.sysbios.family.arm.v7r.vim.Hwi",
-            timerDelegate : "ti.sysbios.family.arm.v7r.rti.Timer",
-            clockTimerDelegate : "ti.sysbios.family.arm.v7r.rti.Timer",
+            timerDelegate : "ti.sysbios.timers.rti.Timer",
+            clockTimerDelegate : "ti.sysbios.timers.rti.Timer",
+            timestampDelegate : "ti.sysbios.family.arm.a15.TimestampProvider",
+            taskSupportDelegate : "ti.sysbios.family.arm.TaskSupport",
+            intrinsicsSupportDelegate : "ti.sysbios.family.arm.IntrinsicsSupport",
+            bootModule : "ti.sysbios.family.arm.v7r.tms570.Boot",
+            mmuModule : "ti.sysbios.family.arm.MPU",
+            cacheDelegate : null,
+            powerDelegate : null,
+            secondsDelegate : null,
+            coreDelegate : "ti.sysbios.family.arm.v7r.tms570.Core",
+            clockTickPeriod : 1000,
+            targets : [ "ti.targets.arm.elf.R4F" ]
+        },
+        "AR14XX": {
+            hwiDelegate : "ti.sysbios.family.arm.v7r.vim.Hwi",
+            timerDelegate : "ti.sysbios.timers.rti.Timer",
+            clockTimerDelegate : "ti.sysbios.timers.rti.Timer",
             timestampDelegate : "ti.sysbios.family.arm.a15.TimestampProvider",
             taskSupportDelegate : "ti.sysbios.family.arm.TaskSupport",
             intrinsicsSupportDelegate : "ti.sysbios.family.arm.IntrinsicsSupport",
@@ -463,6 +479,7 @@ deviceTable["ti.catalog.arm.cortexa8"]["TMS320.*81.8"]  = deviceTable["ti.catalo
 deviceTable["ti.catalog.arm.cortexa8"]["TMS320C3.*"]    = deviceTable["ti.catalog.arm.cortexa8"]["TMS320C3430"];
 deviceTable["ti.catalog.arm.cortexa8"]["OMAP3.*"]       = deviceTable["ti.catalog.arm.cortexa8"]["TMS320C3430"];
 deviceTable["ti.catalog.arm.cortexa8"]["AM35.*"]        = deviceTable["ti.catalog.arm.cortexa8"]["TMS320C3430"];
+deviceTable["ti.catalog.arm.cortexa8"]["DM37XX"]        = deviceTable["ti.catalog.arm.cortexa8"]["TMS320C3430"];
 
 deviceTable["ti.catalog.arm.cortexa15"]["Vayu"] = deviceTable["ti.catalog.arm.cortexa15"]["DRA7XX"];
 deviceTable["ti.catalog.arm.cortexa15"]["C66AK2E05"] = deviceTable["ti.catalog.arm.cortexa15"]["TCI6636K2H"];
@@ -484,6 +501,9 @@ deviceTable["ti.catalog.arm.cortexm3"]["CC2538.*"]  = deviceTable["ti.catalog.ar
 deviceTable["ti.catalog.arm.cortexm3"]["CC26.*"]  = deviceTable["ti.catalog.arm.cortexm3"]["CC2650"];
 deviceTable["ti.catalog.arm.cortexm3"]["CC13.*"]  = deviceTable["ti.catalog.arm.cortexm3"]["CC2650"];
 
+/* CC3220 M4 devices */
+deviceTable["ti.catalog.arm.cortexm4"]["CC322.*"] = deviceTable["ti.catalog.arm.cortexm4"]["CC3200"];
+
 /* Tiva devices */
 deviceTable["ti.catalog.arm.cortexm4"]["TM4.*"]     = deviceTable["ti.catalog.arm.cortexm4"]["TM4C129CNCPDT"];
 
@@ -494,9 +514,13 @@ deviceTable["ti.catalog.arm.cortexm3"]["TM4.*"]     = deviceTable["ti.catalog.ar
 deviceTable["ti.catalog.arm.cortexm4"]["Vayu"]      = deviceTable["ti.catalog.arm.cortexm4"]["DRA7XX"];
 deviceTable["ti.catalog.arm.cortexm4"]["TDA3XX"]    = deviceTable["ti.catalog.arm.cortexm4"]["DRA7XX"];
 
+/* Agama devices */
+deviceTable["ti.catalog.arm.cortexm4"]["CC26.*"]    = deviceTable["ti.catalog.arm.cortexm3"]["CC2650"];
+
 /* Cortex-R5 devices */
 deviceTable["ti.catalog.arm.cortexr5"]["RM57D8.*"] = deviceTable["ti.catalog.arm.cortexr5"]["RM57D8XX"];
 deviceTable["ti.catalog.arm.cortexr5"]["RM57L8.*"] = deviceTable["ti.catalog.arm.cortexr5"]["RM57D8XX"];
+deviceTable["ti.catalog.arm.cortexr4"]["AR16XX"] = deviceTable["ti.catalog.arm.cortexr4"]["AR14XX"];
 
 /* MSP432 devices */
 deviceTable["ti.catalog.arm.cortexm4"]["MSP432.*"] = deviceTable["ti.catalog.arm.cortexm4"]["MSP432P401R"];

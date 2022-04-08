@@ -40,9 +40,9 @@ PAGE 0:    /* Program Memory */
 
     FLASH       : origin = 0x100000, length = 0x3FF80
     BEGIN       : origin = 0x13FFF0, length = 0x2
-    
+
 PAGE 1 :   /* Data Memory */
-   
+
     M01SARAM    : origin = 0x0,      length = 0x800     /* on-chip RAM block M0, M1 */
     PIEVECT     : origin = 0xD00,    length = 0x100
     L03SARAM    : origin = 0x8000,   length = 0x4000    /* on-chip RAM block L0-L3 */

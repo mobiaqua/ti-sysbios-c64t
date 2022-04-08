@@ -1,6 +1,7 @@
 00000000 g     F .text:ti_sysbios_BIOS_exit__E__mangled__	00000000 .hidden ti_sysbios_BIOS_exit__E__mangled__
 00000000 g     F .text:ti_sysbios_BIOS_getCpuFreq__E__mangled__	00000000 .hidden ti_sysbios_BIOS_getCpuFreq__E__mangled__
 00000000 g     F .text:ti_sysbios_BIOS_getThreadType__E	00000000 .hidden ti_sysbios_BIOS_getThreadType__E
+00000000 g     F .text:ti_sysbios_BIOS_linkedWithIncorrectBootLibrary__E__mangled__	00000000 .hidden ti_sysbios_BIOS_linkedWithIncorrectBootLibrary__E__mangled__
 00000000 g     F .text:ti_sysbios_BIOS_Module__startupDone__S	00000000 .hidden ti_sysbios_BIOS_Module__startupDone__S
 00000000 g     F .text:ti_sysbios_BIOS_RtsGateProxy_create	00000000 .hidden ti_sysbios_BIOS_RtsGateProxy_create
 00000000 g     F .text:ti_sysbios_BIOS_RtsGateProxy_delete	00000000 .hidden ti_sysbios_BIOS_RtsGateProxy_delete
@@ -143,6 +144,8 @@
 00000000 g     F .text:ti_sysbios_family_arm_m3_IntrinsicsSupport_maxbit__E	00000000 .hidden ti_sysbios_family_arm_m3_IntrinsicsSupport_maxbit__E
 00000000 g     F .text:ti_sysbios_family_arm_m3_TaskSupport_checkStack__E	00000000 .hidden ti_sysbios_family_arm_m3_TaskSupport_checkStack__E
 00000000 g     F .text:ti_sysbios_family_arm_m3_TaskSupport_checkStack__E	00000000 .hidden ti_sysbios_knl_Task_SupportProxy_checkStack__E
+00000000 g     F .text:ti_sysbios_family_arm_m3_TaskSupport_getCheckValueAddr__E	00000000 .hidden ti_sysbios_family_arm_m3_TaskSupport_getCheckValueAddr__E
+00000000 g     F .text:ti_sysbios_family_arm_m3_TaskSupport_getCheckValueAddr__E	00000000 .hidden ti_sysbios_knl_Task_SupportProxy_getCheckValueAddr__E
 00000000 g     F .text:ti_sysbios_family_arm_m3_TaskSupport_getDefaultStackSize__E	00000000 .hidden ti_sysbios_family_arm_m3_TaskSupport_getDefaultStackSize__E
 00000000 g     F .text:ti_sysbios_family_arm_m3_TaskSupport_getDefaultStackSize__E	00000000 .hidden ti_sysbios_knl_Task_SupportProxy_getDefaultStackSize__E
 00000000 g     F .text:ti_sysbios_family_arm_m3_TaskSupport_getStackAlignment__E__mangled__	00000000 .hidden ti_sysbios_family_arm_m3_TaskSupport_getStackAlignment__E__mangled__
@@ -495,12 +498,16 @@
 00000000 g     F .text:ti_sysbios_knl_Task_getIdleTask__E	00000000 .hidden ti_sysbios_knl_Task_getIdleTask__E
 00000000 g     F .text:ti_sysbios_knl_Task_getIdleTaskHandle__E	00000000 .hidden ti_sysbios_knl_Task_getIdleTaskHandle__E
 00000000 g     F .text:ti_sysbios_knl_Task_getMode__E	00000000 .hidden ti_sysbios_knl_Task_getMode__E
+00000000 g     F .text:ti_sysbios_knl_Task_getModuleStateCheckValue__I	00000000 .hidden ti_sysbios_knl_Task_getModuleStateCheckValue__I
+00000000 g     F .text:ti_sysbios_knl_Task_getObjectCheckValue__I	00000000 .hidden ti_sysbios_knl_Task_getObjectCheckValue__I
 00000000 g     F .text:ti_sysbios_knl_Task_getPri__E	00000000 .hidden ti_sysbios_knl_Task_getPri__E
 00000000 g     F .text:ti_sysbios_knl_Task_Handle__label__S	00000000 .hidden ti_sysbios_knl_Task_Handle__label__S
 00000000 g     F .text:ti_sysbios_knl_Task_Instance_finalize__E__mangled__	00000000 .hidden ti_sysbios_knl_Task_Instance_finalize__E__mangled__
 00000000 g     F .text:ti_sysbios_knl_Task_Instance_init__E__mangled__	00000000 .hidden ti_sysbios_knl_Task_Instance_init__E__mangled__
 00000000 g     F .text:ti_sysbios_knl_Task_Module__startupDone__S	00000000 .hidden ti_sysbios_knl_Task_Module__startupDone__S
 00000000 g     F .text:ti_sysbios_knl_Task_Module_startup__E__mangled__	00000000 .hidden ti_sysbios_knl_Task_Module_startup__E__mangled__
+00000000 g     F .text:ti_sysbios_knl_Task_moduleStateCheck__I	00000000 .hidden ti_sysbios_knl_Task_moduleStateCheck__I
+00000000 g     F .text:ti_sysbios_knl_Task_objectCheck__I	00000000 .hidden ti_sysbios_knl_Task_objectCheck__I
 00000000 g     F .text:ti_sysbios_knl_Task_Object__create__S	00000000 .hidden ti_sysbios_knl_Task_Object__create__S
 00000000 g     F .text:ti_sysbios_knl_Task_Object__delete__S__mangled__	00000000 .hidden ti_sysbios_knl_Task_Object__delete__S__mangled__
 00000000 g     F .text:ti_sysbios_knl_Task_Object__destruct__S__mangled__	00000000 .hidden ti_sysbios_knl_Task_Object__destruct__S__mangled__
@@ -590,7 +597,7 @@
 00000000 g     F .text:xdc_runtime_Registry_isMember__E	00000000 .hidden xdc_runtime_Registry_isMember__E
 00000000 g     F .text:xdc_runtime_Registry_matchPattern__I	00000000 .hidden xdc_runtime_Registry_matchPattern__I
 00000000 g     F .text:xdc_runtime_Startup_exec__E__mangled__	00000000 .hidden xdc_runtime_Startup_exec__E__mangled__
-00000000 g     F .text:xdc_runtime_Startup_rtsDone__E	00000000 .hidden xdc_runtime_Startup_rtsDone__E
+00000000 g     F .text:xdc_runtime_Startup_rtsDone__E__mangled__	00000000 .hidden xdc_runtime_Startup_rtsDone__E__mangled__
 00000000 g     F .text:xdc_runtime_Startup_startMods__I__mangled__	00000000 .hidden xdc_runtime_Startup_startMods__I__mangled__
 00000000 g     F .text:xdc_runtime_SysCallback_abort__E__mangled__	00000000 .hidden xdc_runtime_SysCallback_abort__E__mangled__
 00000000 g     F .text:xdc_runtime_SysCallback_defaultAbort	00000000 .hidden xdc_runtime_SysCallback_defaultAbort

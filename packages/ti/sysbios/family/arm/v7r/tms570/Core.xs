@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,12 +67,16 @@ if (xdc.om.$name == "cfg" || typeof(genCdoc) != "undefined") {
         },
         "RM57L8xx": {
             numCores  : 1
+        },
+        "AR14XX": {
+            numCores  : 1
         }
     };
 
     deviceTable["RM57D8[a-zA-Z0-9]+"] = deviceTable["RM57D8xx"];
     deviceTable["RM57L8[a-zA-Z0-9]+"] = deviceTable["RM57L8xx"];
     deviceTable["RM48L.*"] = deviceTable["RM57L8xx"];
+    deviceTable["AR16XX"] = deviceTable["AR14XX"];
 }
 
 /*

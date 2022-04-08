@@ -1,6 +1,6 @@
 %%{
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,6 +36,8 @@
  */
 var Build = xdc.module("ti.sysbios.Build");
 var BIOS = xdc.module("ti.sysbios.BIOS");
+var ROM = xdc.module("ti.sysbios.rom.ROM");
+var F28004x = xdc.module("ti.sysbios.rom.c28.f28004x.F28004x");
 
 /* get the specified output directory (saved when BIOS was "used") */
 var outputDir = Build.$private.outputDir;
@@ -97,15 +99,12 @@ void ti_sysbios_rom_c28_f28004x_F28004x_dataInit()
         ds++;
     }
 }
+
 %}
-
 %if (this.useFlash != true) {
-#define REVISION_WORD_ADDRESS  0x003f910a
-#define REVISION               1915367466
-
 Void ti_sysbios_rom_c28_f28004x_F28004x_checkRevision__E()
 {
-    if (*((UInt32 *)(REVISION_WORD_ADDRESS)) != REVISION) {
+    if (*((UInt32 *)(`F28004x.REVISION_WORD_ADDRESS`)) != `F28004x.REVISION`) {
 	/* Loop here forever if application is built with wrong version of ROM image */
         while(1) {
             ;

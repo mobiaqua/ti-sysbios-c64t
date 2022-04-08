@@ -53,6 +53,8 @@ function getCFiles(targetName)
              "pthread_mutex.c",
              "pthread_rwlock.c",
              "clock.c",
+             "mqueue.c",
+             "sched.c",
              "semaphore.c",
              "sleep.c",
              "timer.c"]);
@@ -92,6 +94,7 @@ function module$use()
 
     xdc.useModule('ti.sysbios.hal.Seconds');
     xdc.useModule('ti.sysbios.knl.Clock');
+    xdc.useModule('ti.sysbios.knl.Mailbox');
     xdc.useModule('ti.sysbios.knl.Queue');
     xdc.useModule('ti.sysbios.knl.Semaphore');
     xdc.useModule('ti.sysbios.knl.Task');

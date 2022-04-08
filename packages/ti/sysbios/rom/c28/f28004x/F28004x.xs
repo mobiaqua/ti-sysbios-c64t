@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,6 +37,7 @@
 var BIOS = null;
 var Build = null;
 var Program = null;
+var ROM = null;
 var F28004x = null;
 var appName = null;
 
@@ -52,6 +53,7 @@ function module$meta$init()
 
     BIOS = xdc.useModule('ti.sysbios.BIOS');
     Build = xdc.useModule('ti.sysbios.Build');
+    ROM = xdc.module('ti.sysbios.rom.ROM');
     F28004x = xdc.module('ti.sysbios.rom.c28.f28004x.F28004x');
 
     /* no need for abstract interface */
@@ -111,7 +113,19 @@ function module$use()
     }
 
     if (Build.buildROM == true) return;
-    
+
+    switch (ROM.romName) {
+        case ROM.F28004x:
+            F28004x.REVISION = 1915367466;
+            F28004x.REVISION_WORD_ADDRESS = 0x003f910a;
+            break;
+
+        case ROM.F28004x_P2:
+            F28004x.REVISION = 1114795641;
+            F28004x.REVISION_WORD_ADDRESS = 0x003f9110;
+            break;
+    }
+
     /* inform getLibs() about location of library */
     switch (BIOS.libType) {
         case BIOS.LibType_Instrumented:

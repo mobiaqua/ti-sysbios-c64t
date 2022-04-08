@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2014-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,8 @@
 package ti.sysbios.family.c64p;
 
 import xdc.rov.ViewInfo;
+
+import xdc.runtime.Error;
 
 /*!
  *  ======== Cache ========
@@ -343,6 +345,20 @@ module Cache inherits ti.sysbios.interfaces.ICache
     config UInt32 MAR224_255;
 
     /*!
+     *  Error raised when invalid L1 cache size defined
+     */
+    config Error.Id E_invalidL1CacheSize = {
+        msg: "E_invalidL1CacheSize: Invalid L1 cache size %d"
+    };
+
+    /*!
+     *  Error raised when invalid L2 cache size defined
+     */
+    config Error.Id E_invalidL2CacheSize = {
+        msg: "E_invalidL2CacheSize: Invalid L2 cache size %d"
+    };
+
+    /*!
      *  ======== disable ========
      *  Disables the 'type' cache(s)
      *
@@ -481,6 +497,21 @@ internal:
      */
     Void block(Ptr blockPtr, SizeT byteCnt, Bool wait,
                volatile UInt32 *barReg);
+
+    /*
+     *  ======== getL1DInitSize ========
+     */
+    Void getL1DInitSize(Size *size);
+
+    /*
+     *  ======== getL1PInitSize ========
+     */
+    Void getL1PInitSize(Size *size);
+
+    /*
+     *  ======== getL2InitSize ========
+     */
+    Void getL2InitSize(Size *size);
 
     /*
      *  ======== marInit ========

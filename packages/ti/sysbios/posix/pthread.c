@@ -386,6 +386,14 @@ int pthread_detach(pthread_t pthread)
 }
 
 /*
+ *  ======== pthread_equal ========
+ */
+int pthread_equal(pthread_t pt1, pthread_t pt2)
+{
+    return (pt1 == pt2);
+}
+
+/*
  *  ======== pthread_exit ========
  */
 void pthread_exit(void *retval)

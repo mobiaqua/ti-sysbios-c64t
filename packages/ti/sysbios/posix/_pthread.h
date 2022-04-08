@@ -46,6 +46,12 @@ extern "C" {
 #include <ti/sysbios/knl/Semaphore.h>
 #include <ti/sysbios/posix/pthread.h>
 
+#include <ti/sysbios/posix/Settings.h>
+
+#ifndef ti_sysbios_posix_Settings_supportsMutexPriority__D
+#define ti_sysbios_posix_Settings_supportsMutexPriority__D 1
+#endif
+
 typedef void *(*pthread_RunFxn)(void *);
 
 /*

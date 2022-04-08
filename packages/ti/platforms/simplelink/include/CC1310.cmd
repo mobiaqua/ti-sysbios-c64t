@@ -40,7 +40,7 @@
 --args 0x8
 /* Suppress warnings and errors:                                             */
 /* - 10063: Warning about entry point not being _c_int00                     */
-/* - 16011, 16012: 8-byte alignment errors. Observed when linking in object  */ 
+/* - 16011, 16012: 8-byte alignment errors. Observed when linking in object  */
 /*   files compiled using Keil (ARM compiler)                                */
 --diag_suppress=10063,16011,16012
 

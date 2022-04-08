@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2013-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,7 @@
 
 var BIOS = null;
 var Task = null;
+var Build = null;
 var Semaphore = null;
 var ReentSupport = null;
 
@@ -46,6 +47,7 @@ function module$use()
     ReentSupport = this;
     
     BIOS = xdc.useModule("ti.sysbios.BIOS");
+    Build = xdc.module("ti.sysbios.Build");
     Semaphore = xdc.useModule("ti.sysbios.knl.Semaphore");
 
     xdc.useModule('xdc.runtime.Memory');
@@ -54,6 +56,8 @@ function module$use()
         Task = xdc.useModule("ti.sysbios.knl.Task");
     }
 
+    Build.ccArgs.$add("-Dti_sysbios_rts_gnu_ReentSupport_enableReentSupport__D=" +
+        (ReentSupport.enableReentSupport ? "TRUE" : "FALSE"));
 }
 
 /*

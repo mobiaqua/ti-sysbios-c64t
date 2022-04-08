@@ -5,7 +5,7 @@
 
 /*****************************************************************************/
 /* _AUTO_INIT()   v7.0.3 - Perform initialization of C variables.            */
-/*  Copyright (c) 1993-2010  Texas Instruments Incorporated                  */
+/*  Copyright (c) 1993-2016  Texas Instruments Incorporated                  */
 /*****************************************************************************/
 #include <string.h>
 
@@ -23,6 +23,8 @@ typedef void (*PTRFUNC)();
    extern far const PTRFUNC __pinit__[];
 
 #else
+
+extern void __TI_tls_init(void * TLS_block_addr);
 
 #pragma WEAK(__TI_INITARRAY_Limit);
 #pragma WEAK(__TI_INITARRAY_Base);
@@ -129,6 +131,8 @@ void _auto_init_elf(void)
    if (&xdc_runtime_Startup__EXECFXN__C == (int*)1) {
       xdc_runtime_Startup_exec__E();
    }
+
+   __TI_tls_init(NULL);
 
    /*------------------------------------------------------------------------*/
    /* Process Pinit table for ELF.                                           */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Texas Instruments Incorporated
+ * Copyright (c) 2013-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -85,8 +85,9 @@ interface ITimer
      *  Timer runs for a single period value and stops.
      *
      *  @c(RunMode_DYNAMIC)
-     *  Timer is dynamically reprogrammed for the next required tick.
-     *
+     *  Timer is dynamically reprogrammed for the next required tick. This mode
+     *  is intended only for use by the Clock module when it is operating in
+     *  TickMode_DYNAMIC; it is not applicable for user-created Timer instances.
      */
     enum RunMode {
         RunMode_CONTINUOUS,     /*! periodic and continuous */

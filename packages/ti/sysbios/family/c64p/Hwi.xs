@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -186,7 +186,8 @@ function module$use()
     }
 
     /* place .vecs section into platform's codeMemory */
-    if (Program.sectMap[".vecs"] === undefined) {
+    if (!Program.platformName.match(/ti\.platforms\.c6x/) &&
+        (Program.sectMap[".vecs"] === undefined)) {
         Program.sectMap[".vecs"] = new Program.SectionSpec();
         Program.sectMap[".vecs"].loadSegment = Program.platform.codeMemory;
     }

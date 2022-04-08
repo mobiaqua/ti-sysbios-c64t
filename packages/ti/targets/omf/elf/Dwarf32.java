@@ -205,6 +205,10 @@ public class Dwarf32
     private static final int DW_FORM_ref8 = 0x14; /* reference */
     private static final int DW_FORM_ref_udata = 0x15; /* reference */
     private static final int DW_FORM_indirect = 0x16 ;/* see Section 7.5.  */
+    private static final int DW_FORM_sec_offset = 0x17; /* lineptr, loclistptr, macptr, rangelistptr */
+    private static final int DW_FORM_exprloc = 0x18; /* exprloc */
+    private static final int DW_FORM_flag_present = 0x19; /* flag */
+    private static final int DW_FORM_ref_sig8 = 0x20; /* reference */
 
     /*
      *  ======== Form ========
@@ -247,6 +251,16 @@ public class Dwarf32
         new Form("DW_FORM_ref8", 8),     /* 0x14,  reference */
         new Form("DW_FORM_ref_udata", 0),/* 0x15,  reference (unsigned LEB128) */
         new Form("DW_FORM_indirect", 0), /* 0x16,  see Section 7.5. (unsigned LEB128) */
+        new Form("DW_FORM_sec_offset", 4), /* 0x17, lineptr, loclistptr, macptr, rangelistptr */
+        new Form("DW_FORM_exprloc", 0),  /* 0x18,  exprloc */
+        new Form("DW_FORM_flag_present", 0),  /* 0x19,  flag */
+        new Form("0x1a", -1),            /* 0x1a */
+        new Form("0x1b", -1),            /* 0x1b */
+        new Form("0x1c", -1),            /* 0x1c */
+        new Form("0x1d", -1),            /* 0x1d */
+        new Form("0x1e", -1),            /* 0x1e */
+        new Form("0x1f", -1),            /* 0x1f */
+        new Form("DW_FORM_ref_sig8", 0), /* 0x20,  reference */
     };
  
     /*
@@ -512,7 +526,7 @@ public class Dwarf32
 
     /*
      *  ======== CUHeader ========
-     *  Class spec to hold Compilation Unit Header information  
+     *  Class spec to hold Compilation Unit Header information
      */
     private class CUHeader
     {
@@ -532,7 +546,7 @@ public class Dwarf32
 
     /*
      *  ======== DieAttr ========
-     *  Class spec to hold DIE attribute information  
+     *  Class spec to hold DIE attribute information
      */
     private class DieAttr
     {
@@ -542,10 +556,10 @@ public class Dwarf32
 
     /*
      *  ======== Abbrev ========
-     *  Class spec to hold Abbreviation record information  
+     *  Class spec to hold Abbreviation record information
      */
     private class Abbrev {
-        public int             offset;    /* offset of DIE in the abbrev rec */  
+        public int             offset;    /* offset of DIE in the abbrev rec */
         public int             code;      /* info that links various recs */
         public int             tag;       /* DIE type */
         public boolean         children;  /* Does this DIE have children? */
@@ -566,7 +580,7 @@ public class Dwarf32
      *  ======== getAbbrevRec ========
      *  Get the abbreviation record 
      *
-     *  Get the abbreviation for the given abbreviation code starting at the 
+     *  Get the abbreviation for the given abbreviation code starting at the
      *  abbreviation offset.
      *
      *  Note: This function is optimized using the assumption that the supplied
@@ -631,21 +645,27 @@ public class Dwarf32
     /*
      *  ======== getBaseType ========
      *  Recursively navigate to get the base type name
+     *
+     *  This function follows the chain of typedefs, or a relation between an
+     *  array and its element type, or between a pointer type and its base type.
+     *  In most cases we are looking for Mod_Struct types, and they are at the
+     *  end of such chains. But, if we started looking for other types, the
+     *  logic that uses this function might not work.
      */
     private Types getBaseType(HashMap<Integer, Types> typesMap, int type)
     {
-        Types typeObj = typesMap.get(type);
+        Types currType, newType;
 
-        if (typeObj == null) {
+        if ((currType = typesMap.get(type)) == null) {
             return (null);
         }
 
-        int tempType = typeObj.type;
-        if (tempType != 0) {
-            return (this.getBaseType(typesMap, tempType));
+        if ((newType = getBaseType(typesMap, currType.type)) == null) {
+            return (currType);
         }
-
-        return (typesMap.get(type));
+        else {
+            return (newType);
+        }
     }
 
     /*
@@ -674,15 +694,22 @@ public class Dwarf32
             /* if this entry is an array variable, directType will have elnum
              * larger than 0,
              */
+
             Types directType = typesMap.get(entry.getValue());
-            Types typeObj = this.getBaseType(typesMap, entry.getValue());
-            String varType = "";
-            if (typeObj != null) {
-               varType = typeObj.name;
-            }
-            else {
+            /* directType should normally never be null, but we don't extract
+             * information about each type to typesMap. Arrays are, for example,
+             * ignored currently.
+             */
+
+            if (directType == null) {
                 continue;
             }
+            Types typeObj = this.getBaseType(typesMap, entry.getValue());
+
+            /* typeObj is never 'null' because we checked for that case
+             * through directType.
+             */
+            String varType = typeObj.name;
 
             int counter = 1;
             int offset = 0;
@@ -691,11 +718,15 @@ public class Dwarf32
                 offset = directType.elsize;
             }
 
+            /* This loop goes through globals and checks if any of them, or any
+             * member of a global structure matches the regular expression.
+             */
             for (int i = 0; i < counter; i++) {
                 String nm = varName;
                 if (offset > 0) {
                     nm = varName + "." + i;
                 }
+
                 getVariableByType(typeRegEx, typeObj, nm, i * offset, varList,
                                   0);
             }
@@ -738,7 +769,9 @@ public class Dwarf32
         else if (typeObj.subtypes != null) {
             for (Map.Entry<Integer, Integer> st: typeObj.subtypes.entrySet()) {
                 Types subType = this.getBaseType(typesMap, st.getValue());
-                if (subType == null) return;
+                if (subType == null) {
+                    return;
+                }
                 String nm = varName;
                 Pattern p = Pattern.compile(".+_(\\w*)_Struct");
                 Matcher m = p.matcher(subType.name);
@@ -815,7 +848,7 @@ public class Dwarf32
             abbrevRec = this.getAbbrevRec(header.debug_abbrev_offset,
                                           abbrevCode);
 
-            /* loop through CU DIE. We don't need this info*/
+            /* loop through CU DIE. We don't need this info */
             for (int k = 0; k < abbrevRec.attrs.length; k++) {
                 int id = abbrevRec.attrs[k].id;
                 int form = abbrevRec.attrs[k].form;
@@ -883,7 +916,6 @@ public class Dwarf32
                 Types typeObj = null;
 
                 abbrevCode = this.readULEB128(info);
-
                 /* if it is a null DIE, skip it */
                 if (abbrevCode == 0) {
                     if (level > 1 ) {
@@ -950,12 +982,18 @@ public class Dwarf32
                             value = Integer.toString(cuOffset + info.get());
                         }
                         else if (form == DW_FORM_ref2) {
-                            value = Integer.toString(cuOffset + info.getShort());
+                            value = Integer.toString(cuOffset
+                                + info.getShort());
                         }
                         else if (form == DW_FORM_ref4) {
                             value = Integer.toString(cuOffset + info.getInt());
                         }
-                        else if (form == DW_FORM_ref_addr) {
+                        else if (form == DW_FORM_ref8
+                            || form == DW_FORM_ref_sig8) {
+                            value = Long.toString(cuOffset + info.getLong());
+                        }
+                        else if (form == DW_FORM_ref_addr
+                            || form == DW_FORM_sec_offset) {
                             value = Integer.toString(info.getInt());
                         }
                         else {
@@ -973,12 +1011,18 @@ public class Dwarf32
                                     bsize = info.getInt();
                                     break;
                                 }
+                                /* bsize should be long?
+                                case 8: {
+                                    bsize = info.getLong();
+                                    break;
+                                }
+                                */
                                 default: {
                                     /* Should not happen? */
                                     throw new Exception(name + "has an unsupported size: " +  size);
                                 }
                             }
-                            /* DW_FORM_data1 has values can be a signed or an
+                            /* DW_FORM_data1 values can be a signed or an
                              * unsigned integer. We are here only interested in
                              * array lengths or array sizes so we will assume
                              * that they were originally unsigned, but Java
@@ -1013,12 +1057,20 @@ public class Dwarf32
                     }
                     else if (size == 0) {
                         switch (form) {
+                            case DW_FORM_flag_present: {
+                                /* abbrev record specifies that the attribute
+                                 * is present, but there is no value encoded in
+                                 * DIE.
+                                 */
+                                break;
+                            }
                             case DW_FORM_string: {
                                 value = this.readStringFromBuffer(info,
                                         info.position());
                                 break;
                             }
-                            case DW_FORM_block: {
+                            case DW_FORM_block:
+                            case DW_FORM_exprloc: {
                                 int bsize = readULEB128(info);
                                 value = ""; /* just to be sure */
                                 while (bsize != 0) {

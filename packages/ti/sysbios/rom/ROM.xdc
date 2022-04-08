@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -106,8 +106,10 @@ metaonly module ROM
     enum RomName {
         NO_ROM,         /*! Default for NOT building against a ROM */
         CC2650,         /*! Use for all CC26xx devices */
+        CC2640R2F,      /*! Use for all CC26xx R2 devices */
         CC1350,         /*! Use for all CC13xx devices */
         F28004x,        /*! Use for all F28004x class devices */
+        F28004x_P2,     /*! Use for all F28004x P2 class devices */
         CC2650_FLASH    /*! THIS OPTION IS NOT SUPPORTED! */
     };
 

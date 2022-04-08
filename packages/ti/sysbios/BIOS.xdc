@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,6 @@
  */
 /*
  *  ======== BIOS.xdc ========
- *
  */
 
 package ti.sysbios;
@@ -708,7 +707,7 @@ module BIOS
      *  Example: A macro hex value of 0x64501 implies that the SYS/BIOS
      *  product version number is 6.45.01
      */
-    const UInt32 version = 0x64503;
+    const UInt32 version = 0x64600;
 
     /*!
      *  ======== addUserStartupFunction ========
@@ -717,6 +716,18 @@ module BIOS
      */
     metaonly Void addUserStartupFunction(StartupFuncPtr func);
 
+    /*!
+     *  ======== linkedWithIncorrectBootLibrary ========
+     *  Application was linked with incorrect Boot library
+     *
+     *  This function has a loop that spins forever. If execution
+     *  reaches this function, it indicates that the application
+     *  was linked with an incorrect boot library and the XDC
+     *  runtime startup functions did not get run. This can happen
+     *  if the code gen tool's RTS library was before SYS/BIOS's
+     *  generated linker cmd file on the link line.
+     */
+    Void linkedWithIncorrectBootLibrary();
 
     /*!
      *  ======== start ========

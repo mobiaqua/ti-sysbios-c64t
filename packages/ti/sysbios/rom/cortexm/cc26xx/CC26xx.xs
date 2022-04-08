@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -115,9 +115,9 @@ function module$use()
 	    if (CC26xx.usePatch == true) {
 		Program.linkTemplate = String(CC26xx.$package.packageBase + "golden/CC26xx_patch/linkcmd_iar.xdt");
 	    }
-	    else {
-		Program.linkTemplate = String(CC26xx.$package.packageBase + "golden/CC26xx/linkcmd_iar.xdt");
-	    }
+            else {
+                Program.linkTemplate = String(CC26xx.$package.packageBase + "golden/CC26xx/linkcmd_iar.xdt");
+            }
 	}
     }
     

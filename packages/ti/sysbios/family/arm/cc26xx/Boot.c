@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Texas Instruments Incorporated
+ * Copyright (c) 2014-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,18 +34,19 @@
  */
 
 #include <driverlib/sys_ctrl.h>
+#include <driverlib/setup.h>
 
 #include "package/internal/Boot.xdc.h"
 
 void Boot_trimDevice(void);
-extern void trimDevice(void);
+extern void SetupTrimDevice(void);
 
 /*
  *  ======== ti_sysbios_family_arm_cc26xx_Boot_trimDevice ========
  */
 void ti_sysbios_family_arm_cc26xx_Boot_trimDevice(void)
 {
-    trimDevice();
+    SetupTrimDevice();
 }
 
 /*

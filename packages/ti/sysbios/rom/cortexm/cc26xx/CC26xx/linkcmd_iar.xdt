@@ -42,9 +42,16 @@
 %}
 
 %if (prog.platform.$orig.includeLinkCmdFile) {
-%var RomModule = xdc.module('ti.sysbios.rom.cortexm.cc26xx.CC26xx');
---config "`String(RomModule.$package.packageBase + "CC26xx/")`/`prog.cpu.deviceName.toUpperCase()`.icf"
+%    var linkFile;
+%    linkFile = prog.platform.$package.packageBase + '/include_iar/'
+%        + prog.cpu.deviceName.toUpperCase() + '.icf';
+--config "`linkFile`"
 %}
+
+%var RomModule = xdc.module('ti.sysbios.rom.cortexm.cc26xx.CC26xx');
+%var path = RomModule.$package.packageBase + "golden/CC26xx/"
+--config_search `path`
+--config_def USE_TIRTOS_ROM=1
 
 %/* force linker to include xdcmeta which is needed by ROV*/
 --keep __ASM__

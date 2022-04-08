@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,8 +44,12 @@ extern "C" {
 #define EPERM        1  /* Do not have permission to do the operation  */
 #endif
 
+#ifndef EAGAIN
+#define EAGAIN       11  /* Semaphore not available */
+#endif
+
 #ifndef ENOMEM
-#define ENOMEM       12      /* Cannot allocate memory */
+#define ENOMEM       12 /* Cannot allocate memory */
 #endif
 
 #ifndef EBUSY
@@ -57,10 +61,7 @@ extern "C" {
 #endif
 
 #ifndef EDEADLK
-#define EDEADLK      45 /* Deadlock condition - from gcc tools sys/errno.h
-                         * (Different from ndk serrno.h where EDEADLK is
-                         * defined as 11.)
-                         */
+#define EDEADLK      45 /* Deadlock condition  */
 #endif
 
 #ifndef ENOSYS
@@ -68,14 +69,8 @@ extern "C" {
 #endif
 
 #ifndef ETIMEDOUT
-#define ETIMEDOUT    60  /* Timed out waiting for resource (from ndk serrno.h
-                          * GCC tools sys/errno.h defines ETIMEDOUT to 116.
-                          */
+#define ETIMEDOUT    116 /* Timed out waiting for resource */
 #endif
-
-#define EAGAIN       35  /* Semaphore not available (from ndk serrno.h).
-                          * GCC tools sys/errno.h defines EAGAIN to 11.
-                          */
 
 #ifdef __cplusplus
 }

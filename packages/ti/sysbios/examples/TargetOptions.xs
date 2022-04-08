@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -418,6 +418,17 @@ var targetOptions = {
                     " -lgcc -lc -lm -lnosys",
                 productGroup: "",
                 devices: {
+                    "SEMIHOST": {
+                        cfgPrefix: "cortexm_semihost/",
+                        platform: "ti.platforms.tiva:$DeviceId$",
+                        linkerCommandFile: "ti/platforms/tiva/include_gnu/" +
+                            "$DeviceId$.lds",
+                        linkerBuildOptions:
+                            " -mthumb -march=armv7-m -nostartfiles -static" +
+                            " -Wl,--gc-sections -L${xdc_find:gnu/targets/arm" +
+                            "/libs/install-native/arm-none-eabi/lib" +
+                            "/armv7-m:${ProjName}} -lgcc -lc -lm -lrdimon",
+                    },
                     /* exclude CC26XX because it needs driverlib ...
                     "CC26XX": {
                         cfgPrefix: "cc26xx/",

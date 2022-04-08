@@ -6,12 +6,22 @@ import java.util.HashMap;
 import java.util.ArrayList;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+
+import java.util.zip.CRC32;
+
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 /*
  *  ======== Elf32 ========
  */
 public class Elf32 implements xdc.rta.IOFReader, xdc.rov.ISymbolTable
 {
+    static final Pattern C_IDENT = Pattern.compile("[a-zA-Z_][a-zA-Z0-9_]*");
+    static Matcher cIdent = C_IDENT.matcher("");
+    
     static final int ET_NONE = 0;         /* No machine */
     static final int EM_M32 = 1;          /* AT&T WE 32100 */
     static final int EM_SPARC = 2;        /* SPARC */
@@ -405,6 +415,18 @@ public class Elf32 implements xdc.rta.IOFReader, xdc.rov.ISymbolTable
         }
 
         /*
+         *  ======== isLocalCode ========
+         */
+        boolean isLocalCode()
+        {
+            if (st_info == STT_FUNC) {
+                return (true);
+            }
+
+            return (false);
+        }
+
+        /*
          *  ======== isLocalData ========
          */
         boolean isLocalData()
@@ -423,6 +445,52 @@ public class Elf32 implements xdc.rta.IOFReader, xdc.rov.ISymbolTable
     public FileHeader getFileHeader()
     {
         return (fileHeader);
+    }
+
+    /*
+     *  ======== getSectionCRC ========
+     *  Compute CRC for the specified section
+     */
+    public long getSectionCRC(SectHeader hdr)
+        throws java.io.IOException
+    {
+        return (getSectionCRC(hdr, hdr.sh_addr, hdr.sh_size));
+    }
+
+    /*
+     *  ======== getSectionCRC ========
+     *  Compute CRC for the portion of the section defined by addr and len
+     */
+    public long getSectionCRC(SectHeader hdr, long addr, int length)
+        throws java.io.IOException
+    {
+        /* convert target addresses into a file offset */
+        long delta = addr - hdr.sh_addr;
+        if (delta < 0) {
+            return (0);
+        }
+        
+        CRC32 crc = new CRC32();
+        FileInputStream fis = new FileInputStream(file.getFD());
+        BufferedInputStream bis = new BufferedInputStream(fis);
+        byte[] byteArr = new byte[1024];
+
+        /* seek to the section in the file */
+        long offset = hdr.sh_offset + delta;
+        file.seek(offset);
+
+        /* read the data from the file and update CRC */
+        int rem = length;
+        while (rem > 0) {
+            int len = rem > byteArr.length ? byteArr.length : rem;
+            if ((len = bis.read(byteArr, 0, len)) <= 0) {
+                break;
+            }
+            crc.update(byteArr, 0, len);
+            rem -= len;
+        }
+
+        return (crc.getValue());
     }
 
     /*
@@ -693,10 +761,12 @@ public class Elf32 implements xdc.rta.IOFReader, xdc.rov.ISymbolTable
     /*
      *  ======== parseSymbols ========
      *  Parse the elf file for its symbol table.
-     *  This API must be called before calling any of the ISymbolTable
-     *  APIs. It's not necessary to call it, though, if this Elf32 object is
+     *
+     *  This function must be called before calling any of the ISymbolTable
+     *  methods. It's not necessary to call it this Elf32 object is
      *  only to be used as an IOFReader.
-     *  This API assumes 'parse' has already been called.
+     *
+     *  This function assumes 'parse' has already been called.
      */
     public void parseSymbols()
         throws java.io.IOException
@@ -764,13 +834,22 @@ public class Elf32 implements xdc.rta.IOFReader, xdc.rov.ISymbolTable
             entry.read(symTabBuffer);
 
             /* If this is a data or program symbol ... */
-            if (entry.isAbsolute() || entry.isData() || entry.isLocalData() || entry.isCode()) {
+            if (entry.isAbsolute()
+                || entry.isData() || entry.isLocalData()
+                || entry.isCode() || entry.isLocalCode()) {
                                 
                 /* Read the symbol name from the file. */
                 // TODO - Are the symbol table strings always encoded as
                 //        1 byte-per-char, or should we use the target size?
                 entry.name = 
                     readStringFromBuffer(symStrTabBuffer, entry.st_name, 1);
+
+                /* skip code symbols that are not valid C/C++ identifiers */
+                if (entry.isLocalCode()) {
+                    if (!cIdent.reset(entry.name).matches()) {
+                        continue;
+                    }
+                }
 
                 /* Retrieve the value of the symbol. */
                 long val = entry.st_value; 
@@ -796,7 +875,7 @@ public class Elf32 implements xdc.rta.IOFReader, xdc.rov.ISymbolTable
                 if (entry.isData() || entry.isLocalData()) {
                     symsByVal = dataSymsByVal;
                 }
-                else if (entry.isCode()) {
+                else if (entry.isCode() || entry.isLocalCode()) {
                     symsByVal = progSymsByVal;
                 }
                 else {
@@ -992,6 +1071,32 @@ public class Elf32 implements xdc.rta.IOFReader, xdc.rov.ISymbolTable
     }
 
     /*
+     *  ======== readSection ========
+     *  Reads bytes from a section in the elf file
+     */
+    public int readSection(SectHeader hdr, byte[] byteArr, long addr, int len)
+        throws java.io.IOException
+    {
+        /* never read more than what fits in byteArr */
+        if (len > byteArr.length) {
+            len = byteArr.length;
+        }
+        
+        /* convert target addresses into a file offset */
+        long delta = addr - hdr.sh_addr;
+        if (delta < 0) {
+            return (0);
+        }
+        
+        /* seek to the section in the file */
+        long offset = hdr.sh_offset + delta;
+        file.seek(offset);
+
+        /* read the data from the file */
+        return (file.read(byteArr, 0, len));
+    }
+    
+    /*
      *  ======== decimate ========
      */
     private int decimate(byte [] stringBuf, int df)
@@ -1020,6 +1125,7 @@ public class Elf32 implements xdc.rta.IOFReader, xdc.rov.ISymbolTable
         
         /* Walk through the buffer until we find the null terminator. */
         while (buffer.get() != 0) {
+            ;
         }
         
         /* 
@@ -1043,7 +1149,7 @@ public class Elf32 implements xdc.rta.IOFReader, xdc.rov.ISymbolTable
         }
         
         /* Create a String from the buffer and return it. */
-        return(new String(stringBuf, 0, strLen));        
+        return (new String(stringBuf, 0, strLen));        
     }
     
     /*

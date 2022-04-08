@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,7 @@ var Memory = null;
 var Startup = null;
 var BIOS = null;
 var primaryHeapNotUsed = true;
+var primaryHeapInitialized = false;
 
 /* Table to round up to power of 2 (grow if need) */
 var powerOf2 = [2, 2, 2,                        /* 0-2 */
@@ -184,6 +185,8 @@ function instance$static$init(obj, params)
  */
 function viewInitBasic(view, obj)
 {
+    var Program = xdc.useModule('xdc.rov.Program');
+
     view.label = Program.getShortName(obj.$label);
 
     view.buf = "0x" + Number(obj.buf.$addr).toString(16);

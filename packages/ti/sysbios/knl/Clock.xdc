@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, Texas Instruments Incorporated
+ * Copyright (c) 2013-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -747,13 +747,16 @@ instance:
      *  The first argument is the function that gets called when the timeout
      *  expires.
      *
-     *  The 'timeout' argument is used to specify the initial timeout
-     *  for both one-shot and periodic Clock instances (in Clock ticks).
-     *
-     *  The {@link #period} parameter is used to set the subsequent timeout
-     *  interval (in Clock ticks) for periodic instances.
-     *
-     *  For one-shot instances, the period parameter must be set to zero.
+     *  The 'timeout' argument is used to specify the startup timeout for
+     *  both one-shot and periodic Clock instances (in Clock ticks).  This
+     *  timeout is applied when the Clock instance is started.  For periodic
+     *  instances, the configured Clock function will be called initially
+     *  after an interval equal to the timeout, and will be subsequently
+     *  called at the rate specified by the {@link #period} parameter.  For
+     *  one-shot instances (where the {@link #period} parameter is 0), once
+     *  the Clock instance is started (with {@link #start Clock_start()} or
+     *  automatically if {@link #startFlag} is true) the configured Clock
+     *  function will be called once after an interval equal to the timeout.
      *
      *  When instances are created they are placed upon a linked list managed
      *  by the Clock module.  For this reason, instances cannot be created
@@ -810,6 +813,9 @@ instance:
     /*!
      *  ======== period ========
      *  Period of this instance (in clock ticks)
+     *
+     *  This parameter is used to set the subsequent timeout interval (in
+     *  Clock ticks) for periodic instances.
      *
      *  The default value of this parameter is 0, which indicates this is
      *  a one-shot Clock object.

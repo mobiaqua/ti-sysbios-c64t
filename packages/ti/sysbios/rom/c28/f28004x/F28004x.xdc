@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,9 +66,10 @@ module F28004x inherits ti.sysbios.interfaces.IRomDevice
     override metaonly config String templateName = "F28004x_rom_makefile.xdt";
     
     /*
-     *  Set this constant to a magic value unique to the ROM.romName = ROM.F28004x.
+     *  Set this constant to a magic value unique to the ROM.romName.
      */
-    config UInt32 REVISION = 1915367466;
+    config UInt32 REVISION;
+    metaonly config UInt32 REVISION_WORD_ADDRESS;
 
 internal:   /* not for client use */
 

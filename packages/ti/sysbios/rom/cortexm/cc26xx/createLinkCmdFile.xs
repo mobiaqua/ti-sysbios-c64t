@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -112,16 +112,33 @@ function buildRomSegment(objDumpArray)
     var virtualAddr, symbolName;
     var tokens = new Array();
     var lineArray = new Array();
+    var isFunc = false;
 
     lineArray[lineArray.length] = "";
 
     for (idx = 0; idx < objDumpArray.length; idx++) {
         tokens = String(objDumpArray[idx]).split(/\s+/);
         virtualAddr = "0x" + String(tokens[0]);
-        virtualAddr = (parseInt(virtualAddr) | 1).toString(16);
+
+        if(tokens[4] == 0) {
+            isFunc = true;
+        }
+        else { /* consts placed in text region have non-zero size */
+            isFunc = false;
+        }
+
+        /* encode function addresses with LSB = 1 */
+        if (isFunc == true) {
+            virtualAddr = (parseInt(virtualAddr) | 1).toString(16);
+        }
+        else {
+            virtualAddr = (parseInt(virtualAddr)).toString(16);
+        }
         symbolName = String(tokens[6]);
         if (isIAR) {
-            lineArray[lineArray.length] = "--define_symbol " + symbolName + "=0x" + virtualAddr;
+            if (isFunc == true) {
+                lineArray[lineArray.length] = "--define_symbol " + symbolName + "=0x" + virtualAddr;
+            }
         }
         else {
 /* !!! hack to workaround TI linker warning regarding redefinition of memcpy and memset !!! */
@@ -299,7 +316,7 @@ print("Writing linkcmd.xdt");
 
     if (isIAR) {
         writeXdtFile(linkCmdFile, undefSegment.concat(romSymbolSegment));
-        writeXdtFile(args[4], linkConfigIAR.concat(placementSegment));
+        writeXdtFile("TIRTOS_ROM.icf", placementSegment);
     }
     else {
         writeXdtFile(linkCmdFile, undefSegment.concat(romSymbolSegment, placementSegment));

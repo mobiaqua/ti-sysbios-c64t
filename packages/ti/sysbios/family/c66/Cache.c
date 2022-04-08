@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,8 @@
 #ifdef ti_sysbios_BIOS_useSK__D
 #include <ti/sk/sk.h>
 #endif
+
+#include <_reg_synch_api.h>
 
 #include "package/internal/Cache.xdc.h"
 
@@ -99,7 +101,6 @@
 #define MAR160       0xA0
 #define MAR192       0xC0
 #define MAR224       0xE0
-
 
 /*
  *  ======== mapL1dOper ========
@@ -320,8 +321,12 @@ Void Cache_block(Ptr blockPtr, SizeT byteCnt, Bool wait,
 Void Cache_startup()
 {
     UInt32 i;
+    Cache_Size cacheSize;
 
-    Cache_setSize((Cache_Size *)&(Cache_initSize));
+    Cache_getL1DInitSize(&cacheSize);
+    Cache_getL1PInitSize(&cacheSize);
+    Cache_getL2InitSize(&cacheSize);
+    Cache_setSize(&cacheSize);
 
     /*
      *  MAR0-15 is ready-only and will generate an exception
@@ -333,8 +338,29 @@ Void Cache_startup()
 }
 
 /*
+ *  ======== Cache_Module_startup ========
+ *  Initialize and start the Cache Module.
+ *  Called at system init time before main().
+ */
+Int Cache_Module_startup(Int phase)
+{
+    /*
+     * Must call _register_synch_api() *after* cinit initialization
+     * of RTS function pointers, so it needs to go here and not in
+     * Cache_startup() which is registered as a "reset" function.
+     */
+    if (Cache_registerRTSSynch) {
+        _register_synch_api(Cache_RTSSynchInv,
+                            Cache_RTSSynchWb,
+                            Cache_RTSSynchWbInv);
+    }
+
+    return Startup_DONE;
+}
+
+/*
  *  ======== Cache_enable ========
- *  For L1P and L1D, set the size to the Cache_initSize.
+ *  For L1P and L1D, set the size to the Cache init size.
  *  For L2, set the cache mode to NORMAL.
  */
 Void Cache_enable(Bits16 type)
@@ -344,11 +370,11 @@ Void Cache_enable(Bits16 type)
     Cache_getSize(&size);
 
     if (type == Cache_Type_L1P) {
-        size.l1pSize = Cache_initSize.l1pSize;
+        Cache_getL1PInitSize(&size);
         Cache_setSize(&size);
     }
     else if (type == Cache_Type_L1D) {
-        size.l1dSize = Cache_initSize.l1dSize;
+        Cache_getL1DInitSize(&size);
         Cache_setSize(&size);
     }
     else {
@@ -750,6 +776,33 @@ Void Cache_wbInv(Ptr blockPtr, SizeT byteCnt, Bits16 type, Bool wait)
 }
 
 /*
+ *  ======== Cache_RTSSynchInv ========
+ *  API to be called by RTS for RTS-owned data synchronization.
+ */
+Void Cache_RTSSynchInv(Ptr blockPtr, SizeT byteCnt)
+{
+    Cache_block(blockPtr, byteCnt, TRUE, L2IBAR);
+}
+
+/*
+ *  ======== Cache_RTSSynchWb ========
+ *  API to be called by RTS for RTS-owned data synchronization.
+ */
+Void Cache_RTSSynchWb(Ptr blockPtr, SizeT byteCnt)
+{
+    Cache_block(blockPtr, byteCnt, TRUE, L2WBAR);
+}
+
+/*
+ *  ======== Cache_RTSSynchWbInv ========
+ *  API to be called by RTS for RTS-owned data synchronization.
+ */
+Void Cache_RTSSynchWbInv(Ptr blockPtr, SizeT byteCnt)
+{
+    Cache_block(blockPtr, byteCnt, TRUE, L2WIBAR);
+}
+
+/*
  *  ======== Cache_invPrefetchBuffer ========
  *  Invalidate the prefetch buffer.
  */
@@ -780,4 +833,115 @@ Void Cache_wait()
 
     /* do a 2nd mfence as per single mfence silicon errata */
     _mfence();
+}
+
+/*
+ *  ======== Cache_getL1DInitSize ========
+ */
+Void Cache_getL1DInitSize(Cache_Size *cacheSize)
+{
+    __extern __FAR__ UInt32 ti_sysbios_family_c66_Cache_l1dSize;
+
+    /*
+     *  Copy cache size extern to local variable instead of using
+     *  it directly in switch expression in order to avoid compiler
+     *  warning.
+     */
+    UInt32 l1dSize = (UInt32)&ti_sysbios_family_c66_Cache_l1dSize;
+
+    switch (l1dSize) {
+        case 0:
+            cacheSize->l1dSize = Cache_L1Size_0K;
+            break;
+        case (4*1024):
+            cacheSize->l1dSize = Cache_L1Size_4K;
+            break;
+        case (8*1024):
+            cacheSize->l1dSize = Cache_L1Size_8K;
+            break;
+        case (16*1024):
+            cacheSize->l1dSize = Cache_L1Size_16K;
+            break;
+        case (32*1024):
+            cacheSize->l1dSize = Cache_L1Size_32K;
+            break;
+        default:
+            Error_raise(NULL, Cache_E_invalidL1CacheSize, l1dSize, 0);
+    }
+}
+
+/*
+ *  ======== Cache_getL1PInitSize ========
+ */
+Void Cache_getL1PInitSize(Cache_Size *cacheSize)
+{
+    __extern __FAR__ UInt32 ti_sysbios_family_c66_Cache_l1pSize;
+
+    /*
+     *  Copy cache size extern to local variable instead of using
+     *  it directly in switch expression in order to avoid compiler
+     *  warning.
+     */
+    UInt32 l1pSize = (UInt32)&ti_sysbios_family_c66_Cache_l1pSize;
+
+    switch (l1pSize) {
+        case 0:
+            cacheSize->l1pSize = Cache_L1Size_0K;
+            break;
+        case (4*1024):
+            cacheSize->l1pSize = Cache_L1Size_4K;
+            break;
+        case (8*1024):
+            cacheSize->l1pSize = Cache_L1Size_8K;
+            break;
+        case (16*1024):
+            cacheSize->l1pSize = Cache_L1Size_16K;
+            break;
+        case (32*1024):
+            cacheSize->l1pSize = Cache_L1Size_32K;
+            break;
+        default:
+            Error_raise(NULL, Cache_E_invalidL1CacheSize, l1pSize, 0);
+    }
+}
+
+/*
+ *  ======== Cache_getL2InitSize ========
+ */
+Void Cache_getL2InitSize(Cache_Size *cacheSize)
+{
+    __extern __FAR__ UInt32 ti_sysbios_family_c66_Cache_l2Size;
+
+    /*
+     *  Copy cache size extern to local variable instead of using
+     *  it directly in switch expression in order to avoid compiler
+     *  warning.
+     */
+    UInt32 l2Size = (UInt32)&ti_sysbios_family_c66_Cache_l2Size;
+
+    switch (l2Size) {
+        case 0:
+            cacheSize->l2Size = Cache_L2Size_0K;
+            break;
+        case (32*1024):
+            cacheSize->l2Size = Cache_L2Size_32K;
+            break;
+        case (64*1024):
+            cacheSize->l2Size = Cache_L2Size_64K;
+            break;
+        case (128*1024):
+            cacheSize->l2Size = Cache_L2Size_128K;
+            break;
+        case (256*1024):
+            cacheSize->l2Size = Cache_L2Size_256K;
+            break;
+        case (512*1024):
+            cacheSize->l2Size = Cache_L2Size_512K;
+            break;
+        case (1024*1024):
+            cacheSize->l2Size = Cache_L2Size_1024K;
+            break;
+        default:
+            Error_raise(NULL, Cache_E_invalidL2CacheSize, l2Size, 0);
+    }
 }

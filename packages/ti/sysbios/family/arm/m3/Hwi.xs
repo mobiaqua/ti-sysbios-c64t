@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -102,6 +102,12 @@ if (xdc.om.$name == "cfg") {
             resetVectorAddress : 0,
             vectorTableAddress : 0,
         },
+        "TDA3XX": {
+            numInterrupts : 16 + 70,
+            numPriorities : 16,
+            resetVectorAddress : 0,
+            vectorTableAddress : 0,
+        },
         "LM3.*": {
             numInterrupts : 16 + 64,
             numPriorities : 8,
@@ -151,7 +157,7 @@ if (xdc.om.$name == "cfg") {
             vectorTableAddress : 0x20000000,
         },
         "CC26.*": {
-            numInterrupts : 16 + 39,            /* supports 55 interrupts */
+            numInterrupts : 16 + 34,            /* supports 50 interrupts */
             numPriorities : 8,
             resetVectorAddress : 0x0,           /* placed low in flash */
             vectorTableAddress : 0x20000000,
@@ -161,6 +167,12 @@ if (xdc.om.$name == "cfg") {
             numPriorities : 8,
             resetVectorAddress : 0x20004000,
             vectorTableAddress : 0x20004000,
+        },
+        "CC3220SF": {
+            numInterrupts : 16 + 179,
+            numPriorities : 8,
+            resetVectorAddress : 0x01000800,
+            vectorTableAddress : 0x20000000,
         }
     }
 
@@ -180,8 +192,9 @@ if (xdc.om.$name == "cfg") {
     deviceTable["OMAP5430"]      = deviceTable["OMAP4430"];
     deviceTable["Vayu"]          = deviceTable["OMAP4430"];
     deviceTable["DRA7XX"]        = deviceTable["OMAP4430"];
-    deviceTable["TDA3XX"]        = deviceTable["OMAP4430"];
     deviceTable["CC13.*"]        = deviceTable["CC26.*"];
+    deviceTable["CC3220"]        = deviceTable["CC3200"];
+    deviceTable["CC3220S"]       = deviceTable["CC3200"];
 }
 
 /*
@@ -1477,35 +1490,107 @@ function viewFillExceptionContext(excContext)
 {
     var Program = xdc.useModule('xdc.rov.Program');
     var CallStack = xdc.useModule('xdc.rov.CallStack');
-    CallStack.fetchRegisters(["R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10", "R11", "R12", "R13", "R14", "PC", "xPSR"]);
+    CallStack.fetchRegisters(["R0", "R1"]); /* R0 contains excContext, R1 is LR */
 
-    excContext.r0 = String(CallStack.getRegister("R0"));
-    excContext.r1 = CallStack.getRegister("R1");
-    excContext.r2 = CallStack.getRegister("R2");
-    excContext.r3 = CallStack.getRegister("R3");
-    excContext.r4 = CallStack.getRegister("R4");
-    excContext.r5 = CallStack.getRegister("R5");
-    excContext.r6 = CallStack.getRegister("R6");
-    excContext.r7 = CallStack.getRegister("R7");
-    excContext.r8 = CallStack.getRegister("R8");
-    excContext.r9 = CallStack.getRegister("R9");
-    excContext.r10 = CallStack.getRegister("R10");
-    excContext.r11 = CallStack.getRegister("R11");
-    excContext.r12 = CallStack.getRegister("R12");
-    excContext.sp = CallStack.getRegister("R13");
-    excContext.lr = CallStack.getRegister("R14");
-    excContext.pc = CallStack.getRegister("PC");
-    excContext.psr = CallStack.getRegister("xPSR");
+    excContext.$addr = "N/A"; /* excContext is not in physical memory */
 
-    excContext.ICSR = Program.ptrToHex(Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UInt', isScalar: true}, 0xe000ed04, 1, false));
-    excContext.MMFSR = Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UInt', isScalar: true}, 0xe000ed04, 1, false);
-    excContext.BFSR = Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UChar', isScalar: true}, 0xe000ed29, 1, false);
-    excContext.UFSR = Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UInt16', isScalar: true}, 0xe000ed2a, 1, false);
-    excContext.HFSR = Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UInt', isScalar: true}, 0xe000ed2c, 1, false);
-    excContext.DFSR = Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UInt', isScalar: true}, 0xe000ed30, 1, false);
-    excContext.MMAR = Program.ptrToHex(Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UInt', isScalar: true}, 0xe000ed34, 1, false));
-    excContext.BFAR = Program.ptrToHex(Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UInt', isScalar: true}, 0xe000ed38, 1, false));
-    excContext.AFSR = Program.ptrToHex(Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_UInt', isScalar: true}, 0xe000ed3c, 1, false));
+    /* use $addr() to force ROV to render in HEX */
+    excContext.sp = $addr(CallStack.getRegister("R0") + 16);
+
+    /* R0 points to registerContext saved by ti_sysbios_family_arm_m3_Hwi_excHandlerAsm__I */
+    var registerContext = Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_Ptr', isScalar: true}, CallStack.getRegister("R0"), 16, false);
+
+
+    /* r4-r11 registers were programmatically pushed */
+    /* untouched S_Ptr types render as HEX */
+    excContext.r4 = registerContext[0];
+    excContext.r5 = registerContext[1];
+    excContext.r6 = registerContext[2];
+    excContext.r7 = registerContext[3];
+    excContext.r8 = registerContext[4];
+    excContext.r9 = registerContext[5];
+    excContext.r10 = registerContext[6];
+    excContext.r11 = registerContext[7];
+
+    /* first 8 words are exception frame saved by M3/M4 during exception */
+    excContext.r0 = registerContext[8];
+    excContext.r1 = registerContext[9];
+    excContext.r2 = registerContext[10];
+    excContext.r3 = registerContext[11];
+    excContext.r12 = registerContext[12];
+    excContext.lr = registerContext[13];
+    excContext.pc = registerContext[14];
+    excContext.psr = registerContext[15];
+
+    var ICSR = Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_Ptr', isScalar: true}, 0xe000ed04, 1, false);
+    excContext.ICSR = ICSR[0];
+
+    /* fetch 6 words starting at MMFSR */
+    var nvicRegs = Program.fetchArray({type: 'xdc.rov.support.ScalarStructs.S_Ptr', isScalar: true}, 0xe000ed28, 6, false);
+
+    /* use $addr() to force ROV to render in HEX after math is performed on the S_Ptr */
+    excContext.MMFSR = $addr(nvicRegs[0] & 0xff);
+    excContext.BFSR = $addr((nvicRegs[0] & 0x0000ff00) >> 8);
+    excContext.UFSR = $addr((nvicRegs[0] & 0xffff0000) >> 16);
+
+    /* untouched S_Ptr types render as HEX */
+    excContext.HFSR = nvicRegs[1];
+    excContext.DFSR = nvicRegs[2];
+    excContext.MMAR = nvicRegs[3];
+    excContext.BFAR = nvicRegs[4];
+    excContext.AFSR = nvicRegs[5];
+
+    /* get BIOS module view to retrieve BIOS ThreadType */
+    var biosModView = Program.scanModuleView('ti.sysbios.BIOS', 'Module');
+
+    switch(biosModView.currentThreadType[0]) {
+        case "Task":
+            var taskModView = Program.scanModuleView('ti.sysbios.knl.Task', 'Module');
+            excContext.threadType = "Task";
+            excContext.threadHandle = taskModView.currentTask[0];
+            var taskRawView = Program.scanRawView('ti.sysbios.knl.Task');
+            for (var i in taskRawView.instStates) {
+                if (Number(taskRawView.instStates[i].$addr) == Number(taskModView.currentTask[0])) {
+                    excContext.threadStack = taskRawView.instStates[i].stack;
+                    excContext.threadStackSize = taskRawView.instStates[i].stackSize;
+                    break;
+                }
+            }
+            break;
+
+        case "Swi":
+            excContext.threadType = "Swi";
+            var swiModView = Program.scanModuleView('ti.sysbios.knl.Swi', 'Module');
+            excContext.threadHandle = swiModView.currentSwi;
+            break;
+
+        case "Hwi":
+            excContext.threadType = "Hwi";
+            excContext.threadHandle = "unknown";
+            var hwiRawView = Program.scanRawView('ti.sysbios.family.arm.m3.Hwi');
+            for (var i in hwiRawView.instStates) {
+                if (Number(hwiRawView.instStates[i].intNum) == (excContext.psr & 0xff)) {
+                    excContext.threadHandle = hwiRawView.instStates[i].$addr;
+                    break;
+                }
+            }
+            break;
+
+        case "Main":
+            excContext.threadType = "Main";
+            excContext.threadHandle = $addr(0);
+            break;
+    }
+
+    switch(biosModView.currentThreadType[0]) {
+        case "Swi":
+        case "Hwi":
+        case "Main":
+            var hwiRawView = Program.scanRawView('ti.sysbios.family.arm.m3.Hwi');
+            excContext.threadStack = hwiRawView.modState.isrStackBase;
+            excContext.threadStackSize = hwiRawView.modState.isrStackSize;
+            break;
+    }
 }
 
 /*

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -604,6 +604,164 @@ if (xdc.om.$name == "cfg" || typeof(genCdoc) != "undefined") {
                 ]
             }
         },
+        "AR14XX": {
+            "Core0": {
+                isMemoryMapped  : false,
+                numRegions      : 16,
+                regionSettings  : [
+                    {
+                        regionId             : 0,
+                        baseAddress          : 0x00000000,
+                        regionSize           : 0x3E, /* MPU.RegionSize_4G */
+                        enable               : true,
+                        bufferable           : false,
+                        cacheable            : false,
+                        shareable            : false,
+                        noExecute            : false,
+                        accPerm              : 0,    /* No access at PL1 and
+                                                        PL0 */
+                        tex                  : 1,
+                        subregionDisableMask : 0xFF
+                    },
+                    {
+                        regionId             : 1,
+                        baseAddress          : 0x00000000,
+                        regionSize           : 0x2A, /* MPU.RegionSize_4M */
+                        enable               : true,
+                        bufferable           : true,
+                        cacheable            : true,
+                        shareable            : true,
+                        noExecute            : false,
+                        accPerm              : 6,    /* R-only access at PL1 and
+                                                        PL0 */
+                        tex                  : 1,
+                        subregionDisableMask : 0
+                    },
+                    {
+                        regionId             : 2,
+                        baseAddress          : 0x08000000,
+                        regionSize           : 0x24, /* MPU.RegionSize_512K */
+                        enable               : true,
+                        bufferable           : true,
+                        cacheable            : true,
+                        shareable            : false,
+                        noExecute            : true,
+                        accPerm              : 3,    /* RW access at PL1 and
+                                                        PL0 */
+                        tex                  : 1,
+                        subregionDisableMask : 0
+                    },
+                    {
+                        regionId             : 3,
+                        baseAddress          : 0x60000000,
+                        regionSize           : 0x36, /* MPU.RegionSize_256M */
+                        enable               : true,
+                        bufferable           : false,
+                        cacheable            : false,
+                        shareable            : true,
+                        noExecute            : false,
+                        accPerm              : 3,    /* RW access at PL1 and PL0 */
+                        tex                  : 0,
+                        subregionDisableMask : 0
+                    },
+                    {
+                        regionId             : 4,
+                        baseAddress          : 0x80000000,
+                        regionSize           : 0x38, /* MPU.RegionSize_512M */
+                        enable               : true,
+                        bufferable           : false,
+                        cacheable            : false,
+                        shareable            : false,
+                        noExecute            : false,
+                        accPerm              : 3,    /* RW access at PL1 and PL0 */
+                        tex                  : 1,
+                        subregionDisableMask : 0
+                    },
+                    {
+                        regionId             : 5,
+                        baseAddress          : 0xF0000000,
+                        regionSize           : 0x2A, /* MPU.RegionSize_4M */
+                        enable               : true,
+                        bufferable           : false,
+                        cacheable            : false,
+                        shareable            : false,
+                        noExecute            : true,
+                        accPerm              : 2,    /* RW access at PL1 and R-only
+                                                        at PL0 */
+                        tex                  : 1,
+                        subregionDisableMask : 0
+                    },
+                    {
+                        regionId             : 6,
+                        baseAddress          : 0xFB000000,
+                        regionSize           : 0x2E, /* MPU.RegionSize_16M */
+                        enable               : true,
+                        bufferable           : false,
+                        cacheable            : false,
+                        shareable            : false,
+                        noExecute            : true,
+                        accPerm              : 3,    /* RW access at PL1 and PL0 */
+                        tex                  : 2,
+                        subregionDisableMask : 0
+                    },
+                    {
+                        regionId             : 7,
+                        baseAddress          : 0xFC000000,
+                        regionSize           : 0x2E, /* MPU.RegionSize_16M */
+                        enable               : true,
+                        bufferable           : false,
+                        cacheable            : false,
+                        shareable            : false,
+                        noExecute            : true,
+                        accPerm              : 2,    /* RW access at PL1 and R-only
+                                                        at PL0 */
+                        tex                  : 2,
+                        subregionDisableMask : 0
+                    },
+                    {
+                        regionId             : 8,
+                        baseAddress          : 0xFE000000,
+                        regionSize           : 0x2E, /* MPU.RegionSize_16M */
+                        enable               : true,
+                        bufferable           : false,
+                        cacheable            : false,
+                        shareable            : false,
+                        noExecute            : true,
+                        accPerm              : 3,    /* RW access at PL1 and PL0 */
+                        tex                  : 2,
+                        subregionDisableMask : 0xE0
+                    },
+                    {
+                        regionId             : 9,
+                        baseAddress          : 0xFF000000,
+                        regionSize           : 0x2E, /* MPU.RegionSize_16M */
+                        enable               : true,
+                        bufferable           : false,
+                        cacheable            : false,
+                        shareable            : false,
+                        noExecute            : true,
+                        accPerm              : 2,    /* RW access at PL1 and R-only
+                                                        at PL0 */
+                        tex                  : 2,
+                        subregionDisableMask : 0xC0
+                    },
+                    {
+                        regionId             : 15,
+                        baseAddress          : 0xFFF80000,
+                        regionSize           : 0x24, /* MPU.RegionSize_512K */
+                        enable               : true,
+                        bufferable           : false,
+                        cacheable            : false,
+                        shareable            : false,
+                        noExecute            : true,
+                        accPerm              : 2,    /* RW access at PL1 and R-only
+                                                        at PL0 */
+                        tex                  : 2,
+                        subregionDisableMask : 0
+                    }
+                ]
+            }
+        },
         "MSP432P401R": {
             "Core0": {
                 isMemoryMapped  : true,
@@ -626,6 +784,7 @@ if (xdc.om.$name == "cfg" || typeof(genCdoc) != "undefined") {
     deviceTable["RM57D8.*"] = deviceTable["RM57D8xx"];
     deviceTable["RM57L8.*"] = deviceTable["RM57L8xx"];
     deviceTable["RM48L.*"]  = deviceTable["RM57L8xx"];
+    deviceTable["AR16XX"]  = deviceTable["AR14XX"];
 
     /* MSP432 devices */
     deviceTable["MSP432.*"] = deviceTable["MSP432P401R"];
@@ -910,8 +1069,9 @@ function setRegionMeta(regionId, regionBaseAddr, regionSize, attrs)
             alignMask = convertToUInt32(~0 << ((regionSize >>> 1) + 1));
         }
 
-        if (regionBaseAddr != (regionBaseAddr & alignMask)) {
-            MPU.$logWarning("Region base address not aligned to region size",
+        if (regionBaseAddr != convertToUInt32(regionBaseAddr & alignMask)) {
+            MPU.$logWarning("Region base address 0x" +
+                regionBaseAddr.toString(16) + " not aligned to region size.",
                 MPU);
         }
 

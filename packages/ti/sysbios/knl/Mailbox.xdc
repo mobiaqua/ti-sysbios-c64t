@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated
+ * Copyright (c) 2014-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -139,6 +139,7 @@ import xdc.runtime.IHeap;
 @ModuleStartup     /* Instances require more initialization at startup */
 @InstanceFinalize
 @InstanceInitError
+@InstanceInitStatic     /* Construct/Destruct CAN becalled at runtime */
 
 module Mailbox 
 {
@@ -329,6 +330,11 @@ instance:
      *  Since the buffer must be a aligned properly, it may be necessary to
      *  'round up' the total size of the buffer to the next multiple of the
      *  alignment for odd sized messages.
+     *
+     *  Also note that if {@link ti.sysbios.BIOS#runtimeCreatesEnabled
+     *  BIOS.runtimeCreatesEnabled} is set to false, then the user is required
+     *  to provide this buffer when constructing the Mailbox object. If 'buf'
+     *  is not set, then Mailbox_construct() will fail.
      *
      *  @see #MbxElem
      */

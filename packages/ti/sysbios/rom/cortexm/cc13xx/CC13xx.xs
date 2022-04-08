@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -87,6 +87,7 @@ function module$use()
 {
     if (!Program.platformName.match(/ti\.platforms\.cc26xx/) &&
         !Program.platformName.match(/ti\.platforms\.simplelink/) &&
+        !Program.platformName.match(/ti\.platforms\.emt13xx/) &&
          Build.buildROMApp == true) {
         this.$logError(
                 "CC13xx ROM Applications only support the cc26xx or simplelink platforms",

@@ -261,12 +261,43 @@ function instance_validate(instance)
 }
 
 /*
+ *  ======== viewGetTicksRTC ========
+ */
+function viewGetTicksRTC()
+{
+    var ticks = 0;
+    var tickPeriod = Program.$modules['ti.sysbios.knl.Clock'].tickPeriod;
+    var period64 = Math.floor(0x100000000 * tickPeriod / 1000000);
+
+    try {
+        var SEC = Program.fetchArray(
+            { type: 'xdc.rov.support.ScalarStructs.S_UInt32', isScalar: true },
+            Number("0x40092008"), 1, false);
+        var SUBSEC = Program.fetchArray(
+            { type: 'xdc.rov.support.ScalarStructs.S_UInt32', isScalar: true },
+            Number("0x4009200C"), 1, false);
+    }
+    catch (e) {
+        print("Error: Problem fetching RTC values: " + e.toString());
+    }
+
+    /* only 51 bits resolution in JS, so break into SEC and SUBSEC pieces */
+    ticks = SUBSEC / period64;                    /* ticks from SUBSEC */
+    ticks = ticks + (SEC * 1000000 / tickPeriod); /* plus ticks from SEC */
+    ticks = Math.floor(ticks);                    /* clip total */
+
+    return ticks;
+}
+
+
+/*
  *  ======== viewInitBasic ========
  */
 function viewInitBasic(view, obj)
 {
     var Program = xdc.useModule('xdc.rov.Program');
     var Model = xdc.useModule("xdc.rov.Model");
+    var modCfg = Program.getModuleConfig('ti.sysbios.knl.Clock');
 
     view.label = obj.$label;
     view.timeout = obj.timeout;
@@ -275,6 +306,13 @@ function viewInitBasic(view, obj)
     view.fxn = Program.lookupFuncName(Number(obj.fxn));
 
     view.arg = obj.arg;
+
+    /* if Clock timer proxy is the CC26xx RTC, compute the Clock tick count */
+    var cc26xxRTC = false;
+    if (modCfg.TimerProxy.$name.match(/ti.sysbios.family.arm.cc26xx.Timer/)) {
+        cc26xxRTC = true;
+        var ticks = viewGetTicksRTC();
+    }
 
     /* The inst is started if active is TRUE */
     if (obj.active == false) {
@@ -285,7 +323,12 @@ function viewInitBasic(view, obj)
 
         var modRaw = Program.scanRawView("ti.sysbios.knl.Clock");
 
-        var remain = obj.currTimeout - modRaw.modState.ticks;
+        if (cc26xxRTC) {
+            var remain = obj.currTimeout - ticks;
+        }
+        else {
+            var remain = obj.currTimeout - modRaw.modState.ticks;
+        }
 
         /*
          * Check if 'currTimeout' has wrapped.
@@ -298,10 +341,11 @@ function viewInitBasic(view, obj)
             remain += Math.pow(2, 32);
         }
 
-        /* if skipping ticks indicate stale data */
-        if (modRaw.modState.numTickSkip > 1) {
+        /* if not CC26xx but skipping ticks, indicate stale data */
+        if ((!cc26xxRTC) && (modRaw.modState.numTickSkip > 1)) {
             view.tRemaining = String(remain) + " (stale data)";
         }
+        /* else, just show remaining ticks */
         else {
             view.tRemaining = String(remain);
         }
@@ -319,10 +363,16 @@ function viewInitModule(view, mod)
     var modRaw = Program.scanRawView("ti.sysbios.knl.Clock");
     var modCfg = Program.getModuleConfig('ti.sysbios.knl.Clock');
 
-    /* if skipping ticks indicate stale data */
-    if (modRaw.modState.numTickSkip > 1) {
+    /* if Clock timer proxy is the CC26xx RTC, compute the Clock tick count */
+    if (modCfg.TimerProxy.$name.match(/ti.sysbios.family.arm.cc26xx.Timer/)) {
+        var ticks = viewGetTicksRTC();
+        view.ticks = String(ticks);
+    }
+    /* else, when skipping ticks with other timers, indicate stale data */
+    else if (modRaw.modState.numTickSkip > 1) {
         view.ticks = String(mod.ticks) + " (stale data)";
     }
+    /* else, just show the tick counter */
     else {
         view.ticks = String(mod.ticks);
     }

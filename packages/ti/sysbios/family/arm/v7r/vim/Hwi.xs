@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,12 +57,20 @@ if (xdc.om.$name == "cfg") {
             vimRamAddress       : 0xFFF82000,
             resetVectorAddress  : 0x00000000,
             numInterrupts       : 128
+        },
+        "AR14XX": {
+            lockstepDevice      : true,
+            vimBaseAddress      : 0xFFFFFDEC,
+            vimRamAddress       : 0xFFF82000,
+            resetVectorAddress  : 0x00000000,
+            numInterrupts       : 128
         }
     }
 
     deviceTable["RM57D8.*"] = deviceTable["RM57D8xx"];
     deviceTable["RM57L8.*"] = deviceTable["RM57L8xx"];
     deviceTable["RM48L.*"] = deviceTable["RM57L8xx"];
+    deviceTable["AR16XX"] = deviceTable["AR14XX"];
 }
 
 /*

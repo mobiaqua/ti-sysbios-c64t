@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -294,7 +294,6 @@ var biosPackages = [
     "ti.sysbios.family.arm.msp432.init",
     "ti.sysbios.family.arm.v7r",
     "ti.sysbios.family.arm.v7r.tms570",
-    "ti.sysbios.family.arm.v7r.rti",
     "ti.sysbios.family.arm.v7r.vim",
     "ti.sysbios.family.arm.tms570",
     "ti.sysbios.family.arm.v7a",
@@ -330,11 +329,13 @@ var biosPackages = [
     "ti.sysbios.rts",
     "ti.sysbios.rts.gnu",
     "ti.sysbios.rts.iar",
+    "ti.sysbios.rts.ti",
     "ti.sysbios.rom.c28",
     "ti.sysbios.smp",
     "ti.sysbios.syncs",
     "ti.sysbios.timers.dmtimer",
     "ti.sysbios.timers.gptimer",
+    "ti.sysbios.timers.rti",
     "ti.sysbios.timers.timer64",
     "ti.sysbios.utils",
     "ti.sysbios.xdcruntime",
@@ -441,7 +442,9 @@ function getDefs()
     var defs =   " -Dti_sysbios_BIOS_swiEnabled__D=" + (BIOS.swiEnabled ? "TRUE" : "FALSE")
                + " -Dti_sysbios_BIOS_taskEnabled__D=" + (BIOS.taskEnabled ? "TRUE" : "FALSE")
                + " -Dti_sysbios_BIOS_clockEnabled__D=" + (BIOS.clockEnabled ? "TRUE" : "FALSE")
-               + " -Dti_sysbios_BIOS_runtimeCreatesEnabled__D=" + (BIOS.runtimeCreatesEnabled ? "TRUE" : "FALSE");
+               + " -Dti_sysbios_BIOS_runtimeCreatesEnabled__D=" + (BIOS.runtimeCreatesEnabled ? "TRUE" : "FALSE")
+               + " -Dti_sysbios_knl_Task_moduleStateCheckFlag__D=" + (Task.moduleStateCheckFlag ? "TRUE" : "FALSE")
+               + " -Dti_sysbios_knl_Task_objectCheckFlag__D=" + (Task.objectCheckFlag ? "TRUE" : "FALSE");
 
     if (xdc.module(HwiDelegate).hooks.length == 0) {
         defs += " -Dti_sysbios_hal_Hwi_DISABLE_ALL_HOOKS";
@@ -821,15 +824,25 @@ function getIncludePaths()
     var prefix = Program.build.target.ccOpts.prefix;
 
     /*
-     * First look for TI compiler's '--include_path=' option. This is
-     * a contiguous string (no spaces) so it will be a single token.
+     * First look for TI compiler's '--include_path=' option.
+     * This will be a quoted string which may include embedded
+     * spaces.
      */
     var tokens = prefix.split(" ");
+
     for (i=0; i < tokens.length; i++) {
         if (tokens[i].match(/--include_path/)) {
-	    incs += tokens[i] + " ";
+            incs += tokens[i] + " ";
+            if (tokens[i].lastIndexOf('"') == -1) {
+                continue;
+            }
+            /* pull in tokens until last character of token is '"' */
+            while (tokens[i].lastIndexOf('"') != tokens[i].length-1) {
+                incs += tokens[++i] + " ";
+            }
         }
     }
+
 
     /*
      * Now look for TI, IAR and gcc's -I options.  There may be 0 or more

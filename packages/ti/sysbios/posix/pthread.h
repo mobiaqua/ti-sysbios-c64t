@@ -46,9 +46,7 @@ extern "C" {
 
 #include <ti/sysbios/posix/types.h>
 #include <ti/sysbios/posix/_time.h>
-
-#define sched_get_priority_min() 1
-#define sched_get_priority_max() Task_numPriorities
+#include <ti/sysbios/posix/sched.h>
 
 #define PTHREAD_BARRIER_SERIAL_THREAD -1
 
@@ -131,12 +129,7 @@ extern void _pthread_cleanup_push(struct _pthread_cleanup_context *context,
 extern int pthread_create(pthread_t *newthread, const pthread_attr_t *attr,
             void *(*startroutine)(void *), void *arg);
 extern int pthread_detach(pthread_t pthread);
-
-static inline int pthread_equal(pthread_t pt1, pthread_t pt2)
-{
-    return (pt1 == pt2);
-}
-
+extern int pthread_equal(pthread_t pt1, pthread_t pt2);
 extern void pthread_exit(void *ptr);
 extern int pthread_getschedparam(pthread_t thread, int *policy,
         struct sched_param *param);

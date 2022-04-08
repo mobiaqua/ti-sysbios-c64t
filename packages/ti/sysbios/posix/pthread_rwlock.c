@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -188,9 +188,9 @@ int pthread_rwlock_timedwrlock(pthread_rwlock_t *rwlock,
     }
 
     if (Semaphore_pend(Semaphore_handle(&(rwlock->sem)), timeout)) {
-        Assert_isTrue(rwlock->owner == NULL, NULL);
+        Assert_isTrue(rwlock->owner == NULL, 0);
         rwlock->owner = pthread_self();
-        Assert_isTrue(rwlock->activeReaderCnt == 0, NULL);
+        Assert_isTrue(rwlock->activeReaderCnt == 0, 0);
 
         return (0);
     }
@@ -212,9 +212,9 @@ int pthread_rwlock_tryrdlock(pthread_rwlock_t *rwlock)
 int pthread_rwlock_trywrlock(pthread_rwlock_t *rwlock)
 {
     if (Semaphore_pend(Semaphore_handle(&(rwlock->sem)), 0)) {
-        Assert_isTrue(rwlock->owner == NULL, NULL);
+        Assert_isTrue(rwlock->owner == NULL, 0);
         rwlock->owner = pthread_self();
-        Assert_isTrue(rwlock->activeReaderCnt == 0, NULL);
+        Assert_isTrue(rwlock->activeReaderCnt == 0, 0);
 
         return (0);
     }
@@ -233,7 +233,7 @@ int pthread_rwlock_unlock(pthread_rwlock_t *rwlock)
     key = Task_disable();
 
     if (rwlock->activeReaderCnt) {
-        Assert_isTrue(rwlock->blockedReaderCnt == 0, NULL);
+        Assert_isTrue(rwlock->blockedReaderCnt == 0, 0);
         /*
          *  Lock is held by a reader.  The last active reader
          *  releases the semaphore.
@@ -257,9 +257,9 @@ int pthread_rwlock_unlock(pthread_rwlock_t *rwlock)
             Semaphore_post(Semaphore_handle(&(rwlock->readSem)));
         }
 
-        Assert_isTrue(rwlock->owner == pthread_self(), NULL);
+        Assert_isTrue(rwlock->owner == pthread_self(), 0);
         rwlock->owner = NULL;
-        Assert_isTrue(rwlock->activeReaderCnt == 0, NULL);
+        Assert_isTrue(rwlock->activeReaderCnt == 0, 0);
     }
 
     Task_restore(key);
@@ -274,9 +274,9 @@ int pthread_rwlock_wrlock(pthread_rwlock_t *rwlock)
 {
     Semaphore_pend(Semaphore_handle(&(rwlock->sem)), BIOS_WAIT_FOREVER);
 
-    Assert_isTrue(rwlock->owner == NULL, NULL);
+    Assert_isTrue(rwlock->owner == NULL, 0);
     rwlock->owner = pthread_self();
-    Assert_isTrue(rwlock->activeReaderCnt == 0, NULL);
+    Assert_isTrue(rwlock->activeReaderCnt == 0, 0);
 
     return (0);
 }
@@ -311,9 +311,9 @@ static int rdlockAcquire(pthread_rwlock_t *rwlock, UInt timeout)
     if (Semaphore_pend(Semaphore_handle(&(rwlock->sem)), 0)) {
         /* Got the semaphore */
         rwlock->activeReaderCnt++;
-        Assert_isTrue(rwlock->activeReaderCnt == 1, NULL);
+        Assert_isTrue(rwlock->activeReaderCnt == 1, 0);
 
-        Assert_isTrue(rwlock->owner == NULL, NULL);
+        Assert_isTrue(rwlock->owner == NULL, 0);
         rwlock->owner = pthread_self();
 
         /*
@@ -369,8 +369,8 @@ static int rdlockAcquire(pthread_rwlock_t *rwlock, UInt timeout)
             rwlock->blockedReaderCnt--;
             rwlock->activeReaderCnt++;
 
-            Assert_isTrue(rwlock->activeReaderCnt == 1, NULL);
-            Assert_isTrue(rwlock->owner == NULL, NULL);
+            Assert_isTrue(rwlock->activeReaderCnt == 1, 0);
+            Assert_isTrue(rwlock->owner == NULL, 0);
             rwlock->owner = pthread_self();
 
             Task_restore(key);

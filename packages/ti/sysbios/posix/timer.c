@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated
+ * Copyright (c) 2015-2016, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -100,10 +100,10 @@ int timer_create(clockid_t clockid, struct sigevent *evp, timer_t *timerid)
     Int                priority;
     Int                retc;
 
-    Assert_isTrue(evp != NULL, NULL);
-    Assert_isTrue(evp->sigev_notify_function != NULL, NULL);
+    Assert_isTrue(evp != NULL, 0);
+    Assert_isTrue(evp->sigev_notify_function != NULL, 0);
     Assert_isTrue((evp->sigev_notify == SIGEV_THREAD) ||
-            (evp->sigev_notify == SIGEV_SIGNAL), NULL);
+            (evp->sigev_notify == SIGEV_SIGNAL), 0);
 
     pthread_attr_init(&pDefAttrs);
 

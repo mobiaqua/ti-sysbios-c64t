@@ -59,35 +59,7 @@ extern "C" {
 #endif
 
 #if defined(__GNUC__) && !defined(__ti__)
-
-#include <sched.h>
-
 #else
-
-/*
- *  These defines would be in a sched.h, which TI and IAR
- *  toolchains don't have.
- */
-#ifndef SCHED_FIFO
-#define SCHED_FIFO 0
-#endif
-
-#ifndef SCHED_RR
-#define SCHED_RR 0
-#endif
-
-#ifndef SCHED_OTHER
-#define SCHED_OTHER 0
-#endif
-
-/*
- *  ======== sched_param ========
- *  This was taken from sys/sched.h
- */
-struct sched_param {
-  int sched_priority; /* Thread execution priority */
-};
-
 /*
  *  TI and IAR tools do not have sys/types.h where timespec and itimerspec
  *  would be defined.
@@ -107,9 +79,10 @@ struct itimerspec {
 typedef unsigned long timer_t;
 #endif
 
-#endif
-
 typedef uint32_t clockid_t;
+
+#endif    /* #if defined(__GNUC__) && !defined(__ti__) */
+
 typedef unsigned long useconds_t;
 
 /*
